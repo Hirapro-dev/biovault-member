@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ────────────────────────────────────────
+// ユーザー（会員 + 管理者）
+// ────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(MEMBER)
+  name          String
+  nameKana      String?
+  phone         String?
+  dateOfBirth   DateTime?
+  address       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  isActive      Boolean   @default(true)
+  mustChangePassword Boolean @default(true)
+
+  membership    Membership?
+  notes         AdminNote[]
+  documents     Document[]
+  statusHistory StatusHistory[]
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ────────────────────────────────────────
+// 会員権（1ユーザー = 1会員権）
+// ────────────────────────────────────────
+model Membership {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
+  memberNumber    String          @unique
+  plan            MembershipPlan  @default(STANDARD)
+  contractDate    DateTime
+  paymentStatus   PaymentStatus   @default(PENDING)
+  totalAmount     Int
+  paidAmount      Int             @default(0)
+
+  ipsStatus       IpsStatus       @default(APPLICATION)
+  clinicDate      DateTime?
+  ipsCompletedAt  DateTime?
+  storageStartAt  DateTime?
+  storageYears    Int             @default(10)
+
+  treatments      Treatment[]
+
+  referrerId      String?
+  referrerName    String?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+enum MembershipPlan {
+  STANDARD
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  COMPLETED
+}
+
+enum IpsStatus {
+  APPLICATION
+  CONTRACT_SIGNED
+  CLINIC_RESERVED
+  BLOOD_COLLECTED
+  IPS_CREATING
+  IPS_COMPLETED
+  STORAGE_ACTIVE
+  STORAGE_EXPIRED
+}
+
+// ────────────────────────────────────────
+// ステータス履歴（変更ログ）
+// ────────────────────────────────────────
+model StatusHistory {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  fromStatus  IpsStatus
+  toStatus    IpsStatus
+  note        String?
+  changedBy   String
+  changedAt   DateTime  @default(now())
+}
+
+// ────────────────────────────────────────
+// 醸成器（培養上清液）投与記録
+// ────────────────────────────────────────
+model Treatment {
+  id            String          @id @default(cuid())
+  membershipId  String
+  membership    Membership      @relation(fields: [membershipId], references: [id])
+  type          TreatmentType
+  volume        Int             @default(10)
+  amount        Int
+  scheduledAt   DateTime?
+  completedAt   DateTime?
+  clinicName    String?
+  note          String?
+  createdAt     DateTime        @default(now())
+}
+
+enum TreatmentType {
+  IV_DRIP
+  LOCAL_INJECTION
+}
+
+// ────────────────────────────────────────
+// 契約書類
+// ────────────────────────────────────────
+model Document {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  type        DocumentType
+  title       String
+  fileUrl     String?
+  signedAt    DateTime?
+  status      DocumentStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+}
+
+enum DocumentType {
+  CONTRACT
+  CONSENT_CELL_STORAGE
+  INFORMED_CONSENT
+  PRIVACY_POLICY
+  SIMPLE_AGREEMENT
+}
+
+enum DocumentStatus {
+  PENDING
+  SENT
+  SIGNED
+  ARCHIVED
+}
+
+// ────────────────────────────────────────
+// 管理者メモ（顧客カルテ用）
+// ────────────────────────────────────────
+model AdminNote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+}
+
+// ────────────────────────────────────────
+// iPS ニュース記事（管理者が随時更新）
+// ────────────────────────────────────────
+model IpsArticle {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  title       String
+  summary     String
+  content     String           @db.Text
+  category    IpsArticleCategory
+  imageUrl    String?
+  sourceUrl   String?
+  sourceName  String?
+  publishedAt DateTime         @default(now())
+  isPublished Boolean          @default(false)
+  author      String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+enum IpsArticleCategory {
+  NEWS          // 最新ニュース
+  RESEARCH      // 研究動向
+  CLINICAL      // 臨床応用
+  REGULATION    // 制度・規制
+  MARKET        // 市場動向
+}

@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base */
+  --color-bg-primary: #070709;
+  --color-bg-secondary: #0F0F13;
+  --color-bg-tertiary: #16161D;
+  --color-bg-elevated: #1E1E28;
+
+  /* Gold Accent */
+  --color-gold-primary: #C9A84C;
+  --color-gold-light: #E8D48B;
+  --color-gold-dark: #8B7332;
+
+  /* Text */
+  --color-text-primary: #F0EDE6;
+  --color-text-secondary: #8A8A9A;
+  --color-text-muted: #555565;
+
+  /* Border */
+  --color-border: #1F1F2A;
+  --color-border-gold: rgba(201, 168, 76, 0.25);
+
+  /* Status */
+  --color-status-active: #10B981;
+  --color-status-warning: #F59E0B;
+  --color-status-danger: #EF4444;
+  --color-status-info: #3B82F6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg-primary: var(--color-bg-primary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-bg-tertiary: var(--color-bg-tertiary);
+  --color-bg-elevated: var(--color-bg-elevated);
+  --color-gold: var(--color-gold-primary);
+  --color-gold-light: var(--color-gold-light);
+  --color-gold-dark: var(--color-gold-dark);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-gold: var(--color-border-gold);
+  --color-status-active: var(--color-status-active);
+  --color-status-warning: var(--color-status-warning);
+  --color-status-danger: var(--color-status-danger);
+  --color-status-info: var(--color-status-info);
+  --font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
+  --font-sans: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --font-serif-jp: "Noto Serif JP", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ゴールドパルスアニメーション */
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(201, 168, 76, 0.5), 0 0 60px rgba(201, 168, 76, 0.15);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* ゴールドグラデーションテキスト */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #8B7332 0%, #C9A84C 30%, #E8D48B 50%, #C9A84C 70%, #8B7332 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ゴールドグラデーションボタン */
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #8B7332, #C9A84C);
+}
+
+.bg-gold-gradient:hover {
+  background: linear-gradient(135deg, #C9A84C, #E8D48B);
+}
+
+/* スクロールバー */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }

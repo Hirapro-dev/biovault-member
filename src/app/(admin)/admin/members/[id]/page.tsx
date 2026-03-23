@@ -1,0 +1,252 @@
+import { requireAdmin } from "@/lib/auth-helpers";
+import prisma from "@/lib/prisma";
+import StatusTimeline from "@/components/ui/StatusTimeline";
+import Badge from "@/components/ui/Badge";
+import {
+  IPS_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  DOCUMENT_STATUS_LABELS,
+  DOCUMENT_TYPE_LABELS,
+  TREATMENT_TYPE_LABELS,
+} from "@/types";
+import { notFound } from "next/navigation";
+import MemberKarteActions from "./MemberKarteActions";
+
+export default async function MemberKartePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireAdmin();
+  const { id } = await params;
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      membership: {
+        include: { treatments: { orderBy: { createdAt: "desc" } } },
+      },
+      documents: { orderBy: { createdAt: "asc" } },
+      notes: { orderBy: { createdAt: "desc" } },
+      statusHistory: { orderBy: { changedAt: "desc" } },
+    },
+  });
+
+  if (!user) notFound();
+
+  const membership = user.membership;
+
+  return (
+    <div>
+      <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px] mb-7">
+        会員カルテ
+      </h2>
+
+      {/* 基本情報 */}
+      <div className="grid grid-cols-2 gap-5 mb-6">
+        <div className="bg-bg-secondary border border-border rounded-md p-6">
+          <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+            基本情報
+          </h3>
+          <InfoRow label="氏名" value={user.name} />
+          <InfoRow label="フリガナ" value={user.nameKana || "---"} />
+          <InfoRow label="メール" value={user.email} />
+          <InfoRow label="電話" value={user.phone || "---"} />
+          <InfoRow
+            label="生年月日"
+            value={
+              user.dateOfBirth
+                ? new Date(user.dateOfBirth).toLocaleDateString("ja-JP")
+                : "---"
+            }
+          />
+          <InfoRow label="住所" value={user.address || "---"} />
+        </div>
+
+        <div className="bg-bg-secondary border border-border rounded-md p-6">
+          <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+            契約情報
+          </h3>
+          <InfoRow label="会員番号" value={membership?.memberNumber || "---"} mono />
+          <InfoRow label="プラン" value="基本パッケージ（880万円）" />
+          <InfoRow
+            label="契約日"
+            value={
+              membership
+                ? new Date(membership.contractDate).toLocaleDateString("ja-JP")
+                : "---"
+            }
+          />
+          <InfoRow
+            label="入金状況"
+            value={membership ? PAYMENT_STATUS_LABELS[membership.paymentStatus] : "---"}
+          />
+          <InfoRow
+            label="入金額"
+            value={
+              membership
+                ? `¥${membership.paidAmount.toLocaleString()} / ¥${membership.totalAmount.toLocaleString()}`
+                : "---"
+            }
+            mono
+          />
+          <InfoRow label="紹介者" value={membership?.referrerName || "---"} />
+        </div>
+      </div>
+
+      {/* iPSステータス */}
+      <div className="mb-6">
+        <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+          iPS 細胞ステータス
+        </h3>
+        {membership && <StatusTimeline currentStatus={membership.ipsStatus} />}
+      </div>
+
+      {/* アクション（ステータス変更・メモ追加） */}
+      <MemberKarteActions
+        userId={user.id}
+        currentStatus={membership?.ipsStatus || "APPLICATION"}
+      />
+
+      {/* 書類管理 */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          書類管理
+        </h3>
+        {user.documents.map((doc) => (
+          <div
+            key={doc.id}
+            className="flex items-center justify-between py-3 border-b border-border last:border-b-0"
+          >
+            <div>
+              <div className="text-[13px]">{DOCUMENT_TYPE_LABELS[doc.type] || doc.title}</div>
+              {doc.signedAt && (
+                <div className="text-[11px] text-text-muted mt-0.5">
+                  署名日: {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
+                </div>
+              )}
+            </div>
+            <Badge
+              variant={
+                doc.status === "SIGNED"
+                  ? "success"
+                  : doc.status === "SENT"
+                  ? "warning"
+                  : "muted"
+              }
+            >
+              {DOCUMENT_STATUS_LABELS[doc.status]}
+            </Badge>
+          </div>
+        ))}
+      </div>
+
+      {/* 醸成器投与記録 */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          醸成器投与記録
+        </h3>
+        {membership?.treatments.length ? (
+          membership.treatments.map((t) => (
+            <div
+              key={t.id}
+              className="flex items-center justify-between py-3 border-b border-border last:border-b-0"
+            >
+              <div>
+                <div className="text-[13px]">{TREATMENT_TYPE_LABELS[t.type]}</div>
+                <div className="text-[11px] text-text-muted mt-0.5">
+                  {t.volume}cc・{t.clinicName || "---"}
+                </div>
+              </div>
+              <div className="text-[11px] text-text-muted font-mono">
+                {t.completedAt
+                  ? new Date(t.completedAt).toLocaleDateString("ja-JP")
+                  : t.scheduledAt
+                  ? `予定: ${new Date(t.scheduledAt).toLocaleDateString("ja-JP")}`
+                  : "---"}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-text-muted text-sm py-4 text-center">投与記録なし</div>
+        )}
+      </div>
+
+      {/* 管理者メモ */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          管理者メモ
+        </h3>
+        {user.notes.length ? (
+          user.notes.map((note) => (
+            <div
+              key={note.id}
+              className="py-3 border-b border-border last:border-b-0"
+            >
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[11px] text-gold">{note.author}</span>
+                <span className="text-[11px] text-text-muted font-mono">
+                  {new Date(note.createdAt).toLocaleDateString("ja-JP")}
+                </span>
+              </div>
+              <p className="text-[13px] text-text-primary leading-relaxed">{note.content}</p>
+            </div>
+          ))
+        ) : (
+          <div className="text-text-muted text-sm py-4 text-center">メモなし</div>
+        )}
+      </div>
+
+      {/* ステータス変更履歴 */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          ステータス変更履歴
+        </h3>
+        {user.statusHistory.length ? (
+          user.statusHistory.map((h) => (
+            <div
+              key={h.id}
+              className="flex items-center gap-4 py-3 border-b border-border last:border-b-0"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
+              <div className="flex-1">
+                <span className="text-xs text-text-secondary">
+                  {IPS_STATUS_LABELS[h.fromStatus]}
+                </span>
+                <span className="text-xs text-gold mx-1.5">→</span>
+                <span className="text-xs text-gold">{IPS_STATUS_LABELS[h.toStatus]}</span>
+                {h.note && (
+                  <span className="text-[11px] text-text-muted ml-2">({h.note})</span>
+                )}
+              </div>
+              <div className="text-[11px] text-text-muted font-mono">
+                {new Date(h.changedAt).toLocaleDateString("ja-JP")}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-text-muted text-sm py-4 text-center">変更履歴なし</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-center py-2 border-b border-border last:border-b-0">
+      <div className="w-24 text-[11px] text-text-muted shrink-0">{label}</div>
+      <div className={`text-[13px] text-text-primary ${mono ? "font-mono" : ""}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
