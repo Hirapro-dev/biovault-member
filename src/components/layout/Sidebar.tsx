@@ -10,6 +10,7 @@ const memberNav = [
   { href: "/about-ips", label: "About iPS", icon: "🧬" },
   { href: "/treatment", label: "醸成器申込", icon: "◆" },
   { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
+  { href: "/settings", label: "設定", icon: "⚙" },
 ];
 
 const adminNav = [
@@ -28,10 +29,13 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
     <div className="w-60 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       {/* ロゴ */}
       <div className="px-6 py-7 border-b border-border">
-        <div className="font-serif text-2xl font-normal tracking-[4px] text-gold-gradient">
-          BioVault
-        </div>
-        <div className="text-[9px] tracking-[3px] text-text-muted mt-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.png"
+          alt="BioVault"
+          className="h-8 w-auto"
+        />
+        <div className="text-[9px] tracking-[3px] text-text-muted mt-2">
           {isAdmin ? "ADMIN CONSOLE" : "MEMBER'S PORTAL"}
         </div>
       </div>

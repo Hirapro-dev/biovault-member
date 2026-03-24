@@ -28,21 +28,69 @@ export default async function AdminMembersPage({
     orderBy: { createdAt: "desc" },
   });
 
-  // ステータスフィルタ
   const filtered = status
     ? members.filter((m) => m.membership?.ipsStatus === status)
     : members;
 
+  const paymentColors: Record<string, string> = {
+    COMPLETED: "text-status-active",
+    PARTIAL: "text-status-warning",
+    PENDING: "text-status-danger",
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px]">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 sm:mb-6">
+        <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px]">
           会員一覧
         </h2>
         <MemberSearch />
       </div>
 
-      <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+      {/* モバイル: カードリスト */}
+      <div className="flex flex-col gap-3 sm:hidden">
+        {filtered.map((m) => (
+          <Link
+            key={m.id}
+            href={`/admin/members/${m.id}`}
+            className="block bg-bg-secondary border border-border rounded-md p-4 transition-colors duration-200 active:border-border-gold"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-mono text-[13px] text-gold">
+                {m.membership?.memberNumber || "---"}
+              </span>
+              <span
+                className={`text-[11px] ${
+                  m.membership
+                    ? paymentColors[m.membership.paymentStatus] || "text-text-secondary"
+                    : "text-text-secondary"
+                }`}
+              >
+                {m.membership ? PAYMENT_STATUS_LABELS[m.membership.paymentStatus] : "---"}
+              </span>
+            </div>
+            <div className="text-sm text-text-primary mb-2">{m.name}</div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">
+                {m.membership ? IPS_STATUS_LABELS[m.membership.ipsStatus] : "---"}
+              </span>
+              <span className="text-[11px] text-text-muted font-mono">
+                {m.membership
+                  ? new Date(m.membership.contractDate).toLocaleDateString("ja-JP")
+                  : "---"}
+              </span>
+            </div>
+          </Link>
+        ))}
+        {filtered.length === 0 && (
+          <div className="py-12 text-center text-text-muted text-sm">
+            該当する会員が見つかりません
+          </div>
+        )}
+      </div>
+
+      {/* PC: テーブル */}
+      <div className="hidden sm:block bg-bg-secondary border border-border rounded-md overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-border">
@@ -57,64 +105,49 @@ export default async function AdminMembersPage({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((m) => {
-              const paymentColors: Record<string, string> = {
-                COMPLETED: "text-status-active",
-                PARTIAL: "text-status-warning",
-                PENDING: "text-status-danger",
-              };
-
-              return (
-                <tr
-                  key={m.id}
-                  className="border-b border-border transition-colors duration-200 hover:bg-bg-elevated"
-                >
-                  <td className="px-5 py-3.5 font-mono text-[13px] text-gold">
-                    {m.membership?.memberNumber || "---"}
-                  </td>
-                  <td className="px-5 py-3.5 text-[13px]">{m.name}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-gold/10 text-gold border border-gold/20">
-                      {m.membership
-                        ? IPS_STATUS_LABELS[m.membership.ipsStatus]
-                        : "---"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className={`text-[11px] ${
-                        m.membership
-                          ? paymentColors[m.membership.paymentStatus] || "text-text-secondary"
-                          : "text-text-secondary"
-                      }`}
-                    >
-                      {m.membership
-                        ? PAYMENT_STATUS_LABELS[m.membership.paymentStatus]
-                        : "---"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-xs text-text-muted font-mono">
-                    {m.membership
-                      ? new Date(m.membership.contractDate).toLocaleDateString("ja-JP")
-                      : "---"}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <Link
-                      href={`/admin/members/${m.id}`}
-                      className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all duration-300"
-                    >
-                      カルテ
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
+            {filtered.map((m) => (
+              <tr
+                key={m.id}
+                className="border-b border-border transition-colors duration-200 hover:bg-bg-elevated"
+              >
+                <td className="px-5 py-3.5 font-mono text-[13px] text-gold">
+                  {m.membership?.memberNumber || "---"}
+                </td>
+                <td className="px-5 py-3.5 text-[13px]">{m.name}</td>
+                <td className="px-5 py-3.5">
+                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-gold/10 text-gold border border-gold/20">
+                    {m.membership ? IPS_STATUS_LABELS[m.membership.ipsStatus] : "---"}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <span
+                    className={`text-[11px] ${
+                      m.membership
+                        ? paymentColors[m.membership.paymentStatus] || "text-text-secondary"
+                        : "text-text-secondary"
+                    }`}
+                  >
+                    {m.membership ? PAYMENT_STATUS_LABELS[m.membership.paymentStatus] : "---"}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-xs text-text-muted font-mono">
+                  {m.membership
+                    ? new Date(m.membership.contractDate).toLocaleDateString("ja-JP")
+                    : "---"}
+                </td>
+                <td className="px-5 py-3.5">
+                  <Link
+                    href={`/admin/members/${m.id}`}
+                    className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all duration-300"
+                  >
+                    カルテ
+                  </Link>
+                </td>
+              </tr>
+            ))}
             {filtered.length === 0 && (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-5 py-12 text-center text-text-muted text-sm"
-                >
+                <td colSpan={6} className="px-5 py-12 text-center text-text-muted text-sm">
                   該当する会員が見つかりません
                 </td>
               </tr>

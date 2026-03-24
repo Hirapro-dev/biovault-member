@@ -15,7 +15,7 @@ export default function MemberKarteActions({
   const router = useRouter();
 
   return (
-    <div className="grid grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
       <StatusChangeForm userId={userId} currentStatus={currentStatus} onSuccess={() => router.refresh()} />
       <NoteForm userId={userId} onSuccess={() => router.refresh()} />
     </div>

@@ -12,6 +12,7 @@ async function main() {
     where: { email: "admin@biovault.jp" },
     update: {},
     create: {
+      loginId: "admin0001",
       email: "admin@biovault.jp",
       passwordHash: adminHash,
       name: "管理者",
@@ -19,16 +20,18 @@ async function main() {
       mustChangePassword: false,
     },
   });
-  console.log("✅ Admin created:", admin.email);
+  console.log("✅ Admin created:", admin.email, "/ Login ID: admin0001");
 
   // テスト会員データ
   const memberPassword = await bcrypt.hash("member123", 12);
 
   const membersData = [
     {
+      loginId: "tanaka0001",
       email: "tanaka@example.com",
       name: "田中 太郎",
       nameKana: "タナカ タロウ",
+      nameRomaji: "Taro TANAKA",
       phone: "090-1234-5678",
       memberNumber: "BV-0001",
       ipsStatus: "IPS_CREATING" as const,
@@ -36,9 +39,11 @@ async function main() {
       paidAmount: 8800000,
     },
     {
+      loginId: "sato0001",
       email: "sato@example.com",
       name: "佐藤 花子",
       nameKana: "サトウ ハナコ",
+      nameRomaji: "Hanako SATO",
       phone: "090-2345-6789",
       memberNumber: "BV-0002",
       ipsStatus: "BLOOD_COLLECTED" as const,
@@ -46,9 +51,11 @@ async function main() {
       paidAmount: 8800000,
     },
     {
+      loginId: "suzuki0001",
       email: "suzuki@example.com",
       name: "鈴木 一郎",
       nameKana: "スズキ イチロウ",
+      nameRomaji: "Ichiro SUZUKI",
       phone: "090-3456-7890",
       memberNumber: "BV-0003",
       ipsStatus: "CONTRACT_SIGNED" as const,
@@ -56,9 +63,11 @@ async function main() {
       paidAmount: 4400000,
     },
     {
+      loginId: "yamada0001",
       email: "yamada@example.com",
       name: "山田 美咲",
       nameKana: "ヤマダ ミサキ",
+      nameRomaji: "Misaki YAMADA",
       phone: "090-4567-8901",
       memberNumber: "BV-0004",
       ipsStatus: "CLINIC_RESERVED" as const,
@@ -67,9 +76,11 @@ async function main() {
       clinicDate: new Date("2025-06-02"),
     },
     {
+      loginId: "takahashi0001",
       email: "takahashi@example.com",
       name: "高橋 健太",
       nameKana: "タカハシ ケンタ",
+      nameRomaji: "Kenta TAKAHASHI",
       phone: "090-5678-9012",
       memberNumber: "BV-0005",
       ipsStatus: "APPLICATION" as const,
@@ -92,10 +103,12 @@ async function main() {
       where: { email: data.email },
       update: {},
       create: {
+        loginId: data.loginId,
         email: data.email,
         passwordHash: memberPassword,
         name: data.name,
         nameKana: data.nameKana,
+        nameRomaji: data.nameRomaji,
         phone: data.phone,
         role: "MEMBER",
         mustChangePassword: false, // デモ用

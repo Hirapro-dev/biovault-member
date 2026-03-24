@@ -1,136 +1,63 @@
-"use client";
+import { requireAuth } from "@/lib/auth-helpers";
+import prisma from "@/lib/prisma";
+import Link from "next/link";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+export default async function SettingsPage() {
+  const user = await requireAuth();
 
-export default function SettingsPage() {
-  const { data: session } = useSession();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("");
-    setError("");
-
-    if (newPassword !== confirmPassword) {
-      setError("新しいパスワードが一致しません");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setError("パスワードは8文字以上で入力してください");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "パスワードの変更に失敗しました");
-      } else {
-        setMessage("パスワードを変更しました");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
-    } catch {
-      setError("エラーが発生しました");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fullUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { membership: true },
+  });
 
   return (
     <div>
-      <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px] mb-7">
-        アカウント設定
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
+        設定
       </h2>
 
-      <div className="bg-bg-secondary border border-border rounded-md p-8 max-w-[560px]">
-        <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-6 pb-3 border-b border-border">
-          パスワード変更
-        </h3>
-
-        {(session?.user as any)?.mustChangePassword && (
-          <div className="mb-6 p-3 bg-status-warning/10 border border-status-warning/20 rounded text-status-warning text-xs">
-            初回ログインのためパスワードの変更が必要です
+      {/* プロフィールサマリー */}
+      <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 mb-5">
+        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-border">
+          <div className="w-14 h-14 rounded-full bg-bg-elevated border border-border-gold flex items-center justify-center text-xl text-gold shrink-0">
+            {fullUser?.name?.charAt(0) || "U"}
           </div>
-        )}
-
-        <form onSubmit={handleChangePassword}>
-          {message && (
-            <div className="mb-4 p-3 bg-status-active/10 border border-status-active/20 rounded text-status-active text-xs">
-              {message}
+          <div>
+            <div className="text-base text-text-primary font-medium">{fullUser?.name}</div>
+            <div className="text-[11px] text-text-muted font-mono mt-0.5">
+              {fullUser?.loginId} ・ {fullUser?.membership?.memberNumber || "---"}
             </div>
-          )}
-          {error && (
-            <div className="mb-4 p-3 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-xs">
-              {error}
-            </div>
-          )}
-
-          <div className="mb-5">
-            <label className="block text-[11px] text-text-secondary tracking-[2px] mb-2">
-              現在のパスワード
-            </label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold"
-            />
           </div>
+        </div>
+        <Link
+          href="/settings/profile"
+          className="flex items-center justify-between py-3 text-sm text-text-primary hover:text-gold transition-colors"
+        >
+          <span>プロフィール・パスワード変更</span>
+          <span className="text-text-muted">→</span>
+        </Link>
+      </div>
 
-          <div className="mb-5">
-            <label className="block text-[11px] text-text-secondary tracking-[2px] mb-2">
-              新しいパスワード
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-[11px] text-text-secondary tracking-[2px] mb-2">
-              新しいパスワード（確認）
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer transition-all duration-300 hover:opacity-90 disabled:opacity-50"
-          >
-            {loading ? "変更中..." : "パスワードを変更"}
-          </button>
-        </form>
+      {/* 規約・ポリシー */}
+      <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+        <SettingsLink href="/settings/terms" label="利用規約" />
+        <SettingsLink href="/settings/legal" label="特定商取引法に基づく表記" />
+        <SettingsLink href="/settings/privacy" label="プライバシーポリシー" last />
       </div>
     </div>
+  );
+}
+
+function SettingsLink({ href, label, last = false }: { href: string; label: string; last?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center justify-between px-5 sm:px-6 py-5 text-base text-text-primary hover:bg-bg-elevated hover:text-gold transition-all ${
+        !last ? "border-b border-border" : ""
+      }`}
+    >
+      <span>{label}</span>
+      <span className="text-text-muted text-xs">→</span>
+    </Link>
   );
 }

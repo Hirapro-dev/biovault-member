@@ -7,65 +7,116 @@ export default function StatusTimeline({ currentStatus }: { currentStatus: IpsSt
   const currentIndex = IPS_STATUS_ORDER.indexOf(currentStatus);
 
   return (
-    <div className="bg-bg-secondary border border-border rounded-md p-8 overflow-x-auto">
-      <div className="flex items-start relative min-w-[700px]">
-        {IPS_STATUS_ORDER.map((status, i) => {
-          const done = i < currentIndex;
-          const active = i === currentIndex;
+    <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-4">
+      {/* モバイル: 縦タイムライン */}
+      <div className="block sm:hidden">
+        <div className="relative ml-2">
+          {/* 縦の接続線 */}
+          <div
+            className="absolute left-[14px] top-0 bottom-0 w-[2px]"
+            style={{
+              background: `linear-gradient(to bottom, var(--color-gold-primary) ${((currentIndex + 0.5) / IPS_STATUS_ORDER.length) * 100}%, var(--color-border) ${((currentIndex + 0.5) / IPS_STATUS_ORDER.length) * 100}%)`,
+            }}
+          />
+          {IPS_STATUS_ORDER.map((status, i) => {
+            const done = i < currentIndex;
+            const active = i === currentIndex;
 
-          return (
-            <div key={status} className="flex-1 text-center relative z-[1]">
-              {/* 接続線 */}
-              {i > 0 && (
+            return (
+              <div key={status} className="flex items-start gap-4 pb-7 last:pb-0">
+                {/* ノード */}
                 <div
-                  className="absolute top-5 right-1/2 w-full h-[2px] z-0"
+                  className={`relative z-[2] w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
+                    done
+                      ? "text-bg-primary text-sm font-bold"
+                      : active
+                      ? "border-2 border-gold text-gold text-sm"
+                      : "border border-border text-text-muted text-sm"
+                  } ${active ? "animate-pulse-gold" : ""}`}
                   style={{
                     background: done
-                      ? "linear-gradient(90deg, var(--color-gold-primary), var(--color-gold-light))"
-                      : "var(--color-border)",
+                      ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
+                      : active
+                      ? "var(--color-bg-primary)"
+                      : "var(--color-bg-elevated)",
                   }}
-                />
-              )}
-              {/* ノード */}
-              <div
-                className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center relative z-[2] transition-all duration-500 ${
-                  done
-                    ? "text-bg-primary text-base font-bold"
-                    : active
-                    ? "border-2 border-gold text-gold text-sm"
-                    : "border border-border text-text-muted text-sm"
-                } ${active ? "animate-pulse-gold" : ""}`}
-                style={{
-                  background: done
-                    ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
-                    : active
-                    ? "var(--color-bg-primary)"
-                    : "var(--color-bg-elevated)",
-                }}
-              >
-                {done ? "✓" : IPS_STATUS_ICONS[status]}
-              </div>
-              {/* ラベル */}
-              <div
-                className={`mt-3 text-[11px] tracking-wide leading-relaxed ${
-                  done
-                    ? "text-gold font-normal"
-                    : active
-                    ? "text-gold-light font-semibold"
-                    : "text-text-muted font-normal"
-                }`}
-              >
-                {IPS_STATUS_LABELS[status]}
-              </div>
-              {/* アクティブ説明 */}
-              {active && (
-                <div className="mt-2 text-[10px] text-text-secondary leading-relaxed px-1">
-                  {IPS_STATUS_DESCRIPTIONS[status]}
+                >
+                  {done ? "✓" : IPS_STATUS_ICONS[status]}
                 </div>
-              )}
-            </div>
-          );
-        })}
+                {/* ラベル */}
+                <div className="pt-1.5 min-w-0">
+                  <div
+                    className={`text-sm ${
+                      done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"
+                    }`}
+                  >
+                    {IPS_STATUS_LABELS[status]}
+                  </div>
+                  {active && (
+                    <div className="mt-1.5 text-xs text-text-secondary leading-relaxed">
+                      {IPS_STATUS_DESCRIPTIONS[status]}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* PC: 横タイムライン */}
+      <div className="hidden sm:block overflow-x-auto">
+        <div className="flex items-start relative min-w-[700px]">
+          {IPS_STATUS_ORDER.map((status, i) => {
+            const done = i < currentIndex;
+            const active = i === currentIndex;
+
+            return (
+              <div key={status} className="flex-1 text-center relative">
+                {i > 0 && (
+                  <div
+                    className="absolute top-5 right-1/2 w-full h-[2px] z-[1]"
+                    style={{
+                      background: done
+                        ? "linear-gradient(90deg, var(--color-gold-primary), var(--color-gold-light))"
+                        : "var(--color-border)",
+                    }}
+                  />
+                )}
+                <div
+                  className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center relative z-[3] transition-all duration-500 ${
+                    done
+                      ? "text-bg-primary text-base font-bold"
+                      : active
+                      ? "border-2 border-gold text-gold text-sm"
+                      : "border border-border text-text-muted text-sm"
+                  } ${active ? "animate-pulse-gold" : ""}`}
+                  style={{
+                    background: done
+                      ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
+                      : active
+                      ? "var(--color-bg-primary)"
+                      : "var(--color-bg-elevated)",
+                  }}
+                >
+                  {done ? "✓" : IPS_STATUS_ICONS[status]}
+                </div>
+                <div
+                  className={`mt-3 text-xs tracking-wide leading-relaxed ${
+                    done ? "text-gold font-normal" : active ? "text-gold-light font-semibold" : "text-text-muted font-normal"
+                  }`}
+                >
+                  {IPS_STATUS_LABELS[status]}
+                </div>
+                {active && (
+                  <div className="mt-2 text-[11px] text-text-secondary leading-relaxed px-1">
+                    {IPS_STATUS_DESCRIPTIONS[status]}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

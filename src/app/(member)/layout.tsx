@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import MobileNav from "@/components/layout/MobileNav";
 
 export default async function MemberLayout({
   children,
@@ -12,10 +13,21 @@ export default async function MemberLayout({
 
   return (
     <div className="flex min-h-screen bg-bg-primary text-text-primary font-sans">
-      <Sidebar isAdmin={false} />
-      <div className="flex-1 overflow-y-auto relative">
-        <Header userName={user.name} isAdmin={isAdmin} />
-        <main className="p-8 px-10 max-w-[1200px] mx-auto animate-fade-in">
+      {/* PC: サイドバー */}
+      <div className="hidden lg:block">
+        <Sidebar isAdmin={false} />
+      </div>
+
+      <div className="flex-1 overflow-y-auto relative w-full">
+        {/* モバイル: ハンバーガーナビ */}
+        <MobileNav isAdmin={false} userName={user.name} />
+
+        {/* PC: ヘッダー */}
+        <div className="hidden lg:block">
+          <Header userName={user.name} isAdmin={isAdmin} />
+        </div>
+
+        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 max-w-[1200px] mx-auto animate-fade-in">
           {children}
         </main>
       </div>

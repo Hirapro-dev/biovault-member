@@ -32,16 +32,16 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px] mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         管理ダッシュボード
       </h2>
 
       {/* 統計カード */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {stats.map((s, i) => (
           <div
             key={i}
-            className="bg-bg-secondary border border-border rounded-md p-6 text-center"
+            className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 text-center"
           >
             <div className="text-[11px] text-text-muted tracking-[2px] mb-2">{s.label}</div>
             <div className="font-mono text-4xl text-gold font-light">{s.value}</div>

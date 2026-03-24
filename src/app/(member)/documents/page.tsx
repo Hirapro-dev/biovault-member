@@ -20,7 +20,7 @@ export default async function DocumentsPage() {
 
   return (
     <div>
-      <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px] mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         契約書類
       </h2>
 
@@ -30,27 +30,27 @@ export default async function DocumentsPage() {
           return (
             <div
               key={doc.id}
-              className="bg-bg-secondary border border-border rounded-md px-7 py-5 flex items-center justify-between transition-colors duration-300 hover:border-border-gold"
+              className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-9 h-9 rounded bg-bg-elevated flex items-center justify-center text-base text-gold">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-sm sm:text-base text-gold shrink-0">
                   ◇
                 </div>
-                <div>
-                  <div className="text-sm text-text-primary">
+                <div className="min-w-0">
+                  <div className="text-sm sm:text-base text-text-primary leading-snug">
                     {DOCUMENT_TYPE_LABELS[doc.type] || doc.title}
                   </div>
                   {doc.signedAt && (
-                    <div className="text-[11px] text-text-muted mt-0.5">
+                    <div className="text-xs text-text-secondary mt-0.5">
                       {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pl-11 sm:pl-0">
                 <Badge variant={st.variant}>{st.label}</Badge>
                 {doc.status === "SIGNED" && doc.fileUrl && (
-                  <button className="px-3.5 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm cursor-pointer text-[11px] hover:border-border-gold hover:text-gold transition-all duration-300">
+                  <button className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm cursor-pointer text-[11px] hover:border-border-gold hover:text-gold transition-all duration-300">
                     PDF
                   </button>
                 )}
@@ -60,7 +60,7 @@ export default async function DocumentsPage() {
         })}
 
         {documents.length === 0 && (
-          <div className="text-center py-16 text-text-muted text-sm">
+          <div className="text-center py-12 text-text-muted text-sm">
             書類が登録されていません
           </div>
         )}

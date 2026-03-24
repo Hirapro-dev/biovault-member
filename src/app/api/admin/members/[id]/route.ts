@@ -46,6 +46,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     data: {
       name: body.name,
       nameKana: body.nameKana,
+      nameRomaji: body.nameRomaji,
       phone: body.phone,
       dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
       address: body.address,

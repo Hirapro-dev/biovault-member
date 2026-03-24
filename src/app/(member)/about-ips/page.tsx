@@ -16,9 +16,9 @@ export default async function AboutIpsPage() {
   return (
     <div>
       {/* ヒーローセクション */}
-      <div className="text-center mb-12">
+      <div className="text-center mb-8 sm:mb-12">
         <div className="text-[11px] tracking-[6px] text-gold-dark mb-3">ABOUT</div>
-        <h1 className="font-serif text-4xl font-light tracking-[4px] text-gold-gradient mb-3">
+        <h1 className="font-serif text-3xl sm:text-4xl font-light tracking-[4px] text-gold-gradient mb-3">
           iPS Cells
         </h1>
         <GoldDivider width={80} className="mx-auto mb-4" />
@@ -30,7 +30,7 @@ export default async function AboutIpsPage() {
       </div>
 
       {/* ナビゲーションカード */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-8 sm:mb-12">
         <NavCard
           href="/about-ips/what-is-ips"
           icon="🧬"
@@ -71,7 +71,7 @@ export default async function AboutIpsPage() {
               <Link
                 key={article.id}
                 href={`/about-ips/news/${article.slug}`}
-                className="bg-bg-secondary border border-border rounded-md px-6 py-5 flex items-center justify-between transition-all duration-300 hover:border-border-gold group"
+                className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between transition-all duration-300 hover:border-border-gold group"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1.5">
@@ -120,7 +120,7 @@ function NavCard({
   return (
     <Link
       href={href}
-      className="bg-bg-secondary border border-border rounded-md p-7 transition-all duration-300 hover:border-border-gold group block"
+      className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7 transition-all duration-300 hover:border-border-gold group block"
     >
       <div className="text-3xl mb-4">{icon}</div>
       <h3 className="font-serif-jp text-base font-normal text-text-primary group-hover:text-gold transition-colors mb-2">

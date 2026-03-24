@@ -38,18 +38,20 @@ export default async function MemberKartePage({
 
   return (
     <div>
-      <h2 className="font-serif-jp text-[22px] font-normal text-text-primary tracking-[2px] mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         会員カルテ
       </h2>
 
       {/* 基本情報 */}
-      <div className="grid grid-cols-2 gap-5 mb-6">
-        <div className="bg-bg-secondary border border-border rounded-md p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5 sm:mb-6">
+        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
             基本情報
           </h3>
           <InfoRow label="氏名" value={user.name} />
           <InfoRow label="フリガナ" value={user.nameKana || "---"} />
+          <InfoRow label="ローマ字" value={user.nameRomaji || "---"} />
+          <InfoRow label="ログインID" value={user.loginId} mono />
           <InfoRow label="メール" value={user.email} />
           <InfoRow label="電話" value={user.phone || "---"} />
           <InfoRow
@@ -63,7 +65,7 @@ export default async function MemberKartePage({
           <InfoRow label="住所" value={user.address || "---"} />
         </div>
 
-        <div className="bg-bg-secondary border border-border rounded-md p-6">
+        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
             契約情報
           </h3>
