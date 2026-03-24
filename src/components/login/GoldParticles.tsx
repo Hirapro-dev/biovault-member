@@ -15,134 +15,123 @@ export default function GoldParticles() {
     let h = (canvas.height = window.innerHeight);
     let time = 0;
     let raf: number;
+    let mouse = { x: w / 2, y: h / 2 };
 
-    // DNA螺旋パラメータ
-    const NUM_PAIRS = 20;       // 塩基対の数
-    const HELIX_RADIUS = 40;    // 螺旋の半径
-    const HELIX_SPACING = 28;   // 塩基対の間隔
-    const ROTATION_SPEED = 0.008; // 回転速度
-    const VERTICAL_SPEED = 0.3;  // 上昇速度
+    // ゴールドパレット（ロゴ準拠）
+    const GOLD_COLORS = [
+      { r: 191, g: 160, b: 75 },   // リッチゴールド
+      { r: 212, g: 188, b: 106 },  // ライトゴールド
+      { r: 165, g: 135, b: 55 },   // ディープゴールド
+      { r: 220, g: 200, b: 150 },  // シャンパン
+      { r: 180, g: 165, b: 130 },  // アンティーク
+    ];
 
-    // 微細パーティクル（DNA周囲に浮遊）
-    const particles = Array.from({ length: 30 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.15,
-      vy: (Math.random() - 0.5) * 0.15,
-      r: Math.random() * 1.5 + 0.3,
-      a: Math.random() * 0.2 + 0.05,
+    // 浮遊パーティクル（微細なゴールドダスト）
+    const particles = Array.from({ length: 50 }, () => {
+      const color = GOLD_COLORS[Math.floor(Math.random() * GOLD_COLORS.length)];
+      return {
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: -Math.random() * 0.15 - 0.02, // ゆっくり上昇
+        r: Math.random() * 1.5 + 0.3,
+        baseAlpha: Math.random() * 0.25 + 0.05,
+        phase: Math.random() * Math.PI * 2,
+        color,
+      };
+    });
+
+    // ゆらぎライト（大きなぼかし光）
+    const lights = Array.from({ length: 3 }, (_, i) => ({
+      x: w * (0.2 + i * 0.3),
+      y: h * (0.3 + Math.random() * 0.4),
+      radius: 150 + Math.random() * 100,
+      phase: (i * Math.PI * 2) / 3,
+      speed: 0.003 + Math.random() * 0.002,
+      color: GOLD_COLORS[i % GOLD_COLORS.length],
     }));
 
-    function drawDNAHelix(cx: number, cy: number, offset: number) {
-      const totalHeight = NUM_PAIRS * HELIX_SPACING;
-      const startY = cy - totalHeight / 2;
-
-      for (let i = 0; i < NUM_PAIRS; i++) {
-        const y = startY + i * HELIX_SPACING + ((offset * VERTICAL_SPEED) % HELIX_SPACING);
-        const angle = time * ROTATION_SPEED + i * 0.35 + offset * 0.001;
-
-        // 画面外はスキップ
-        if (y < -20 || y > h + 20) continue;
-
-        const x1 = cx + Math.cos(angle) * HELIX_RADIUS;
-        const x2 = cx + Math.cos(angle + Math.PI) * HELIX_RADIUS;
-
-        // 奥行き感（sin値で透明度とサイズを調整）
-        const depth1 = (Math.sin(angle) + 1) / 2;            // 0〜1
-        const depth2 = (Math.sin(angle + Math.PI) + 1) / 2;
-
-        const alpha1 = 0.15 + depth1 * 0.35;
-        const alpha2 = 0.15 + depth2 * 0.35;
-        const size1 = 2 + depth1 * 2.5;
-        const size2 = 2 + depth2 * 2.5;
-
-        // 接続線（バックボーン）- 手前にある方を先に描画
-        if (depth1 > 0.3 && depth2 > 0.3) {
-          // 塩基対の横線（水素結合）
-          const bridgeAlpha = Math.min(alpha1, alpha2) * 0.4;
-          ctx!.beginPath();
-          ctx!.moveTo(x1, y);
-          ctx!.lineTo(x2, y);
-          ctx!.strokeStyle = `rgba(191,160,75,${bridgeAlpha})`;
-          ctx!.lineWidth = 0.5;
-          ctx!.stroke();
-        }
-
-        // 左鎖のバックボーン（上のノードと接続）
-        if (i > 0) {
-          const prevAngle = time * ROTATION_SPEED + (i - 1) * 0.35 + offset * 0.001;
-          const prevX1 = cx + Math.cos(prevAngle) * HELIX_RADIUS;
-          const prevY = y - HELIX_SPACING;
-          const prevDepth1 = (Math.sin(prevAngle) + 1) / 2;
-          const backboneAlpha1 = Math.min(alpha1, 0.15 + prevDepth1 * 0.35) * 0.6;
-
-          ctx!.beginPath();
-          ctx!.moveTo(prevX1, prevY);
-          ctx!.lineTo(x1, y);
-          ctx!.strokeStyle = `rgba(191,160,75,${backboneAlpha1})`;
-          ctx!.lineWidth = 1;
-          ctx!.stroke();
-
-          // 右鎖のバックボーン
-          const prevX2 = cx + Math.cos(prevAngle + Math.PI) * HELIX_RADIUS;
-          const prevDepth2 = (Math.sin(prevAngle + Math.PI) + 1) / 2;
-          const backboneAlpha2 = Math.min(alpha2, 0.15 + prevDepth2 * 0.35) * 0.6;
-
-          ctx!.beginPath();
-          ctx!.moveTo(prevX2, prevY);
-          ctx!.lineTo(x2, y);
-          ctx!.strokeStyle = `rgba(191,160,75,${backboneAlpha2})`;
-          ctx!.lineWidth = 1;
-          ctx!.stroke();
-        }
-
-        // ノード（塩基）
-        // 奥にあるものを先に、手前のものを後に描画
-        const nodes = [
-          { x: x1, depth: depth1, alpha: alpha1, size: size1 },
-          { x: x2, depth: depth2, alpha: alpha2, size: size2 },
-        ].sort((a, b) => a.depth - b.depth);
-
-        nodes.forEach((node) => {
-          // グロー
-          const glow = ctx!.createRadialGradient(node.x, y, 0, node.x, y, node.size * 3);
-          glow.addColorStop(0, `rgba(191,160,75,${node.alpha * 0.3})`);
-          glow.addColorStop(1, "rgba(191,160,75,0)");
-          ctx!.beginPath();
-          ctx!.arc(node.x, y, node.size * 3, 0, Math.PI * 2);
-          ctx!.fillStyle = glow;
-          ctx!.fill();
-
-          // ノード本体
-          ctx!.beginPath();
-          ctx!.arc(node.x, y, node.size, 0, Math.PI * 2);
-          ctx!.fillStyle = `rgba(191,160,75,${node.alpha})`;
-          ctx!.fill();
-        });
-      }
-    }
+    // マウス追従（PC用）
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
 
     function draw() {
       ctx!.clearRect(0, 0, w, h);
       time++;
 
-      // DNA螺旋を描画（画面中央付近に配置）
-      drawDNAHelix(w * 0.3, h * 0.5, time);
-      drawDNAHelix(w * 0.75, h * 0.45, time * 0.7 + 100);
+      // ── ゆらぎライト（大きなソフトグロー） ──
+      lights.forEach((light) => {
+        const offsetX = Math.sin(time * light.speed + light.phase) * 60;
+        const offsetY = Math.cos(time * light.speed * 0.7 + light.phase) * 40;
+        const x = light.x + offsetX;
+        const y = light.y + offsetY;
+        const alpha = 0.02 + Math.sin(time * 0.005 + light.phase) * 0.01;
 
-      // 微細パーティクル
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
+        const grad = ctx!.createRadialGradient(x, y, 0, x, y, light.radius);
+        grad.addColorStop(0, `rgba(${light.color.r},${light.color.g},${light.color.b},${alpha})`);
+        grad.addColorStop(0.5, `rgba(${light.color.r},${light.color.g},${light.color.b},${alpha * 0.3})`);
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+
         ctx!.beginPath();
-        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(191,160,75,${p.a})`;
+        ctx!.arc(x, y, light.radius, 0, Math.PI * 2);
+        ctx!.fillStyle = grad;
         ctx!.fill();
       });
+
+      // ── マウス周辺のソフトグロー（PC） ──
+      const mouseGrad = ctx!.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 200);
+      mouseGrad.addColorStop(0, "rgba(191,160,75,0.015)");
+      mouseGrad.addColorStop(0.5, "rgba(191,160,75,0.005)");
+      mouseGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx!.beginPath();
+      ctx!.arc(mouse.x, mouse.y, 200, 0, Math.PI * 2);
+      ctx!.fillStyle = mouseGrad;
+      ctx!.fill();
+
+      // ── パーティクル ──
+      particles.forEach((p) => {
+        // 移動
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // 微細な横揺れ
+        p.x += Math.sin(time * 0.01 + p.phase) * 0.1;
+
+        // 画面外→リセット
+        if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+
+        // 明滅
+        const flicker = Math.sin(time * 0.02 + p.phase) * 0.5 + 0.5;
+        const alpha = p.baseAlpha * (0.5 + flicker * 0.5);
+
+        // グロー
+        const glowSize = p.r * 4;
+        const glow = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowSize);
+        glow.addColorStop(0, `rgba(${p.color.r},${p.color.g},${p.color.b},${alpha * 0.5})`);
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
+        ctx!.fillStyle = glow;
+        ctx!.fill();
+
+        // コア
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${p.color.r},${p.color.g},${p.color.b},${alpha})`;
+        ctx!.fill();
+      });
+
+      // ── 画面下部のゴールドフォグ ──
+      const fogGrad = ctx!.createLinearGradient(0, h, 0, h - 200);
+      fogGrad.addColorStop(0, "rgba(140,110,42,0.03)");
+      fogGrad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx!.fillStyle = fogGrad;
+      ctx!.fillRect(0, h - 200, w, 200);
 
       raf = requestAnimationFrame(draw);
     }
@@ -151,12 +140,17 @@ export default function GoldParticles() {
     const handleResize = () => {
       w = canvas!.width = window.innerWidth;
       h = canvas!.height = window.innerHeight;
+      lights.forEach((l, i) => {
+        l.x = w * (0.2 + i * 0.3);
+        l.y = h * (0.3 + Math.random() * 0.4);
+      });
     };
     window.addEventListener("resize", handleResize);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 

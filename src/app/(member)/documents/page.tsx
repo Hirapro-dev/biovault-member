@@ -49,10 +49,15 @@ export default async function DocumentsPage() {
               </div>
               <div className="flex items-center gap-3 pl-11 sm:pl-0">
                 <Badge variant={st.variant}>{st.label}</Badge>
-                {doc.status === "SIGNED" && doc.fileUrl && (
-                  <button className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm cursor-pointer text-[11px] hover:border-border-gold hover:text-gold transition-all duration-300">
-                    PDF
-                  </button>
+                {doc.fileUrl && (
+                  <a
+                    href={`/api/member/documents/${doc.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
+                  >
+                    PDF を見る
+                  </a>
                 )}
               </div>
             </div>

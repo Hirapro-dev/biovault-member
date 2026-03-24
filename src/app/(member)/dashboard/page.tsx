@@ -28,36 +28,45 @@ export default async function DashboardPage() {
       {/* メンバーカード */}
       <div className="mb-6 sm:mb-8" style={{ minWidth: 280, maxWidth: 540 }}>
         <div
-          className="relative overflow-hidden rounded-xl sm:rounded-2xl p-6 sm:p-8 w-full aspect-[1.586/1] flex flex-col justify-between"
+          className="relative overflow-hidden rounded-2xl p-6 sm:p-8 w-full aspect-[1.586/1] flex flex-col justify-between border border-white/15"
           style={{
-            background: "linear-gradient(145deg, #1A1A22 0%, #0E0E14 40%, #141418 70%, #1C1C24 100%)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)",
+            background: "#0A0A0C",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
           }}
         >
-          {/* 幾何学模様（カード装飾） */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[140%] border border-white/[0.03] rounded-full rotate-[25deg]" />
-            <div className="absolute top-[-40%] right-[10%] w-[40%] h-[140%] border border-white/[0.02] rounded-full rotate-[35deg]" />
-            <div className="absolute bottom-[-30%] left-[-10%] w-[50%] h-[100%] border border-white/[0.02] rounded-full rotate-[-20deg]" />
-            {/* ゴールドのアクセントライン */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-[1px]"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(191,160,75,0.15), transparent)" }}
-            />
-          </div>
+          {/* 背景画像（透過） */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: "url('/card_bg.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          {/* シルバー光沢オーバーレイ（中心に向かうリニア） */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)",
+            }}
+          />
 
           {/* 上部: ロゴ + MEMBER */}
           <div className="relative z-10 flex items-center justify-between">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo_white.png" alt="BioVault" className="h-5 sm:h-6 w-auto" />
-            <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-text-primary/80">
-              MEMBERSHIP
+            <img
+              src="/logo_white.png"
+              alt="BioVault"
+              className="h-5 sm:h-6 w-auto opacity-70"
+            />
+            <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">
+              MEMBER
             </div>
           </div>
 
           {/* 中央: 会員ID */}
           <div className="relative z-10">
-            <div className="font-mono text-2xl sm:text-2xl tracking-[4px] sm:tracking-[4px]">
+            <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]">
               {membership?.memberNumber || "----"}
             </div>
           </div>
@@ -65,14 +74,18 @@ export default async function DashboardPage() {
           {/* 下部: ローマ字氏名 + 契約年月 */}
           <div className="relative z-10 flex items-end justify-between">
             <div>
-              <div className="text-[8px] sm:text-[9px] tracking-[2px] mb-1 text-text-primary/80">CARD HOLDER</div>
+              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">
+                CARD HOLDER
+              </div>
               <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">
                 {fullUser?.nameRomaji || user.name}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[8px] sm:text-[9px] tracking-[2px] mb-1 text-text-primary/80">MEMBER SINCE</div>
-              <div className="font-mono text-[11px] sm:text-xs tracking-wider">
+              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">
+                MEMBER SINCE
+              </div>
+              <div className="font-mono text-[14px] sm:text-xs tracking-wider text-white/80">
                 {membership
                   ? new Date(membership.contractDate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })
                   : "--/----"}
@@ -111,7 +124,7 @@ export default async function DashboardPage() {
           icon="◇"
         />
         <QuickCard
-          title="醸成器投与"
+          title="培養上清液投与"
           count={String(membership?.treatments.length || 0)}
           sub="回投与済み"
           icon="◆"

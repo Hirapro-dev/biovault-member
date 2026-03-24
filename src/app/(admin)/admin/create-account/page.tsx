@@ -278,8 +278,12 @@ export default function CreateAccountPage() {
           <FormField label="ログインID（自動生成）">
             <div className="flex gap-2">
               <input
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={loginId}
-                onChange={(e) => handleLoginIdChange(e.target.value)}
+                onChange={(e) => handleLoginIdChange(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))}
                 placeholder="フリガナ入力で自動生成"
                 className="flex-1 px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold font-mono tracking-wider"
               />
@@ -303,6 +307,10 @@ export default function CreateAccountPage() {
               <div className="relative flex-1">
                 <input
                   type={showPassword ? "text" : "password"}
+                  inputMode="url"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 pr-12 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold font-mono tracking-wider"

@@ -80,6 +80,10 @@ export default function PasswordChangeForm({ mustChange }: { mustChange: boolean
           <div className="relative">
             <input
               type={showCurrent ? "text" : "password"}
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
@@ -103,6 +107,10 @@ export default function PasswordChangeForm({ mustChange }: { mustChange: boolean
           <div className="relative">
             <input
               type={showNew ? "text" : "password"}
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
@@ -126,6 +134,10 @@ export default function PasswordChangeForm({ mustChange }: { mustChange: boolean
           </label>
           <input
             type="password"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required

@@ -78,8 +78,13 @@ export default function LoginPage() {
           </label>
           <input
             type="text"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="username"
+            spellCheck={false}
             value={loginId}
-            onChange={(e) => setLoginId(e.target.value.toLowerCase())}
+            onChange={(e) => setLoginId(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase())}
             placeholder="tanaka0001"
             required
             className="w-full px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold mb-5 font-mono tracking-wider"
@@ -91,6 +96,11 @@ export default function LoginPage() {
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="current-password"
+              spellCheck={false}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"

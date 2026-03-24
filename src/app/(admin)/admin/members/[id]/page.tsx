@@ -10,6 +10,7 @@ import {
   TREATMENT_TYPE_LABELS,
 } from "@/types";
 import { notFound } from "next/navigation";
+import DocumentManager from "./DocumentManager";
 import MemberKarteActions from "./MemberKarteActions";
 
 export default async function MemberKartePage({
@@ -111,42 +112,22 @@ export default async function MemberKartePage({
       />
 
       {/* 書類管理 */}
-      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
-        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
-          書類管理
-        </h3>
-        {user.documents.map((doc) => (
-          <div
-            key={doc.id}
-            className="flex items-center justify-between py-3 border-b border-border last:border-b-0"
-          >
-            <div>
-              <div className="text-[13px]">{DOCUMENT_TYPE_LABELS[doc.type] || doc.title}</div>
-              {doc.signedAt && (
-                <div className="text-[11px] text-text-muted mt-0.5">
-                  署名日: {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
-                </div>
-              )}
-            </div>
-            <Badge
-              variant={
-                doc.status === "SIGNED"
-                  ? "success"
-                  : doc.status === "SENT"
-                  ? "warning"
-                  : "muted"
-              }
-            >
-              {DOCUMENT_STATUS_LABELS[doc.status]}
-            </Badge>
-          </div>
-        ))}
-      </div>
+      <DocumentManager
+        userId={user.id}
+        documents={user.documents.map((doc) => ({
+          id: doc.id,
+          type: doc.type,
+          title: doc.title,
+          status: doc.status,
+          fileUrl: doc.fileUrl,
+          signedAt: doc.signedAt ? doc.signedAt.toISOString() : null,
+        }))}
+      />
 
-      {/* 醸成器投与記録 */}
-      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-6">
+      {/* 培養上清液投与記録 */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
         <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
-          醸成器投与記録
+          培養上清液投与記録
         </h3>
         {membership?.treatments.length ? (
           membership.treatments.map((t) => (

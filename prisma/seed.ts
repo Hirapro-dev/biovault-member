@@ -156,7 +156,7 @@ async function main() {
     console.log(`✅ Member created: ${data.name} (${data.memberNumber})`);
   }
 
-  // 田中太郎に醸成器投与記録を追加
+  // 田中太郎に培養上清液投与記録を追加
   const tanaka = await prisma.user.findUnique({
     where: { email: "tanaka@example.com" },
     include: { membership: true },

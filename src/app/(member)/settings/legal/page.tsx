@@ -24,7 +24,7 @@ export default function LegalPage() {
           <LegalRow label="所在地" value="〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F" />
           <LegalRow label="電話番号" value="0120-788-839" />
           <LegalRow label="メールアドレス" value="info@biovault.jp" />
-          <LegalRow label="サービスの対価" value="基本パッケージ：8,800,000円（税込）／追加醸成器：800,000円（税込・1回10cc）" />
+          <LegalRow label="サービスの対価" value="基本パッケージ：8,800,000円（税込）／追加培養上清液：800,000円（税込・1回10cc）" />
           <LegalRow label="対価以外の必要料金" value="クリニックでの診察料・交通費等は別途お客様のご負担となります" />
           <LegalRow label="お支払い方法" value="銀行振込" />
           <LegalRow label="お支払い時期" value="契約締結後、当社指定の期日までにお支払いください" />
