@@ -388,3 +388,37 @@ model AgencyApplication {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 }
+
+// ────────────────────────────────────────
+// パンフレット印刷依頼
+// ────────────────────────────────────────
+model PrintRequest {
+  id                 String       @id @default(cuid())
+  agencyUserId       String
+  agencyCode         String
+  companyName        String
+  representativeName String
+  quantity           Int                               // 部数（100枚単位）
+  postalCode         String?
+  shippingAddress    String
+  paymentMethod      String       @default("cod")     // cod=代引き, bank_transfer=銀行振込
+  note               String?      @db.Text
+  // 進捗ステータス
+  status             PrintRequestStatus @default(REQUESTED)
+  confirmedAt        DateTime?                         // 本部確認日時
+  bankInfo           String?                           // 振込先情報（銀行振込の場合）
+  paidAt             DateTime?                         // 入金確認日時
+  orderedAt          DateTime?                         // 本部発注日時
+  adminNote          String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+enum PrintRequestStatus {
+  REQUESTED         // 申請
+  CONFIRMED         // 本部確認済
+  AWAITING_PAYMENT  // 入金待ち（銀行振込の場合）
+  PAID              // 入金確認済（銀行振込の場合）
+  ORDERED           // 本部発注済
+  CANCELLED         // キャンセル
+}

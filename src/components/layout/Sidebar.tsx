@@ -17,6 +17,7 @@ const adminNav = [
   { href: "/admin", label: "ダッシュボード", icon: "◈" },
   { href: "/admin/members", label: "会員一覧", icon: "◉" },
   { href: "/admin/agencies", label: "代理店管理", icon: "🤝" },
+  { href: "/admin/print-requests", label: "印刷依頼管理", icon: "🖨️" },
   { href: "/admin/articles", label: "iPS ニュース管理", icon: "📰" },
   { href: "/admin/settings", label: "規約・書類管理", icon: "⚙" },
 ];

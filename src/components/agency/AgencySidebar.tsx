@@ -8,6 +8,7 @@ const nav = [
   { href: "/agency/profile", label: "エージェント情報", icon: "◉" },
   { href: "/agency/commissions", label: "報酬管理", icon: "💰" },
   { href: "/agency/customers", label: "顧客管理", icon: "👥" },
+  { href: "/agency/print-request", label: "パンフレット印刷依頼", icon: "🖨️" },
   { href: "/agency/guidelines", label: "ガイドライン", icon: "📋" },
   { href: "/agency/settings", label: "設定", icon: "⚙" },
 ];
