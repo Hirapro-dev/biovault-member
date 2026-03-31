@@ -16,6 +16,10 @@ export default withAuth(
 
     // ── 代理店エリア ──
     if (path.startsWith("/agency")) {
+      // 代理店申込フォームは公開ページ（認証不要）
+      if (path.startsWith("/agency/form")) {
+        return NextResponse.next();
+      }
       // 代理店ロール以外はアクセス不可
       if (token?.role !== "AGENCY") {
         return NextResponse.redirect(new URL("/login", req.url));
@@ -57,7 +61,13 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // 代理店申込フォームは認証不要
+        if (req.nextUrl.pathname.startsWith("/agency/form")) {
+          return true;
+        }
+        return !!token;
+      },
     },
   }
 );
