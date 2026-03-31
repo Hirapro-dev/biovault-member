@@ -25,7 +25,7 @@ function ApplyPage() {
     // 1. 申込者情報
     name: "",
     nameKana: "",
-    dateOfBirth: "",
+    dateOfBirth: "1980-01-01",
     postalCode: "",
     address: "",
     phone: "",
