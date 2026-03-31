@@ -6,21 +6,26 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    // 管理者ページへのアクセス制御
+    // 管理者は同意チェック不要
     if (path.startsWith("/admin")) {
       if (token?.role !== "ADMIN" && token?.role !== "SUPER_ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
-      return NextResponse.next(); // 管理者は同意チェック不要
+      return NextResponse.next();
+    }
+
+    // 重要事項ページ自体は常にアクセス可能
+    if (path === "/important-notice") {
+      return NextResponse.next();
     }
 
     // パスワード変更が必要な場合
-    if (token?.mustChangePassword && path !== "/settings/profile" && !path.startsWith("/api/")) {
+    if (token?.mustChangePassword && !path.startsWith("/settings")) {
       return NextResponse.redirect(new URL("/settings/profile", req.url));
     }
 
-    // 重要事項説明に未同意の場合（重要事項ページとAPIは除外）
-    if (!token?.hasAgreedTerms && path !== "/important-notice" && !path.startsWith("/api/")) {
+    // 重要事項説明に未同意の場合
+    if (token?.hasAgreedTerms === false) {
       return NextResponse.redirect(new URL("/important-notice", req.url));
     }
 
@@ -38,6 +43,6 @@ export const config = {
     "/dashboard/:path*", "/status/:path*", "/documents/:path*",
     "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
-    "/important-notice/:path*",
+    "/important-notice",
   ],
 };

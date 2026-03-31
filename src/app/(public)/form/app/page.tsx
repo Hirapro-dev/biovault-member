@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import GoldDivider from "@/components/ui/GoldDivider";
 
 export default function ApplyPage() {
@@ -113,7 +113,7 @@ export default function ApplyPage() {
 
       {/* ステップインジケーター */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono ${
@@ -126,7 +126,7 @@ export default function ApplyPage() {
             >
               {step > s ? "✓" : s}
             </div>
-            {s < 4 && <div className={`w-8 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
+            {s < 5 && <div className={`w-6 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
           </div>
         ))}
       </div>
@@ -289,9 +289,14 @@ export default function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 4: 確認・送信 */}
+      {/* Step 4: 利用規約 */}
       {step === 4 && (
-        <FormSection title="6. 入力内容の確認">
+        <TermsStep onBack={() => setStep(3)} onNext={() => setStep(5)} />
+      )}
+
+      {/* Step 5: 確認・送信 */}
+      {step === 5 && (
+        <FormSection title="入力内容の確認">
           <div className="space-y-4 mb-6">
             <ConfirmGroup title="申込者情報">
               <ConfirmRow label="氏名" value={form.name} />
@@ -317,7 +322,7 @@ export default function ApplyPage() {
           </p>
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(3)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
+            <button onClick={() => setStep(4)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
               戻る
             </button>
             <button
@@ -422,6 +427,148 @@ function ConfirmRow({ label, value }: { label: string; value: string }) {
       <div className="w-24 text-[11px] text-text-muted shrink-0">{label}</div>
       <div className="text-xs text-text-primary">{value}</div>
     </div>
+  );
+}
+
+// ── 利用規約スクロール同意ステップ ──
+function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      if (scrollTop + clientHeight >= scrollHeight - 20) {
+        setScrolledToBottom(true);
+      }
+    };
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <FormSection title="5. BioVault会員規約">
+      <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
+
+      <div ref={scrollRef} className="max-h-[50vh] overflow-y-auto bg-bg-elevated border border-border rounded-md p-4 sm:p-5 mb-4">
+        <article className="text-xs text-text-secondary leading-[2] space-y-4">
+          <TermsSection title="第1条（目的）">
+            <p>本規約は、株式会社SCPP（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p>
+          </TermsSection>
+          <TermsSection title="第2条（定義）">
+            <p>「本サービス」とは、当社が「BioVault」の名称で運営する会員制サービスおよびこれに付随する一切のサービスをいいます。</p>
+            <p>「会員」とは、当社所定の手続きにより本サービスの申込みを行い、当社が承認し、会員資格を付与された個人または法人をいいます。</p>
+            <p>「会員権」とは、本サービスの利用資格として当社が付与する地位をいいます。</p>
+            <p>「CellAsset」とは、会員本人に由来する血液その他検体に関して、提携先における細胞の作製、加工、保管その他関連手続きの実施に向けた案内、申込管理、日程調整、情報提供および運営上の連携サービスをいいます。</p>
+            <p>「提携先」とは、医療機関、検査機関、加工施設、保管施設、配送事業者、決済関連事業者その他本サービス提供に関連する第三者をいいます。</p>
+          </TermsSection>
+          <TermsSection title="第3条（本規約の適用）">
+            <p>本規約は、会員と当社との間の本サービス利用に関する一切の関係に適用されます。</p>
+            <p>関連文書は、本規約と一体として適用されます。</p>
+          </TermsSection>
+          <TermsSection title="第4条（本サービスの位置付け）">
+            <p>当社は、本サービスの運営主体であり、会員に対し医療行為を行うものではありません。</p>
+            <p>診察、問診、採血、医学的判断、施術その他の医療行為は、提携医療機関またはその所属医師等が、その責任において行うものとします。</p>
+            <p>本サービスは、特定の美容上、健康上、医療上または将来の治療機会を保証するものではありません。</p>
+          </TermsSection>
+          <TermsSection title="第5条（会員資格）">
+            <p>会員資格は、当社が申込みを承認した時点で発生します。</p>
+            <p>会員資格は会員本人に専属し、当社の事前の書面承諾なく第三者へ譲渡、貸与、担保設定その他の処分をすることはできません。</p>
+            <p>会員資格は、相続、承継または名義変更の対象とはなりません。</p>
+          </TermsSection>
+          <TermsSection title="第6条（本サービスの内容）">
+            <p>本サービスの中核は、CellAssetに関する案内、申込管理、連絡調整、提供連携および関連する会員向け付随サービスとします。</p>
+          </TermsSection>
+          <TermsSection title="第7条（会員限定サービス）">
+            <p>当社は、会員に対し、情報配信サービス、個別相談またはコンシェルジュ案内、会員限定イベント、提携先優待または紹介サービス、その他当社が別途定めるサービスを提供または案内することがあります。</p>
+          </TermsSection>
+          <TermsSection title="第8条（会員情報の管理）">
+            <p>会員は、当社に届け出た氏名、住所、連絡先、メールアドレスその他の情報に変更があった場合、速やかに当社所定の方法で届け出るものとします。</p>
+          </TermsSection>
+          <TermsSection title="第9条（利用条件）">
+            <p>会員は、本サービスを、自らの備え、情報取得、会員特典利用その他当社が想定する目的の範囲で利用するものとします。</p>
+            <p>本サービスは、会員本人のために提供されるものであり、当社の事前承諾なく第三者に利用させることはできません。</p>
+          </TermsSection>
+          <TermsSection title="第10条（禁止事項）">
+            <p>会員は、次の各号の行為をしてはなりません。</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>法令または公序良俗に反する行為</li>
+              <li>虚偽の申告または重要事項の不申告</li>
+              <li>当社、提携先、他の会員または第三者の信用、名誉、権利または利益を侵害する行為</li>
+              <li>当社または提携先の業務運営を妨げる行為</li>
+              <li>本サービスに関連して取得した情報、資料、ノウハウ等を無断で転載、複製、販売、第三者提供または営業利用する行為</li>
+              <li>反社会的勢力に利益供与し、またはこれに関与する行為</li>
+              <li>その他当社が合理的理由に基づき不適切と判断する行為</li>
+            </ul>
+          </TermsSection>
+          <TermsSection title="第11条（知的財産権）">
+            <p>本サービスに関連して当社または提携先が提供する資料、文章、画像、動画、商標、ノウハウ、システムその他一切の知的財産権は、当社または正当な権利者に帰属します。</p>
+          </TermsSection>
+          <TermsSection title="第12条（秘密保持）">
+            <p>会員は、本サービスに関連して知り得た当社または提携先の営業上、技術上、運営上その他一切の非公知情報を、当社の事前承諾なく第三者に開示または漏えいしてはなりません。</p>
+          </TermsSection>
+          <TermsSection title="第13条（個人情報等の取扱い）">
+            <p>当社は、会員の個人情報、要配慮個人情報、個人遺伝情報、検査結果、問診情報、細胞に関する情報その他本サービスに関連して取得する情報を、法令、関連文書および当社所定のプライバシーポリシーに従って取り扱います。</p>
+          </TermsSection>
+          <TermsSection title="第14条（情報配信）">
+            <p>当社は、会員に対し、本サービスの運営上必要な通知、日程調整、契約管理、重要なお知らせ等を、電子メール、書面、電話、メッセージ配信その他相当な方法により行うことができます。</p>
+          </TermsSection>
+          <TermsSection title="第15条（会員資格の停止・喪失）">
+            <p>当社は、会員が本規約、会員契約書または関連文書に違反した場合、申告内容に重大な虚偽があった場合、料金の支払を遅滞した場合、反社会的勢力に該当した場合、その他本サービスの運営上重大な支障がある場合、会員資格を停止し、または喪失させることができます。</p>
+          </TermsSection>
+          <TermsSection title="第16条（会員による退会等）">
+            <p>会員は、当社所定の方法により退会または解約を申し出ることができます。</p>
+            <p>退会または解約に伴う返金、控除、未実施部分の精算その他の条件は、会員契約書および重要事項説明書の定めに従います。</p>
+          </TermsSection>
+          <TermsSection title="第17条（死亡時の取扱い）">
+            <p>会員が個人である場合において、当該会員が死亡したときは、その会員資格は当然に終了します。</p>
+          </TermsSection>
+          <TermsSection title="第18条（規約の変更）">
+            <p>当社は、法令改正、監督官庁の指導、提携条件の変更、サービス内容の合理的見直し、運営上の必要その他相当の事由がある場合、本規約を変更することができます。</p>
+          </TermsSection>
+          <TermsSection title="第19条（免責）">
+            <p>当社は、本サービスに関して、特定の美容上、健康上、医療上、経済上またはその他の結果、効果、効能を保証しません。</p>
+            <p>当社は、天災、感染症、行政指導、法令改正、交通事情、通信障害、システム障害その他当社の合理的支配を超える事情により生じた損害について責任を負いません。</p>
+          </TermsSection>
+          <TermsSection title="第20条（反社会的勢力の排除）">
+            <p>会員は、自らまたは自らの役員、実質的支配者その他関係者が、反社会的勢力に該当せず、また将来にわたっても該当しないことを表明し、保証します。</p>
+          </TermsSection>
+          <TermsSection title="第21条（協議事項）">
+            <p>本規約に定めのない事項または本規約の解釈に疑義が生じた場合、当社と会員は誠実に協議して解決するものとします。</p>
+          </TermsSection>
+          <TermsSection title="第22条（準拠法・管轄）">
+            <p>本規約は、日本法に準拠し、日本法に従って解釈されます。</p>
+            <p>本規約または本サービスに関して紛争が生じた場合、当社本店所在地を管轄する地方裁判所または簡易裁判所を第一審の専属的合意管轄裁判所とします。</p>
+          </TermsSection>
+        </article>
+      </div>
+
+      {!scrolledToBottom && (
+        <p className="text-xs text-text-muted text-center mb-3 animate-pulse">↓ 最後までスクロールしてください</p>
+      )}
+
+      <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
+        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 cursor-pointer shrink-0" />
+        <span className="text-sm text-text-primary leading-relaxed">上記の BioVault会員規約の内容を確認し、同意します。</span>
+      </label>
+
+      <div className="flex gap-3">
+        <button onClick={onBack} className="flex-1 py-3 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">戻る</button>
+        <button onClick={onNext} disabled={!agreed} className="flex-1 py-3 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">次へ</button>
+      </div>
+    </FormSection>
+  );
+}
+
+function TermsSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-xs text-text-primary font-medium mb-1">{title}</h3>
+      <div className="space-y-1.5">{children}</div>
+    </section>
   );
 }
 
