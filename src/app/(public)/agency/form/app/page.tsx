@@ -154,18 +154,11 @@ export default function AgencyApplyPage() {
 
         <div className="mb-5">
           <label className="block text-xs text-text-secondary tracking-wider mb-2">郵便番号</label>
-          <input
-            inputMode="numeric"
+          <AgencyPostalCode
             value={form.postalCode}
-            onChange={(e) => {
-              const digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 7);
-              let formatted = digits;
-              if (digits.length > 3) formatted = digits.slice(0, 3) + "-" + digits.slice(3);
-              update("postalCode", formatted);
-            }}
-            placeholder="000-0000"
-            maxLength={8}
-            className={ic + " font-mono"}
+            onChange={(v) => update("postalCode", v)}
+            onAddress={(v) => update("address", v)}
+            className={ic}
           />
         </div>
 
@@ -247,5 +240,36 @@ function AgencyNameInput({ value, onChange, onKana, className }: { value: string
       required
       className={className}
     />
+  );
+}
+
+// ── 郵便番号入力（自動住所検索） ──
+function AgencyPostalCode({ value, onChange, onAddress, className }: { value: string; onChange: (v: string) => void; onAddress: (v: string) => void; className: string }) {
+  const [searching, setSearching] = useState(false);
+
+  const handleChange = async (raw: string) => {
+    const digits = raw.replace(/[^0-9]/g, "").slice(0, 7);
+    let formatted = digits;
+    if (digits.length > 3) formatted = digits.slice(0, 3) + "-" + digits.slice(3);
+    onChange(formatted);
+
+    if (digits.length === 7) {
+      setSearching(true);
+      try {
+        const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${digits}`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const r = data.results[0];
+          onAddress(`${r.address1}${r.address2}${r.address3}`);
+        }
+      } catch {} finally { setSearching(false); }
+    }
+  };
+
+  return (
+    <div className="relative">
+      <input inputMode="numeric" value={value} onChange={(e) => handleChange(e.target.value)} placeholder="000-0000" maxLength={8} className={className + " font-mono"} />
+      {searching && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-text-muted">検索中...</span>}
+    </div>
   );
 }
