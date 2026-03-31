@@ -48,11 +48,6 @@ export default withAuth(
       return NextResponse.redirect(new URL("/agency", req.url));
     }
 
-    // パスワード変更が必要な場合
-    if (token?.mustChangePassword && !path.startsWith("/settings")) {
-      return NextResponse.redirect(new URL("/settings/profile", req.url));
-    }
-
     // 重要事項説明に未同意の場合
     if (token?.hasAgreedTerms === false) {
       return NextResponse.redirect(new URL("/important-notice", req.url));
