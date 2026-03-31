@@ -11,11 +11,17 @@ export default withAuth(
       if (token?.role !== "ADMIN" && token?.role !== "SUPER_ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
+      return NextResponse.next(); // 管理者は同意チェック不要
     }
 
     // パスワード変更が必要な場合
-    if (token?.mustChangePassword && path !== "/settings" && !path.startsWith("/api/")) {
-      return NextResponse.redirect(new URL("/settings", req.url));
+    if (token?.mustChangePassword && path !== "/settings/profile" && !path.startsWith("/api/")) {
+      return NextResponse.redirect(new URL("/settings/profile", req.url));
+    }
+
+    // 重要事項説明に未同意の場合（重要事項ページとAPIは除外）
+    if (!token?.hasAgreedTerms && path !== "/important-notice" && !path.startsWith("/api/")) {
+      return NextResponse.redirect(new URL("/important-notice", req.url));
     }
 
     return NextResponse.next();
@@ -28,5 +34,10 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/status/:path*", "/documents/:path*", "/glossary/:path*", "/treatment/:path*", "/concierge/:path*", "/settings/:path*", "/admin/:path*"],
+  matcher: [
+    "/dashboard/:path*", "/status/:path*", "/documents/:path*",
+    "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
+    "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
+    "/important-notice/:path*",
+  ],
 };

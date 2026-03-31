@@ -15,8 +15,8 @@ const memberNav = [
 
 const adminNav = [
   { href: "/admin", label: "ダッシュボード", icon: "◈" },
+  { href: "/admin/applications", label: "申込管理", icon: "📋" },
   { href: "/admin/members", label: "会員一覧", icon: "◉" },
-  { href: "/admin/create-account", label: "アカウント発行", icon: "◇" },
   { href: "/admin/status-update", label: "ステータス更新", icon: "◆" },
   { href: "/admin/articles", label: "iPS ニュース管理", icon: "📰" },
 ];

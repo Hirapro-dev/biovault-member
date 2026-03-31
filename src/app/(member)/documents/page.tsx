@@ -2,14 +2,21 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Badge from "@/components/ui/Badge";
 import { DOCUMENT_TYPE_LABELS } from "@/types";
+import Link from "next/link";
 
 export default async function DocumentsPage() {
   const user = await requireAuth();
 
-  const documents = await prisma.document.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  });
+  const [documents, fullUser] = await Promise.all([
+    prisma.document.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { hasAgreedTerms: true, agreedTermsAt: true },
+    }),
+  ]);
 
   const statusConfig = {
     SIGNED: { label: "署名済", variant: "success" as const },
@@ -25,6 +32,34 @@ export default async function DocumentsPage() {
       </h2>
 
       <div className="flex flex-col gap-3">
+        {/* 重要事項説明 */}
+        <Link
+          href="/important-notice"
+          className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold"
+        >
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-sm sm:text-base text-gold shrink-0">
+              📋
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm sm:text-base text-text-primary leading-snug">
+                重要事項説明書 / 個人情報同意書
+              </div>
+              {fullUser?.agreedTermsAt && (
+                <div className="text-xs text-text-secondary mt-0.5">
+                  同意日: {new Date(fullUser.agreedTermsAt).toLocaleDateString("ja-JP")}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-3 pl-11 sm:pl-0">
+            <Badge variant={fullUser?.hasAgreedTerms ? "success" : "warning"}>
+              {fullUser?.hasAgreedTerms ? "同意済" : "未同意"}
+            </Badge>
+            <span className="text-xs text-text-muted">内容を見る →</span>
+          </div>
+        </Link>
+
         {documents.map((doc) => {
           const st = statusConfig[doc.status];
           return (

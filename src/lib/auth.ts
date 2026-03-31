@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
           where: { loginId: credentials.loginId },
         });
 
-        if (!user || !user.isActive) return null;
+        if (!user || !user.isActive || !user.isIdIssued) return null;
 
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!isValid) return null;
@@ -36,6 +36,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           mustChangePassword: user.mustChangePassword,
+          hasAgreedTerms: user.hasAgreedTerms,
         };
       },
     }),
@@ -48,11 +49,23 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
         token.mustChangePassword = (user as any).mustChangePassword;
+        token.hasAgreedTerms = (user as any).hasAgreedTerms;
+      }
+      // セッション更新時にDBから最新の同意状態を取得
+      if (trigger === "update") {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { hasAgreedTerms: true, mustChangePassword: true },
+        });
+        if (dbUser) {
+          token.hasAgreedTerms = dbUser.hasAgreedTerms;
+          token.mustChangePassword = dbUser.mustChangePassword;
+        }
       }
       return token;
     },
@@ -61,6 +74,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
         (session.user as any).mustChangePassword = token.mustChangePassword;
+        (session.user as any).hasAgreedTerms = token.hasAgreedTerms;
       }
       return session;
     },

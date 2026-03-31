@@ -12,6 +12,8 @@ import {
 import { notFound } from "next/navigation";
 import DocumentManager from "./DocumentManager";
 import MemberKarteActions from "./MemberKarteActions";
+import IssueIdSection from "./IssueIdSection";
+import DeleteAccount from "./DeleteAccount";
 
 export default async function MemberKartePage({
   params,
@@ -94,6 +96,18 @@ export default async function MemberKartePage({
             mono
           />
           <InfoRow label="紹介者" value={membership?.referrerName || "---"} />
+          <div className="flex items-center py-2 border-t border-border mt-1">
+            <div className="w-24 text-[11px] text-text-muted shrink-0">重要事項同意</div>
+            <div className="text-[13px]">
+              {user.hasAgreedTerms ? (
+                <span className="text-status-active">
+                  同意済 {user.agreedTermsAt && <span className="text-text-muted text-[11px] ml-1">({new Date(user.agreedTermsAt).toLocaleDateString("ja-JP")})</span>}
+                </span>
+              ) : (
+                <span className="text-status-warning">未同意</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -104,6 +118,44 @@ export default async function MemberKartePage({
         </h3>
         {membership && <StatusTimeline currentStatus={membership.ipsStatus} />}
       </div>
+
+      {/* アカウント情報（ID発行・PW変更） */}
+      <IssueIdSection
+        userId={user.id}
+        currentLoginId={user.loginId}
+        nameKana={user.nameKana || ""}
+        isIdIssued={user.isIdIssued}
+      />
+
+      {/* 申込情報・健康状態 */}
+      {(user.occupation || user.paymentMethod || user.currentIllness !== undefined) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5 sm:mb-6">
+          <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+            <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+              申込情報
+            </h3>
+            <InfoRow label="職業" value={user.occupation || "---"} />
+            <InfoRow label="郵便番号" value={user.postalCode || "---"} />
+            <InfoRow label="支払方法" value={user.paymentMethod === "bank_transfer" ? "銀行振込" : user.paymentMethod || "---"} />
+            <InfoRow label="支払予定日" value={user.paymentDate ? new Date(user.paymentDate).toLocaleDateString("ja-JP") : "---"} />
+            <InfoRow label="営業担当" value={user.salesRepName || "---"} />
+          </div>
+
+          <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+            <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+              健康状態（事前確認）
+            </h3>
+            <HealthRow label="治療中の病気" has={user.currentIllness} detail={user.currentIllnessDetail} />
+            <HealthRow label="病気・手術歴" has={user.pastIllness} detail={user.pastIllnessDetail} />
+            <HealthRow label="使用中の薬" has={user.currentMedication} detail={user.currentMedicationDetail} />
+            <HealthRow label="持病" has={user.chronicDisease} detail={user.chronicDiseaseDetail} />
+            <HealthRow label="感染症" has={user.infectiousDisease} detail={user.infectiousDiseaseDetail} />
+            <HealthRow label="妊娠中/可能性" has={user.pregnancy} detail={null} />
+            <HealthRow label="アレルギー" has={user.allergy} detail={user.allergyDetail} />
+            <HealthRow label="その他" has={user.otherHealth} detail={user.otherHealthDetail} />
+          </div>
+        </div>
+      )}
 
       {/* アクション（ステータス変更・メモ追加） */}
       <MemberKarteActions
@@ -211,6 +263,9 @@ export default async function MemberKartePage({
           <div className="text-text-muted text-sm py-4 text-center">変更履歴なし</div>
         )}
       </div>
+
+      {/* アカウント削除 */}
+      <DeleteAccount userId={user.id} loginId={user.loginId} />
     </div>
   );
 }
@@ -229,6 +284,21 @@ function InfoRow({
       <div className="w-24 text-[11px] text-text-muted shrink-0">{label}</div>
       <div className={`text-[13px] text-text-primary ${mono ? "font-mono" : ""}`}>
         {value}
+      </div>
+    </div>
+  );
+}
+
+function HealthRow({ label, has, detail }: { label: string; has: boolean; detail: string | null }) {
+  return (
+    <div className="flex items-start py-2 border-b border-border last:border-b-0">
+      <div className="w-28 text-[11px] text-text-muted shrink-0">{label}</div>
+      <div className="text-xs">
+        {has ? (
+          <span className="text-status-warning">あり{detail && `（${detail}）`}</span>
+        ) : (
+          <span className="text-text-secondary">なし</span>
+        )}
       </div>
     </div>
   );

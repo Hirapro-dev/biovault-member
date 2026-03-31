@@ -12,7 +12,7 @@ datasource db {
 // ────────────────────────────────────────
 model User {
   id            String    @id @default(cuid())
-  loginId       String    @unique           // ログインID（6桁英数字）
+  loginId       String    @unique           // ログインID
   email         String    @unique
   passwordHash  String
   role          Role      @default(MEMBER)
@@ -21,12 +21,40 @@ model User {
   nameRomaji    String?                       // ローマ字氏名（カード表示用）
   phone         String?
   dateOfBirth   DateTime?
+  postalCode    String?
   address       String?
+  occupation    String?                       // 職業
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?
   isActive      Boolean   @default(true)
+  isIdIssued    Boolean   @default(false)   // ID発行済みか
   mustChangePassword Boolean @default(true)
+  hasAgreedTerms     Boolean @default(false)  // 重要事項説明に同意済みか
+  agreedTermsAt      DateTime?                // 同意日時
+
+  // 申込情報（フォームから登録時に保存）
+  applicationId    String?                    // 元の申込ID
+  paymentMethod    String?                    // 支払方法
+  paymentDate      DateTime?                  // 支払予定日
+  salesRepName     String?                    // 担当営業者名
+
+  // 健康状態（事前確認事項）
+  currentIllness       Boolean  @default(false)
+  currentIllnessDetail String?
+  pastIllness          Boolean  @default(false)
+  pastIllnessDetail    String?
+  currentMedication    Boolean  @default(false)
+  currentMedicationDetail String?
+  chronicDisease       Boolean  @default(false)
+  chronicDiseaseDetail String?
+  infectiousDisease    Boolean  @default(false)
+  infectiousDiseaseDetail String?
+  pregnancy            Boolean  @default(false)
+  allergy              Boolean  @default(false)
+  allergyDetail        String?
+  otherHealth          Boolean  @default(false)
+  otherHealthDetail    String?
 
   membership    Membership?
   notes         AdminNote[]
@@ -194,4 +222,78 @@ enum IpsArticleCategory {
   CLINICAL      // 臨床応用
   REGULATION    // 制度・規制
   MARKET        // 市場動向
+}
+
+// ────────────────────────────────────────
+// 購入申込（BioVault申込書）
+// ────────────────────────────────────────
+model Application {
+  id                String            @id @default(cuid())
+
+  // 1. 申込者情報
+  name              String                                // 氏名
+  nameKana          String                                // フリガナ
+  dateOfBirth       DateTime                              // 生年月日
+  postalCode        String?                               // 郵便番号
+  address           String                                // 住所
+  phone             String                                // 電話番号
+  email             String                                // メールアドレス
+  occupation        String?                               // 職業
+
+  // 2. 申込内容
+  paymentMethod     String            @default("bank_transfer") // 支払方法
+  paymentMethodOther String?                              // その他の場合
+  paymentDate       DateTime?                             // 支払予定日
+  referrerName      String?                               // 紹介者名／代理店名
+  salesRepName      String?                               // 担当営業者名
+
+  // 3. 事前確認事項（健康状態）
+  currentIllness       Boolean  @default(false)           // 現在治療中の病気
+  currentIllnessDetail String?
+  pastIllness          Boolean  @default(false)           // 過去の病気・手術歴
+  pastIllnessDetail    String?
+  currentMedication    Boolean  @default(false)           // 現在使用中の薬
+  currentMedicationDetail String?
+  chronicDisease       Boolean  @default(false)           // 持病
+  chronicDiseaseDetail String?
+  infectiousDisease    Boolean  @default(false)           // 感染症
+  infectiousDiseaseDetail String?
+  pregnancy            Boolean  @default(false)           // 妊娠中/可能性
+  allergy              Boolean  @default(false)           // アレルギー
+  allergyDetail        String?
+  otherHealth          Boolean  @default(false)           // その他健康上の事項
+  otherHealthDetail    String?
+
+  // 4. 確認事項チェック
+  confirmNotMedical    Boolean  @default(false)           // 医療行為でないことの確認
+  confirmScppRole      Boolean  @default(false)           // SCPPの役割確認
+  confirmClinicRole    Boolean  @default(false)           // 提携医療機関の役割確認
+  confirmLabRole       Boolean  @default(false)           // 提携先機関の役割確認
+  confirmDocuments     Boolean  @default(false)           // 関連文書の確認
+
+  // 5. 受領確認文書
+  receivedContract     Boolean  @default(false)           // 会員契約書
+  receivedTerms        Boolean  @default(false)           // 会員規約
+  receivedImportant    Boolean  @default(false)           // 重要事項説明書
+  receivedMedicalCheck Boolean  @default(false)           // 医師問診確認書
+  receivedPrivacy      Boolean  @default(false)           // 個人情報同意書
+  receivedCellStorage  Boolean  @default(false)           // 細胞保管同意書
+  receivedIpsConsent   Boolean  @default(false)           // iPS細胞説明書
+
+  // ステータス管理
+  status            ApplicationStatus @default(PENDING)
+  adminNote         String?                               // 管理者メモ
+  convertedUserId   String?                               // 会員登録済みの場合のユーザーID
+
+  applicationDate   DateTime  @default(now())             // 申込日
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING           // 申込受付
+  REVIEWING         // 審査中
+  APPROVED          // 承認済
+  REGISTERED        // 会員登録済
+  REJECTED          // 却下
 }
