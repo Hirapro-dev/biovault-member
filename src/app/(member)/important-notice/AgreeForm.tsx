@@ -13,6 +13,11 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
   const [checked, setChecked] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ページ表示時に最上部へスクロール
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // スクロール検知
   useEffect(() => {
     const el = scrollRef.current;
