@@ -197,6 +197,18 @@ model AdminNote {
 }
 
 // ────────────────────────────────────────
+// サイト設定（規約・特商法等の編集可能テキスト）
+// ────────────────────────────────────────
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique                // 設定キー（terms, legal, privacy, important_notice）
+  title     String                          // 表示タイトル
+  content   String   @db.Text              // HTML/テキスト内容
+  updatedBy String?                        // 最終更新者
+  updatedAt DateTime @updatedAt
+}
+
+// ────────────────────────────────────────
 // iPS ニュース記事（管理者が随時更新）
 // ────────────────────────────────────────
 model IpsArticle {
