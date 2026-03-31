@@ -173,7 +173,7 @@ function ApplyPage() {
             <div className="text-[10px] text-text-muted mt-1">ひらがなで入力すると自動でカタカナに変換されます</div>
           </Field>
           <Field label="生年月日" required>
-            <input type="date" value={form.dateOfBirth} onChange={(e) => update("dateOfBirth", e.target.value)} required className={inputClass} />
+            <DateSelect value={form.dateOfBirth} onChange={(v) => update("dateOfBirth", v)} yearStart={1930} yearEnd={2010} />
           </Field>
           <Field label="郵便番号">
             <PostalCodeInput value={form.postalCode} onChange={(v) => update("postalCode", v)} onAddress={(v) => update("address", v)} />
@@ -257,7 +257,7 @@ function ApplyPage() {
             </Field>
           )}
           <Field label="支払予定日">
-            <input type="date" value={form.paymentDate} onChange={(e) => update("paymentDate", e.target.value)} className={inputClass} />
+            <DateSelect value={form.paymentDate} onChange={(v) => update("paymentDate", v)} yearStart={2025} yearEnd={2030} />
           </Field>
           <Field label="紹介者名／代理店名">
             <input value={form.referrerName} onChange={(e) => update("referrerName", e.target.value)} className={inputClass} />
@@ -585,6 +585,56 @@ function TermsSection({ title, children }: { title: string; children: React.Reac
 }
 
 const inputClass = "w-full px-4 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none transition-colors duration-300 focus:border-border-gold";
+
+// ── 年/月/日 プルダウン日付選択 ──
+function DateSelect({
+  value,
+  onChange,
+  yearStart = 1930,
+  yearEnd = 2030,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  yearStart?: number;
+  yearEnd?: number;
+}) {
+  const parts = value ? value.split("-") : ["", "", ""];
+  const year = parts[0] || "";
+  const month = parts[1] || "";
+  const day = parts[2] || "";
+
+  const updateDate = (y: string, m: string, d: string) => {
+    if (y && m && d) {
+      onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+    } else {
+      onChange("");
+    }
+  };
+
+  const years = [];
+  for (let y = yearStart; y <= yearEnd; y++) years.push(y);
+
+  const daysInMonth = year && month ? new Date(Number(year), Number(month), 0).getDate() : 31;
+
+  const sc = "flex-1 px-2 py-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer focus:border-border-gold";
+
+  return (
+    <div className="flex gap-2">
+      <select value={year} onChange={(e) => updateDate(e.target.value, month, day)} className={sc}>
+        <option value="">年</option>
+        {years.map((y) => <option key={y} value={String(y)}>{y}年</option>)}
+      </select>
+      <select value={month ? String(Number(month)) : ""} onChange={(e) => updateDate(year, e.target.value, day)} className={sc}>
+        <option value="">月</option>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => <option key={m} value={String(m)}>{m}月</option>)}
+      </select>
+      <select value={day ? String(Number(day)) : ""} onChange={(e) => updateDate(year, month, e.target.value)} className={sc}>
+        <option value="">日</option>
+        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => <option key={d} value={String(d)}>{d}日</option>)}
+      </select>
+    </div>
+  );
+}
 
 // ── 氏名入力（inputイベントのinputTypeでIME変換前のひらがなを検出） ──
 function NameInput({

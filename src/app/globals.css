@@ -119,6 +119,18 @@ body {
   background: linear-gradient(135deg, #BFA04B, #D4BC6A);
 }
 
+/* date/select inputのスマホ対応 */
+input[type="date"],
+input[type="datetime-local"],
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 /* スクロールバー */
 ::-webkit-scrollbar {
   width: 6px;
