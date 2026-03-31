@@ -34,7 +34,7 @@ function ApplyPage() {
     // 2. 申込内容
     paymentMethod: "bank_transfer",
     paymentMethodOther: "",
-    paymentDate: "",
+    paymentDate: new Date().toISOString().split("T")[0],
     referrerName: "",
     salesRepName: "",
     // 3. 健康状態
