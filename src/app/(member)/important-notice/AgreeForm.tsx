@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import GoldDivider from "@/components/ui/GoldDivider";
 
 export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; agreedAt: string | null }) {
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -30,6 +32,8 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
     try {
       const res = await fetch("/api/member/agree-terms", { method: "POST" });
       if (res.ok) {
+        // JWTトークンを更新（hasAgreedTerms: true を反映）
+        await updateSession();
         router.push("/dashboard");
         router.refresh();
       }
