@@ -34,8 +34,8 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
       if (res.ok) {
         // JWTトークンを更新（hasAgreedTerms: true を反映）
         await updateSession();
-        router.push("/dashboard");
-        router.refresh();
+        // マイページトップにリダイレクト
+        window.location.href = "/dashboard";
       }
     } catch {
       // エラー処理
