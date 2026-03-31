@@ -64,7 +64,7 @@ export default async function AdminAgenciesPage() {
                           <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
                         </td>
                         <td className="px-4 py-3">
-                          <Link href={`/admin/members/${a.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
+                          <Link href={`/admin/agencies/${a.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                             カルテ
                           </Link>
                         </td>
@@ -94,7 +94,7 @@ export default async function AdminAgenciesPage() {
                     <div className="text-sm text-text-primary mb-1">{p?.companyName || a.name}</div>
                     <div className="text-[11px] text-text-muted mb-2">{a.email} ・ 報酬率 {p?.commissionRate || 0}% ・ 紹介 {customerCounts[a.id] || 0}名</div>
                     <div className="flex items-center gap-2">
-                      <Link href={`/admin/members/${a.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
+                      <Link href={`/admin/agencies/${a.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                         カルテ
                       </Link>
                       <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
