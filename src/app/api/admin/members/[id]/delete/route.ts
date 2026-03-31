@@ -28,7 +28,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 
   // 管理者は削除不可
-  if (user.role !== "MEMBER") {
+  if (user.role !== "MEMBER" && user.role !== "AGENCY") {
     return NextResponse.json({ error: "管理者アカウントは削除できません" }, { status: 400 });
   }
 
@@ -41,16 +41,19 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       ? [prisma.treatment.deleteMany({ where: { membershipId: user.membership.id } }),
          prisma.membership.delete({ where: { userId: id } })]
       : []),
+    // 代理店プロフィール・報酬記録の削除
+    prisma.agencyCommission.deleteMany({ where: { agencyProfile: { userId: id } } }),
+    prisma.agencyProfile.deleteMany({ where: { userId: id } }),
     prisma.user.delete({ where: { id } }),
   ]);
 
-  // 関連する申込データのconvertedUserIdもクリア
+  // 関連する申込データも削除（メールアドレスの重複を防止）
   if (user.applicationId) {
-    await prisma.application.update({
-      where: { id: user.applicationId },
-      data: { convertedUserId: null, status: "APPROVED" },
-    }).catch(() => {});
+    await prisma.application.delete({ where: { id: user.applicationId } }).catch(() => {});
   }
+  // メールアドレスで一致する申込データも削除
+  await prisma.application.deleteMany({ where: { email: user.email } }).catch(() => {});
+  await prisma.agencyApplication.deleteMany({ where: { email: user.email } }).catch(() => {});
 
   return NextResponse.json({ success: true });
 }
