@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import GoldDivider from "@/components/ui/GoldDivider";
 
 export default function AgencyApplyPage() {
@@ -94,11 +94,10 @@ export default function AgencyApplyPage() {
           <label className="block text-xs text-text-secondary tracking-wider mb-2">
             代表者名 / 氏名 <span className="text-status-danger">*</span>
           </label>
-          <input
+          <AgencyNameInput
             value={form.representativeName}
-            onChange={(e) => update("representativeName", e.target.value)}
-            placeholder="山田 太郎"
-            required
+            onChange={(v) => update("representativeName", v)}
+            onKana={(v) => update("nameKana", v)}
             className={ic}
           />
           <div className="text-[10px] text-text-muted mt-1">※ 姓と名の間にスペースを入れてください</div>
@@ -106,7 +105,7 @@ export default function AgencyApplyPage() {
 
         <div className="mb-5">
           <label className="block text-xs text-text-secondary tracking-wider mb-2">
-            フリガナ <span className="text-status-danger">*</span>
+            フリガナ（自動入力） <span className="text-status-danger">*</span>
           </label>
           <input
             value={form.nameKana}
@@ -200,5 +199,53 @@ function Wrapper({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
       <div className="max-w-lg mx-auto px-4 py-10 sm:py-16">{children}</div>
     </div>
+  );
+}
+
+// ── 氏名入力（IME compositionupdate でひらがな取得→カタカナ変換） ──
+function AgencyNameInput({ value, onChange, onKana, className }: { value: string; onChange: (v: string) => void; onKana: (v: string) => void; className: string }) {
+  const confirmedKana = useRef("");
+  const lastCompositionData = useRef("");
+  const isComposing = useRef(false);
+
+  const handleCompositionStart = () => { isComposing.current = true; lastCompositionData.current = ""; };
+
+  const handleCompositionUpdate = (e: React.CompositionEvent<HTMLInputElement>) => {
+    if (e.data) {
+      const hasHiragana = /[\u3041-\u3096]/.test(e.data);
+      if (hasHiragana) {
+        lastCompositionData.current = e.data.replace(/[\u3041-\u3096]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+      }
+    }
+  };
+
+  const handleCompositionEnd = () => {
+    isComposing.current = false;
+    if (lastCompositionData.current) {
+      confirmedKana.current += lastCompositionData.current;
+      lastCompositionData.current = "";
+      onKana(confirmedKana.current);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isComposing.current) {
+      if (e.key === " " || e.key === "　") { confirmedKana.current += " "; onKana(confirmedKana.current); }
+      if (e.key === "Backspace") { confirmedKana.current = confirmedKana.current.slice(0, -1); onKana(confirmedKana.current); }
+    }
+  };
+
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onCompositionStart={handleCompositionStart}
+      onCompositionUpdate={handleCompositionUpdate}
+      onCompositionEnd={handleCompositionEnd}
+      onKeyDown={handleKeyDown}
+      placeholder="山田 太郎"
+      required
+      className={className}
+    />
   );
 }
