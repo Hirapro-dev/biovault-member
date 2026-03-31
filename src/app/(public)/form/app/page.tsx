@@ -16,7 +16,11 @@ function ApplyPage() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
 
-  const [step, setStep] = useState(1);
+  const [step, setStepRaw] = useState(1);
+  const setStep = (s: number) => {
+    setStepRaw(s);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
