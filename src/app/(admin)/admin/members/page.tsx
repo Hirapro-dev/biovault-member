@@ -105,7 +105,7 @@ export default async function AdminMembersPage({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-border">
-              {["会員番号", "氏名", "iPSステータス", "入金状況", "契約日", "ID", ""].map((h, i) => (
+              {["会員番号", "氏名", "iPSステータス", "入金状況", "申込日", "ID", ""].map((h, i) => (
                 <th
                   key={i}
                   className="px-5 py-3.5 text-left text-[11px] text-text-muted tracking-wider font-normal"
@@ -142,9 +142,7 @@ export default async function AdminMembersPage({
                   </span>
                 </td>
                 <td className="px-5 py-3.5 text-xs text-text-muted font-mono">
-                  {m.membership
-                    ? new Date(m.membership.contractDate).toLocaleDateString("ja-JP")
-                    : "---"}
+                  {new Date(m.createdAt).toLocaleDateString("ja-JP")}
                 </td>
                 <td className="px-5 py-3.5">
                   <IssueIdModal userId={m.id} loginId={m.loginId} nameKana={m.nameKana || ""} isIdIssued={m.isIdIssued} />
