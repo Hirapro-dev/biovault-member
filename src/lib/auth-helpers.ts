@@ -23,3 +23,11 @@ export async function requireAdmin(): Promise<SessionUser> {
   }
   return user;
 }
+
+export async function requireAgency(): Promise<SessionUser> {
+  const user = await requireAuth();
+  if (user.role !== "AGENCY") {
+    redirect("/login");
+  }
+  return user;
+}

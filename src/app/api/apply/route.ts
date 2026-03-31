@@ -96,6 +96,7 @@ export async function POST(req: Request) {
       role: "MEMBER",
       isIdIssued: false,
       mustChangePassword: true,
+      referredByAgency: body.referredByAgency || null,
       applicationId: application.id,
       paymentMethod: body.paymentMethod || "bank_transfer",
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,

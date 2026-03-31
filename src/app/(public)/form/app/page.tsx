@@ -1,9 +1,21 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
 
-export default function ApplyPage() {
+export default function ApplyPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-primary" />}>
+      <ApplyPage />
+    </Suspense>
+  );
+}
+
+function ApplyPage() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref") || "";
+
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -66,7 +78,7 @@ export default function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, referredByAgency: refCode }),
       });
       if (!res.ok) {
         const data = await res.json();

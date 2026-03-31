@@ -38,6 +38,8 @@ export default function LoginPage() {
 
     if (role === "ADMIN" || role === "SUPER_ADMIN") {
       router.push("/admin");
+    } else if (role === "AGENCY") {
+      router.push("/agency");
     } else {
       router.push("/dashboard");
     }

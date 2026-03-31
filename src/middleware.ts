@@ -6,7 +6,7 @@ export default withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
-    // 管理者は同意チェック不要
+    // ── 管理者エリア ──
     if (path.startsWith("/admin")) {
       if (token?.role !== "ADMIN" && token?.role !== "SUPER_ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -14,9 +14,38 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // ── 代理店エリア ──
+    if (path.startsWith("/agency")) {
+      // 代理店ロール以外はアクセス不可
+      if (token?.role !== "AGENCY") {
+        return NextResponse.redirect(new URL("/login", req.url));
+      }
+      // 代理店同意ページ自体は常にアクセス可能
+      if (path === "/agency-agree") {
+        return NextResponse.next();
+      }
+      // 未同意の場合は同意ページへ
+      if (token?.agencyAgreed === false) {
+        return NextResponse.redirect(new URL("/agency-agree", req.url));
+      }
+      return NextResponse.next();
+    }
+
+    // ── 代理店同意ページ ──
+    if (path === "/agency-agree") {
+      return NextResponse.next();
+    }
+
+    // ── 会員エリア ──
+
     // 重要事項ページ自体は常にアクセス可能
     if (path === "/important-notice") {
       return NextResponse.next();
+    }
+
+    // 代理店ユーザーが会員ページにアクセスしようとした場合
+    if (token?.role === "AGENCY") {
+      return NextResponse.redirect(new URL("/agency", req.url));
     }
 
     // パスワード変更が必要な場合
@@ -44,5 +73,6 @@ export const config = {
     "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
     "/important-notice",
+    "/agency/:path*", "/agency-agree",
   ],
 };

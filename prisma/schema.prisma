@@ -56,16 +56,20 @@ model User {
   otherHealth          Boolean  @default(false)
   otherHealthDetail    String?
 
+  referredByAgency String?                  // 紹介元エージェントコード
+
   membership    Membership?
   notes         AdminNote[]
   documents     Document[]
   statusHistory StatusHistory[]
+  agencyProfile AgencyProfile?
 }
 
 enum Role {
   MEMBER
   ADMIN
   SUPER_ADMIN
+  AGENCY
 }
 
 // ────────────────────────────────────────
@@ -308,4 +312,79 @@ enum ApplicationStatus {
   APPROVED          // 承認済
   REGISTERED        // 会員登録済
   REJECTED          // 却下
+}
+
+// ────────────────────────────────────────
+// 代理店プロフィール（1:1 with User）
+// ────────────────────────────────────────
+model AgencyProfile {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  user                User      @relation(fields: [userId], references: [id])
+  agencyCode          String    @unique             // AG-0001形式
+  companyName         String?                       // 法人名
+  representativeName  String?                       // 代表者名
+  commissionRate      Float     @default(0)         // 基本成果報酬率(%)
+  bankName            String?                       // 振込先銀行
+  bankBranch          String?                       // 支店名
+  bankAccountType     String?                       // 口座種別（普通/当座）
+  bankAccountNumber   String?                       // 口座番号
+  bankAccountName     String?                       // 口座名義
+  hasAgreedContract   Boolean   @default(false)     // 代理店契約書同意
+  hasAgreedPledge     Boolean   @default(false)     // 遵守誓約書同意
+  hasAgreedNda        Boolean   @default(false)     // NDA同意
+  agreedAt            DateTime?                     // 全同意完了日時
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  commissions         AgencyCommission[]
+}
+
+// ────────────────────────────────────────
+// 代理店報酬記録
+// ────────────────────────────────────────
+model AgencyCommission {
+  id                String           @id @default(cuid())
+  agencyProfileId   String
+  agencyProfile     AgencyProfile    @relation(fields: [agencyProfileId], references: [id])
+  memberUserId      String                          // 紹介した会員のID
+  memberName        String                          // 会員名
+  memberNumber      String                          // 会員番号
+  saleAmount        Int                             // 売上金額
+  commissionRate    Float                           // 適用報酬率(%)
+  commissionAmount  Int                             // 報酬金額
+  contributionType  String                          // 紹介のみ/説明補助/クロージング協力
+  status            CommissionStatus @default(PENDING)
+  paidAt            DateTime?
+  note              String?
+  createdAt         DateTime         @default(now())
+}
+
+enum CommissionStatus {
+  PENDING           // 未確定
+  CONFIRMED         // 確定
+  PAID              // 支払済
+  CANCELLED         // 取消
+}
+
+// ────────────────────────────────────────
+// 代理店申込
+// ────────────────────────────────────────
+model AgencyApplication {
+  id                  String            @id @default(cuid())
+  companyName         String?                       // 法人名（個人の場合は空）
+  representativeName  String                        // 代表者名/氏名
+  nameKana            String                        // フリガナ
+  email               String
+  phone               String
+  postalCode          String?
+  address             String
+  occupation          String?
+  motivation          String?           @db.Text    // 申込動機
+  experience          String?           @db.Text    // 営業経験
+  status              ApplicationStatus @default(PENDING)
+  convertedUserId     String?                       // ユーザー登録済みの場合
+  adminNote           String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 }

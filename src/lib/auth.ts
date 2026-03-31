@@ -30,6 +30,16 @@ export const authOptions: NextAuthOptions = {
           data: { lastLoginAt: new Date() },
         });
 
+        // 代理店の場合はプロフィールの同意状態を取得
+        let agencyAgreed = false;
+        if (user.role === "AGENCY") {
+          const profile = await prisma.agencyProfile.findUnique({
+            where: { userId: user.id },
+            select: { hasAgreedContract: true, hasAgreedPledge: true, hasAgreedNda: true },
+          });
+          agencyAgreed = !!(profile?.hasAgreedContract && profile?.hasAgreedPledge && profile?.hasAgreedNda);
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -37,6 +47,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           mustChangePassword: user.mustChangePassword,
           hasAgreedTerms: user.hasAgreedTerms,
+          agencyAgreed,
         };
       },
     }),
@@ -55,16 +66,25 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.mustChangePassword = (user as any).mustChangePassword;
         token.hasAgreedTerms = (user as any).hasAgreedTerms;
+        token.agencyAgreed = (user as any).agencyAgreed;
       }
       // セッション更新時にDBから最新の同意状態を取得
       if (trigger === "update") {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { hasAgreedTerms: true, mustChangePassword: true },
+          select: { hasAgreedTerms: true, mustChangePassword: true, role: true },
         });
         if (dbUser) {
           token.hasAgreedTerms = dbUser.hasAgreedTerms;
           token.mustChangePassword = dbUser.mustChangePassword;
+          // 代理店の同意状態も更新
+          if (dbUser.role === "AGENCY") {
+            const profile = await prisma.agencyProfile.findUnique({
+              where: { userId: token.id as string },
+              select: { hasAgreedContract: true, hasAgreedPledge: true, hasAgreedNda: true },
+            });
+            token.agencyAgreed = !!(profile?.hasAgreedContract && profile?.hasAgreedPledge && profile?.hasAgreedNda);
+          }
         }
       }
       return token;
@@ -75,6 +95,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).mustChangePassword = token.mustChangePassword;
         (session.user as any).hasAgreedTerms = token.hasAgreedTerms;
+        (session.user as any).agencyAgreed = token.agencyAgreed;
       }
       return session;
     },
