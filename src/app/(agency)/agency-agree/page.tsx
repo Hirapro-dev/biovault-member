@@ -8,7 +8,7 @@ export default async function AgencyAgreePage() {
 
   const profile = await prisma.agencyProfile.findUnique({
     where: { userId: user.id },
-    select: { hasAgreedContract: true, hasAgreedPledge: true, hasAgreedNda: true, agreedAt: true },
+    select: { hasAgreedContract: true, hasAgreedPledge: true, hasAgreedNda: true },
   });
 
   if (!profile) redirect("/login");
@@ -18,5 +18,5 @@ export default async function AgencyAgreePage() {
     redirect("/agency");
   }
 
-  return <AgencyAgreeForm agreed={profile} />;
+  return <AgencyAgreeForm />;
 }
