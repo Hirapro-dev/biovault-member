@@ -76,7 +76,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
             <h2 className="text-base text-text-primary font-medium">BioVault 重要事項説明書兼確認書</h2>
           </div>
 
-          <p>株式会社SCPP（以下「当社」という。）は、BioVaultBioVaultメンバーシップサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
+          <p>株式会社SCPP（以下「当社」という。）は、BioVaultメンバーシップサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
           <p>申込者は、本書の内容を十分に確認し、理解したうえで、本サービスの申込みおよび契約締結を行うものとします。</p>
 
           <Section title="第1条（本書の目的）">
@@ -177,7 +177,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
             <h2 className="text-base text-text-primary font-medium">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
           </div>
 
-          <p>株式会社SCPP（以下「甲」という。）は、BioVaultBioVaultメンバーシップサービス（以下「本サービス」という。）の提供にあたり、申込者兼会員（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
+          <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップサービス（以下「本サービス」という。）の提供にあたり、申込者兼会員（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
           <p>乙は、本書の内容を確認し、理解したうえで、必要な範囲について同意するものとします。</p>
 
           <Section title="第1条（目的）">
