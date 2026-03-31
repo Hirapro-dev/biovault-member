@@ -19,7 +19,7 @@ function ApplyPage() {
   const [step, setStepRaw] = useState(1);
   const setStep = (s: number) => {
     setStepRaw(s);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => window.scrollTo(0, 0), 50);
   };
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
