@@ -1,9 +1,10 @@
 import { requireAuth } from "@/lib/auth-helpers";
-import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
+
+export const dynamic = "force-dynamic";
 
 export default async function MemberLayout({
   children,
@@ -13,20 +14,14 @@ export default async function MemberLayout({
   const user = await requireAuth();
   const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
 
-  // 現在のパスを取得して重要事項説明ページかどうか判定
-  const headersList = await headers();
-  const pathname = headersList.get("x-next-pathname") || headersList.get("x-invoke-path") || "";
-  const isImportantNotice = pathname === "/important-notice";
-
-  // 未同意かどうかをDBから確認
+  // 未同意かどうかをDBから確認（キャッシュなし）
   const fullUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { hasAgreedTerms: true },
   });
-  const hideNav = !fullUser?.hasAgreedTerms;
 
-  // 未同意時はメニューバーを非表示
-  if (hideNav || isImportantNotice) {
+  // 未同意時はメニューバーを非表示（重要事項説明ページ用）
+  if (!fullUser?.hasAgreedTerms) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
         <main className="px-4 py-8 sm:py-12 max-w-[800px] mx-auto animate-fade-in">
