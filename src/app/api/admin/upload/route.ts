@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { uploadFile } from "@/lib/storage";
+import sharp from "sharp";
 
 /**
  * 管理者用 画像アップロードAPI
- * サムネイル画像をAWS S3にアップロード
+ * 画像をロスレス圧縮（WebP lossless）してからAWS S3にアップロード
+ *
+ * - アップロード上限: 20MB（圧縮前）
+ * - 出力形式: WebP（ロスレス圧縮）
+ * - 長辺最大: 2000px にリサイズ（元が小さければそのまま）
  */
+
+const MAX_UPLOAD_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_DIMENSION = 2000; // 長辺最大px
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
@@ -21,9 +30,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "ファイルが指定されていません" }, { status: 400 });
     }
 
-    // ファイルサイズ制限（5MB）
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "ファイルサイズは5MB以下にしてください" }, { status: 400 });
+    // ファイルサイズ制限（20MB — 圧縮前）
+    if (file.size > MAX_UPLOAD_SIZE) {
+      return NextResponse.json({ error: "ファイルサイズは20MB以下にしてください" }, { status: 400 });
     }
 
     // 画像ファイルのみ許可
@@ -31,14 +40,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "画像ファイルのみアップロードできます" }, { status: 400 });
     }
 
-    // ファイルパス生成
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    // 元画像をBufferに変換
+    const originalBuffer = Buffer.from(await file.arrayBuffer());
+    const originalSize = originalBuffer.length;
+
+    // sharpでロスレス圧縮（WebP lossless）+ リサイズ
+    const compressed = await sharp(originalBuffer)
+      .resize(MAX_DIMENSION, MAX_DIMENSION, {
+        fit: "inside",          // アスペクト比を維持して長辺をMAX_DIMENSIONに収める
+        withoutEnlargement: true, // 元が小さい場合は拡大しない
+      })
+      .webp({ lossless: true }) // ロスレスWebP
+      .toBuffer();
+
+    const compressedSize = compressed.length;
+    const ratio = Math.round((1 - compressedSize / originalSize) * 100);
+
+    console.log(
+      `画像圧縮: ${(originalSize / 1024).toFixed(0)}KB → ${(compressedSize / 1024).toFixed(0)}KB (${ratio}%削減)`
+    );
+
+    // ファイルパス生成（拡張子はwebp）
+    const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
 
     // S3にアップロード
-    const url = await uploadFile(path, file, file.type);
+    const url = await uploadFile(path, compressed, "image/webp");
 
-    return NextResponse.json({ url });
+    return NextResponse.json({
+      url,
+      originalSize,
+      compressedSize,
+      reduction: `${ratio}%`,
+    });
   } catch (error) {
     console.error("アップロードエラー:", error);
     const message = error instanceof Error ? error.message : "不明なエラー";
