@@ -1,152 +1,255 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import GoldDivider from "@/components/ui/GoldDivider";
 
-export default async function AboutIpsPage() {
+const CATEGORY_LABELS: Record<string, string> = {
+  NEWS: "ニュース",
+  RESEARCH: "研究動向",
+  CLINICAL: "臨床応用",
+  REGULATION: "制度・規制",
+  MARKET: "市場動向",
+};
+
+// タブ定義（「すべて」+ 基礎知識 + カテゴリ）
+const TABS = [
+  { key: "all", label: "すべて" },
+  { key: "knowledge", label: "基礎知識" },
+  { key: "NEWS", label: "ニュース" },
+  { key: "RESEARCH", label: "研究動向" },
+  { key: "CLINICAL", label: "臨床応用" },
+];
+
+export default async function AboutIpsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   await requireAuth();
+  const { tab } = await searchParams;
+  const activeTab = tab || "all";
 
-  // 最新のニュース記事を3件取得
-  const latestArticles = await prisma.ipsArticle.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-  });
+  // 記事を取得
+  const where: Record<string, unknown> = { isPublished: true };
+  if (activeTab !== "all" && activeTab !== "knowledge" && CATEGORY_LABELS[activeTab]) {
+    where.category = activeTab;
+  }
+
+  const articles = activeTab === "knowledge"
+    ? [] // 基礎知識タブは静的コンテンツ
+    : await prisma.ipsArticle.findMany({
+        where,
+        orderBy: { publishedAt: "desc" },
+      });
+
+  // 注目記事（最新の公開記事1件をピン留め）
+  const featuredArticle = activeTab === "knowledge"
+    ? null
+    : await prisma.ipsArticle.findFirst({
+        where: { isPublished: true },
+        orderBy: { publishedAt: "desc" },
+      });
 
   return (
     <div>
-      {/* ヒーローセクション */}
-      <div className="text-center mb-8 sm:mb-12">
-        <div className="text-[11px] tracking-[6px] text-gold-dark mb-3">ABOUT</div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-light tracking-[4px] text-gold-gradient mb-3">
-          iPS Cells
-        </h1>
-        <GoldDivider width={80} className="mx-auto mb-4" />
-        <p className="text-sm text-text-secondary leading-relaxed max-w-[600px] mx-auto">
-          iPS細胞の基礎知識から最新の研究動向まで。
-          <br />
-          あなたの「細胞資産」をより深く理解するための情報をお届けします。
-        </p>
-      </div>
-
-      {/* ナビゲーションカード */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-8 sm:mb-12">
-        <NavCard
-          href="/about-ips/what-is-ips"
-          icon="🧬"
-          title="iPS細胞とは？"
-          description="人工多能性幹細胞の仕組みと可能性、再生医療・創薬への応用について"
-        />
-        <NavCard
-          href="/about-ips/history"
-          icon="📜"
-          title="iPS細胞の歴史"
-          description="1962年の核移植実験から2026年の世界初承認まで、60年以上の軌跡"
-        />
-        <NavCard
-          href="/about-ips/glossary"
-          icon="📖"
-          title="用語集"
-          description="iPS細胞・再生医療に関する専門用語をわかりやすく解説"
-        />
-      </div>
-
-      {/* 最新ニュース */}
-      <div>
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
-          <h2 className="font-serif-jp text-base font-normal text-text-primary tracking-wider">
-            iPS 最新ニュース
-          </h2>
+      {/* タブ切り替え */}
+      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+        {TABS.map((t) => (
           <Link
-            href="/about-ips/news"
-            className="text-[11px] text-gold hover:text-gold-light transition-colors"
+            key={t.key}
+            href={t.key === "all" ? "/about-ips" : `/about-ips?tab=${t.key}`}
+            className={`shrink-0 text-[12px] px-4 py-2 rounded-full border transition-all ${
+              activeTab === t.key
+                ? "bg-gold/15 text-gold border-gold/30 font-medium"
+                : "bg-transparent text-text-muted border-border hover:border-border-gold hover:text-text-secondary"
+            }`}
           >
-            すべて見る →
+            {t.label}
           </Link>
-        </div>
-
-        {latestArticles.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {latestArticles.map((article) => (
-              <Link
-                key={article.id}
-                href={`/about-ips/news/${article.slug}`}
-                className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between transition-all duration-300 hover:border-border-gold group"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1.5">
-                    <CategoryBadge category={article.category} />
-                    <span className="text-[11px] text-text-muted font-mono">
-                      {new Date(article.publishedAt).toLocaleDateString("ja-JP")}
-                    </span>
-                  </div>
-                  <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-[11px] text-text-secondary mt-1 line-clamp-1">
-                    {article.summary}
-                  </p>
-                </div>
-                <span className="text-text-muted group-hover:text-gold transition-colors ml-4">
-                  →
-                </span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
-            <div className="text-2xl mb-3">📡</div>
-            <p className="text-sm text-text-muted">
-              最新ニュースは近日公開予定です
-            </p>
-          </div>
-        )}
+        ))}
       </div>
+
+      {/* 基礎知識タブ */}
+      {activeTab === "knowledge" ? (
+        <KnowledgeSection />
+      ) : (
+        <>
+          {/* 注目コンテンツ（ピン留め記事） */}
+          {featuredArticle && activeTab === "all" && (
+            <Link
+              href={`/about-ips/news/${featuredArticle.slug}`}
+              className="block mb-6 group"
+            >
+              <div className="relative bg-bg-secondary border border-border rounded-lg overflow-hidden transition-all duration-300 hover:border-border-gold">
+                {featuredArticle.imageUrl ? (
+                  <div className="relative w-full aspect-[2/1] sm:aspect-[3/1]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={featuredArticle.imageUrl}
+                      alt={featuredArticle.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/90 via-bg-primary/40 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30 backdrop-blur-sm">
+                          📌 注目
+                        </span>
+                        <CategoryBadge category={featuredArticle.category} />
+                        <span className="text-[11px] text-white/60 font-mono">
+                          {new Date(featuredArticle.publishedAt).toLocaleDateString("ja-JP")}
+                        </span>
+                      </div>
+                      <h2 className="text-base sm:text-lg text-white font-medium leading-snug group-hover:text-gold transition-colors">
+                        {featuredArticle.title}
+                      </h2>
+                      <p className="text-[12px] text-white/70 mt-1.5 line-clamp-2 hidden sm:block">
+                        {featuredArticle.summary}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30">
+                        📌 注目
+                      </span>
+                      <CategoryBadge category={featuredArticle.category} />
+                      <span className="text-[11px] text-text-muted font-mono">
+                        {new Date(featuredArticle.publishedAt).toLocaleDateString("ja-JP")}
+                      </span>
+                    </div>
+                    <h2 className="text-base sm:text-lg text-text-primary font-medium leading-snug group-hover:text-gold transition-colors">
+                      {featuredArticle.title}
+                    </h2>
+                    <p className="text-[12px] text-text-secondary mt-1.5 line-clamp-2">
+                      {featuredArticle.summary}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Link>
+          )}
+
+          {/* ニュースタイムライン */}
+          <div className="space-y-3">
+            {articles.length > 0 ? (
+              articles.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/about-ips/news/${article.slug}`}
+                  className="flex gap-4 bg-bg-secondary border border-border rounded-md p-4 transition-all duration-300 hover:border-border-gold group"
+                >
+                  {/* サムネイル */}
+                  {article.imageUrl ? (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-md overflow-hidden shrink-0 bg-bg-elevated">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={article.imageUrl}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-md shrink-0 bg-bg-elevated flex items-center justify-center text-2xl">
+                      {article.category === "RESEARCH" ? "🔬" : article.category === "CLINICAL" ? "🏥" : article.category === "NEWS" ? "📰" : "📋"}
+                    </div>
+                  )}
+
+                  {/* コンテンツ */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <CategoryBadge category={article.category} />
+                      <span className="text-[10px] text-text-muted font-mono">
+                        {new Date(article.publishedAt).toLocaleDateString("ja-JP")}
+                      </span>
+                    </div>
+                    <h3 className="text-[13px] sm:text-sm text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-[11px] text-text-muted mt-1 line-clamp-1 hidden sm:block">
+                      {article.summary}
+                    </p>
+                    {article.sourceName && (
+                      <div className="text-[10px] text-text-muted mt-1">
+                        {article.sourceName}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
+                <div className="text-2xl mb-3">📡</div>
+                <p className="text-sm text-text-muted">
+                  {activeTab !== "all"
+                    ? `「${CATEGORY_LABELS[activeTab] || activeTab}」の記事はまだありません`
+                    : "記事はまだ投稿されていません"}
+                </p>
+                <p className="text-[11px] text-text-muted mt-1">
+                  最新情報は随時更新されます
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function NavCard({
-  href,
-  icon,
-  title,
-  description,
-}: {
-  href: string;
-  icon: string;
-  title: string;
-  description: string;
-}) {
+// 基礎知識セクション（静的コンテンツカード）
+function KnowledgeSection() {
+  const items = [
+    {
+      href: "/about-ips/what-is-ips",
+      icon: "🧬",
+      title: "iPS細胞とは？",
+      description: "人工多能性幹細胞の仕組みと可能性、再生医療・創薬への応用について",
+    },
+    {
+      href: "/about-ips/history",
+      icon: "📜",
+      title: "iPS細胞の歴史",
+      description: "1962年の核移植実験から2026年の世界初承認まで、60年以上の軌跡",
+    },
+    {
+      href: "/about-ips/glossary",
+      icon: "📖",
+      title: "用語集",
+      description: "iPS細胞・再生医療に関する専門用語をわかりやすく解説",
+    },
+  ];
+
   return (
-    <Link
-      href={href}
-      className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7 transition-all duration-300 hover:border-border-gold group block"
-    >
-      <div className="text-3xl mb-4">{icon}</div>
-      <h3 className="font-serif-jp text-base font-normal text-text-primary group-hover:text-gold transition-colors mb-2">
-        {title}
-      </h3>
-      <p className="text-[12px] text-text-secondary leading-relaxed">
-        {description}
-      </p>
-      <div className="mt-4 text-[11px] text-gold opacity-0 group-hover:opacity-100 transition-opacity">
-        詳しく見る →
-      </div>
-    </Link>
+    <div className="space-y-4">
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group"
+        >
+          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">
+            {item.icon}
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">
+              {item.title}
+            </h3>
+            <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">
+              {item.description}
+            </p>
+          </div>
+          <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
+        </Link>
+      ))}
+    </div>
   );
 }
 
 function CategoryBadge({ category }: { category: string }) {
-  const labels: Record<string, string> = {
-    NEWS: "ニュース",
-    RESEARCH: "研究動向",
-    CLINICAL: "臨床応用",
-    REGULATION: "制度・規制",
-    MARKET: "市場動向",
-  };
   return (
     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">
-      {labels[category] || category}
+      {CATEGORY_LABELS[category] || category}
     </span>
   );
 }

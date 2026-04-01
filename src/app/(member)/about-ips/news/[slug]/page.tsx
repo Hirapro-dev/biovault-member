@@ -46,6 +46,17 @@ export default async function NewsArticlePage({
       {/* 記事ヘッダー */}
       <article>
         <div className="mb-8">
+          {/* サムネイル画像 */}
+          {article.imageUrl && (
+            <div className="w-full aspect-[2/1] rounded-lg overflow-hidden mb-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <div className="flex items-center gap-3 mb-4">
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">
               {CATEGORY_LABELS[article.category] || article.category}

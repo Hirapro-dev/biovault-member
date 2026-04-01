@@ -42,6 +42,7 @@ export async function POST(req: Request) {
       summary: body.summary || body.content.slice(0, 200),
       content: body.content,
       category: body.category,
+      imageUrl: body.imageUrl || null,
       sourceUrl: body.sourceUrl || null,
       sourceName: body.sourceName || null,
       isPublished: body.isPublished ?? false,

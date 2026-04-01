@@ -20,6 +20,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       summary: body.summary,
       content: body.content,
       category: body.category,
+      imageUrl: body.imageUrl,
       sourceUrl: body.sourceUrl,
       sourceName: body.sourceName,
       isPublished: body.isPublished,
