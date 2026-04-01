@@ -5,20 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
+// 会員用トグルメニュー（設定系の内容）
 const memberNav = [
-  { href: "/dashboard", label: "マイページ", icon: "◈" },
-  { href: "/status", label: "ステータス詳細", icon: "◉" },
-  { href: "/apply-service", label: "サービス申込", icon: "✍️" },
-  { href: "/documents", label: "契約書類", icon: "◇" },
-  { href: "/about-ips", label: "iPS Portal", icon: "🧬" },
+  { href: "/settings/profile", label: "プロフィール・パスワード変更", icon: "👤" },
+  { href: "/settings/terms", label: "利用規約", icon: "📜" },
+  { href: "/settings/legal", label: "特定商取引法に基づく表記", icon: "⚖️" },
+  { href: "/settings/privacy", label: "プライバシーポリシー", icon: "🔒" },
   { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
-  { href: "/settings", label: "設定", icon: "⚙" },
 ];
 
 const adminNav = [
   { href: "/admin", label: "ダッシュボード", icon: "◈" },
   { href: "/admin/members", label: "会員一覧", icon: "◉" },
-  { href: "/admin/articles", label: "iPS ニュース管理", icon: "📰" },
+  { href: "/admin/agencies", label: "代理店管理", icon: "🤝" },
+  { href: "/admin/print-requests", label: "印刷依頼管理", icon: "🖨️" },
+  { href: "/admin/articles", label: "記事管理", icon: "📰" },
+  { href: "/admin/news", label: "ニュース管理", icon: "📡" },
+  { href: "/admin/videos", label: "動画管理", icon: "🎬" },
   { href: "/admin/settings", label: "規約・書類管理", icon: "⚙" },
 ];
 
@@ -98,10 +101,7 @@ export default function MobileNav({
           <nav className="flex-1 p-3 overflow-y-auto">
             {nav.map((item) => {
               const active =
-                pathname === item.href ||
-                (item.href !== "/admin" &&
-                  item.href !== "/dashboard" &&
-                  pathname.startsWith(item.href));
+                pathname === item.href || pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
