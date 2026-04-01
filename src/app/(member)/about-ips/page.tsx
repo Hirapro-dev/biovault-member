@@ -43,9 +43,10 @@ export default async function AboutIpsPage({
       })
     : [];
 
-  // 外部ニュース
+  // 外部ニュース（管理者が公開承認したもののみ表示）
   const externalNews = activeTab === "news"
     ? await prisma.externalNews.findMany({
+        where: { isPublished: true },
         orderBy: { publishedAt: "desc" },
         take: 30,
       })

@@ -5,10 +5,10 @@ import prisma from "@/lib/prisma";
 
 /**
  * 外部ニュース自動取得API（Google News RSS経由）
- * iPS細胞・再生医療関連のニュースを取得してDBに保存
- *
- * 管理者が手動で実行するか、Vercel Cronで定期実行
+ * iPS細胞・再生医療関連のニュースを取得 + OGP画像を自動取得してDBに保存
  */
+
+export const maxDuration = 60;
 
 interface RssItem {
   title: string;
@@ -31,7 +31,6 @@ async function fetchGoogleNewsRss(query: string): Promise<RssItem[]> {
 
   const xml = await res.text();
 
-  // シンプルなXMLパーサー（正規表現ベース）
   const items: RssItem[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   let match;
@@ -56,8 +55,38 @@ async function fetchGoogleNewsRss(query: string): Promise<RssItem[]> {
   return items;
 }
 
+// 記事ページからOGP画像を取得
+async function fetchOgpImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "BioVault-OGP-Fetcher/1.0" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(5000), // 5秒タイムアウト
+    });
+
+    if (!res.ok) return null;
+
+    const html = await res.text();
+
+    // og:image を取得
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+
+    if (ogMatch) return ogMatch[1];
+
+    // twitter:image を取得（フォールバック）
+    const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+
+    if (twMatch) return twMatch[1];
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function extractTag(xml: string, tag: string): string | null {
-  // CDATAセクション対応
   const cdataRegex = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[(.+?)\\]\\]></${tag}>`);
   const cdataMatch = xml.match(cdataRegex);
   if (cdataMatch) return cdataMatch[1];
@@ -77,6 +106,7 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&#x27;/g, "'");
 }
 
+// POST: ニュース取得実行
 export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
@@ -84,7 +114,6 @@ export async function POST() {
   }
 
   try {
-    // 複数のクエリでiPS関連ニュースを取得
     const queries = [
       "iPS細胞",
       "再生医療 iPS",
@@ -99,18 +128,22 @@ export async function POST() {
       totalFetched += items.length;
 
       for (const item of items) {
-        // 重複チェック（sourceUrlがユニーク）
         const exists = await prisma.externalNews.findUnique({
           where: { sourceUrl: item.link },
         });
 
         if (!exists) {
+          // OGP画像を取得（最大5秒で諦める）
+          const imageUrl = await fetchOgpImage(item.link);
+
           await prisma.externalNews.create({
             data: {
               title: item.title,
               sourceUrl: item.link,
               sourceName: item.source,
+              imageUrl,
               publishedAt: new Date(item.pubDate),
+              isPublished: false, // デフォルト非公開（管理者が選んで公開）
             },
           });
           totalSaved++;
@@ -140,7 +173,28 @@ export async function GET() {
 
   const news = await prisma.externalNews.findMany({
     orderBy: { publishedAt: "desc" },
-    take: 50,
+    take: 100,
+  });
+
+  return NextResponse.json(news);
+}
+
+// PATCH: 公開/非公開切り替え
+export async function PATCH(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+    return NextResponse.json({ error: "権限がありません" }, { status: 403 });
+  }
+
+  const body = await req.json();
+
+  if (!body.id) {
+    return NextResponse.json({ error: "IDが必要です" }, { status: 400 });
+  }
+
+  const news = await prisma.externalNews.update({
+    where: { id: body.id },
+    data: { isPublished: body.isPublished },
   });
 
   return NextResponse.json(news);

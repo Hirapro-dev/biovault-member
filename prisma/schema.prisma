@@ -274,7 +274,8 @@ model ExternalNews {
   summary     String?   @db.Text
   sourceUrl   String    @unique               // 元記事URL（重複防止）
   sourceName  String                          // 出典名
-  imageUrl    String?
+  imageUrl    String?                         // OGP画像URL（自動取得）
+  isPublished Boolean   @default(false)       // 管理者が公開承認したか
   publishedAt DateTime
   fetchedAt   DateTime  @default(now())
 }
