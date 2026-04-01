@@ -10,7 +10,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   MARKET: "市場動向",
 };
 
-// タブ定義（「すべて」+ 基礎知識 + カテゴリ）
 const TABS = [
   { key: "all", label: "すべて" },
   { key: "knowledge", label: "基礎知識" },
@@ -28,31 +27,26 @@ export default async function AboutIpsPage({
   const { tab } = await searchParams;
   const activeTab = tab || "all";
 
-  // 記事を取得
   const where: Record<string, unknown> = { isPublished: true };
   if (activeTab !== "all" && activeTab !== "knowledge" && CATEGORY_LABELS[activeTab]) {
     where.category = activeTab;
   }
 
   const articles = activeTab === "knowledge"
-    ? [] // 基礎知識タブは静的コンテンツ
+    ? []
     : await prisma.ipsArticle.findMany({
         where,
         orderBy: { publishedAt: "desc" },
       });
 
-  // 注目記事（最新の公開記事1件をピン留め）
-  const featuredArticle = activeTab === "knowledge"
-    ? null
-    : await prisma.ipsArticle.findFirst({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-      });
+  // 注目記事（1件目）とそれ以外
+  const featured = articles.length > 0 && activeTab === "all" ? articles[0] : null;
+  const restArticles = featured ? articles.slice(1) : articles;
 
   return (
     <div>
       {/* タブ切り替え */}
-      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+      <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {TABS.map((t) => (
           <Link
             key={t.key}
@@ -71,133 +65,134 @@ export default async function AboutIpsPage({
       {/* 基礎知識タブ */}
       {activeTab === "knowledge" ? (
         <KnowledgeSection />
+      ) : articles.length === 0 ? (
+        <EmptyState activeTab={activeTab} />
       ) : (
         <>
-          {/* 注目コンテンツ（ピン留め記事） */}
-          {featuredArticle && activeTab === "all" && (
+          {/* ──── ヒーロー記事（日経風: 左画像 + 右テキスト） ──── */}
+          {featured && (
             <Link
-              href={`/about-ips/news/${featuredArticle.slug}`}
-              className="block mb-6 group"
+              href={`/about-ips/news/${featured.slug}`}
+              className="block mb-5 group"
             >
-              <div className="relative bg-bg-secondary border border-border rounded-lg overflow-hidden transition-all duration-300 hover:border-border-gold">
-                {featuredArticle.imageUrl ? (
-                  <div className="relative w-full aspect-[2/1] sm:aspect-[3/1]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={featuredArticle.imageUrl}
-                      alt={featuredArticle.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/90 via-bg-primary/40 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30 backdrop-blur-sm">
-                          📌 注目
-                        </span>
-                        <CategoryBadge category={featuredArticle.category} />
-                        <span className="text-[11px] text-white/60 font-mono">
-                          {new Date(featuredArticle.publishedAt).toLocaleDateString("ja-JP")}
-                        </span>
+              <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden transition-all duration-300 hover:border-border-gold">
+                <div className="flex flex-col sm:flex-row">
+                  {/* 左: サムネイル */}
+                  <div className="sm:w-[55%] shrink-0">
+                    {featured.imageUrl ? (
+                      <div className="w-full aspect-[16/9] sm:aspect-auto sm:h-full">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={featured.imageUrl}
+                          alt={featured.title}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <h2 className="text-base sm:text-lg text-white font-medium leading-snug group-hover:text-gold transition-colors">
-                        {featuredArticle.title}
-                      </h2>
-                      <p className="text-[12px] text-white/70 mt-1.5 line-clamp-2 hidden sm:block">
-                        {featuredArticle.summary}
-                      </p>
-                    </div>
+                    ) : (
+                      <div className="w-full aspect-[16/9] sm:aspect-auto sm:h-full bg-bg-elevated flex items-center justify-center">
+                        <span className="text-5xl opacity-20">📰</span>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="p-5 sm:p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30">
-                        📌 注目
-                      </span>
-                      <CategoryBadge category={featuredArticle.category} />
-                      <span className="text-[11px] text-text-muted font-mono">
-                        {new Date(featuredArticle.publishedAt).toLocaleDateString("ja-JP")}
-                      </span>
+                  {/* 右: テキスト */}
+                  <div className="flex-1 p-5 sm:p-6 flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <CategoryBadge category={featured.category} />
+                      {featured.sourceName && (
+                        <span className="text-[10px] text-text-muted">
+                          {featured.sourceName}
+                        </span>
+                      )}
                     </div>
-                    <h2 className="text-base sm:text-lg text-text-primary font-medium leading-snug group-hover:text-gold transition-colors">
-                      {featuredArticle.title}
+                    <h2 className="text-base sm:text-lg font-medium text-text-primary leading-snug group-hover:text-gold transition-colors mb-3">
+                      {featured.title}
                     </h2>
-                    <p className="text-[12px] text-text-secondary mt-1.5 line-clamp-2">
-                      {featuredArticle.summary}
+                    <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 mb-3">
+                      {featured.summary}
                     </p>
+                    <div className="text-[10px] text-text-muted font-mono">
+                      {new Date(featured.publishedAt).toLocaleDateString("ja-JP")}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             </Link>
           )}
 
-          {/* ニュースタイムライン */}
-          <div className="space-y-3">
-            {articles.length > 0 ? (
-              articles.map((article) => (
+          {/* ──── 2カラムグリッド（日経風: テキスト左 + 画像右） ──── */}
+          {restArticles.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-0">
+              {restArticles.map((article, i) => (
                 <Link
                   key={article.id}
                   href={`/about-ips/news/${article.slug}`}
-                  className="flex gap-4 bg-bg-secondary border border-border rounded-md p-4 transition-all duration-300 hover:border-border-gold group"
+                  className="group"
                 >
-                  {/* サムネイル */}
-                  {article.imageUrl ? (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-md overflow-hidden shrink-0 bg-bg-elevated">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={article.imageUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-md shrink-0 bg-bg-elevated flex items-center justify-center text-2xl">
-                      {article.category === "RESEARCH" ? "🔬" : article.category === "CLINICAL" ? "🏥" : article.category === "NEWS" ? "📰" : "📋"}
-                    </div>
-                  )}
-
-                  {/* コンテンツ */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <CategoryBadge category={article.category} />
-                      <span className="text-[10px] text-text-muted font-mono">
-                        {new Date(article.publishedAt).toLocaleDateString("ja-JP")}
-                      </span>
-                    </div>
-                    <h3 className="text-[13px] sm:text-sm text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-[11px] text-text-muted mt-1 line-clamp-1 hidden sm:block">
-                      {article.summary}
-                    </p>
-                    {article.sourceName && (
-                      <div className="text-[10px] text-text-muted mt-1">
-                        {article.sourceName}
+                  <div className={`flex gap-3 py-4 ${
+                    i < restArticles.length - (restArticles.length % 2 === 0 ? 2 : 1)
+                      ? "border-b border-border"
+                      : ""
+                  }`}>
+                    {/* 左: テキスト */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">
+                        {article.title}
+                      </h3>
+                      {/* 奇数番目（0始まり）のみ要約を表示 — 日経風に密度にバリエーション */}
+                      {i % 3 === 0 && (
+                        <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mb-1.5">
+                          {article.summary}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <CategoryBadge category={article.category} small />
+                        {article.sourceName && (
+                          <span className="text-[10px] text-text-muted">{article.sourceName}</span>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    {/* 右: サムネイル */}
+                    <div className="w-[90px] h-[68px] sm:w-[110px] sm:h-[80px] rounded overflow-hidden shrink-0 bg-bg-elevated">
+                      {article.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={article.imageUrl}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xl opacity-20">
+                          {article.category === "RESEARCH" ? "🔬" : article.category === "CLINICAL" ? "🏥" : "📰"}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Link>
-              ))
-            ) : (
-              <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
-                <div className="text-2xl mb-3">📡</div>
-                <p className="text-sm text-text-muted">
-                  {activeTab !== "all"
-                    ? `「${CATEGORY_LABELS[activeTab] || activeTab}」の記事はまだありません`
-                    : "記事はまだ投稿されていません"}
-                </p>
-                <p className="text-[11px] text-text-muted mt-1">
-                  最新情報は随時更新されます
-                </p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>
   );
 }
 
-// 基礎知識セクション（静的コンテンツカード）
+// 空状態
+function EmptyState({ activeTab }: { activeTab: string }) {
+  return (
+    <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
+      <div className="text-2xl mb-3">📡</div>
+      <p className="text-sm text-text-muted">
+        {activeTab !== "all"
+          ? `「${CATEGORY_LABELS[activeTab] || activeTab}」の記事はまだありません`
+          : "記事はまだ投稿されていません"}
+      </p>
+      <p className="text-[11px] text-text-muted mt-1">最新情報は随時更新されます</p>
+    </div>
+  );
+}
+
+// 基礎知識セクション
 function KnowledgeSection() {
   const items = [
     {
@@ -246,9 +241,9 @@ function KnowledgeSection() {
   );
 }
 
-function CategoryBadge({ category }: { category: string }) {
+function CategoryBadge({ category, small }: { category: string; small?: boolean }) {
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">
+    <span className={`${small ? "text-[9px] px-1.5 py-px" : "text-[10px] px-2 py-0.5"} rounded-full bg-gold/10 text-gold border border-gold/20`}>
       {CATEGORY_LABELS[category] || category}
     </span>
   );
