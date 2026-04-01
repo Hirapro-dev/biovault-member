@@ -106,7 +106,7 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&#x27;/g, "'");
 }
 
-// POST: ニュース取得実行
+// POST: ニュース取得実行（高速版 — OGP画像取得なし、RSS即保存）
 export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
@@ -114,48 +114,34 @@ export async function POST() {
   }
 
   try {
-    const queries = [
-      "iPS細胞",
-      "再生医療 iPS",
-      "幹細胞 治療",
-    ];
-
-    let totalFetched = 0;
+    // RSS取得（1クエリに絞って高速化）
+    const items = await fetchGoogleNewsRss("iPS細胞 OR 再生医療");
     let totalSaved = 0;
 
-    for (const query of queries) {
-      const items = await fetchGoogleNewsRss(query);
-      totalFetched += items.length;
+    for (const item of items) {
+      const exists = await prisma.externalNews.findUnique({
+        where: { sourceUrl: item.link },
+      });
 
-      for (const item of items) {
-        const exists = await prisma.externalNews.findUnique({
-          where: { sourceUrl: item.link },
+      if (!exists) {
+        await prisma.externalNews.create({
+          data: {
+            title: item.title,
+            sourceUrl: item.link,
+            sourceName: item.source,
+            publishedAt: new Date(item.pubDate),
+            isPublished: false,
+          },
         });
-
-        if (!exists) {
-          // OGP画像を取得（最大5秒で諦める）
-          const imageUrl = await fetchOgpImage(item.link);
-
-          await prisma.externalNews.create({
-            data: {
-              title: item.title,
-              sourceUrl: item.link,
-              sourceName: item.source,
-              imageUrl,
-              publishedAt: new Date(item.pubDate),
-              isPublished: false, // デフォルト非公開（管理者が選んで公開）
-            },
-          });
-          totalSaved++;
-        }
+        totalSaved++;
       }
     }
 
     return NextResponse.json({
       success: true,
-      fetched: totalFetched,
+      fetched: items.length,
       saved: totalSaved,
-      message: `${totalFetched}件取得、${totalSaved}件を新規保存しました`,
+      message: `${items.length}件取得、${totalSaved}件を新規保存しました`,
     });
   } catch (error) {
     console.error("ニュース取得エラー:", error);
