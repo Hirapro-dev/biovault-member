@@ -32,6 +32,8 @@ model User {
   mustChangePassword Boolean @default(true)
   hasAgreedTerms     Boolean @default(false)  // 重要事項説明に同意済みか
   agreedTermsAt      DateTime?                // 同意日時
+  hasAgreedPamphlet  Boolean @default(false)  // パンフレット免責事項に同意済みか
+  agreedPamphletAt   DateTime?                // パンフレット同意日時
 
   // 申込情報（フォームから登録時に保存）
   applicationId    String?                    // 元の申込ID
@@ -64,6 +66,7 @@ model User {
   statusHistory StatusHistory[]
   agencyProfile AgencyProfile?
   favorites     Favorite[]
+  consentLogs   ConsentLog[]
 }
 
 enum Role {
@@ -299,6 +302,40 @@ enum FavoriteType {
   ARTICLE        // 自社投稿記事（IpsArticle）
   VIDEO          // 動画（Video）
   EXTERNAL_NEWS  // 外部ニュース（ExternalNews）
+}
+
+// ────────────────────────────────────────
+// 同意ログ（免責事項・資料閲覧同意の詳細記録）
+// ────────────────────────────────────────
+model ConsentLog {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  memberEmail         String                         // 記録時点のメールアドレス
+  membershipStatus    String?                        // 記録時点の会員ステータス
+
+  // 対象資料
+  documentId          String                         // 資料ID（例: "pamphlet-v1"）
+  documentTitle       String                         // 資料名
+  documentVersion     String                         // 資料バージョン
+  documentUrl         String?                        // 資料URL
+
+  // 同意文面
+  consentTextVersion  String                         // 免責文面のバージョン
+  consentTextSnapshot String   @db.Text              // 表示された免責文面の全文
+
+  // アクション
+  consentAction       String   @default("agreed")    // agreed / revoked
+  popupDisplayedAt    DateTime?                      // ポップアップ表示時刻
+  consentedAt         DateTime @default(now())       // 同意時刻
+  viewStartedAt       DateTime?                      // 閲覧開始時刻
+
+  // 技術情報
+  ipAddress           String?
+  userAgent           String?  @db.Text
+  sessionId           String?
+
+  createdAt           DateTime @default(now())
 }
 
 // ────────────────────────────────────────

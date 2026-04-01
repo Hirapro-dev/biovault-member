@@ -108,6 +108,18 @@ export default async function MemberKartePage({
               )}
             </div>
           </div>
+          <div className="flex items-center py-2 border-t border-border">
+            <div className="w-24 text-[11px] text-text-muted shrink-0">パンフ同意</div>
+            <div className="text-[13px]">
+              {user.hasAgreedPamphlet ? (
+                <span className="text-status-active">
+                  同意済 {user.agreedPamphletAt && <span className="text-text-muted text-[11px] ml-1">({new Date(user.agreedPamphletAt).toLocaleDateString("ja-JP")})</span>}
+                </span>
+              ) : (
+                <span className="text-text-muted">未閲覧</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

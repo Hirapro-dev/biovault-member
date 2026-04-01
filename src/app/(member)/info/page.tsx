@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const menuItems = [
   {
-    href: "/about-ips?tab=knowledge",
+    href: "/pamphlet",
     icon: "📖",
     label: "BVパンフレット",
     description: "BioVaultサービスの詳細情報",
