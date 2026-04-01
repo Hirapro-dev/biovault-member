@@ -5,13 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
-// 会員用トグルメニュー（設定系の内容）
+// 会員用トグルメニュー
 const memberNav = [
-  { href: "/settings/profile", label: "プロフィール・パスワード変更", icon: "👤" },
-  { href: "/settings/terms", label: "利用規約", icon: "📜" },
-  { href: "/settings/legal", label: "特定商取引法に基づく表記", icon: "⚖️" },
-  { href: "/settings/privacy", label: "プライバシーポリシー", icon: "🔒" },
-  { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
+  { href: "/settings/profile", label: "登録情報", icon: "👤" },
+  { href: "/settings/profile#password", label: "パスワード変更", icon: "🔑" },
 ];
 
 const adminNav = [

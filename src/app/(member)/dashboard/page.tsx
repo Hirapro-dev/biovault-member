@@ -144,30 +144,28 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* 購入前の場合: About iPS への導線 */}
-      {!isPurchased && (
-        <div className="mt-6 sm:mt-9">
-          <Link
-            href="/about-ips"
-            className="block bg-bg-secondary border border-border rounded-md p-5 sm:p-6 hover:border-border-gold transition-all group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center text-xl shrink-0">
-                🧬
-              </div>
-              <div className="flex-1">
-                <div className="text-sm text-text-primary group-hover:text-gold transition-colors">
-                  iPS細胞について知る
-                </div>
-                <div className="text-xs text-text-muted mt-1">
-                  iPS細胞の可能性、研究動向、最新ニュースをご覧いただけます
-                </div>
-              </div>
-              <div className="text-text-muted group-hover:text-gold transition-colors">→</div>
+      {/* 契約書類・同意書類 */}
+      <div className="mt-6 sm:mt-9">
+        <Link
+          href="/documents"
+          className="block bg-bg-secondary border border-border rounded-md p-5 sm:p-6 hover:border-border-gold transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center text-xl shrink-0">
+              ◇
             </div>
-          </Link>
-        </div>
-      )}
+            <div className="flex-1">
+              <div className="text-sm text-text-primary group-hover:text-gold transition-colors">
+                契約書類・同意書類
+              </div>
+              <div className="text-xs text-text-muted mt-1">
+                契約書類の確認・署名状況
+              </div>
+            </div>
+            <div className="text-text-muted group-hover:text-gold transition-colors">→</div>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
