@@ -77,7 +77,7 @@ export const config = {
     "/dashboard/:path*", "/status/:path*", "/documents/:path*",
     "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
-    "/important-notice",
+    "/important-notice", "/apply-service/:path*",
     "/agency/:path*", "/agency-agree",
   ],
 };

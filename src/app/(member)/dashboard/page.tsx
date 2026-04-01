@@ -1,6 +1,9 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import StatusTimeline from "@/components/ui/StatusTimeline";
+import { POST_SERVICE_STATUSES } from "@/types";
+import type { IpsStatus } from "@/types";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -23,6 +26,9 @@ export default async function DashboardPage() {
 
   const signedCount = documents.filter((d) => d.status === "SIGNED").length;
 
+  // 購入済みかどうか（SERVICE_APPLIED以降）
+  const isPurchased = membership && POST_SERVICE_STATUSES.includes(membership.ipsStatus);
+
   return (
     <div>
       {/* メンバーカード */}
@@ -43,7 +49,7 @@ export default async function DashboardPage() {
               backgroundPosition: "center",
             }}
           />
-          {/* シルバー光沢オーバーレイ（中心に向かうリニア） */}
+          {/* シルバー光沢オーバーレイ */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -95,9 +101,9 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* iPS 細胞ステータス */}
+      {/* ステップ進捗 */}
       <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
-        iPS 細胞ステータス
+        ステータス
       </h3>
       {membership ? (
         <StatusTimeline currentStatus={membership.ipsStatus} />
@@ -105,6 +111,11 @@ export default async function DashboardPage() {
         <div className="bg-bg-secondary border border-border rounded-md p-6 sm:p-8 text-center text-text-muted text-sm">
           会員権情報が見つかりません
         </div>
+      )}
+
+      {/* 次のアクション CTA */}
+      {membership && (
+        <NextActionCTA ipsStatus={membership.ipsStatus} />
       )}
 
       {/* 保管中の場合: 保管期間表示 */}
@@ -115,23 +126,136 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* クイックカード */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mt-6 sm:mt-9">
-        <QuickCard
-          title="契約書類"
-          count={`${signedCount} / ${documents.length}`}
-          sub="署名済み"
-          icon="◇"
-        />
-        <QuickCard
-          title="培養上清液投与"
-          count={String(membership?.treatments.length || 0)}
-          sub="回投与済み"
-          icon="◆"
-        />
-      </div>
+      {/* クイックカード（購入済みの場合のみ表示） */}
+      {isPurchased && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mt-6 sm:mt-9">
+          <QuickCard
+            title="契約書類"
+            count={`${signedCount} / ${documents.length}`}
+            sub="署名済み"
+            icon="◇"
+          />
+          <QuickCard
+            title="培養上清液投与"
+            count={String(membership?.treatments.length || 0)}
+            sub="回投与済み"
+            icon="◆"
+          />
+        </div>
+      )}
+
+      {/* 購入前の場合: About iPS への導線 */}
+      {!isPurchased && (
+        <div className="mt-6 sm:mt-9">
+          <Link
+            href="/about-ips"
+            className="block bg-bg-secondary border border-border rounded-md p-5 sm:p-6 hover:border-border-gold transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center text-xl shrink-0">
+                🧬
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-text-primary group-hover:text-gold transition-colors">
+                  iPS細胞について知る
+                </div>
+                <div className="text-xs text-text-muted mt-1">
+                  iPS細胞の可能性、研究動向、最新ニュースをご覧いただけます
+                </div>
+              </div>
+              <div className="text-text-muted group-hover:text-gold transition-colors">→</div>
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
+}
+
+// 次のアクション CTA コンポーネント
+function NextActionCTA({ ipsStatus }: { ipsStatus: IpsStatus }) {
+  const ctaConfig: Record<string, { text: string; sub: string; href?: string }> = {
+    REGISTERED: {
+      text: "重要事項を確認する",
+      sub: "次のステップに進むために、重要事項説明をご確認ください",
+      href: "/important-notice",
+    },
+    TERMS_AGREED: {
+      text: "iPSサービスに申し込む",
+      sub: "iPSサービスへのお申込みに進めます",
+      href: "/apply-service",
+    },
+    SERVICE_APPLIED: {
+      text: "担当者からのご連絡をお待ちください",
+      sub: "お申込み内容を確認のうえ、担当者より改めてご連絡いたします",
+    },
+    SCHEDULE_ARRANGED: {
+      text: "ステータス詳細を確認",
+      sub: "クリニックでの採血日程をご確認いただけます",
+      href: "/status",
+    },
+    BLOOD_COLLECTED: {
+      text: "iPS細胞作製の進捗を確認",
+      sub: "現在のiPS細胞作製状況をご確認いただけます",
+      href: "/status",
+    },
+    IPS_CREATING: {
+      text: "iPS細胞作製の進捗を確認",
+      sub: "現在のiPS細胞作製状況をご確認いただけます",
+      href: "/status",
+    },
+    STORAGE_ACTIVE: {
+      text: "保管状況を確認",
+      sub: "iPS細胞の保管状況をご確認いただけます",
+      href: "/status",
+    },
+  };
+
+  const config = ctaConfig[ipsStatus];
+  if (!config) return null;
+
+  // 購入前ステップ（REGISTERED, TERMS_AGREED）は大きめのCTA
+  const isPreService = ["REGISTERED", "TERMS_AGREED"].includes(ipsStatus);
+  // 営業フォロー待ち（SERVICE_APPLIED）はテキストのみ
+  const isWaiting = ipsStatus === "SERVICE_APPLIED";
+
+  if (isWaiting) {
+    return (
+      <div className="mt-5 bg-bg-secondary border border-border-gold rounded-md p-5 sm:p-6 text-center">
+        <div className="text-gold text-sm font-medium mb-1">{config.text}</div>
+        <div className="text-xs text-text-muted">{config.sub}</div>
+      </div>
+    );
+  }
+
+  if (isPreService && config.href) {
+    return (
+      <Link href={config.href}>
+        <div className="mt-5 bg-gold-gradient rounded-md p-5 sm:p-6 text-center cursor-pointer hover:opacity-90 transition-opacity">
+          <div className="text-bg-primary text-sm font-semibold tracking-wider mb-1">
+            {config.text}
+          </div>
+          <div className="text-bg-primary/70 text-xs">{config.sub}</div>
+        </div>
+      </Link>
+    );
+  }
+
+  if (config.href) {
+    return (
+      <Link href={config.href}>
+        <div className="mt-5 bg-bg-secondary border border-border rounded-md p-4 sm:p-5 flex items-center justify-between hover:border-border-gold transition-all cursor-pointer">
+          <div>
+            <div className="text-sm text-text-primary">{config.text}</div>
+            <div className="text-xs text-text-muted mt-0.5">{config.sub}</div>
+          </div>
+          <div className="text-gold">→</div>
+        </div>
+      </Link>
+    );
+  }
+
+  return null;
 }
 
 function StoragePeriodCard({

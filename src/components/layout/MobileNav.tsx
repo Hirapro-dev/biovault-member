@@ -8,9 +8,9 @@ import { signOut } from "next-auth/react";
 const memberNav = [
   { href: "/dashboard", label: "マイページ", icon: "◈" },
   { href: "/status", label: "ステータス詳細", icon: "◉" },
+  { href: "/apply-service", label: "サービス申込", icon: "✍️" },
   { href: "/documents", label: "契約書類", icon: "◇" },
   { href: "/about-ips", label: "About iPS", icon: "🧬" },
-  { href: "/treatment", label: "サービス申込", icon: "◆" },
   { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
   { href: "/settings", label: "設定", icon: "⚙" },
 ];

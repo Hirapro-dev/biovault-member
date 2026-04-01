@@ -86,11 +86,14 @@ model Membership {
   totalAmount     Int
   paidAmount      Int             @default(0)
 
-  ipsStatus       IpsStatus       @default(APPLICATION)
+  ipsStatus       IpsStatus       @default(REGISTERED)
   clinicDate      DateTime?
   ipsCompletedAt  DateTime?
   storageStartAt  DateTime?
   storageYears    Int             @default(10)
+
+  serviceAppliedAt  DateTime?       // サービス申込日時
+  consentSignedAt   DateTime?       // 同意書署名日時
 
   treatments      Treatment[]
 
@@ -112,14 +115,19 @@ enum PaymentStatus {
 }
 
 enum IpsStatus {
+  REGISTERED           // ① メンバー登録済み（ID発行された状態）
+  TERMS_AGREED         // ② 重要事項確認済み
+  SERVICE_APPLIED      // ③ iPSサービス申込み済み（880万円支払い）
+  SCHEDULE_ARRANGED    // ④ iPS作成日程調整
+  BLOOD_COLLECTED      // ⑤ クリニック問診と採血
+  IPS_CREATING         // ⑥ iPS作成中
+  STORAGE_ACTIVE       // ⑦ iPS保管中
+  STORAGE_EXPIRED      // 保管期間満了
+  // 旧enum値（マイグレーション互換用、新規では使用しない）
   APPLICATION
   CONTRACT_SIGNED
   CLINIC_RESERVED
-  BLOOD_COLLECTED
-  IPS_CREATING
   IPS_COMPLETED
-  STORAGE_ACTIVE
-  STORAGE_EXPIRED
 }
 
 // ────────────────────────────────────────

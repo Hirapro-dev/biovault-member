@@ -35,11 +35,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // 保管中になった場合は保管開始日を設定
   if (newStatus === "STORAGE_ACTIVE" && !membership.storageStartAt) {
     updateData.storageStartAt = new Date();
+    // 保管開始 = iPS作製完了でもあるので、ipsCompletedAtも設定
+    if (!membership.ipsCompletedAt) {
+      updateData.ipsCompletedAt = new Date();
+    }
   }
 
-  // iPS作製完了の場合
-  if (newStatus === "IPS_COMPLETED" && !membership.ipsCompletedAt) {
-    updateData.ipsCompletedAt = new Date();
+  // サービス申込済みの場合
+  if (newStatus === "SERVICE_APPLIED" && !membership.serviceAppliedAt) {
+    updateData.serviceAppliedAt = new Date();
   }
 
   // トランザクション: ステータス更新 + 履歴記録

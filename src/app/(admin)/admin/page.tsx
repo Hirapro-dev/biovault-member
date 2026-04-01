@@ -1,13 +1,23 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
-import { IPS_STATUS_LABELS } from "@/types";
+import { IPS_STATUS_LABELS, IPS_STATUS_ORDER, IPS_STATUS_ICONS } from "@/types";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
-  const [totalMembers, ipsCreating, paymentCompleted, recentLogs] = await Promise.all([
+  // 各ステータスの件数を集計
+  const statusCounts = await prisma.membership.groupBy({
+    by: ["ipsStatus"],
+    _count: true,
+  });
+
+  const countMap: Record<string, number> = {};
+  for (const item of statusCounts) {
+    countMap[item.ipsStatus] = item._count;
+  }
+
+  const [totalMembers, paymentCompleted, recentLogs] = await Promise.all([
     prisma.user.count({ where: { role: "MEMBER" } }),
-    prisma.membership.count({ where: { ipsStatus: "IPS_CREATING" } }),
     prisma.membership.count({ where: { paymentStatus: "COMPLETED" } }),
     prisma.statusHistory.findMany({
       take: 10,
@@ -23,9 +33,14 @@ export default async function AdminDashboardPage() {
     where: { role: "MEMBER", createdAt: { gte: startOfMonth } },
   });
 
+  // サマリー統計（従来の4カード）
+  const serviceApplied = (countMap["SERVICE_APPLIED"] || 0) +
+    (countMap["SCHEDULE_ARRANGED"] || 0) + (countMap["BLOOD_COLLECTED"] || 0) +
+    (countMap["IPS_CREATING"] || 0) + (countMap["STORAGE_ACTIVE"] || 0);
+
   const stats = [
     { label: "総会員数", value: String(totalMembers), sub: "名" },
-    { label: "iPS作製中", value: String(ipsCreating), sub: "名" },
+    { label: "成約数", value: String(serviceApplied), sub: "名" },
     { label: "入金完了", value: String(paymentCompleted), sub: "名" },
     { label: "今月新規", value: String(newThisMonth), sub: "名" },
   ];
@@ -48,6 +63,56 @@ export default async function AdminDashboardPage() {
             <div className="text-[11px] text-text-secondary">{s.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* ファネル表示 */}
+      <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+        ステータス別会員数
+      </h3>
+      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="space-y-2">
+          {IPS_STATUS_ORDER.map((status, i) => {
+            const count = countMap[status] || 0;
+            const maxCount = Math.max(...IPS_STATUS_ORDER.map((s) => countMap[s] || 0), 1);
+            const widthPercent = (count / maxCount) * 100;
+            // 成約ライン（SERVICE_APPLIED）の前に区切り
+            const isServiceLine = status === "SERVICE_APPLIED";
+
+            return (
+              <div key={status}>
+                {isServiceLine && (
+                  <div className="flex items-center gap-2 py-2">
+                    <div className="flex-1 h-[1px] bg-gold/30" />
+                    <span className="text-[10px] text-gold tracking-wider">成約ライン</span>
+                    <div className="flex-1 h-[1px] bg-gold/30" />
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <div className="w-5 text-center text-sm">
+                    {IPS_STATUS_ICONS[status]}
+                  </div>
+                  <div className="w-24 sm:w-32 text-xs text-text-secondary truncate">
+                    {IPS_STATUS_LABELS[status]}
+                  </div>
+                  <div className="flex-1 h-6 bg-bg-tertiary rounded overflow-hidden">
+                    <div
+                      className="h-full rounded transition-all duration-500"
+                      style={{
+                        width: `${Math.max(widthPercent, count > 0 ? 4 : 0)}%`,
+                        background: i < 2
+                          ? "linear-gradient(90deg, var(--color-gold-dark), var(--color-gold-primary))"
+                          : "linear-gradient(90deg, var(--color-gold-primary), var(--color-gold-light))",
+                      }}
+                    />
+                  </div>
+                  <div className="w-10 text-right font-mono text-sm text-gold">
+                    {count}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* 最近のステータス変更 */}

@@ -11,6 +11,7 @@ export async function POST() {
 
   const userId = (session.user as any).id;
 
+  // ユーザーの重要事項同意フラグを更新
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -18,6 +19,29 @@ export async function POST() {
       agreedTermsAt: new Date(),
     },
   });
+
+  // Membershipのステータスを TERMS_AGREED に更新 + 履歴記録
+  const membership = await prisma.membership.findUnique({
+    where: { userId },
+  });
+
+  if (membership && membership.ipsStatus === "REGISTERED") {
+    await prisma.$transaction([
+      prisma.membership.update({
+        where: { userId },
+        data: { ipsStatus: "TERMS_AGREED" },
+      }),
+      prisma.statusHistory.create({
+        data: {
+          userId,
+          fromStatus: "REGISTERED",
+          toStatus: "TERMS_AGREED",
+          note: "重要事項説明に同意",
+          changedBy: "会員本人",
+        },
+      }),
+    ]);
+  }
 
   return NextResponse.json({ success: true });
 }

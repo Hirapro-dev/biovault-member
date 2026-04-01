@@ -34,7 +34,7 @@ async function main() {
       nameRomaji: "Taro TANAKA",
       phone: "090-1234-5678",
       memberNumber: "BV-0001",
-      ipsStatus: "IPS_CREATING" as const,
+      ipsStatus: "IPS_CREATING" as const,  // ⑥ iPS作成中
       paymentStatus: "COMPLETED" as const,
       paidAmount: 8800000,
     },
@@ -58,7 +58,7 @@ async function main() {
       nameRomaji: "Ichiro SUZUKI",
       phone: "090-3456-7890",
       memberNumber: "BV-0003",
-      ipsStatus: "CONTRACT_SIGNED" as const,
+      ipsStatus: "SERVICE_APPLIED" as const,  // ③ サービス申込済み
       paymentStatus: "PARTIAL" as const,
       paidAmount: 4400000,
     },
@@ -70,7 +70,7 @@ async function main() {
       nameRomaji: "Misaki YAMADA",
       phone: "090-4567-8901",
       memberNumber: "BV-0004",
-      ipsStatus: "CLINIC_RESERVED" as const,
+      ipsStatus: "SCHEDULE_ARRANGED" as const,  // ④ 日程調整
       paymentStatus: "COMPLETED" as const,
       paidAmount: 8800000,
       clinicDate: new Date("2025-06-02"),
@@ -83,7 +83,7 @@ async function main() {
       nameRomaji: "Kenta TAKAHASHI",
       phone: "090-5678-9012",
       memberNumber: "BV-0005",
-      ipsStatus: "APPLICATION" as const,
+      ipsStatus: "REGISTERED" as const,  // ① メンバー登録済み
       paymentStatus: "PENDING" as const,
       paidAmount: 0,
     },
@@ -131,14 +131,14 @@ async function main() {
     // 書類作成（各会員ごと）
     const existingDocs = await prisma.document.count({ where: { userId: user.id } });
     if (existingDocs === 0) {
-      // ステータスに応じて書類のステータスを設定
+      // ステータスに応じて書類のステータスを設定（新7段階）
       const ipsIndex = [
-        "APPLICATION",
-        "CONTRACT_SIGNED",
-        "CLINIC_RESERVED",
+        "REGISTERED",
+        "TERMS_AGREED",
+        "SERVICE_APPLIED",
+        "SCHEDULE_ARRANGED",
         "BLOOD_COLLECTED",
         "IPS_CREATING",
-        "IPS_COMPLETED",
         "STORAGE_ACTIVE",
       ].indexOf(data.ipsStatus);
 
@@ -205,7 +205,7 @@ async function main() {
       await prisma.statusHistory.create({
         data: {
           userId: satoUser.id,
-          fromStatus: "CLINIC_RESERVED",
+          fromStatus: "SCHEDULE_ARRANGED",
           toStatus: "BLOOD_COLLECTED",
           note: "採血完了",
           changedBy: "管理者",
@@ -218,8 +218,8 @@ async function main() {
       await prisma.statusHistory.create({
         data: {
           userId: yamadaUser.id,
-          fromStatus: "CONTRACT_SIGNED",
-          toStatus: "CLINIC_RESERVED",
+          fromStatus: "SERVICE_APPLIED",
+          toStatus: "SCHEDULE_ARRANGED",
           note: "6月2日（月）に予約確定",
           changedBy: "管理者",
           changedAt: new Date("2025-05-15"),
