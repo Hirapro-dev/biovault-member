@@ -32,6 +32,7 @@ export default async function MemberKartePage({
       documents: { orderBy: { createdAt: "asc" } },
       notes: { orderBy: { createdAt: "desc" } },
       statusHistory: { orderBy: { changedAt: "desc" } },
+      accessLogs: { orderBy: { accessedAt: "desc" }, take: 20 },
     },
   });
 
@@ -273,6 +274,33 @@ export default async function MemberKartePage({
           ))
         ) : (
           <div className="text-text-muted text-sm py-4 text-center">変更履歴なし</div>
+        )}
+      </div>
+
+      {/* アクセスログ */}
+      <div className="mb-6">
+        <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+          アクセスログ（直近20件）
+        </h3>
+        {user.accessLogs.length === 0 ? (
+          <div className="bg-bg-secondary border border-border rounded-md p-6 text-center text-text-muted text-xs">
+            アクセス履歴はありません
+          </div>
+        ) : (
+          <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+            {user.accessLogs.map((log, i) => (
+              <div key={log.id} className={`flex items-center gap-4 px-5 py-3 ${i < user.accessLogs.length - 1 ? "border-b border-border" : ""}`}>
+                <div className="text-[11px] text-text-muted font-mono whitespace-nowrap w-28 shrink-0">
+                  {new Date(log.accessedAt).toLocaleString("ja-JP", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] text-text-primary">{log.pageTitle || "---"}</div>
+                  <div className="text-[10px] text-text-muted font-mono truncate">{log.path}</div>
+                </div>
+                <div className="text-[10px] text-text-muted font-mono shrink-0">{log.ipAddress || ""}</div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

@@ -4,6 +4,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
 import BottomNav from "@/components/layout/BottomNav";
+import AccessLogger from "@/components/analytics/AccessLogger";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,9 @@ export default async function MemberLayout({
 
         {/* モバイル: 下部固定ナビ */}
         <BottomNav />
+
+        {/* アクセスログ自動記録 */}
+        <AccessLogger />
       </div>
     </div>
   );

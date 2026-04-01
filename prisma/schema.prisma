@@ -67,6 +67,7 @@ model User {
   agencyProfile AgencyProfile?
   favorites     Favorite[]
   consentLogs   ConsentLog[]
+  accessLogs    AccessLog[]
 }
 
 enum Role {
@@ -336,6 +337,24 @@ model ConsentLog {
   sessionId           String?
 
   createdAt           DateTime @default(now())
+}
+
+// ────────────────────────────────────────
+// アクセスログ（ページ閲覧記録）
+// ────────────────────────────────────────
+model AccessLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  path        String                          // 閲覧ページのパス
+  pageTitle   String?                         // ページタイトル
+  ipAddress   String?
+  userAgent   String?  @db.Text
+  referer     String?                         // リファラー
+  accessedAt  DateTime @default(now())
+
+  @@index([userId, accessedAt])
+  @@index([accessedAt])
 }
 
 // ────────────────────────────────────────
