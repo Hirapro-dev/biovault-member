@@ -128,35 +128,33 @@ export default async function AboutIpsPage({
                   >
                     <div className={`py-4 ${i < restArticles.length - 1 ? "border-b border-border" : ""}`}>
                       {article.imageUrl ? (
-                        /* 画像あり: テキスト左 + 画像右 */
+                        /* 画像あり: 画像左（16:9） + テキスト右 */
                         <div className="flex gap-3">
+                          <div className="w-[120px] shrink-0">
+                            <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={article.imageUrl}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </div>
                           <div className="flex-1 min-w-0">
-                            {i === 0 && featured && (
-                              <CategoryBadge category={article.category} small className="mb-1.5" />
-                            )}
                             <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">
                               {article.title}
                             </h3>
-                            {/* 一部の記事のみ要約 */}
                             {i % 4 === 0 && (
-                              <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mt-1.5">
+                              <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mt-1">
                                 {article.summary}
                               </p>
                             )}
                             <div className="flex items-center gap-2 mt-1.5">
-                              {i !== 0 || !featured ? <CategoryBadge category={article.category} small /> : null}
+                              <CategoryBadge category={article.category} small />
                               {article.sourceName && (
                                 <span className="text-[10px] text-text-muted">{article.sourceName}</span>
                               )}
                             </div>
-                          </div>
-                          <div className="w-[100px] h-[75px] rounded overflow-hidden shrink-0 bg-bg-elevated">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={article.imageUrl}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
                           </div>
                         </div>
                       ) : (
@@ -193,6 +191,18 @@ export default async function AboutIpsPage({
                     }`}>
                       {article.imageUrl ? (
                         <div className="flex gap-3">
+                          {/* 画像左（16:9） */}
+                          <div className="w-[130px] shrink-0">
+                            <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={article.imageUrl}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </div>
+                          {/* テキスト右 */}
                           <div className="flex-1 min-w-0">
                             <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">
                               {article.title}
@@ -208,14 +218,6 @@ export default async function AboutIpsPage({
                                 <span className="text-[10px] text-text-muted">{article.sourceName}</span>
                               )}
                             </div>
-                          </div>
-                          <div className="w-[110px] h-[80px] rounded overflow-hidden shrink-0 bg-bg-elevated">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={article.imageUrl}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
                           </div>
                         </div>
                       ) : (
