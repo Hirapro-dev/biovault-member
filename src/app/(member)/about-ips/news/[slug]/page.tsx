@@ -87,25 +87,6 @@ export default async function NewsArticlePage({
           />
         </div>
 
-        {/* ソース */}
-        {article.sourceUrl && (
-          <div className="mt-6 p-4 bg-bg-secondary border border-border rounded-md">
-            <div className="text-[11px] text-text-muted mb-1">出典・参考</div>
-            <div className="text-[13px] text-text-secondary">
-              {article.sourceName && (
-                <span className="mr-2">{article.sourceName}</span>
-              )}
-              <span className="text-gold-dark font-mono text-[11px] break-all">
-                {article.sourceUrl}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* 著者 */}
-        <div className="mt-4 text-right text-[11px] text-text-muted">
-          投稿者: {article.author}
-        </div>
       </article>
 
       {/* ナビゲーション */}

@@ -117,33 +117,38 @@ export default async function AboutIpsPage({
         </>
       )}
 
-      {/* ── 動画 ── */}
+      {/* ── 動画（YouTube風サムネ一覧） ── */}
       {activeTab === "videos" && (
         <>
           {videos.length === 0 ? (
             <EmptyState label="動画" />
           ) : (
-            <div className="space-y-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               {videos.map((video) => (
-                <div key={video.id}>
-                  <div className="aspect-video rounded-lg overflow-hidden bg-black mb-3">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                      title={video.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-[15px] text-text-primary font-medium leading-snug mb-1">{video.title}</h3>
-                      {video.description && <p className="text-[12px] text-text-muted leading-relaxed line-clamp-2">{video.description}</p>}
-                      <div className="text-[10px] text-text-muted font-mono mt-1">{new Date(video.publishedAt).toLocaleDateString("ja-JP")}</div>
+                <Link key={video.id} href={`/about-ips/video/${video.id}`} className="group">
+                  {/* サムネイル */}
+                  <div className="aspect-video rounded-md overflow-hidden bg-bg-elevated mb-2 relative">
+                    {video.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={video.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl opacity-20">🎬</div>
+                    )}
+                    {/* 再生ボタンオーバーレイ */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
+                        <span className="text-bg-primary text-sm ml-0.5">▶</span>
+                      </div>
                     </div>
-                    <FavoriteButton contentType="VIDEO" contentId={video.id} isFavorited={favSet.has(`VIDEO:${video.id}`)} />
                   </div>
-                </div>
+                  {/* タイトル（20文字程度） */}
+                  <h3 className="text-[13px] text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2 font-medium">
+                    {video.title.length > 24 ? video.title.slice(0, 24) + "..." : video.title}
+                  </h3>
+                  <div className="text-[10px] text-text-muted font-mono mt-1">
+                    {new Date(video.publishedAt).toLocaleDateString("ja-JP")}
+                  </div>
+                </Link>
               ))}
             </div>
           )}
