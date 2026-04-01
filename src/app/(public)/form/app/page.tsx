@@ -100,11 +100,17 @@ function ApplyPage() {
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
           <h2 className="font-serif-jp text-xl text-gold mb-3">メンバー登録を受け付けました</h2>
-          <p className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto">
-            ご登録いただいたメールアドレスに確認メールをお送りいたします。
-            <br />
-            担当者より改めてご連絡させていただきます。
-          </p>
+          <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
+            <p>
+              お申し込みの内容をもとに、専用本部にて審査を行います。
+            </p>
+            <p>
+              <span className="text-gold font-medium">3営業日以内</span>に、メンバーサイトのIDとパスワードをメールにてお届けいたします。
+            </p>
+            <p className="text-xs text-text-muted">
+              ※ 審査の内容によっては、ご入会いただけない場合がございます。あらかじめご了承ください。
+            </p>
+          </div>
         </div>
       </PageWrapper>
     );
