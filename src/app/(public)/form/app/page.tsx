@@ -35,10 +35,7 @@ function ApplyPage() {
     phone: "",
     email: "",
     occupation: "",
-    // 2. 申込内容
-    paymentMethod: "bank_transfer",
-    paymentMethodOther: "",
-    paymentDate: new Date().toISOString().split("T")[0],
+    // 2. 紹介情報
     referrerName: "",
     salesRepName: "",
     // 3. 健康状態
@@ -102,7 +99,7 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">お申込みを受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">メンバー登録を受け付けました</h2>
           <p className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto">
             ご登録いただいたメールアドレスに確認メールをお送りいたします。
             <br />
@@ -119,7 +116,7 @@ function ApplyPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-8 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
-          BioVault メンバーシップ 申込書
+          BioVault メンバー登録
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
@@ -245,24 +242,7 @@ function ApplyPage() {
 
       {/* Step 2: 申込内容 + 健康状態 */}
       {step === 2 && (
-        <FormSection title="2. 申込内容 / 3. 事前確認事項">
-          <Field label="会員価格">
-            <div className={`${inputClass} text-gold`}>8,800,000円（税込）</div>
-          </Field>
-          <Field label="支払方法">
-            <select value={form.paymentMethod} onChange={(e) => update("paymentMethod", e.target.value)} className={inputClass}>
-              <option value="bank_transfer">銀行振込</option>
-              <option value="other">その他</option>
-            </select>
-          </Field>
-          {form.paymentMethod === "other" && (
-            <Field label="その他の支払方法">
-              <input value={form.paymentMethodOther} onChange={(e) => update("paymentMethodOther", e.target.value)} className={inputClass} />
-            </Field>
-          )}
-          <Field label="支払予定日">
-            <DateSelect value={form.paymentDate} onChange={(v) => update("paymentDate", v)} yearStart={2025} yearEnd={2030} />
-          </Field>
+        <FormSection title="2. 事前確認事項">
           <Field label="紹介者名／代理店名">
             <input value={form.referrerName} onChange={(e) => update("referrerName", e.target.value)} className={inputClass} />
           </Field>
@@ -323,18 +303,16 @@ function ApplyPage() {
               <ConfirmRow label="メール" value={form.email} />
               <ConfirmRow label="職業" value={form.occupation || "---"} />
             </ConfirmGroup>
-            <ConfirmGroup title="申込内容">
-              <ConfirmRow label="支払方法" value={form.paymentMethod === "bank_transfer" ? "銀行振込" : form.paymentMethodOther || "その他"} />
-              <ConfirmRow label="支払予定日" value={form.paymentDate || "---"} />
+            <ConfirmGroup title="その他">
               <ConfirmRow label="紹介者" value={form.referrerName || "---"} />
               <ConfirmRow label="営業担当" value={form.salesRepName || "---"} />
             </ConfirmGroup>
           </div>
 
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
-            本申込書の内容を真実かつ正確に記載し、上記各事項を確認・理解のうえ、
+            上記の内容を真実かつ正確に記載し、各事項を確認・理解のうえ、
             <br />
-            BioVaultメンバーシップに申し込みます。
+            BioVaultメンバー登録に申し込みます。
           </p>
 
           <div className="flex gap-3">
@@ -346,7 +324,7 @@ function ApplyPage() {
               disabled={submitting}
               className="flex-1 py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? "送信中..." : "申込みを送信する"}
+              {submitting ? "送信中..." : "登録を申し込む"}
             </button>
           </div>
         </FormSection>
