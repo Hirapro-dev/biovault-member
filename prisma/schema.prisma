@@ -249,6 +249,37 @@ enum IpsArticleCategory {
 }
 
 // ────────────────────────────────────────
+// 動画コンテンツ（YouTube埋め込み）
+// ────────────────────────────────────────
+model Video {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  youtubeUrl  String                          // YouTube動画URL
+  youtubeId   String                          // YouTube動画ID（埋め込み用）
+  thumbnailUrl String?                        // サムネイル（YouTubeから自動取得）
+  isPublished Boolean   @default(false)
+  publishedAt DateTime  @default(now())
+  author      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ────────────────────────────────────────
+// 外部ニュース（API自動取得）
+// ────────────────────────────────────────
+model ExternalNews {
+  id          String    @id @default(cuid())
+  title       String
+  summary     String?   @db.Text
+  sourceUrl   String    @unique               // 元記事URL（重複防止）
+  sourceName  String                          // 出典名
+  imageUrl    String?
+  publishedAt DateTime
+  fetchedAt   DateTime  @default(now())
+}
+
+// ────────────────────────────────────────
 // 購入申込（BioVault申込書）
 // ────────────────────────────────────────
 model Application {
