@@ -435,6 +435,46 @@ export default function AdminArticlesPage() {
   );
 }
 
+// ── クライアント側画像圧縮ユーティリティ ──
+async function compressImageOnClient(file: File, maxDimension = 2000, quality = 0.9): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // リサイズ計算（長辺をmaxDimensionに収める）
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round(height * (maxDimension / width));
+          width = maxDimension;
+        } else {
+          width = Math.round(width * (maxDimension / height));
+          height = maxDimension;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas context error"));
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // WebP形式で出力（quality 0.9 = 高品質）
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Blob conversion failed"));
+        },
+        "image/webp",
+        quality
+      );
+    };
+    img.onerror = () => reject(new Error("Image load failed"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 // ── 画像アップローダーコンポーネント ──
 function ImageUploader({
   imageUrl,
@@ -446,6 +486,7 @@ function ImageUploader({
   onRemove: () => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [status, setStatus] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,9 +494,16 @@ function ImageUploader({
     if (!file) return;
 
     setUploading(true);
+    setStatus("画像を圧縮中...");
     try {
+      // クライアント側で圧縮（大きな画像もここで縮小されるので4.5MB制限に収まる）
+      const compressed = await compressImageOnClient(file);
+      const originalKB = Math.round(file.size / 1024);
+      const compressedKB = Math.round(compressed.size / 1024);
+      setStatus(`圧縮完了 (${originalKB}KB → ${compressedKB}KB)。アップロード中...`);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressed, file.name.replace(/\.[^.]+$/, ".webp"));
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
@@ -465,9 +513,13 @@ function ImageUploader({
       if (res.ok) {
         const data = await res.json();
         onUpload(data.url);
+        setStatus("");
+      } else {
+        const data = await res.json();
+        setStatus(`エラー: ${data.error}`);
       }
     } catch {
-      // アップロード失敗
+      setStatus("アップロードに失敗しました");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -511,9 +563,9 @@ function ImageUploader({
           {uploading ? "⏳" : "🖼️"}
         </div>
         <div className="text-xs text-text-muted group-hover:text-text-secondary transition-colors">
-          {uploading ? "アップロード中..." : "サムネイル画像を追加（クリックして選択）"}
+          {uploading ? status || "処理中..." : "サムネイル画像を追加（クリックして選択）"}
         </div>
-        <div className="text-[10px] text-text-muted mt-1">JPG, PNG, WebP（最大5MB）</div>
+        <div className="text-[10px] text-text-muted mt-1">JPG, PNG, WebP（大きな画像も自動圧縮されます）</div>
       </button>
       <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
     </div>
