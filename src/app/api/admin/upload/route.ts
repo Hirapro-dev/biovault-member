@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { put } from "@vercel/blob";
+import { uploadFile } from "@/lib/storage";
 
 /**
  * 管理者用 画像アップロードAPI
- * サムネイル画像をVercel Blobにアップロード
+ * サムネイル画像をAWS S3にアップロード
  */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -31,18 +31,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "画像ファイルのみアップロードできます" }, { status: 400 });
     }
 
-    // ファイル名生成
+    // ファイルパス生成
     const ext = file.name.split(".").pop() || "jpg";
-    const filename = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    // Vercel Blobに直接アップロード（ArrayBufferに変換してから渡す）
-    const bytes = await file.arrayBuffer();
-    const blob = await put(filename, Buffer.from(bytes), {
-      access: "public",
-      contentType: file.type,
-    });
+    // S3にアップロード
+    const url = await uploadFile(path, file, file.type);
 
-    return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url });
   } catch (error) {
     console.error("アップロードエラー:", error);
     const message = error instanceof Error ? error.message : "不明なエラー";

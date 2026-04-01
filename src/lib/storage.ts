@@ -1,63 +1,75 @@
 /**
- * ファイルストレージ抽象化レイヤー
+ * ファイルストレージ（AWS S3）
  *
- * 現在: Vercel Blob Store (Private)
- * 将来: AWS S3 に差し替え予定
- *
- * 移行時はこのファイルの実装だけ変更すればOK
+ * 環境変数:
+ *   AWS_S3_REGION        - S3のリージョン（例: ap-northeast-1）
+ *   AWS_S3_ACCESS_KEY    - IAMアクセスキー（SESと共用可）
+ *   AWS_S3_SECRET_KEY    - IAMシークレットキー（SESと共用可）
+ *   AWS_S3_BUCKET        - バケット名（例: biovault-assets）
  */
 
-import { put, del, getDownloadUrl } from "@vercel/blob";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
+const s3 = new S3Client({
+  region: process.env.AWS_S3_REGION || process.env.AWS_SES_REGION || "ap-northeast-1",
+  credentials: {
+    accessKeyId: process.env.AWS_S3_ACCESS_KEY || process.env.AWS_SES_ACCESS_KEY || "",
+    secretAccessKey: process.env.AWS_S3_SECRET_KEY || process.env.AWS_SES_SECRET_KEY || "",
+  },
+});
+
+const BUCKET = process.env.AWS_S3_BUCKET || "biovault-member-images";
+const REGION = process.env.AWS_S3_REGION || process.env.AWS_SES_REGION || "ap-northeast-1";
+
+/**
+ * ファイルをS3にアップロード
+ * @returns 公開URL
+ */
 export async function uploadFile(
   path: string,
-  file: File | Blob,
-  contentType: string = "application/pdf"
+  file: File | Blob | Buffer,
+  contentType: string = "application/octet-stream"
 ): Promise<string> {
-  const blob = await put(path, file, {
-    access: "public",
-    contentType,
-  });
-  return blob.url;
-}
-
-export async function getFileUrl(storedUrl: string): Promise<string> {
-  // Private Blob の場合、一時的なダウンロードURLを発行
-  try {
-    const downloadUrl = await getDownloadUrl(storedUrl);
-    return downloadUrl;
-  } catch {
-    // フォールバック: そのままURLを返す
-    return storedUrl;
+  // File/Blob → Buffer に変換
+  let body: Buffer;
+  if (Buffer.isBuffer(file)) {
+    body = file;
+  } else {
+    const arrayBuffer = await (file as Blob).arrayBuffer();
+    body = Buffer.from(arrayBuffer);
   }
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: path,
+      Body: body,
+      ContentType: contentType,
+    })
+  );
+
+  // 公開URL（パブリックバケットの場合）
+  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${path}`;
 }
 
+/**
+ * ファイルの公開URLを返す（S3パブリックバケットの場合はそのまま）
+ */
+export async function getFileUrl(storedUrl: string): Promise<string> {
+  return storedUrl;
+}
+
+/**
+ * S3からファイルを削除
+ */
 export async function deleteFile(url: string): Promise<void> {
-  await del(url);
-}
+  // URLからキーを抽出
+  const key = url.replace(`https://${BUCKET}.s3.${REGION}.amazonaws.com/`, "");
 
-// 将来の AWS S3 移行時の実装例:
-//
-// import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-// import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-//
-// const s3 = new S3Client({ region: process.env.AWS_REGION });
-//
-// export async function uploadFile(path: string, file: File | Blob, contentType: string) {
-//   const buffer = Buffer.from(await file.arrayBuffer());
-//   await s3.send(new PutObjectCommand({
-//     Bucket: process.env.S3_BUCKET,
-//     Key: path,
-//     Body: buffer,
-//     ContentType: contentType,
-//   }));
-//   return `s3://${process.env.S3_BUCKET}/${path}`;
-// }
-//
-// export async function getFileUrl(storedUrl: string): Promise<string> {
-//   const key = storedUrl.replace(`s3://${process.env.S3_BUCKET}/`, "");
-//   return getSignedUrl(s3, new GetObjectCommand({
-//     Bucket: process.env.S3_BUCKET,
-//     Key: key,
-//   }), { expiresIn: 3600 }); // 1時間有効
-// }
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+    })
+  );
+}
