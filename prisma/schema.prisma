@@ -63,6 +63,7 @@ model User {
   documents     Document[]
   statusHistory StatusHistory[]
   agencyProfile AgencyProfile?
+  favorites     Favorite[]
 }
 
 enum Role {
@@ -278,6 +279,26 @@ model ExternalNews {
   isPublished Boolean   @default(false)       // 管理者が公開承認したか
   publishedAt DateTime
   fetchedAt   DateTime  @default(now())
+}
+
+// ────────────────────────────────────────
+// お気に入り（会員がコンテンツをブックマーク）
+// ────────────────────────────────────────
+model Favorite {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  contentType FavoriteType                    // コンテンツの種類
+  contentId   String                          // 対象コンテンツのID
+  createdAt   DateTime     @default(now())
+
+  @@unique([userId, contentType, contentId]) // 同じコンテンツの重複防止
+}
+
+enum FavoriteType {
+  ARTICLE        // 自社投稿記事（IpsArticle）
+  VIDEO          // 動画（Video）
+  EXTERNAL_NEWS  // 外部ニュース（ExternalNews）
 }
 
 // ────────────────────────────────────────

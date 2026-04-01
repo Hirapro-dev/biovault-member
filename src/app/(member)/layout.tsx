@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
+import BottomNav from "@/components/layout/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -47,9 +48,12 @@ export default async function MemberLayout({
           <Header userName={user.name} isAdmin={isAdmin} />
         </div>
 
-        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 max-w-[1200px] mx-auto animate-fade-in">
+        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
           {children}
         </main>
+
+        {/* モバイル: 下部固定ナビ */}
+        <BottomNav />
       </div>
     </div>
   );

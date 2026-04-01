@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import FavoriteButton from "@/components/ui/FavoriteButton";
 
 const CATEGORY_LABELS: Record<string, string> = {
   NEWS: "ニュース",
@@ -10,7 +11,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   MARKET: "市場動向",
 };
 
-// 4タブ構成
 const TABS = [
   { key: "featured", label: "注目ニュース" },
   { key: "videos", label: "動画" },
@@ -23,34 +23,31 @@ export default async function AboutIpsPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  await requireAuth();
+  const user = await requireAuth();
   const { tab } = await searchParams;
   const activeTab = tab || "featured";
 
-  // 注目ニュース（自社投稿記事）
+  // 注目ニュース
   const articles = ["featured"].includes(activeTab)
-    ? await prisma.ipsArticle.findMany({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-      })
+    ? await prisma.ipsArticle.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
     : [];
 
   // 動画
   const videos = activeTab === "videos"
-    ? await prisma.video.findMany({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-      })
+    ? await prisma.video.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
     : [];
 
-  // 外部ニュース（管理者が公開承認したもののみ表示）
+  // 外部ニュース
   const externalNews = activeTab === "news"
-    ? await prisma.externalNews.findMany({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-        take: 30,
-      })
+    ? await prisma.externalNews.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" }, take: 30 })
     : [];
+
+  // お気に入り状態を取得
+  const favorites = await prisma.favorite.findMany({
+    where: { userId: user.id },
+    select: { contentType: true, contentId: true },
+  });
+  const favSet = new Set(favorites.map((f) => `${f.contentType}:${f.contentId}`));
 
   const featured = articles.length > 0 && activeTab === "featured" ? articles[0] : null;
   const restArticles = featured ? articles.slice(1) : articles;
@@ -74,45 +71,47 @@ export default async function AboutIpsPage({
         ))}
       </div>
 
-      {/* ── 注目ニュース（自社投稿） ── */}
+      {/* ── 注目ニュース ── */}
       {activeTab === "featured" && (
         <>
           {articles.length === 0 ? (
             <EmptyState label="注目ニュース" />
           ) : (
             <>
-              {/* ヒーロー記事 */}
               {featured && (
-                <Link href={`/about-ips/news/${featured.slug}`} className="block mb-4 group">
-                  <div className="flex flex-col sm:flex-row sm:gap-5">
-                    <div className="sm:w-[55%] shrink-0">
-                      {featured.imageUrl ? (
-                        <div className="w-full aspect-[16/9] overflow-hidden rounded-md sm:rounded-lg">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={featured.imageUrl} alt={featured.title} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-full aspect-[16/9] bg-bg-elevated rounded-md sm:rounded-lg flex items-center justify-center">
-                          <span className="text-5xl opacity-15">📰</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 pt-3 sm:pt-0 sm:flex sm:flex-col sm:justify-center">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CategoryBadge category={featured.category} />
-                        {featured.sourceName && <span className="text-[10px] text-text-muted">{featured.sourceName}</span>}
+                <div className="relative mb-4">
+                  <Link href={`/about-ips/news/${featured.slug}`} className="block group">
+                    <div className="flex flex-col sm:flex-row sm:gap-5">
+                      <div className="sm:w-[55%] shrink-0">
+                        {featured.imageUrl ? (
+                          <div className="w-full aspect-[16/9] overflow-hidden rounded-md sm:rounded-lg">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={featured.imageUrl} alt={featured.title} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-full aspect-[16/9] bg-bg-elevated rounded-md sm:rounded-lg flex items-center justify-center">
+                            <span className="text-5xl opacity-15">📰</span>
+                          </div>
+                        )}
                       </div>
-                      <h2 className="text-[17px] sm:text-lg font-bold text-text-primary leading-snug group-hover:text-gold transition-colors mb-2">
-                        {featured.title}
-                      </h2>
-                      <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 hidden sm:block">{featured.summary}</p>
+                      <div className="flex-1 pt-3 sm:pt-0 sm:flex sm:flex-col sm:justify-center">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CategoryBadge category={featured.category} />
+                          {featured.sourceName && <span className="text-[10px] text-text-muted">{featured.sourceName}</span>}
+                        </div>
+                        <h2 className="text-[17px] sm:text-lg font-bold text-text-primary leading-snug group-hover:text-gold transition-colors mb-2 pr-8">
+                          {featured.title}
+                        </h2>
+                        <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 hidden sm:block">{featured.summary}</p>
+                      </div>
                     </div>
+                  </Link>
+                  <div className="absolute top-3 right-0 sm:top-auto sm:bottom-0 sm:right-0">
+                    <FavoriteButton contentType="ARTICLE" contentId={featured.id} isFavorited={favSet.has(`ARTICLE:${featured.id}`)} />
                   </div>
-                </Link>
+                </div>
               )}
-
-              {/* 記事リスト */}
-              <ArticleList articles={restArticles} />
+              <ArticleList articles={restArticles} favSet={favSet} />
             </>
           )}
         </>
@@ -127,7 +126,6 @@ export default async function AboutIpsPage({
             <div className="space-y-5">
               {videos.map((video) => (
                 <div key={video.id}>
-                  {/* YouTube埋め込み */}
                   <div className="aspect-video rounded-lg overflow-hidden bg-black mb-3">
                     <iframe
                       src={`https://www.youtube.com/embed/${video.youtubeId}`}
@@ -137,16 +135,13 @@ export default async function AboutIpsPage({
                       className="w-full h-full"
                     />
                   </div>
-                  <h3 className="text-[15px] text-text-primary font-medium leading-snug mb-1">
-                    {video.title}
-                  </h3>
-                  {video.description && (
-                    <p className="text-[12px] text-text-muted leading-relaxed line-clamp-2">
-                      {video.description}
-                    </p>
-                  )}
-                  <div className="text-[10px] text-text-muted font-mono mt-1">
-                    {new Date(video.publishedAt).toLocaleDateString("ja-JP")}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-[15px] text-text-primary font-medium leading-snug mb-1">{video.title}</h3>
+                      {video.description && <p className="text-[12px] text-text-muted leading-relaxed line-clamp-2">{video.description}</p>}
+                      <div className="text-[10px] text-text-muted font-mono mt-1">{new Date(video.publishedAt).toLocaleDateString("ja-JP")}</div>
+                    </div>
+                    <FavoriteButton contentType="VIDEO" contentId={video.id} isFavorited={favSet.has(`VIDEO:${video.id}`)} />
                   </div>
                 </div>
               ))}
@@ -155,7 +150,7 @@ export default async function AboutIpsPage({
         </>
       )}
 
-      {/* ── ニュース（API自動取得） ── */}
+      {/* ── ニュース ── */}
       {activeTab === "news" && (
         <>
           {externalNews.length === 0 ? (
@@ -163,51 +158,28 @@ export default async function AboutIpsPage({
           ) : (
             <div>
               {externalNews.map((news, i) => (
-                <a
-                  key={news.id}
-                  href={news.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block"
-                >
-                  <div className={`py-4 ${i < externalNews.length - 1 ? "border-b border-border" : ""}`}>
-                    {news.imageUrl ? (
-                      <div className="flex gap-3">
+                <div key={news.id} className={`py-4 ${i < externalNews.length - 1 ? "border-b border-border" : ""}`}>
+                  <div className="flex gap-3">
+                    <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 flex-1 min-w-0 group">
+                      {news.imageUrl && (
                         <div className="w-[120px] sm:w-[130px] shrink-0">
                           <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-[14px] sm:text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">
-                            {news.title}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-[9px] px-1.5 py-px rounded-full bg-status-info/10 text-status-info border border-status-info/20">
-                              外部記事
-                            </span>
-                            <span className="text-[10px] text-text-muted">{news.sourceName}</span>
-                            <span className="text-[10px] text-text-muted font-mono">{new Date(news.publishedAt).toLocaleDateString("ja-JP")}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <h3 className="text-[14px] sm:text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-2">
-                          {news.title}
-                        </h3>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[14px] sm:text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{news.title}</h3>
                         <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-[9px] px-1.5 py-px rounded-full bg-status-info/10 text-status-info border border-status-info/20">
-                            外部記事
-                          </span>
-                          <span className="text-[10px] text-text-muted">{news.sourceName}</span>
+                          <span className="text-[9px] px-1.5 py-px rounded-full bg-status-info/10 text-status-info border border-status-info/20">{news.sourceName}</span>
                           <span className="text-[10px] text-text-muted font-mono">{new Date(news.publishedAt).toLocaleDateString("ja-JP")}</span>
                         </div>
                       </div>
-                    )}
+                    </a>
+                    <FavoriteButton contentType="EXTERNAL_NEWS" contentId={news.id} isFavorited={favSet.has(`EXTERNAL_NEWS:${news.id}`)} />
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           )}
@@ -220,8 +192,7 @@ export default async function AboutIpsPage({
   );
 }
 
-// 記事リスト（スマホ1カラム / PC2カラム）
-function ArticleList({ articles }: { articles: { id: string; slug: string; title: string; summary: string; imageUrl: string | null; category: string; sourceName: string | null; publishedAt: Date }[] }) {
+function ArticleList({ articles, favSet }: { articles: { id: string; slug: string; title: string; summary: string; imageUrl: string | null; category: string; sourceName: string | null; publishedAt: Date }[]; favSet: Set<string> }) {
   if (articles.length === 0) return null;
 
   return (
@@ -229,70 +200,56 @@ function ArticleList({ articles }: { articles: { id: string; slug: string; title
       {/* スマホ版 */}
       <div className="block sm:hidden">
         {articles.map((article, i) => (
-          <Link key={article.id} href={`/about-ips/news/${article.slug}`} className="group">
-            <div className={`py-4 ${i < articles.length - 1 ? "border-b border-border" : ""}`}>
-              {article.imageUrl ? (
-                <div className="flex gap-3">
+          <div key={article.id} className={`py-4 ${i < articles.length - 1 ? "border-b border-border" : ""}`}>
+            <div className="flex gap-3">
+              <Link href={`/about-ips/news/${article.slug}`} className="flex gap-3 flex-1 min-w-0 group">
+                {article.imageUrl && (
                   <div className="w-[120px] shrink-0">
                     <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={article.imageUrl} alt="" className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{article.title}</h3>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <CategoryBadge category={article.category} small />
-                      {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium">{article.title}</h3>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{article.title}</h3>
                   <div className="flex items-center gap-2 mt-1.5">
                     <CategoryBadge category={article.category} small />
                     {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
                   </div>
                 </div>
-              )}
+              </Link>
+              <FavoriteButton contentType="ARTICLE" contentId={article.id} isFavorited={favSet.has(`ARTICLE:${article.id}`)} />
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
       {/* PC版 */}
       <div className="hidden sm:grid sm:grid-cols-2 gap-x-6 gap-y-0">
         {articles.map((article, i) => (
-          <Link key={article.id} href={`/about-ips/news/${article.slug}`} className="group">
-            <div className={`py-4 ${i < articles.length - (articles.length % 2 === 0 ? 2 : 1) ? "border-b border-border" : ""}`}>
-              {article.imageUrl ? (
-                <div className="flex gap-3">
+          <div key={article.id} className={`py-4 ${i < articles.length - (articles.length % 2 === 0 ? 2 : 1) ? "border-b border-border" : ""}`}>
+            <div className="flex gap-3">
+              <Link href={`/about-ips/news/${article.slug}`} className="flex gap-3 flex-1 min-w-0 group">
+                {article.imageUrl && (
                   <div className="w-[130px] shrink-0">
                     <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={article.imageUrl} alt="" className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">{article.title}</h3>
-                    <div className="flex items-center gap-2">
-                      <CategoryBadge category={article.category} small />
-                      {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
+                )}
+                <div className="flex-1 min-w-0">
                   <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">{article.title}</h3>
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={article.category} small />
                     {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
                   </div>
                 </div>
-              )}
+              </Link>
+              <FavoriteButton contentType="ARTICLE" contentId={article.id} isFavorited={favSet.has(`ARTICLE:${article.id}`)} />
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </>

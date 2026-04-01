@@ -9,7 +9,7 @@ export default withAuth(
     // ── 管理者エリア ──
     if (path.startsWith("/admin")) {
       if (token?.role !== "ADMIN" && token?.role !== "SUPER_ADMIN") {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.redirect(new URL("/about-ips", req.url));
       }
       return NextResponse.next();
     }
@@ -77,7 +77,7 @@ export const config = {
     "/dashboard/:path*", "/status/:path*", "/documents/:path*",
     "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
-    "/important-notice", "/apply-service/:path*",
+    "/important-notice", "/apply-service/:path*", "/favorites/:path*",
     "/agency/:path*", "/agency-agree",
   ],
 };

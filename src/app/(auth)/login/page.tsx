@@ -41,7 +41,7 @@ export default function LoginPage() {
     } else if (role === "AGENCY") {
       router.push("/agency");
     } else {
-      router.push("/dashboard");
+      router.push("/about-ips");
     }
     router.refresh();
   };
