@@ -62,114 +62,180 @@ export default async function AboutIpsPage({
         ))}
       </div>
 
-      {/* 基礎知識タブ */}
       {activeTab === "knowledge" ? (
         <KnowledgeSection />
       ) : articles.length === 0 ? (
         <EmptyState activeTab={activeTab} />
       ) : (
         <>
-          {/* ──── ヒーロー記事（日経風: 左画像 + 右テキスト） ──── */}
+          {/* ══════ ヒーロー記事 ══════ */}
+          {/* スマホ: 画像上 → テキスト下（縦積み） */}
+          {/* PC: 左画像 + 右テキスト（横並び） */}
           {featured && (
             <Link
               href={`/about-ips/news/${featured.slug}`}
-              className="block mb-5 group"
+              className="block mb-4 group"
             >
-              <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden transition-all duration-300 hover:border-border-gold">
-                <div className="flex flex-col sm:flex-row">
-                  {/* 左: サムネイル */}
-                  <div className="sm:w-[55%] shrink-0">
-                    {featured.imageUrl ? (
-                      <div className="w-full aspect-[16/9] sm:aspect-auto sm:h-full">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={featured.imageUrl}
-                          alt={featured.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-[16/9] sm:aspect-auto sm:h-full bg-bg-elevated flex items-center justify-center">
-                        <span className="text-5xl opacity-20">📰</span>
-                      </div>
+              {/* 画像（スマホ: 全幅、PC: 左55%） */}
+              <div className="flex flex-col sm:flex-row sm:gap-5">
+                <div className="sm:w-[55%] shrink-0">
+                  {featured.imageUrl ? (
+                    <div className="w-full aspect-[16/9] overflow-hidden rounded-md sm:rounded-lg">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={featured.imageUrl}
+                        alt={featured.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-[16/9] bg-bg-elevated rounded-md sm:rounded-lg flex items-center justify-center">
+                      <span className="text-5xl opacity-15">📰</span>
+                    </div>
+                  )}
+                </div>
+                {/* テキスト */}
+                <div className="flex-1 pt-3 sm:pt-0 sm:flex sm:flex-col sm:justify-center">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CategoryBadge category={featured.category} />
+                    {featured.sourceName && (
+                      <span className="text-[10px] text-text-muted">{featured.sourceName}</span>
                     )}
                   </div>
-                  {/* 右: テキスト */}
-                  <div className="flex-1 p-5 sm:p-6 flex flex-col justify-center">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <CategoryBadge category={featured.category} />
-                      {featured.sourceName && (
-                        <span className="text-[10px] text-text-muted">
-                          {featured.sourceName}
-                        </span>
-                      )}
-                    </div>
-                    <h2 className="text-base sm:text-lg font-medium text-text-primary leading-snug group-hover:text-gold transition-colors mb-3">
-                      {featured.title}
-                    </h2>
-                    <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 mb-3">
-                      {featured.summary}
-                    </p>
-                    <div className="text-[10px] text-text-muted font-mono">
-                      {new Date(featured.publishedAt).toLocaleDateString("ja-JP")}
-                    </div>
-                  </div>
+                  <h2 className="text-[17px] sm:text-lg font-bold text-text-primary leading-snug group-hover:text-gold transition-colors mb-2">
+                    {featured.title}
+                  </h2>
+                  <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 hidden sm:block">
+                    {featured.summary}
+                  </p>
                 </div>
               </div>
             </Link>
           )}
 
-          {/* ──── 2カラムグリッド（日経風: テキスト左 + 画像右） ──── */}
+          {/* ══════ 記事リスト ══════ */}
+          {/* スマホ: 1カラム（日経スマホアプリ風） */}
+          {/* PC: 2カラム */}
           {restArticles.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-0">
-              {restArticles.map((article, i) => (
-                <Link
-                  key={article.id}
-                  href={`/about-ips/news/${article.slug}`}
-                  className="group"
-                >
-                  <div className={`flex gap-3 py-4 ${
-                    i < restArticles.length - (restArticles.length % 2 === 0 ? 2 : 1)
-                      ? "border-b border-border"
-                      : ""
-                  }`}>
-                    {/* 左: テキスト */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">
-                        {article.title}
-                      </h3>
-                      {/* 奇数番目（0始まり）のみ要約を表示 — 日経風に密度にバリエーション */}
-                      {i % 3 === 0 && (
-                        <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mb-1.5">
-                          {article.summary}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <CategoryBadge category={article.category} small />
-                        {article.sourceName && (
-                          <span className="text-[10px] text-text-muted">{article.sourceName}</span>
-                        )}
-                      </div>
-                    </div>
-                    {/* 右: サムネイル */}
-                    <div className="w-[90px] h-[68px] sm:w-[110px] sm:h-[80px] rounded overflow-hidden shrink-0 bg-bg-elevated">
+            <>
+              {/* ── スマホ版（1カラム） ── */}
+              <div className="block sm:hidden">
+                {restArticles.map((article, i) => (
+                  <Link
+                    key={article.id}
+                    href={`/about-ips/news/${article.slug}`}
+                    className="group"
+                  >
+                    <div className={`py-4 ${i < restArticles.length - 1 ? "border-b border-border" : ""}`}>
                       {article.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={article.imageUrl}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
+                        /* 画像あり: テキスト左 + 画像右 */
+                        <div className="flex gap-3">
+                          <div className="flex-1 min-w-0">
+                            {i === 0 && featured && (
+                              <CategoryBadge category={article.category} small className="mb-1.5" />
+                            )}
+                            <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">
+                              {article.title}
+                            </h3>
+                            {/* 一部の記事のみ要約 */}
+                            {i % 4 === 0 && (
+                              <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mt-1.5">
+                                {article.summary}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {i !== 0 || !featured ? <CategoryBadge category={article.category} small /> : null}
+                              {article.sourceName && (
+                                <span className="text-[10px] text-text-muted">{article.sourceName}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="w-[100px] h-[75px] rounded overflow-hidden shrink-0 bg-bg-elevated">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={article.imageUrl}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl opacity-20">
-                          {article.category === "RESEARCH" ? "🔬" : article.category === "CLINICAL" ? "🏥" : "📰"}
+                        /* 画像なし: テキストのみ */
+                        <div>
+                          <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium">
+                            {article.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <CategoryBadge category={article.category} small />
+                            {article.sourceName && (
+                              <span className="text-[10px] text-text-muted">{article.sourceName}</span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* ── PC版（2カラム） ── */}
+              <div className="hidden sm:grid sm:grid-cols-2 gap-x-6 gap-y-0">
+                {restArticles.map((article, i) => (
+                  <Link
+                    key={article.id}
+                    href={`/about-ips/news/${article.slug}`}
+                    className="group"
+                  >
+                    <div className={`py-4 ${
+                      i < restArticles.length - (restArticles.length % 2 === 0 ? 2 : 1)
+                        ? "border-b border-border"
+                        : ""
+                    }`}>
+                      {article.imageUrl ? (
+                        <div className="flex gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">
+                              {article.title}
+                            </h3>
+                            {i % 3 === 0 && (
+                              <p className="text-[11px] text-text-muted leading-relaxed line-clamp-2 mb-1.5">
+                                {article.summary}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <CategoryBadge category={article.category} small />
+                              {article.sourceName && (
+                                <span className="text-[10px] text-text-muted">{article.sourceName}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="w-[110px] h-[80px] rounded overflow-hidden shrink-0 bg-bg-elevated">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={article.imageUrl}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">
+                            {article.title}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <CategoryBadge category={article.category} small />
+                            {article.sourceName && (
+                              <span className="text-[10px] text-text-muted">{article.sourceName}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
         </>
       )}
@@ -177,7 +243,6 @@ export default async function AboutIpsPage({
   );
 }
 
-// 空状態
 function EmptyState({ activeTab }: { activeTab: string }) {
   return (
     <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
@@ -192,7 +257,6 @@ function EmptyState({ activeTab }: { activeTab: string }) {
   );
 }
 
-// 基礎知識セクション
 function KnowledgeSection() {
   const items = [
     {
@@ -241,9 +305,9 @@ function KnowledgeSection() {
   );
 }
 
-function CategoryBadge({ category, small }: { category: string; small?: boolean }) {
+function CategoryBadge({ category, small, className }: { category: string; small?: boolean; className?: string }) {
   return (
-    <span className={`${small ? "text-[9px] px-1.5 py-px" : "text-[10px] px-2 py-0.5"} rounded-full bg-gold/10 text-gold border border-gold/20`}>
+    <span className={`inline-block ${small ? "text-[9px] px-1.5 py-px" : "text-[10px] px-2 py-0.5"} rounded-full bg-gold/10 text-gold border border-gold/20 ${className || ""}`}>
       {CATEGORY_LABELS[category] || category}
     </span>
   );
