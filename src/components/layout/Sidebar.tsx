@@ -8,7 +8,7 @@ const memberNav = [
   { href: "/status", label: "ステータス詳細", icon: "◉" },
   { href: "/apply-service", label: "サービス申込", icon: "✍️" },
   { href: "/documents", label: "契約書類", icon: "◇" },
-  { href: "/about-ips", label: "About iPS", icon: "🧬" },
+  { href: "/about-ips", label: "iPS Portal", icon: "🧬" },
   { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
   { href: "/settings", label: "設定", icon: "⚙" },
 ];
