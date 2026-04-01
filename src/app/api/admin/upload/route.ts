@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { uploadFile } from "@/lib/storage";
+import { put } from "@vercel/blob";
 
 /**
  * 管理者用 画像アップロードAPI
- * サムネイル画像やエディター内の画像をVercel Blobにアップロード
+ * サムネイル画像をVercel Blobにアップロード
  */
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -31,15 +31,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "画像ファイルのみアップロードできます" }, { status: 400 });
     }
 
-    // ファイルパス生成
+    // ファイル名生成
     const ext = file.name.split(".").pop() || "jpg";
-    const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const filename = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    const url = await uploadFile(path, file, file.type);
+    // Vercel Blobに直接アップロード（ArrayBufferに変換してから渡す）
+    const bytes = await file.arrayBuffer();
+    const blob = await put(filename, Buffer.from(bytes), {
+      access: "public",
+      contentType: file.type,
+    });
 
-    return NextResponse.json({ url });
+    return NextResponse.json({ url: blob.url });
   } catch (error) {
     console.error("アップロードエラー:", error);
-    return NextResponse.json({ error: "アップロードに失敗しました" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "不明なエラー";
+    return NextResponse.json({ error: `アップロードに失敗しました: ${message}` }, { status: 500 });
   }
 }
