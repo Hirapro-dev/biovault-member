@@ -19,3 +19,41 @@ UPDATE "StatusHistory" SET "toStatus" = 'REGISTERED' WHERE "toStatus" = 'APPLICA
 UPDATE "StatusHistory" SET "toStatus" = 'SERVICE_APPLIED' WHERE "toStatus" = 'CONTRACT_SIGNED';
 UPDATE "StatusHistory" SET "toStatus" = 'SCHEDULE_ARRANGED' WHERE "toStatus" = 'CLINIC_RESERVED';
 UPDATE "StatusHistory" SET "toStatus" = 'STORAGE_ACTIVE' WHERE "toStatus" = 'IPS_COMPLETED';
+
+-- ════════════════════════════════════════
+-- 4. コンテンツ更新通知テーブル
+-- ════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS "ContentUpdate" (
+  "id" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "contentType" TEXT NOT NULL,
+  "contentId" TEXT,
+  "linkUrl" TEXT,
+  "publishedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ContentUpdate_pkey" PRIMARY KEY ("id")
+);
+
+-- 5. コンテンツ更新の既読管理テーブル
+CREATE TABLE IF NOT EXISTS "ContentUpdateRead" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "contentUpdateId" TEXT NOT NULL,
+  "readAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ContentUpdateRead_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "ContentUpdateRead_userId_contentUpdateId_key" ON "ContentUpdateRead"("userId", "contentUpdateId");
+CREATE INDEX IF NOT EXISTS "ContentUpdateRead_userId_idx" ON "ContentUpdateRead"("userId");
+
+-- 6. プッシュ通知サブスクリプションテーブル
+CREATE TABLE IF NOT EXISTS "PushSubscription" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "endpoint" TEXT NOT NULL,
+  "p256dh" TEXT NOT NULL,
+  "auth" TEXT NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "PushSubscription_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
+CREATE INDEX IF NOT EXISTS "PushSubscription_userId_idx" ON "PushSubscription"("userId");

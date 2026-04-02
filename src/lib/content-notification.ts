@@ -14,19 +14,23 @@ export async function createContentUpdate({
   linkUrl,
 }: {
   title: string;
-  contentType: "article" | "video" | "news";
+  contentType: "article" | "video" | "news" | "status";
   contentId?: string;
   linkUrl?: string;
 }) {
-  // DB保存（ログイン時ポップアップ用）
-  await prisma.contentUpdate.create({
-    data: {
-      title,
-      contentType,
-      contentId: contentId || null,
-      linkUrl: linkUrl || null,
-    },
-  });
+  try {
+    // DB保存（ログイン時ポップアップ用）
+    await prisma.contentUpdate.create({
+      data: {
+        title,
+        contentType,
+        contentId: contentId || null,
+        linkUrl: linkUrl || null,
+      },
+    });
+  } catch (e) {
+    console.error("ContentUpdate作成エラー（テーブル未作成の可能性）:", e);
+  }
 
   // プッシュ通知送信（非同期・エラーは無視）
   sendPushToAll({

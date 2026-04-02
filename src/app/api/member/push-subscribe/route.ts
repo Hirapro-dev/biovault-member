@@ -38,3 +38,27 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true });
 }
+
+/**
+ * プッシュ通知サブスクリプション解除API
+ * DELETE: endpointを指定してサブスクリプションを削除
+ */
+export async function DELETE(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "未認証です" }, { status: 401 });
+  }
+
+  const { endpoint } = await req.json();
+
+  if (!endpoint) {
+    return NextResponse.json({ error: "endpointが必要です" }, { status: 400 });
+  }
+
+  // 該当のサブスクリプションを削除
+  await prisma.pushSubscription.deleteMany({
+    where: { endpoint },
+  });
+
+  return NextResponse.json({ success: true });
+}

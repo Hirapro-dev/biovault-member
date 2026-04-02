@@ -15,24 +15,28 @@ export async function GET() {
 
   const userId = (session.user as any).id;
 
-  // 未読の最新通知を1件取得
-  const latestUpdate = await prisma.contentUpdate.findFirst({
-    where: {
-      NOT: {
-        id: {
-          in: (
-            await prisma.contentUpdateRead.findMany({
-              where: { userId },
-              select: { contentUpdateId: true },
-            })
-          ).map((r) => r.contentUpdateId),
-        },
-      },
-    },
-    orderBy: { publishedAt: "desc" },
-  });
+  try {
+    // 既読済みのIDリストを取得
+    const readIds = (
+      await prisma.contentUpdateRead.findMany({
+        where: { userId },
+        select: { contentUpdateId: true },
+      })
+    ).map((r) => r.contentUpdateId);
 
-  return NextResponse.json({ update: latestUpdate });
+    // 未読の最新通知を1件取得
+    const latestUpdate = await prisma.contentUpdate.findFirst({
+      where: readIds.length > 0
+        ? { id: { notIn: readIds } }
+        : {},
+      orderBy: { publishedAt: "desc" },
+    });
+
+    return NextResponse.json({ update: latestUpdate });
+  } catch {
+    // テーブル未作成時は空レスポンス
+    return NextResponse.json({ update: null });
+  }
 }
 
 /**
@@ -52,14 +56,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "contentUpdateId が必要です" }, { status: 400 });
   }
 
-  // 既読レコードを作成（重複は無視）
-  await prisma.contentUpdateRead.upsert({
-    where: {
-      userId_contentUpdateId: { userId, contentUpdateId },
-    },
-    update: {},
-    create: { userId, contentUpdateId },
-  });
+  try {
+    await prisma.contentUpdateRead.upsert({
+      where: {
+        userId_contentUpdateId: { userId, contentUpdateId },
+      },
+      update: {},
+      create: { userId, contentUpdateId },
+    });
+  } catch {
+    // テーブル未作成時は無視
+  }
 
   return NextResponse.json({ success: true });
 }

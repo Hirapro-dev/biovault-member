@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import PushNotificationToggle from "@/components/ui/PushNotificationToggle";
 
 export default async function SettingsPage() {
   const user = await requireAuth();
@@ -36,6 +37,11 @@ export default async function SettingsPage() {
           <span>プロフィール・パスワード変更</span>
           <span className="text-text-muted">→</span>
         </Link>
+      </div>
+
+      {/* 通知設定 */}
+      <div className="bg-bg-secondary border border-border rounded-md px-5 sm:px-6 mb-5">
+        <PushNotificationToggle />
       </div>
 
       {/* 規約・ポリシー */}
