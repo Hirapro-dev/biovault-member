@@ -18,15 +18,14 @@ export default function AccessLogger() {
 
     // ページタイトルのマッピング
     const titleMap: Record<string, string> = {
-      "/about-ips": "iPS Portal",
-      "/dashboard": "トップ",
+      "/dashboard": "トップページ",
       "/mypage": "マイページ",
       "/info": "サービス詳細",
       "/favorites": "お気に入り",
       "/apply-service": "サービス申込",
       "/documents": "契約書類",
       "/status": "ステータス詳細",
-      "/pamphlet": "BVパンフレット",
+      "/pamphlet": "パンフレット",
       "/settings": "設定",
       "/settings/profile": "プロフィール",
       "/settings/terms": "利用規約",
@@ -34,13 +33,20 @@ export default function AccessLogger() {
       "/settings/privacy": "プライバシーポリシー",
       "/concierge": "コンシェルジュ",
       "/important-notice": "重要事項説明",
+      "/treatment": "投与記録",
+      "/glossary": "用語集",
+      "/about-ips": "コンテンツ",
+      "/about-ips/news": "ニュース一覧",
+      "/about-ips/history": "iPS細胞の歴史",
+      "/about-ips/what-is-ips": "iPS細胞とは",
+      "/about-ips/glossary": "用語集",
     };
 
+    // 完全一致 → 前方一致の順で検索
     let pageTitle = titleMap[pathname] || null;
     if (!pageTitle) {
       if (pathname.startsWith("/about-ips/news/")) pageTitle = "記事閲覧";
       else if (pathname.startsWith("/about-ips/video/")) pageTitle = "動画閲覧";
-      else if (pathname.startsWith("/about-ips")) pageTitle = "iPS Portal";
     }
 
     // 2秒遅延で送信（ページ描画を優先）
