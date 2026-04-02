@@ -189,14 +189,23 @@ export default async function DashboardPage({
                 <div key={news.id} className={`py-4 ${i < externalNews.length - 1 ? "border-b border-border" : ""}`}>
                   <div className="flex gap-3">
                     <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 flex-1 min-w-0 group">
-                      {news.imageUrl && (
-                        <div className="w-[120px] sm:w-[130px] shrink-0">
-                          <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
-                          </div>
+                      <div className="w-[120px] sm:w-[130px] shrink-0">
+                        <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated flex items-center justify-center">
+                          {news.imageUrl ? (
+                            news.imageUrl.includes("google.com/s2/favicons") ? (
+                              // ファビコンの場合は中央に表示
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={news.imageUrl} alt="" className="w-10 h-10 object-contain" />
+                            ) : (
+                              // OGP画像の場合は全面表示
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
+                            )
+                          ) : (
+                            <span className="text-2xl opacity-20">📰</span>
+                          )}
                         </div>
-                      )}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-[14px] sm:text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{news.title}</h3>
                         <div className="flex items-center gap-2 mt-1.5">

@@ -8,6 +8,7 @@ export const maxDuration = 15;
 /**
  * 個別ニュース記事の詳細取得API
  * プレビュー時にOGP情報（画像・要約）を1件だけ取得してDBを更新
+ * OGP画像が取れない場合は媒体のファビコン（ロゴ）を使用
  */
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -29,14 +30,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   // 元記事ページからOGP情報を取得
   try {
-    const ogpData = await fetchOgpData(news.sourceUrl);
+    // Google Newsリダイレクトを解決して実際のURLを取得
+    const actualUrl = await resolveRedirect(news.sourceUrl);
+    const ogpData = await fetchOgpData(actualUrl);
+
+    // OGP画像が取れない場合は媒体のファビコンを使用
+    let imageUrl = ogpData.image;
+    if (!imageUrl) {
+      imageUrl = getFaviconUrl(actualUrl);
+    }
 
     // DB更新
     const updated = await prisma.externalNews.update({
       where: { id },
       data: {
         summary: ogpData.description || news.summary,
-        imageUrl: ogpData.image || news.imageUrl,
+        imageUrl: imageUrl || news.imageUrl,
       },
     });
 
@@ -47,34 +56,70 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
+/**
+ * リダイレクトを解決して実際のURLを取得
+ * Google Newsの記事リンクはリダイレクトされるため
+ */
+async function resolveRedirect(url: string): Promise<string> {
+  try {
+    const res = await fetch(url, {
+      method: "HEAD",
+      redirect: "follow",
+      headers: { "User-Agent": "BioVault-OGP-Fetcher/1.0" },
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.url || url;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * 媒体のファビコン（ロゴ）URLを取得
+ * Google Favicon APIを使用（高解像度）
+ */
+function getFaviconUrl(url: string): string {
+  try {
+    const domain = new URL(url).hostname;
+    // Google Favicon API（128pxサイズ）
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  } catch {
+    return "";
+  }
+}
+
 // OGP情報を取得
 async function fetchOgpData(url: string): Promise<{ description: string | null; image: string | null }> {
-  const res = await fetch(url, {
-    headers: { "User-Agent": "BioVault-OGP-Fetcher/1.0" },
-    redirect: "follow",
-    signal: AbortSignal.timeout(8000),
-  });
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; BioVault/1.0)" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
 
-  if (!res.ok) return { description: null, image: null };
+    if (!res.ok) return { description: null, image: null };
 
-  const html = await res.text();
+    const html = await res.text();
 
-  // og:description
-  const descMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["']/i)
-    || html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
+    // og:description
+    const descMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["']/i)
+      || html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
 
-  // og:image
-  const imgMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
-    || html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+    // og:image
+    const imgMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
+      || html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
 
-  return {
-    description: descMatch ? decodeHtmlEntities(descMatch[1]) : null,
-    image: imgMatch ? imgMatch[1] : null,
-  };
+    return {
+      description: descMatch ? decodeHtmlEntities(descMatch[1]) : null,
+      image: imgMatch ? imgMatch[1] : null,
+    };
+  } catch {
+    return { description: null, image: null };
+  }
 }
 
 function decodeHtmlEntities(text: string): string {
