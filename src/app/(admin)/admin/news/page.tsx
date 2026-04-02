@@ -269,16 +269,16 @@ export default function AdminNewsPage() {
             >
               {/* サムネイル */}
               <div className="w-[100px] shrink-0">
-                {item.imageUrl ? (
-                  <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated flex items-center justify-center">
+                  {item.imageUrl && !item.imageUrl.includes("google.com/s2/favicons") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-[16/9] rounded bg-bg-elevated flex items-center justify-center text-xl opacity-20">
-                    📰
-                  </div>
-                )}
+                  ) : (
+                    <span className="text-[10px] text-text-muted font-medium text-center px-1 leading-tight">
+                      {item.sourceName}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* コンテンツ */}

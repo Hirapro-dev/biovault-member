@@ -34,18 +34,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const actualUrl = await resolveRedirect(news.sourceUrl);
     const ogpData = await fetchOgpData(actualUrl);
 
-    // OGP画像が取れない場合は媒体のファビコンを使用
-    let imageUrl = ogpData.image;
-    if (!imageUrl) {
-      imageUrl = getFaviconUrl(actualUrl);
-    }
-
-    // DB更新
+    // DB更新（OGP画像が取れた場合のみ画像を更新）
     const updated = await prisma.externalNews.update({
       where: { id },
       data: {
         summary: ogpData.description || news.summary,
-        imageUrl: imageUrl || news.imageUrl,
+        imageUrl: ogpData.image || news.imageUrl,
       },
     });
 
@@ -71,20 +65,6 @@ async function resolveRedirect(url: string): Promise<string> {
     return res.url || url;
   } catch {
     return url;
-  }
-}
-
-/**
- * 媒体のファビコン（ロゴ）URLを取得
- * Google Favicon APIを使用（高解像度）
- */
-function getFaviconUrl(url: string): string {
-  try {
-    const domain = new URL(url).hostname;
-    // Google Favicon API（128pxサイズ）
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  } catch {
-    return "";
   }
 }
 

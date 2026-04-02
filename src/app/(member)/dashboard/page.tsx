@@ -191,18 +191,13 @@ export default async function DashboardPage({
                     <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 flex-1 min-w-0 group">
                       <div className="w-[120px] sm:w-[130px] shrink-0">
                         <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated flex items-center justify-center">
-                          {news.imageUrl ? (
-                            news.imageUrl.includes("google.com/s2/favicons") ? (
-                              // ファビコンの場合は中央に表示
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={news.imageUrl} alt="" className="w-10 h-10 object-contain" />
-                            ) : (
-                              // OGP画像の場合は全面表示
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
-                            )
+                          {news.imageUrl && !news.imageUrl.includes("google.com/s2/favicons") ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-2xl opacity-20">📰</span>
+                            <span className="text-[11px] text-text-muted font-medium text-center px-2 leading-tight">
+                              {news.sourceName}
+                            </span>
                           )}
                         </div>
                       </div>
