@@ -43,10 +43,10 @@ function UserIcon({ active }: { active: boolean }) {
 }
 
 const navItems = [
-  { href: "/about-ips", label: "トップ", Icon: HomeIcon },
-  { href: "/info", label: "基本情報", Icon: InfoIcon },
+  { href: "/dashboard", label: "トップ", Icon: HomeIcon },
+  { href: "/mypage", label: "マイページ", Icon: UserIcon },
+  { href: "/info", label: "サービス詳細", Icon: InfoIcon },
   { href: "/favorites", label: "お気に入り", Icon: StarIcon },
-  { href: "/dashboard", label: "マイページ", Icon: UserIcon },
 ];
 
 export default function BottomNav() {
@@ -56,8 +56,8 @@ export default function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-bg-secondary/95 backdrop-blur-md border-t border-border lg:hidden">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {navItems.map((item) => {
-          const isActive = item.href === "/about-ips"
-            ? pathname === "/about-ips" || pathname.startsWith("/about-ips?") || pathname.startsWith("/about-ips/")
+          const isActive = item.href === "/dashboard"
+            ? pathname === "/dashboard" || pathname.startsWith("/dashboard?")
             : pathname.startsWith(item.href);
 
           return (

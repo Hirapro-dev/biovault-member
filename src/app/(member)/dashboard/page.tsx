@@ -1,323 +1,330 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import StatusTimeline from "@/components/ui/StatusTimeline";
-import { POST_SERVICE_STATUSES } from "@/types";
-import type { IpsStatus } from "@/types";
+import FavoriteButton from "@/components/ui/FavoriteButton";
 
-export default async function DashboardPage() {
+const CATEGORY_LABELS: Record<string, string> = {
+  NEWS: "ニュース",
+  RESEARCH: "研究動向",
+  CLINICAL: "臨床応用",
+  REGULATION: "制度・規制",
+  MARKET: "市場動向",
+};
+
+const CONTENT_TABS = [
+  { key: "featured", label: "注目ニュース" },
+  { key: "videos", label: "動画" },
+  { key: "news", label: "RSS" },
+  { key: "knowledge", label: "基礎知識" },
+];
+
+// 各タブの紹介文
+const TAB_DESCRIPTIONS: Record<string, { icon: string; text: string }> = {
+  featured: {
+    icon: "📰",
+    text: "BioVaultが厳選した、iPS細胞・再生医療に関する注目のトピックスをお届けします。最新の研究成果や臨床応用の進展など、押さえておきたい情報をまとめています。",
+  },
+  videos: {
+    icon: "🎬",
+    text: "iPS細胞や再生医療について、わかりやすく解説した動画コンテンツをご覧いただけます。専門的な内容も映像で直感的に理解できます。",
+  },
+  news: {
+    icon: "📡",
+    text: "世の中のiPS細胞に関する情報を集約しています。クリックすると情報元ページにリンクしていますので気になるニュースがありましたら、ご確認ください。",
+  },
+  knowledge: {
+    icon: "📖",
+    text: "iPS細胞の基本から応用まで、体系的に学べるコンテンツを揃えています。はじめての方も、より深く知りたい方も、ぜひご活用ください。",
+  },
+};
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const user = await requireAuth();
+  const { tab } = await searchParams;
+  const activeTab = tab || "featured";
 
-  const fullUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { nameRomaji: true },
-  });
+  // ── コンテンツ取得 ──
+  const articles = activeTab === "featured"
+    ? await prisma.ipsArticle.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
+    : [];
 
-  const membership = await prisma.membership.findUnique({
+  const videos = activeTab === "videos"
+    ? await prisma.video.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
+    : [];
+
+  const externalNews = activeTab === "news"
+    ? await prisma.externalNews.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" }, take: 30 })
+    : [];
+
+  // お気に入り状態を取得
+  const favorites = await prisma.favorite.findMany({
     where: { userId: user.id },
-    include: {
-      treatments: true,
-    },
+    select: { contentType: true, contentId: true },
   });
+  const favSet = new Set(favorites.map((f) => `${f.contentType}:${f.contentId}`));
 
-  const documents = await prisma.document.findMany({
-    where: { userId: user.id },
-  });
-
-  const signedCount = documents.filter((d) => d.status === "SIGNED").length;
-
-  // 購入済みかどうか（SERVICE_APPLIED以降）
-  const isPurchased = membership && POST_SERVICE_STATUSES.includes(membership.ipsStatus);
+  const featured = articles.length > 0 && activeTab === "featured" ? articles[0] : null;
+  const restArticles = featured ? articles.slice(1) : articles;
 
   return (
     <div>
-      {/* メンバーカード */}
-      <div className="mb-6 sm:mb-8" style={{ minWidth: 280, maxWidth: 540 }}>
-        <div
-          className="relative overflow-hidden rounded-2xl p-6 sm:p-8 w-full aspect-[1.586/1] flex flex-col justify-between border border-white/15"
-          style={{
-            background: "#0A0A0C",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
-          }}
-        >
-          {/* 背景画像（透過） */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: "url('/card_bg.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-          {/* シルバー光沢オーバーレイ */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)",
-            }}
-          />
+      {/* タブ切り替え */}
+      <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+        {CONTENT_TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={t.key === "featured" ? "/dashboard" : `/dashboard?tab=${t.key}`}
+            className={`shrink-0 text-[12px] px-4 py-2 rounded-full border transition-all ${
+              activeTab === t.key
+                ? "bg-gold/15 text-gold border-gold/30 font-medium"
+                : "bg-transparent text-text-muted border-border hover:border-border-gold hover:text-text-secondary"
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
 
-          {/* 上部: ロゴ + MEMBER */}
-          <div className="relative z-10 flex items-center justify-between">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo_white.png"
-              alt="BioVault"
-              className="h-5 sm:h-6 w-auto opacity-70"
-            />
-            <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">
-              MEMBER
+      {/* タブ紹介文 */}
+      {TAB_DESCRIPTIONS[activeTab] && (
+        <div className="flex items-start gap-3 mb-6 bg-bg-secondary border border-border rounded-md p-4">
+          <span className="text-xl shrink-0 mt-0.5">{TAB_DESCRIPTIONS[activeTab].icon}</span>
+          <p className="text-[12px] sm:text-[13px] text-text-secondary leading-relaxed">
+            {TAB_DESCRIPTIONS[activeTab].text}
+          </p>
+        </div>
+      )}
+
+      {/* ── 注目ニュース ── */}
+      {activeTab === "featured" && (
+        <>
+          {articles.length === 0 ? (
+            <EmptyState label="注目ニュース" />
+          ) : (
+            <>
+              {featured && (
+                <div className="relative mb-4">
+                  <Link href={`/about-ips/news/${featured.slug}`} className="block group">
+                    <div className="flex flex-col sm:flex-row sm:gap-5">
+                      <div className="sm:w-[55%] shrink-0">
+                        {featured.imageUrl ? (
+                          <div className="w-full aspect-[16/9] overflow-hidden rounded-md sm:rounded-lg">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={featured.imageUrl} alt={featured.title} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-full aspect-[16/9] bg-bg-elevated rounded-md sm:rounded-lg flex items-center justify-center">
+                            <span className="text-5xl opacity-15">📰</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 pt-3 sm:pt-0 sm:flex sm:flex-col sm:justify-center">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CategoryBadge category={featured.category} />
+                          {featured.sourceName && <span className="text-[10px] text-text-muted">{featured.sourceName}</span>}
+                        </div>
+                        <h2 className="text-[17px] sm:text-lg font-bold text-text-primary leading-snug group-hover:text-gold transition-colors mb-2 pr-8">
+                          {featured.title}
+                        </h2>
+                        <p className="text-[12px] text-text-secondary leading-relaxed line-clamp-3 hidden sm:block">{featured.summary}</p>
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="absolute top-3 right-0 sm:top-auto sm:bottom-0 sm:right-0">
+                    <FavoriteButton contentType="ARTICLE" contentId={featured.id} isFavorited={favSet.has(`ARTICLE:${featured.id}`)} />
+                  </div>
+                </div>
+              )}
+              <ArticleList articles={restArticles} favSet={favSet} />
+            </>
+          )}
+        </>
+      )}
+
+      {/* ── 動画 ── */}
+      {activeTab === "videos" && (
+        <>
+          {videos.length === 0 ? (
+            <EmptyState label="動画" />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {videos.map((video) => (
+                <Link key={video.id} href={`/about-ips/video/${video.id}`} className="group">
+                  <div className="aspect-video rounded-md overflow-hidden bg-bg-elevated mb-2 relative">
+                    {video.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={video.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl opacity-20">🎬</div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
+                        <span className="text-bg-primary text-sm ml-0.5">▶</span>
+                      </div>
+                    </div>
+                  </div>
+                  <h3 className="text-[13px] text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2 font-medium">
+                    {video.title.length > 24 ? video.title.slice(0, 24) + "..." : video.title}
+                  </h3>
+                  <div className="text-[10px] text-text-muted font-mono mt-1">
+                    {new Date(video.publishedAt).toLocaleDateString("ja-JP")}
+                  </div>
+                </Link>
+              ))}
             </div>
-          </div>
+          )}
+        </>
+      )}
 
-          {/* 中央: 会員ID */}
-          <div className="relative z-10">
-            <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]">
-              {membership?.memberNumber || "----"}
-            </div>
-          </div>
-
-          {/* 下部: ローマ字氏名 + 契約年月 */}
-          <div className="relative z-10 flex items-end justify-between">
+      {/* ── ニュース ── */}
+      {activeTab === "news" && (
+        <>
+          {externalNews.length === 0 ? (
+            <EmptyState label="RSS" />
+          ) : (
             <div>
-              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">
-                CARD HOLDER
-              </div>
-              <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">
-                {fullUser?.nameRomaji || user.name}
-              </div>
+              {externalNews.map((news, i) => (
+                <div key={news.id} className={`py-4 ${i < externalNews.length - 1 ? "border-b border-border" : ""}`}>
+                  <div className="flex gap-3">
+                    <a href={news.sourceUrl} target="_blank" rel="noopener noreferrer" className="flex gap-3 flex-1 min-w-0 group">
+                      {news.imageUrl && (
+                        <div className="w-[120px] sm:w-[130px] shrink-0">
+                          <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[14px] sm:text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{news.title}</h3>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[9px] px-1.5 py-px rounded-full bg-status-info/10 text-status-info border border-status-info/20">{news.sourceName}</span>
+                          <span className="text-[10px] text-text-muted font-mono">{new Date(news.publishedAt).toLocaleDateString("ja-JP")}</span>
+                        </div>
+                      </div>
+                    </a>
+                    <FavoriteButton contentType="EXTERNAL_NEWS" contentId={news.id} isFavorited={favSet.has(`EXTERNAL_NEWS:${news.id}`)} />
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="text-right">
-              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">
-                MEMBER SINCE
-              </div>
-              <div className="font-mono text-[14px] sm:text-xs tracking-wider text-white/80">
-                {membership
-                  ? new Date(membership.contractDate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" })
-                  : "--/----"}
-              </div>
+          )}
+        </>
+      )}
+
+      {/* ── 基礎知識 ── */}
+      {activeTab === "knowledge" && <KnowledgeSection />}
+    </div>
+  );
+}
+
+// ── コンテンツ用コンポーネント ──
+
+function ArticleList({ articles, favSet }: { articles: { id: string; slug: string; title: string; summary: string; imageUrl: string | null; category: string; sourceName: string | null; publishedAt: Date }[]; favSet: Set<string> }) {
+  if (articles.length === 0) return null;
+
+  return (
+    <>
+      {/* スマホ版 */}
+      <div className="block sm:hidden">
+        {articles.map((article, i) => (
+          <div key={article.id} className={`py-4 ${i < articles.length - 1 ? "border-b border-border" : ""}`}>
+            <div className="flex gap-3">
+              <Link href={`/about-ips/news/${article.slug}`} className="flex gap-3 flex-1 min-w-0 group">
+                {article.imageUrl && (
+                  <div className="w-[120px] shrink-0">
+                    <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={article.imageUrl} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[14px] text-text-primary leading-snug group-hover:text-gold transition-colors font-medium line-clamp-3">{article.title}</h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <CategoryBadge category={article.category} small />
+                    {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
+                  </div>
+                </div>
+              </Link>
+              <FavoriteButton contentType="ARTICLE" contentId={article.id} isFavorited={favSet.has(`ARTICLE:${article.id}`)} />
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* ステップ進捗 */}
-      <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
-        ステータス
-      </h3>
-      {membership ? (
-        <StatusTimeline currentStatus={membership.ipsStatus} />
-      ) : (
-        <div className="bg-bg-secondary border border-border rounded-md p-6 sm:p-8 text-center text-text-muted text-sm">
-          会員権情報が見つかりません
-        </div>
-      )}
-
-      {/* 次のアクション CTA */}
-      {membership && (
-        <NextActionCTA ipsStatus={membership.ipsStatus} />
-      )}
-
-      {/* 保管中の場合: 保管期間表示 */}
-      {membership?.ipsStatus === "STORAGE_ACTIVE" && membership.storageStartAt && (
-        <StoragePeriodCard
-          storageStartAt={membership.storageStartAt}
-          storageYears={membership.storageYears}
-        />
-      )}
-
-      {/* クイックカード（購入済みの場合のみ表示） */}
-      {isPurchased && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mt-6 sm:mt-9">
-          <QuickCard
-            title="契約書類"
-            count={`${signedCount} / ${documents.length}`}
-            sub="署名済み"
-            icon="◇"
-          />
-          <QuickCard
-            title="培養上清液投与"
-            count={String(membership?.treatments.length || 0)}
-            sub="回投与済み"
-            icon="◆"
-          />
-        </div>
-      )}
-
-      {/* 契約書類・同意書類 */}
-      <div className="mt-6 sm:mt-9">
-        <Link
-          href="/documents"
-          className="block bg-bg-secondary border border-border rounded-md p-5 sm:p-6 hover:border-border-gold transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center text-xl shrink-0">
-              ◇
+      {/* PC版 */}
+      <div className="hidden sm:grid sm:grid-cols-2 gap-x-6 gap-y-0">
+        {articles.map((article, i) => (
+          <div key={article.id} className={`py-4 ${i < articles.length - (articles.length % 2 === 0 ? 2 : 1) ? "border-b border-border" : ""}`}>
+            <div className="flex gap-3">
+              <Link href={`/about-ips/news/${article.slug}`} className="flex gap-3 flex-1 min-w-0 group">
+                {article.imageUrl && (
+                  <div className="w-[130px] shrink-0">
+                    <div className="w-full aspect-[16/9] rounded overflow-hidden bg-bg-elevated">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={article.imageUrl} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[13px] text-text-primary leading-snug group-hover:text-gold transition-colors line-clamp-2 font-medium mb-1.5">{article.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <CategoryBadge category={article.category} small />
+                    {article.sourceName && <span className="text-[10px] text-text-muted">{article.sourceName}</span>}
+                  </div>
+                </div>
+              </Link>
+              <FavoriteButton contentType="ARTICLE" contentId={article.id} isFavorited={favSet.has(`ARTICLE:${article.id}`)} />
             </div>
-            <div className="flex-1">
-              <div className="text-sm text-text-primary group-hover:text-gold transition-colors">
-                契約書類・同意書類
-              </div>
-              <div className="text-xs text-text-muted mt-1">
-                契約書類の確認・署名状況
-              </div>
-            </div>
-            <div className="text-text-muted group-hover:text-gold transition-colors">→</div>
           </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="bg-bg-secondary border border-border rounded-md p-12 text-center">
+      <div className="text-2xl mb-3">📡</div>
+      <p className="text-sm text-text-muted">「{label}」はまだ投稿されていません</p>
+      <p className="text-[11px] text-text-muted mt-1">最新情報は随時更新されます</p>
+    </div>
+  );
+}
+
+function KnowledgeSection() {
+  const items = [
+    { href: "/about-ips/what-is-ips", icon: "🧬", title: "iPS細胞とは？", description: "人工多能性幹細胞の仕組みと可能性、再生医療・創薬への応用について" },
+    { href: "/about-ips/history", icon: "📜", title: "iPS細胞の歴史", description: "1962年の核移植実験から2026年の世界初承認まで、60年以上の軌跡" },
+    { href: "/about-ips/glossary", icon: "📖", title: "用語集", description: "iPS細胞・再生医療に関する専門用語をわかりやすく解説" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {items.map((item) => (
+        <Link key={item.href} href={item.href} className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">{item.icon}</div>
+          <div className="flex-1">
+            <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">{item.title}</h3>
+            <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">{item.description}</p>
+          </div>
+          <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
-      </div>
+      ))}
     </div>
   );
 }
 
-// 次のアクション CTA コンポーネント
-function NextActionCTA({ ipsStatus }: { ipsStatus: IpsStatus }) {
-  const ctaConfig: Record<string, { text: string; sub: string; href?: string }> = {
-    REGISTERED: {
-      text: "重要事項を確認する",
-      sub: "次のステップに進むために、重要事項説明をご確認ください",
-      href: "/important-notice",
-    },
-    TERMS_AGREED: {
-      text: "iPSサービスに申し込む",
-      sub: "iPSサービスへのお申込みに進めます",
-      href: "/apply-service",
-    },
-    SERVICE_APPLIED: {
-      text: "担当者からのご連絡をお待ちください",
-      sub: "お申込み内容を確認のうえ、担当者より改めてご連絡いたします",
-    },
-    SCHEDULE_ARRANGED: {
-      text: "ステータス詳細を確認",
-      sub: "クリニックでの採血日程をご確認いただけます",
-      href: "/status",
-    },
-    BLOOD_COLLECTED: {
-      text: "iPS細胞作製の進捗を確認",
-      sub: "現在のiPS細胞作製状況をご確認いただけます",
-      href: "/status",
-    },
-    IPS_CREATING: {
-      text: "iPS細胞作製の進捗を確認",
-      sub: "現在のiPS細胞作製状況をご確認いただけます",
-      href: "/status",
-    },
-    STORAGE_ACTIVE: {
-      text: "保管状況を確認",
-      sub: "iPS細胞の保管状況をご確認いただけます",
-      href: "/status",
-    },
-  };
-
-  const config = ctaConfig[ipsStatus];
-  if (!config) return null;
-
-  // 購入前ステップ（REGISTERED, TERMS_AGREED）は大きめのCTA
-  const isPreService = ["REGISTERED", "TERMS_AGREED"].includes(ipsStatus);
-  // 営業フォロー待ち（SERVICE_APPLIED）はテキストのみ
-  const isWaiting = ipsStatus === "SERVICE_APPLIED";
-
-  if (isWaiting) {
-    return (
-      <div className="mt-5 bg-bg-secondary border border-border-gold rounded-md p-5 sm:p-6 text-center">
-        <div className="text-gold text-sm font-medium mb-1">{config.text}</div>
-        <div className="text-xs text-text-muted">{config.sub}</div>
-      </div>
-    );
-  }
-
-  if (isPreService && config.href) {
-    return (
-      <Link href={config.href}>
-        <div className="mt-5 bg-gold-gradient rounded-md p-5 sm:p-6 text-center cursor-pointer hover:opacity-90 transition-opacity">
-          <div className="text-bg-primary text-sm font-semibold tracking-wider mb-1">
-            {config.text}
-          </div>
-          <div className="text-bg-primary/70 text-xs">{config.sub}</div>
-        </div>
-      </Link>
-    );
-  }
-
-  if (config.href) {
-    return (
-      <Link href={config.href}>
-        <div className="mt-5 bg-bg-secondary border border-border rounded-md p-4 sm:p-5 flex items-center justify-between hover:border-border-gold transition-all cursor-pointer">
-          <div>
-            <div className="text-sm text-text-primary">{config.text}</div>
-            <div className="text-xs text-text-muted mt-0.5">{config.sub}</div>
-          </div>
-          <div className="text-gold">→</div>
-        </div>
-      </Link>
-    );
-  }
-
-  return null;
-}
-
-function StoragePeriodCard({
-  storageStartAt,
-  storageYears,
-}: {
-  storageStartAt: Date;
-  storageYears: number;
-}) {
-  const start = new Date(storageStartAt);
-  const end = new Date(start);
-  end.setFullYear(end.getFullYear() + storageYears);
-
-  const now = new Date();
-  const totalMs = end.getTime() - start.getTime();
-  const elapsedMs = now.getTime() - start.getTime();
-  const remainMs = end.getTime() - now.getTime();
-  const progress = Math.min(Math.max(elapsedMs / totalMs, 0), 1);
-
-  const remainYears = Math.floor(remainMs / (365.25 * 24 * 60 * 60 * 1000));
-  const remainMonths = Math.floor(
-    (remainMs % (365.25 * 24 * 60 * 60 * 1000)) / (30.44 * 24 * 60 * 60 * 1000)
-  );
-
+function CategoryBadge({ category, small }: { category: string; small?: boolean }) {
   return (
-    <div className="mt-5 sm:mt-6 bg-bg-secondary border border-border-gold rounded-md p-5 sm:p-8">
-      <h4 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4">
-        保管期間
-      </h4>
-      <div className="flex items-center gap-5 sm:gap-8">
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--color-border)" strokeWidth="4" />
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--color-gold-primary)" strokeWidth="4" strokeDasharray={`${2 * Math.PI * 42}`} strokeDashoffset={`${2 * Math.PI * 42 * (1 - progress)}`} strokeLinecap="round" />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-mono text-xs sm:text-sm text-gold">{Math.round(progress * 100)}%</span>
-          </div>
-        </div>
-        <div className="flex-1 space-y-2">
-          <div className="font-mono text-lg sm:text-2xl text-gold font-light">
-            残り {remainYears}年 {remainMonths}ヶ月
-          </div>
-          <div className="text-[11px] text-text-muted space-y-1">
-            <div>保管開始: {start.toLocaleDateString("ja-JP")}</div>
-            <div>保管満了: {end.toLocaleDateString("ja-JP")}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function QuickCard({ title, count, sub, icon }: { title: string; count: string; sub: string; icon: string }) {
-  return (
-    <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 flex items-center gap-4 sm:gap-5 transition-colors duration-300 hover:border-border-gold">
-      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-bg-elevated flex items-center justify-center text-xl sm:text-2xl text-gold shrink-0">
-        {icon}
-      </div>
-      <div>
-        <div className="text-xs sm:text-sm text-text-secondary mb-0.5">{title}</div>
-        <div className="font-mono text-2xl sm:text-3xl text-gold font-light">{count}</div>
-        <div className="text-xs text-text-secondary">{sub}</div>
-      </div>
-    </div>
+    <span className={`inline-block ${small ? "text-[9px] px-1.5 py-px" : "text-[10px] px-2 py-0.5"} rounded-full bg-gold/10 text-gold border border-gold/20`}>
+      {CATEGORY_LABELS[category] || category}
+    </span>
   );
 }

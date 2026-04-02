@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { createContentUpdate } from "@/lib/content-notification";
 
 /**
  * 外部ニュース自動取得API（Google News RSS経由）
@@ -178,10 +179,23 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "IDが必要です" }, { status: 400 });
   }
 
+  // 更新前の公開状態を取得
+  const before = await prisma.externalNews.findUnique({ where: { id: body.id }, select: { isPublished: true } });
+
   const news = await prisma.externalNews.update({
     where: { id: body.id },
     data: { isPublished: body.isPublished },
   });
+
+  // 非公開→公開に切り替わった場合、更新通知を作成
+  if (!before?.isPublished && news.isPublished) {
+    await createContentUpdate({
+      title: `RSSニュースを更新しました`,
+      contentType: "news",
+      contentId: news.id,
+      linkUrl: "/dashboard?tab=news",
+    });
+  }
 
   return NextResponse.json(news);
 }

@@ -31,7 +31,7 @@ export default async function VideoDetailPage({
     <div className="max-w-[900px] mx-auto">
       {/* パンくず */}
       <div className="text-[11px] text-text-muted mb-4">
-        <Link href="/about-ips?tab=videos" className="hover:text-gold transition-colors">
+        <Link href="/dashboard?tab=videos" className="hover:text-gold transition-colors">
           動画一覧
         </Link>
         <span className="mx-2">/</span>

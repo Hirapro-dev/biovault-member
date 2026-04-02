@@ -153,8 +153,8 @@ export default async function GlossaryPage() {
     <div className="max-w-[860px] mx-auto">
       {/* パンくず */}
       <div className="text-[11px] text-text-muted mb-6">
-        <Link href="/about-ips" className="hover:text-gold transition-colors">
-          About iPS
+        <Link href="/dashboard" className="hover:text-gold transition-colors">
+          トップ
         </Link>
         <span className="mx-2">/</span>
         <span className="text-text-secondary">用語集</span>
@@ -216,10 +216,10 @@ export default async function GlossaryPage() {
           ← iPS細胞の歴史
         </Link>
         <Link
-          href="/about-ips"
+          href="/dashboard"
           className="text-sm text-gold hover:text-gold-light transition-colors"
         >
-          About iPS トップ →
+          トップへ戻る →
         </Link>
       </div>
     </div>

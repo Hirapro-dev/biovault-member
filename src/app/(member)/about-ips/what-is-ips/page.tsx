@@ -9,8 +9,8 @@ export default async function WhatIsIpsPage() {
     <div className="max-w-[860px] mx-auto">
       {/* パンくず */}
       <div className="text-[11px] text-text-muted mb-6">
-        <Link href="/about-ips" className="hover:text-gold transition-colors">
-          About iPS
+        <Link href="/dashboard" className="hover:text-gold transition-colors">
+          トップ
         </Link>
         <span className="mx-2">/</span>
         <span className="text-text-secondary">iPS細胞とは？</span>
@@ -84,10 +84,10 @@ export default async function WhatIsIpsPage() {
       {/* 下部ナビゲーション */}
       <div className="mt-12 pt-8 border-t border-border flex justify-between">
         <Link
-          href="/about-ips"
+          href="/dashboard"
           className="text-sm text-text-secondary hover:text-gold transition-colors"
         >
-          ← About iPS トップ
+          ← トップへ戻る
         </Link>
         <Link
           href="/about-ips/history"

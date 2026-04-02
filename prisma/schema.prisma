@@ -425,7 +425,7 @@ model Application {
 
 enum ApplicationStatus {
   PENDING           // 申込受付
-  REVIEWING         // 審査中
+  REVIEWING         // iPS作成適合確認中
   APPROVED          // 承認済
   REGISTERED        // 会員登録済
   REJECTED          // 却下
@@ -538,4 +538,40 @@ enum PrintRequestStatus {
   PAID              // 入金確認済（銀行振込の場合）
   ORDERED           // 本部発注済
   CANCELLED         // キャンセル
+}
+
+// ────────────────────────────────────────
+// コンテンツ更新通知
+// ────────────────────────────────────────
+model ContentUpdate {
+  id          String   @id @default(cuid())
+  title       String                          // 更新タイトル（例: 「注目ニュースを更新しました」）
+  contentType String                          // article / video / news
+  contentId   String?                         // 対象コンテンツのID（任意）
+  linkUrl     String?                         // リンク先URL
+  publishedAt DateTime @default(now())        // 公開日時
+  createdAt   DateTime @default(now())
+}
+
+// コンテンツ更新の既読管理（ユーザーごと）
+model ContentUpdateRead {
+  id              String   @id @default(cuid())
+  userId          String
+  contentUpdateId String
+  readAt          DateTime @default(now())
+
+  @@unique([userId, contentUpdateId])          // 同じ通知を二重既読にしない
+  @@index([userId])
+}
+
+// プッシュ通知用のサブスクリプション管理
+model PushSubscription {
+  id           String   @id @default(cuid())
+  userId       String
+  endpoint     String   @unique               // Web Pushエンドポイント
+  p256dh       String                          // 公開鍵
+  auth         String                          // 認証トークン
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
 }

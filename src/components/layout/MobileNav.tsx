@@ -38,7 +38,7 @@ export default function MobileNav({
       {/* ヘッダーバー */}
       <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-bg-secondary border-b border-border lg:hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-6 w-auto" />
+        <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
         <button
           onClick={() => setOpen(!open)}
           className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text-secondary"

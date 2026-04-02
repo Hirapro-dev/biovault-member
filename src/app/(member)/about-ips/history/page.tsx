@@ -116,8 +116,8 @@ export default async function HistoryPage() {
     <div className="max-w-[860px] mx-auto">
       {/* パンくず */}
       <div className="text-[11px] text-text-muted mb-6">
-        <Link href="/about-ips" className="hover:text-gold transition-colors">
-          About iPS
+        <Link href="/dashboard" className="hover:text-gold transition-colors">
+          トップ
         </Link>
         <span className="mx-2">/</span>
         <span className="text-text-secondary">iPS細胞の歴史</span>

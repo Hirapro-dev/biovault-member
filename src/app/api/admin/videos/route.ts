@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { createContentUpdate } from "@/lib/content-notification";
 
 // YouTubeのURLからVideo IDを抽出
 function extractYoutubeId(url: string): string | null {
@@ -64,6 +65,16 @@ export async function POST(req: Request) {
       author: session.user.name || "管理者",
     },
   });
+
+  // 公開状態の場合、更新通知を作成
+  if (video.isPublished) {
+    await createContentUpdate({
+      title: `動画「${video.title}」を公開しました`,
+      contentType: "video",
+      contentId: video.id,
+      linkUrl: `/about-ips/video/${video.id}`,
+    });
+  }
 
   return NextResponse.json(video);
 }

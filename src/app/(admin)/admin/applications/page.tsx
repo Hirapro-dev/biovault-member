@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   PENDING: { label: "申込受付", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
-  REVIEWING: { label: "審査中", color: "bg-status-info/10 text-status-info border-status-info/20" },
+  REVIEWING: { label: "iPS細胞作製適合確認中", color: "bg-status-info/10 text-status-info border-status-info/20" },
   APPROVED: { label: "承認済", color: "bg-gold/10 text-gold border-gold/20" },
   REGISTERED: { label: "会員登録済", color: "bg-status-active/10 text-status-active border-status-active/20" },
   REJECTED: { label: "却下", color: "bg-status-danger/10 text-status-danger border-status-danger/20" },

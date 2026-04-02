@@ -51,6 +51,14 @@ export default function RootLayout({
       lang="ja"
       className={`${notoSansJP.variable} ${notoSerifJP.variable} ${cormorantGaramond.variable} ${dmMono.variable}`}
     >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#070709" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="BioVault" />
+        <link rel="apple-touch-icon" href="/logo_home.png" />
+      </head>
       <body className="min-h-screen bg-bg-primary text-text-primary font-sans antialiased">
         <SessionProvider>{children}</SessionProvider>
       </body>

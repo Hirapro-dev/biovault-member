@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { createContentUpdate } from "@/lib/content-notification";
 
 // 記事更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +13,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json();
+
+  // 更新前の公開状態を取得
+  const before = await prisma.ipsArticle.findUnique({ where: { id }, select: { isPublished: true } });
 
   const article = await prisma.ipsArticle.update({
     where: { id },
@@ -27,6 +31,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       publishedAt: body.publishedAt ? new Date(body.publishedAt) : undefined,
     },
   });
+
+  // 非公開→公開に切り替わった場合、更新通知を作成
+  if (!before?.isPublished && article.isPublished) {
+    await createContentUpdate({
+      title: `「${article.title}」を公開しました`,
+      contentType: "article",
+      contentId: article.id,
+      linkUrl: `/about-ips/news/${article.slug}`,
+    });
+  }
 
   return NextResponse.json(article);
 }

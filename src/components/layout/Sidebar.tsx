@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// 会員用ナビ（BottomNavと同じ構成）
 const memberNav = [
-  { href: "/dashboard", label: "マイページ", icon: "◈" },
-  { href: "/status", label: "ステータス詳細", icon: "◉" },
-  { href: "/apply-service", label: "サービス申込", icon: "✍️" },
-  { href: "/documents", label: "契約書類", icon: "◇" },
-  { href: "/about-ips", label: "iPS Portal", icon: "🧬" },
-  { href: "/concierge", label: "コンシェルジュ", icon: "◎" },
-  { href: "/settings", label: "設定", icon: "⚙" },
+  { href: "/dashboard", label: "トップ", icon: "◈" },
+  { href: "/mypage", label: "マイページ", icon: "👤" },
+  { href: "/info", label: "サービス詳細", icon: "◉" },
+  { href: "/favorites", label: "お気に入り", icon: "★" },
 ];
 
 const adminNav = [
@@ -37,7 +35,7 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
         <img
           src="/logo.png"
           alt="BioVault"
-          className="h-8 w-auto"
+          className="h-10 w-auto"
         />
         <div className="text-[9px] tracking-[3px] text-text-muted mt-2">
           {isAdmin ? "ADMIN CONSOLE" : "MEMBER'S PORTAL"}

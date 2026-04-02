@@ -10,6 +10,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         loginId: { label: "Login ID", type: "text" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember Me", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.loginId || !credentials?.password) return null;
@@ -48,13 +49,25 @@ export const authOptions: NextAuthOptions = {
           mustChangePassword: user.mustChangePassword,
           hasAgreedTerms: user.hasAgreedTerms,
           agencyAgreed,
+          rememberMe: credentials.rememberMe === "true",
         };
       },
     }),
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30日
+    maxAge: 30 * 24 * 60 * 60, // 30日（rememberMe=true時の最大値）
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   pages: {
     signIn: "/login",
@@ -67,6 +80,12 @@ export const authOptions: NextAuthOptions = {
         token.mustChangePassword = (user as any).mustChangePassword;
         token.hasAgreedTerms = (user as any).hasAgreedTerms;
         token.agencyAgreed = (user as any).agencyAgreed;
+        token.rememberMe = (user as any).rememberMe;
+
+        // rememberMeがオフの場合、トークンの有効期限を1日に短縮
+        if (!(user as any).rememberMe) {
+          token.maxAge = 24 * 60 * 60; // 1日
+        }
       }
       // セッション更新時にDBから最新の同意状態を取得
       if (trigger === "update") {

@@ -39,6 +39,7 @@ export default function ApplyServicePage() {
     allergy: false, allergyDetail: "",
     otherHealth: false, otherHealthDetail: "",
   });
+  const [healthLoaded, setHealthLoaded] = useState(false);
 
   // 支払情報
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
@@ -65,6 +66,36 @@ export default function ApplyServicePage() {
       router.push("/login");
     }
   }, [status, router]);
+
+  // 申込時の健康情報をプリフィル
+  useEffect(() => {
+    if (status !== "authenticated" || healthLoaded) return;
+    fetch("/api/member/health-info")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setHealthData({
+            currentIllness: data.currentIllness ?? false,
+            currentIllnessDetail: data.currentIllnessDetail ?? "",
+            pastIllness: data.pastIllness ?? false,
+            pastIllnessDetail: data.pastIllnessDetail ?? "",
+            currentMedication: data.currentMedication ?? false,
+            currentMedicationDetail: data.currentMedicationDetail ?? "",
+            chronicDisease: data.chronicDisease ?? false,
+            chronicDiseaseDetail: data.chronicDiseaseDetail ?? "",
+            infectiousDisease: data.infectiousDisease ?? false,
+            infectiousDiseaseDetail: data.infectiousDiseaseDetail ?? "",
+            pregnancy: data.pregnancy ?? false,
+            allergy: data.allergy ?? false,
+            allergyDetail: data.allergyDetail ?? "",
+            otherHealth: data.otherHealth ?? false,
+            otherHealthDetail: data.otherHealthDetail ?? "",
+          });
+        }
+        setHealthLoaded(true);
+      })
+      .catch(() => setHealthLoaded(true));
+  }, [status, healthLoaded]);
 
   // 同意書スクロール検知
   const handleConsentScroll = () => {
@@ -161,7 +192,7 @@ export default function ApplyServicePage() {
       {/* ヘッダー */}
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
-        <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider">
+        <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
           iPSサービス申込
         </h2>
         <GoldDivider />
@@ -262,7 +293,12 @@ export default function ApplyServicePage() {
 
           {/* 健康状態自己申告 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">事前確認事項（健康状態）</h3>
+            <h3 className="text-sm text-text-primary tracking-wider mb-3">事前確認事項（健康状態）</h3>
+            <div className="bg-gold/5 border-l-2 border-gold px-4 py-3 rounded-r-md mb-5">
+              <p className="text-[12px] sm:text-[13px] text-text-secondary leading-relaxed">
+                iPS細胞作製にあたり、事前に適合確認のため現在の健康状態の確認をさせていただいております。メンバーシップ申込時より、健康状態に変更がある場合は、その旨ご記載ください。
+              </p>
+            </div>
             <div className="space-y-4">
               <HealthCheckItem
                 label="現在治療中の病気はありますか？"
@@ -306,7 +342,10 @@ export default function ApplyServicePage() {
                   onChange={(e) => updateHealth("pregnancy", e.target.checked)}
                   className="accent-gold w-4 h-4"
                 />
-                <span className="text-sm text-text-secondary">妊娠中、もしくは妊娠の可能性がある</span>
+                <span className="text-sm text-text-secondary">
+                  妊娠中、もしくは妊娠の可能性がある
+                  {!healthData.pregnancy && <span className="ml-2 text-[11px] text-text-muted font-normal">【なし】</span>}
+                </span>
               </div>
               <HealthCheckItem
                 label="アレルギーはありますか？"
@@ -537,7 +576,10 @@ function HealthCheckItem({
           onChange={(e) => onChange(e.target.checked)}
           className="accent-gold w-4 h-4"
         />
-        <span className="text-sm text-text-secondary">{label}</span>
+        <span className="text-sm text-text-secondary">
+          {label}
+          {!checked && <span className="ml-2 text-[11px] text-text-muted font-normal">【なし】</span>}
+        </span>
       </div>
       {checked && (
         <input

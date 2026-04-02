@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { createContentUpdate } from "@/lib/content-notification";
 
 // 記事一覧取得
 export async function GET() {
@@ -50,6 +51,16 @@ export async function POST(req: Request) {
       author: session.user.name || "管理者",
     },
   });
+
+  // 公開状態の場合、更新通知を作成
+  if (article.isPublished) {
+    await createContentUpdate({
+      title: `「${article.title}」を公開しました`,
+      contentType: "article",
+      contentId: article.id,
+      linkUrl: `/about-ips/news/${article.slug}`,
+    });
+  }
 
   return NextResponse.json(article);
 }

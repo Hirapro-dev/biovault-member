@@ -5,7 +5,7 @@ export type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentT
 // iPS ステータスの日本語ラベル
 export const IPS_STATUS_LABELS: Record<IpsStatus, string> = {
   REGISTERED: "メンバー登録",
-  TERMS_AGREED: "重要事項確認",
+  TERMS_AGREED: "iPS細胞作製適合確認",
   SERVICE_APPLIED: "サービス申込",
   SCHEDULE_ARRANGED: "日程調整",
   BLOOD_COLLECTED: "問診・採血",
@@ -65,9 +65,9 @@ export const IPS_STATUS_ICONS: Record<IpsStatus, string> = {
 // ステータス説明
 export const IPS_STATUS_DESCRIPTIONS: Record<IpsStatus, string> = {
   REGISTERED: "メンバー登録が完了しました",
-  TERMS_AGREED: "重要事項説明をご確認いただきました",
-  SERVICE_APPLIED: "iPSサービスへのお申込みが完了しました",
-  SCHEDULE_ARRANGED: "クリニックでの採血日程を調整中です",
+  TERMS_AGREED: "健康状態の確認が完了しました",
+  SERVICE_APPLIED: "サービスのお申込みが完了しました",
+  SCHEDULE_ARRANGED: "問診・採血の日程を調整中です",
   BLOOD_COLLECTED: "クリニックでの問診・採血が完了しました",
   IPS_CREATING: "お客様のiPS細胞を作製しております",
   STORAGE_ACTIVE: "厳重な管理施設にて安全に保管中です",

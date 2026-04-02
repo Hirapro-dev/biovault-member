@@ -102,13 +102,13 @@ function ApplyPage() {
           <h2 className="font-serif-jp text-xl text-gold mb-3">メンバー登録を受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
-              お申し込みの内容をもとに、専用本部にて審査を行います。
+              お申し込みの内容をもとに、専用本部にてiPS細胞作製適合確認を行います。
             </p>
             <p>
               <span className="text-gold font-medium">3営業日以内</span>に、メンバーサイトのIDとパスワードをメールにてお届けいたします。
             </p>
             <p className="text-xs text-text-muted">
-              ※ 審査の内容によっては、ご入会いただけない場合がございます。あらかじめご了承ください。
+              ※ iPS作成適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ function ApplyPage() {
     <PageWrapper>
       <div className="text-center mb-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-8 w-auto mx-auto mb-4" />
+        <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
           BioVault メンバー登録
         </h1>

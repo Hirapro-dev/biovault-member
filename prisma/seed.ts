@@ -34,7 +34,7 @@ async function main() {
       nameRomaji: "Taro TANAKA",
       phone: "090-1234-5678",
       memberNumber: "BV-0001",
-      ipsStatus: "IPS_CREATING" as const,  // ⑥ iPS作成中
+      ipsStatus: "IPS_CREATING" as const,  // ⑥ iPS細胞作製中
       paymentStatus: "COMPLETED" as const,
       paidAmount: 8800000,
     },

@@ -19,7 +19,7 @@ export default function AgencySidebar() {
     <div className="w-60 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       <div className="px-6 py-7 border-b border-border">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-8 w-auto" />
+        <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
         <div className="text-[9px] tracking-[3px] text-text-muted mt-2">AGENCY PORTAL</div>
       </div>
       <nav className="flex-1 p-3 overflow-y-auto">

@@ -131,6 +131,35 @@ select {
   box-sizing: border-box;
 }
 
+/* PWA スタンドアロンモード対応 */
+@media (display-mode: standalone) {
+  /* iOSセーフエリア（ノッチ・ダイナミックアイランド）対応 */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* PWAモード時はスクロールのバウンス効果を制御 */
+  html {
+    overscroll-behavior-y: none;
+  }
+
+  /* ステータスバー背景を本体カラーに合わせる */
+  body::before {
+    content: "";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background: var(--color-bg-secondary);
+    z-index: 9999;
+  }
+}
+
 /* スクロールバー */
 ::-webkit-scrollbar {
   width: 6px;

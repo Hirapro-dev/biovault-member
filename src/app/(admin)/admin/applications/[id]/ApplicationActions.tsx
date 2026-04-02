@@ -33,7 +33,7 @@ function kataToRomaji(kana: string) {
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "申込受付" },
-  { value: "REVIEWING", label: "審査中" },
+  { value: "REVIEWING", label: "iPS細胞作製適合確認中" },
   { value: "APPROVED", label: "承認済" },
   { value: "REJECTED", label: "却下" },
 ];

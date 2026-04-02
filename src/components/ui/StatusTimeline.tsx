@@ -1,10 +1,29 @@
 "use client";
 
-import { IPS_STATUS_ORDER, IPS_STATUS_LABELS, IPS_STATUS_ICONS, IPS_STATUS_DESCRIPTIONS } from "@/types";
+import { IPS_STATUS_ORDER, IPS_STATUS_LABELS, IPS_STATUS_ICONS } from "@/types";
 import type { IpsStatus } from "@/types";
 
-export default function StatusTimeline({ currentStatus }: { currentStatus: IpsStatus }) {
+// 各ステータスに到達した日時のマップ
+type StatusDates = Partial<Record<IpsStatus, string>>;
+
+export default function StatusTimeline({
+  currentStatus,
+  statusDates,
+}: {
+  currentStatus: IpsStatus;
+  statusDates?: StatusDates;
+}) {
   const currentIndex = IPS_STATUS_ORDER.indexOf(currentStatus);
+
+  // 日付フォーマット
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
 
   return (
     <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-4">
@@ -21,6 +40,7 @@ export default function StatusTimeline({ currentStatus }: { currentStatus: IpsSt
           {IPS_STATUS_ORDER.map((status, i) => {
             const done = i < currentIndex;
             const active = i === currentIndex;
+            const dateStr = done || active ? formatDate(statusDates?.[status]) : null;
 
             return (
               <div key={status} className="flex items-start gap-4 pb-7 last:pb-0">
@@ -52,9 +72,9 @@ export default function StatusTimeline({ currentStatus }: { currentStatus: IpsSt
                   >
                     {IPS_STATUS_LABELS[status]}
                   </div>
-                  {active && (
-                    <div className="mt-1.5 text-xs text-text-secondary leading-relaxed">
-                      {IPS_STATUS_DESCRIPTIONS[status]}
+                  {dateStr && (
+                    <div className="mt-0.5 text-[10px] text-text-muted font-mono">
+                      {dateStr}
                     </div>
                   )}
                 </div>
@@ -70,6 +90,7 @@ export default function StatusTimeline({ currentStatus }: { currentStatus: IpsSt
           {IPS_STATUS_ORDER.map((status, i) => {
             const done = i < currentIndex;
             const active = i === currentIndex;
+            const dateStr = done || active ? formatDate(statusDates?.[status]) : null;
 
             return (
               <div key={status} className="flex-1 text-center relative">
@@ -108,9 +129,9 @@ export default function StatusTimeline({ currentStatus }: { currentStatus: IpsSt
                 >
                   {IPS_STATUS_LABELS[status]}
                 </div>
-                {active && (
-                  <div className="mt-2 text-[11px] text-text-secondary leading-relaxed px-1">
-                    {IPS_STATUS_DESCRIPTIONS[status]}
+                {dateStr && (
+                  <div className="mt-1 text-[10px] text-text-muted font-mono">
+                    {dateStr}
                   </div>
                 )}
               </div>

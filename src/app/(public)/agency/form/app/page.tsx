@@ -61,7 +61,7 @@ export default function AgencyApplyPage() {
     <Wrapper>
       <div className="text-center mb-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-8 w-auto mx-auto mb-4" />
+        <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
           BioVault エージェント登録
         </h1>

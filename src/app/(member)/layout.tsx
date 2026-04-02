@@ -5,6 +5,9 @@ import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
 import BottomNav from "@/components/layout/BottomNav";
 import AccessLogger from "@/components/analytics/AccessLogger";
+import UpdateNotification from "@/components/ui/UpdateNotification";
+import PushRegistrar from "@/components/analytics/PushRegistrar";
+import InstallGuide from "@/components/ui/InstallGuide";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,15 @@ export default async function MemberLayout({
 
         {/* アクセスログ自動記録 */}
         <AccessLogger />
+
+        {/* 更新通知ポップアップ */}
+        <UpdateNotification />
+
+        {/* プッシュ通知登録 */}
+        <PushRegistrar />
+
+        {/* ホーム画面追加ガイド */}
+        <InstallGuide />
       </div>
     </div>
   );

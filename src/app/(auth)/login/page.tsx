@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,6 +23,7 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       loginId,
       password,
+      rememberMe: rememberMe ? "true" : "false",
       redirect: false,
     });
 
@@ -41,7 +43,7 @@ export default function LoginPage() {
     } else if (role === "AGENCY") {
       router.push("/agency");
     } else {
-      router.push("/about-ips");
+      router.push("/dashboard");
     }
     router.refresh();
   };
@@ -59,9 +61,9 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="BioVault"
-            className="h-9 w-auto mx-auto"
+            className="h-14 w-auto mx-auto"
           />
-          <GoldDivider width={120} className="mx-auto mt-4" />
+          <GoldDivider width={150} className="mx-auto mt-6" />
         </div>
 
         {/* フォーム */}
@@ -127,7 +129,18 @@ export default function LoginPage() {
             {loading ? "ログイン中..." : "ログイン"}
           </button>
 
-          <p className="text-center text-[11px] text-text-muted mt-5 leading-relaxed">
+          {/* ログイン状態保持 */}
+          <label className="flex items-center justify-center gap-2 mt-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="accent-gold w-3.5 h-3.5"
+            />
+            <span className="text-[11px] text-text-muted">30日間ログイン状態を保持</span>
+          </label>
+
+          <p className="text-center text-[11px] text-text-muted mt-4 leading-relaxed">
             パスワードをお忘れの方は
             <br />
             担当者までご連絡ください
