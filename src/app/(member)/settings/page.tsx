@@ -1,8 +1,6 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import PushNotificationToggle from "@/components/ui/PushNotificationToggle";
-
 export default async function SettingsPage() {
   const user = await requireAuth();
 
@@ -47,8 +45,14 @@ export default async function SettingsPage() {
       </div>
 
       {/* 通知設定 */}
-      <div className="bg-bg-secondary border border-border rounded-md px-5 sm:px-6 mb-5">
-        <PushNotificationToggle />
+      <div className="bg-bg-secondary border border-border rounded-md overflow-hidden mb-5">
+        <Link
+          href="/settings/notifications"
+          className="flex items-center justify-between px-5 sm:px-6 py-5 text-base text-text-primary hover:bg-bg-elevated hover:text-gold transition-all"
+        >
+          <span>通知設定</span>
+          <span className="text-text-muted text-xs">→</span>
+        </Link>
       </div>
 
       {/* 規約・ポリシー */}

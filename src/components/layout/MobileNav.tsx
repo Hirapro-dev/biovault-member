@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react";
 const memberNav = [
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
   { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
-  { href: "/settings", label: "通知設定", icon: "🔔" },
+  { href: "/settings/notifications", label: "通知設定", icon: "🔔" },
 ];
 
 const adminNav = [
