@@ -116,4 +116,5 @@ export interface SessionUser {
   name: string;
   role: Role;
   mustChangePassword: boolean;
+  hasAgreedTerms?: boolean;
 }

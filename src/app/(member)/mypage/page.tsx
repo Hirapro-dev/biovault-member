@@ -8,51 +8,45 @@ import { POST_SERVICE_STATUSES } from "@/types";
 export default async function MyPage() {
   const user = await requireAuth();
 
-  const fullUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: {
-      nameRomaji: true,
-      // 健康状態
-      currentIllness: true,
-      currentIllnessDetail: true,
-      pastIllness: true,
-      pastIllnessDetail: true,
-      currentMedication: true,
-      currentMedicationDetail: true,
-      chronicDisease: true,
-      chronicDiseaseDetail: true,
-      infectiousDisease: true,
-      infectiousDiseaseDetail: true,
-      pregnancy: true,
-      allergy: true,
-      allergyDetail: true,
-      otherHealth: true,
-      otherHealthDetail: true,
-    },
-  });
-
-  const membership = await prisma.membership.findUnique({
-    where: { userId: user.id },
-    include: {
-      treatments: true,
-    },
-  });
-
-  const documents = await prisma.document.findMany({
-    where: { userId: user.id },
-  });
+  // 全DBクエリを並列実行（高速化）
+  const [fullUser, membership, documents, statusHistories] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        nameRomaji: true,
+        currentIllness: true,
+        currentIllnessDetail: true,
+        pastIllness: true,
+        pastIllnessDetail: true,
+        currentMedication: true,
+        currentMedicationDetail: true,
+        chronicDisease: true,
+        chronicDiseaseDetail: true,
+        infectiousDisease: true,
+        infectiousDiseaseDetail: true,
+        pregnancy: true,
+        allergy: true,
+        allergyDetail: true,
+        otherHealth: true,
+        otherHealthDetail: true,
+      },
+    }),
+    prisma.membership.findUnique({
+      where: { userId: user.id },
+      include: { treatments: true },
+    }),
+    prisma.document.findMany({
+      where: { userId: user.id },
+    }),
+    prisma.statusHistory.findMany({
+      where: { userId: user.id },
+      orderBy: { changedAt: "asc" },
+      select: { toStatus: true, changedAt: true },
+    }),
+  ]);
 
   const signedCount = documents.filter((d) => d.status === "SIGNED").length;
-
-  // 購入済みかどうか（SERVICE_APPLIED以降）
   const isPurchased = membership && POST_SERVICE_STATUSES.includes(membership.ipsStatus);
-
-  // ステータス履歴から各ステータスの到達日を取得
-  const statusHistories = await prisma.statusHistory.findMany({
-    where: { userId: user.id },
-    orderBy: { changedAt: "asc" },
-    select: { toStatus: true, changedAt: true },
-  });
 
   // 各ステータスへの最初の到達日をマッピング
   const statusDates: Partial<Record<string, string>> = {};

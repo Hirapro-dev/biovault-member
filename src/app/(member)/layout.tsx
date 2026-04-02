@@ -1,5 +1,4 @@
 import { requireAuth } from "@/lib/auth-helpers";
-import prisma from "@/lib/prisma";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
@@ -9,8 +8,6 @@ import UpdateNotification from "@/components/ui/UpdateNotification";
 import PushRegistrar from "@/components/analytics/PushRegistrar";
 import InstallGuide from "@/components/ui/InstallGuide";
 
-export const dynamic = "force-dynamic";
-
 export default async function MemberLayout({
   children,
 }: {
@@ -19,14 +16,11 @@ export default async function MemberLayout({
   const user = await requireAuth();
   const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
 
-  // 未同意かどうかをDBから確認（キャッシュなし）
-  const fullUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { hasAgreedTerms: true },
-  });
+  // セッション（JWT）から同意状態を取得（DBクエリ不要）
+  const hasAgreedTerms = (user as any).hasAgreedTerms !== false;
 
   // 未同意時はメニューバーを非表示（重要事項説明ページ用）
-  if (!fullUser?.hasAgreedTerms) {
+  if (!hasAgreedTerms) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
         <main className="px-4 py-8 sm:py-12 max-w-[800px] mx-auto animate-fade-in">

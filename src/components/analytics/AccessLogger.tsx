@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 /**
  * アクセスログを自動記録するコンポーネント
- * ページ遷移ごとにAPIにログを送信
+ * ページ遷移ごとにAPIにログを送信（2秒遅延で実行し表示を阻害しない）
  */
 export default function AccessLogger() {
   const pathname = usePathname();
@@ -19,8 +19,9 @@ export default function AccessLogger() {
     // ページタイトルのマッピング
     const titleMap: Record<string, string> = {
       "/about-ips": "iPS Portal",
-      "/dashboard": "マイページ",
-      "/info": "基本情報",
+      "/dashboard": "トップ",
+      "/mypage": "マイページ",
+      "/info": "サービス詳細",
       "/favorites": "お気に入り",
       "/apply-service": "サービス申込",
       "/documents": "契約書類",
@@ -35,7 +36,6 @@ export default function AccessLogger() {
       "/important-notice": "重要事項説明",
     };
 
-    // パスからタイトルを推定
     let pageTitle = titleMap[pathname] || null;
     if (!pageTitle) {
       if (pathname.startsWith("/about-ips/news/")) pageTitle = "記事閲覧";
@@ -43,13 +43,17 @@ export default function AccessLogger() {
       else if (pathname.startsWith("/about-ips")) pageTitle = "iPS Portal";
     }
 
-    // 非同期でログ送信（レスポンスは待たない）
-    fetch("/api/member/access-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: pathname, pageTitle }),
-    }).catch(() => {});
+    // 2秒遅延で送信（ページ描画を優先）
+    const timer = setTimeout(() => {
+      fetch("/api/member/access-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: pathname, pageTitle }),
+      }).catch(() => {});
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [pathname]);
 
-  return null; // UIは描画しない
+  return null;
 }

@@ -47,24 +47,22 @@ export default async function DashboardPage({
   const { tab } = await searchParams;
   const activeTab = tab || "featured";
 
-  // ── コンテンツ取得 ──
-  const articles = activeTab === "featured"
-    ? await prisma.ipsArticle.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
-    : [];
-
-  const videos = activeTab === "videos"
-    ? await prisma.video.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
-    : [];
-
-  const externalNews = activeTab === "news"
-    ? await prisma.externalNews.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" }, take: 30 })
-    : [];
-
-  // お気に入り状態を取得
-  const favorites = await prisma.favorite.findMany({
-    where: { userId: user.id },
-    select: { contentType: true, contentId: true },
-  });
+  // ── コンテンツ + お気に入りを並列取得（高速化） ──
+  const [articles, videos, externalNews, favorites] = await Promise.all([
+    activeTab === "featured"
+      ? prisma.ipsArticle.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
+      : Promise.resolve([]),
+    activeTab === "videos"
+      ? prisma.video.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } })
+      : Promise.resolve([]),
+    activeTab === "news"
+      ? prisma.externalNews.findMany({ where: { isPublished: true }, orderBy: { publishedAt: "desc" }, take: 30 })
+      : Promise.resolve([]),
+    prisma.favorite.findMany({
+      where: { userId: user.id },
+      select: { contentType: true, contentId: true },
+    }),
+  ]);
   const favSet = new Set(favorites.map((f) => `${f.contentType}:${f.contentId}`));
 
   const featured = articles.length > 0 && activeTab === "featured" ? articles[0] : null;
