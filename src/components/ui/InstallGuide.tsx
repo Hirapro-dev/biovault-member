@@ -100,7 +100,7 @@ export default function InstallGuide() {
               {isIos ? (
                 /* iOS用手順 */
                 <div className="space-y-2.5">
-                  <StepItem step={1} text="画面下部の共有ボタン（↑）をタップ" />
+                  <StepItem step={1} text="検索バーの共有ボタン（↑）をタップ" />
                   <StepItem step={2} text="「ホーム画面に追加」をタップ" />
                   <StepItem step={3} text="右上の「追加」をタップ" />
                   <div className="text-[10px] text-text-muted mt-2 leading-relaxed">
