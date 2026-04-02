@@ -15,6 +15,8 @@ const SOURCE_LOGOS: { keyword: string; logo: string }[] = [
   // Yahoo
   { keyword: "Yahoo", logo: "/rss/yahoo.png" },
   { keyword: "ヤフー", logo: "/rss/yahoo.png" },
+  // ダイヤモンド・オンライン
+  { keyword: "ダイヤモンド", logo: "/rss/diamondonline.svg" },
   // JBpress
   { keyword: "JBpress", logo: "/rss/jbpress.svg" },
   // 時事通信
