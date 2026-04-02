@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getSourceLogo } from "@/lib/source-logos";
 
 interface ExternalNewsItem {
   id: string;
@@ -273,6 +274,9 @@ export default function AdminNewsPage() {
                   {item.imageUrl && !item.imageUrl.includes("google.com/s2/favicons") ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                  ) : getSourceLogo(item.sourceName) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={getSourceLogo(item.sourceName)!} alt={item.sourceName} className="w-12 h-12 object-contain" />
                   ) : (
                     <span className="text-[10px] text-text-muted font-medium text-center px-1 leading-tight">
                       {item.sourceName}

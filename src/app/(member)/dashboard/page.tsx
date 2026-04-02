@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import { getSourceLogo } from "@/lib/source-logos";
 
 const CATEGORY_LABELS: Record<string, string> = {
   NEWS: "ニュース",
@@ -194,6 +195,9 @@ export default async function DashboardPage({
                           {news.imageUrl && !news.imageUrl.includes("google.com/s2/favicons") ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={news.imageUrl} alt="" className="w-full h-full object-cover" />
+                          ) : getSourceLogo(news.sourceName) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={getSourceLogo(news.sourceName)!} alt={news.sourceName} className="w-16 h-16 object-contain" />
                           ) : (
                             <span className="text-[11px] text-text-muted font-medium text-center px-2 leading-tight">
                               {news.sourceName}
