@@ -41,14 +41,15 @@ export default function UpdateNotification() {
     }
   };
 
-  // 「更新情報を見る」クリック（既読にしてリンクへ）
-  const handleView = async () => {
+  // 「更新情報を見る」クリック（既読にして閉じる → リンクへ）
+  const handleView = () => {
+    setVisible(false);
     if (update) {
-      await fetch("/api/member/content-updates", {
+      fetch("/api/member/content-updates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contentUpdateId: update.id }),
-      });
+      }).catch(() => {});
     }
   };
 
