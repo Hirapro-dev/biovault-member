@@ -32,9 +32,16 @@ export default async function SettingsPage() {
         </div>
         <Link
           href="/settings/profile"
+          className="flex items-center justify-between py-3 text-sm text-text-primary hover:text-gold transition-colors border-b border-border"
+        >
+          <span>登録情報</span>
+          <span className="text-text-muted">→</span>
+        </Link>
+        <Link
+          href="/settings/password"
           className="flex items-center justify-between py-3 text-sm text-text-primary hover:text-gold transition-colors"
         >
-          <span>プロフィール・パスワード変更</span>
+          <span>パスワード変更</span>
           <span className="text-text-muted">→</span>
         </Link>
       </div>

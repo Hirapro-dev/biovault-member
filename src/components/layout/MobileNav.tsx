@@ -8,7 +8,8 @@ import { signOut } from "next-auth/react";
 // 会員用トグルメニュー
 const memberNav = [
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
-  { href: "/settings/profile#password", label: "パスワード変更", icon: "🔑" },
+  { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
+  { href: "/settings", label: "通知設定", icon: "🔔" },
 ];
 
 const adminNav = [

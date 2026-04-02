@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import PasswordChangeForm from "./PasswordChangeForm";
 import ProfileEditableFields from "./ProfileEditableFields";
 
 export default async function ProfilePage() {
@@ -63,8 +62,6 @@ export default async function ProfilePage() {
         />
       </div>
 
-      {/* パスワード変更 */}
-      <PasswordChangeForm mustChange={(user as any).mustChangePassword} />
     </div>
   );
 }
