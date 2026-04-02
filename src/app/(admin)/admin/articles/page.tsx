@@ -198,39 +198,19 @@ export default function AdminArticlesPage() {
               onRemove={() => setForm({ ...form, imageUrl: "" })}
             />
 
-            {/* メタ情報（カテゴリ・出典） */}
+            {/* カテゴリ */}
             <div className="bg-bg-secondary border border-border rounded-md p-4">
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="block text-[10px] text-text-muted tracking-wider mb-1.5">カテゴリ</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer focus:border-border-gold"
-                  >
-                    {CATEGORY_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] text-text-muted tracking-wider mb-1.5">出典名</label>
-                  <input
-                    value={form.sourceName}
-                    onChange={(e) => setForm({ ...form, sourceName: e.target.value })}
-                    placeholder="京都大学, Nature..."
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold"
-                  />
-                </div>
-              </div>
               <div>
-                <label className="block text-[10px] text-text-muted tracking-wider mb-1.5">出典URL</label>
-                <input
-                  value={form.sourceUrl}
-                  onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold"
-                />
+                <label className="block text-[10px] text-text-muted tracking-wider mb-1.5">カテゴリ</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer focus:border-border-gold"
+                >
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
