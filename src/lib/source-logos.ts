@@ -13,8 +13,8 @@ const SOURCE_LOGOS: { keyword: string; logo: string }[] = [
   { keyword: "日経", logo: "/rss/nikkei.png" },
   { keyword: "日本経済新聞", logo: "/rss/nikkei.png" },
   // Yahoo
-  { keyword: "Yahoo", logo: "/rss/yahoo_finance.png" },
-  { keyword: "ヤフー", logo: "/rss/yahoo_finance.png" },
+  { keyword: "Yahoo", logo: "/rss/yahoo.png" },
+  { keyword: "ヤフー", logo: "/rss/yahoo.png" },
   // JBpress
   { keyword: "JBpress", logo: "/rss/jbpress.svg" },
   // 時事通信
