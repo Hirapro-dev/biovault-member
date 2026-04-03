@@ -131,9 +131,9 @@ export default async function MyPage() {
           <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
           {/* 斜めに流れるシルバーの光 */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 35%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08) 55%, transparent 65%, transparent 100%)", backgroundSize: "300% 100%", animation: "card-shine 10s ease-in-out infinite" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
           </div>
-          <style>{`@keyframes card-shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+          <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
           <div className="relative z-10 flex items-center justify-between">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-70" />
