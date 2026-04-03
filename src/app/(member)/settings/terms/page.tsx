@@ -12,7 +12,7 @@ export default function TermsPage() {
 
       <div className="text-center mb-8">
         <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
-          BioVault会員規約
+          BioVaultメンバーシップ規約
         </h1>
         <GoldDivider width={60} className="mx-auto" />
       </div>

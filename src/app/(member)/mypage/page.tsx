@@ -311,23 +311,46 @@ export default async function MyPage() {
           )}
 
           {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">📅</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">予定</span>
-                </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の予定</div>
-                {membership.clinicDate ? (
-                  <div className="bg-bg-elevated border border-border rounded-md p-4">
-                    <div className="text-[11px] text-text-muted mb-1">問診・採血予定日</div>
-                    <div className="font-mono text-lg text-gold">
-                      {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+            <div className="space-y-4">
+              {/* インフォームドコンセント未同意の場合 */}
+              {!isStepDone("DOC_INFORMED") && (
+                <Link href="/mypage/informed-consent" className="block group">
+                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">📄</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
+                      </div>
+                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">インフォームドコンセント</div>
+                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ こちらの同意がないと、問診・採血に進めません</div>
+                      <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                        同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="text-sm text-text-secondary">日程を調整中です。確定次第こちらに表示されます。</div>
-                )}
+                </Link>
+              )}
+
+              {/* 日程情報 */}
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">📅</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">予定</span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の予定</div>
+                  {membership.clinicDate ? (
+                    <div className="bg-bg-elevated border border-border rounded-md p-4">
+                      <div className="text-[11px] text-text-muted mb-1">問診・採血予定日</div>
+                      <div className="font-mono text-lg text-gold">
+                        {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-text-secondary">日程を調整中です。確定次第こちらに表示されます。</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
