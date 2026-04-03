@@ -129,9 +129,11 @@ export default async function MyPage() {
         >
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
-          {/* ほんのり光るアニメーション */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, transparent 30%, rgba(191,160,75,0.06) 50%, transparent 70%)", backgroundSize: "200% 200%", animation: "card-shimmer 6s ease-in-out infinite" }} />
-          <style>{`@keyframes card-shimmer { 0%,100% { background-position: 200% 200%; } 50% { background-position: 0% 0%; } }`}</style>
+          {/* 斜めに流れるシルバーの光 */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 35%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08) 55%, transparent 65%, transparent 100%)", backgroundSize: "300% 100%", animation: "card-shine 5s ease-in-out infinite" }} />
+          </div>
+          <style>{`@keyframes card-shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
           <div className="relative z-10 flex items-center justify-between">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-70" />
