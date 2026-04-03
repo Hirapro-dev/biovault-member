@@ -172,21 +172,20 @@ export default async function MyPage() {
             const allDone = activeIndex === -1;
             if (allDone) activeIndex = TIMELINE_STEPS.length - 1;
 
-            const donePct = activeIndex > 0
-              ? (((activeIndex - 1) + 0.5) / TIMELINE_STEPS.length) * 100
-              : 0;
-            const activePct = ((activeIndex + 0.5) / TIMELINE_STEPS.length) * 100;
+            // 現在のアクティブステップのノード中心まで固定ライン
+            const donePct = ((activeIndex + 0.3) / TIMELINE_STEPS.length) * 100;
+            // 次のステップのノード中心まで
+            const nextIndex = Math.min(activeIndex + 1, TIMELINE_STEPS.length - 1);
+            const activePct = ((nextIndex + 0.3) / TIMELINE_STEPS.length) * 100;
             const segmentHeight = activePct - donePct;
 
             return (
               <>
-                {/* 完了分の固定ゴールドライン */}
-                {donePct > 0 && (
-                  <div
-                    className="absolute left-[15px] top-0 w-[2px] z-[1]"
-                    style={{ height: `${donePct}%`, background: "var(--color-gold-primary)" }}
-                  />
-                )}
+                {/* 完了〜現在ステップまでの固定ゴールドライン */}
+                <div
+                  className="absolute left-[15px] top-0 w-[2px] z-[1]"
+                  style={{ height: `${donePct}%`, background: "var(--color-gold-primary)" }}
+                />
                 {/* 次ステップへ流れ落ちる光（スクロールインジケーター風） */}
                 {!allDone && segmentHeight > 0 && (
                   <div
