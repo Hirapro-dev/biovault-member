@@ -163,29 +163,55 @@ export default async function MyPage() {
         <div className="relative ml-1">
           {/* 縦の接続線 */}
           <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
-          {/* 完了〜アクティブまでのゴールドライン（なぞるアニメーション） */}
+          {/* ゴールドライン: 完了分は固定 + 次ステップへ伸縮ループ */}
           {(() => {
             let activeIndex = -1;
             for (let i = 0; i < TIMELINE_STEPS.length; i++) {
               if (!isStepDone(TIMELINE_STEPS[i].key)) { activeIndex = i; break; }
             }
-            if (activeIndex === -1) activeIndex = TIMELINE_STEPS.length - 1;
-            const pct = ((activeIndex + 0.3) / TIMELINE_STEPS.length) * 100;
+            const allDone = activeIndex === -1;
+            if (allDone) activeIndex = TIMELINE_STEPS.length - 1;
+
+            // 完了ステップまでの固定ライン（最後の完了ステップの中心まで）
+            const donePct = activeIndex > 0
+              ? (((activeIndex - 1) + 0.5) / TIMELINE_STEPS.length) * 100
+              : 0;
+            // 次のアクティブステップの中心まで
+            const activePct = ((activeIndex + 0.5) / TIMELINE_STEPS.length) * 100;
+
             return (
               <>
-                <div
-                  className="absolute left-[15px] top-0 w-[2px] z-[1]"
-                  style={{
-                    background: "var(--color-gold-primary)",
-                    animation: `timeline-trace 2s ease-out forwards`,
-                  }}
-                />
+                {/* 完了分の固定ゴールドライン */}
+                {donePct > 0 && (
+                  <div
+                    className="absolute left-[15px] top-0 w-[2px] z-[1]"
+                    style={{
+                      height: `${donePct}%`,
+                      background: "var(--color-gold-primary)",
+                    }}
+                  />
+                )}
+                {/* 次ステップへ伸びて消えるループライン */}
+                {!allDone && (
+                  <div
+                    className="absolute left-[15px] w-[2px] z-[1]"
+                    style={{
+                      top: `${donePct}%`,
+                      background: "var(--color-gold-primary)",
+                      animation: `timeline-reach 2.5s ease-in-out infinite`,
+                    }}
+                  />
+                )}
                 <style>{`
-                  @keyframes timeline-trace {
-                    from { height: 0%; }
-                    to { height: ${pct}%; }
+                  @keyframes timeline-reach {
+                    0% { height: 0%; opacity: 0.3; }
+                    50% { height: ${activePct - donePct}%; opacity: 1; }
+                    80% { height: ${activePct - donePct}%; opacity: 0.6; }
+                    100% { height: 0%; opacity: 0; }
                   }
                 `}</style>
+              </>
+            );
               </>
             );
           })()}
