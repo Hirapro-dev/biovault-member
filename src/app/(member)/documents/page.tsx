@@ -1,22 +1,22 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Badge from "@/components/ui/Badge";
-import { DOCUMENT_TYPE_LABELS } from "@/types";
-import Link from "next/link";
+import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_ORDER } from "@/types";
+import type { DocumentType } from "@/types";
 
 export default async function DocumentsPage() {
   const user = await requireAuth();
 
-  const [documents, fullUser] = await Promise.all([
-    prisma.document.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.user.findUnique({
-      where: { id: user.id },
-      select: { hasAgreedTerms: true, agreedTermsAt: true },
-    }),
-  ]);
+  const documents = await prisma.document.findMany({
+    where: { userId: user.id },
+  });
+
+  // 書類を指定順にソート
+  const sortedDocs = [...documents].sort((a, b) => {
+    const ai = DOCUMENT_TYPE_ORDER.indexOf(a.type as DocumentType);
+    const bi = DOCUMENT_TYPE_ORDER.indexOf(b.type as DocumentType);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
 
   const statusConfig = {
     SIGNED: { label: "署名済", variant: "success" as const },
@@ -25,51 +25,31 @@ export default async function DocumentsPage() {
     ARCHIVED: { label: "アーカイブ", variant: "muted" as const },
   };
 
+  const docNumberMap: Record<string, string> = {
+    CONTRACT: "001",
+    PRIVACY_POLICY: "002",
+    CONSENT_CELL_STORAGE: "003",
+    INFORMED_CONSENT: "004",
+  };
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
-        契約書類
+        契約・同意事項書類一覧
       </h2>
 
       <div className="flex flex-col gap-3">
-        {/* 重要事項説明 */}
-        <Link
-          href="/important-notice"
-          className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold"
-        >
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-sm sm:text-base text-gold shrink-0">
-              📋
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm sm:text-base text-text-primary leading-snug">
-                重要事項説明書 / 個人情報同意書
-              </div>
-              {fullUser?.agreedTermsAt && (
-                <div className="text-xs text-text-secondary mt-0.5">
-                  同意日: {new Date(fullUser.agreedTermsAt).toLocaleDateString("ja-JP")}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3 pl-11 sm:pl-0">
-            <Badge variant={fullUser?.hasAgreedTerms ? "success" : "warning"}>
-              {fullUser?.hasAgreedTerms ? "同意済" : "未同意"}
-            </Badge>
-            <span className="text-xs text-text-muted">内容を見る →</span>
-          </div>
-        </Link>
-
-        {documents.map((doc) => {
+        {sortedDocs.map((doc) => {
           const st = statusConfig[doc.status];
+          const docNum = docNumberMap[doc.type] || "";
           return (
             <div
               key={doc.id}
               className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold"
             >
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-sm sm:text-base text-gold shrink-0">
-                  ◇
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
+                  {docNum}
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm sm:text-base text-text-primary leading-snug">
@@ -77,7 +57,7 @@ export default async function DocumentsPage() {
                   </div>
                   {doc.signedAt && (
                     <div className="text-xs text-text-secondary mt-0.5">
-                      {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
+                      署名日: {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
                     </div>
                   )}
                 </div>
@@ -99,7 +79,7 @@ export default async function DocumentsPage() {
           );
         })}
 
-        {documents.length === 0 && (
+        {sortedDocs.length === 0 && (
           <div className="text-center py-12 text-text-muted text-sm">
             書類が登録されていません
           </div>
