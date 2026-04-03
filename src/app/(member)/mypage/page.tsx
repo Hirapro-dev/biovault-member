@@ -163,7 +163,7 @@ export default async function MyPage() {
         <div className="relative ml-1">
           {/* 縦の接続線 */}
           <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
-          {/* ゴールドライン: 完了分は固定 + 次ステップへ伸縮ループ */}
+          {/* ゴールドライン: 完了分は固定 + 次ステップへ光が流れ落ちるループ */}
           {(() => {
             let activeIndex = -1;
             for (let i = 0; i < TIMELINE_STEPS.length; i++) {
@@ -172,12 +172,11 @@ export default async function MyPage() {
             const allDone = activeIndex === -1;
             if (allDone) activeIndex = TIMELINE_STEPS.length - 1;
 
-            // 完了ステップまでの固定ライン（最後の完了ステップの中心まで）
             const donePct = activeIndex > 0
               ? (((activeIndex - 1) + 0.5) / TIMELINE_STEPS.length) * 100
               : 0;
-            // 次のアクティブステップの中心まで
             const activePct = ((activeIndex + 0.5) / TIMELINE_STEPS.length) * 100;
+            const segmentHeight = activePct - donePct;
 
             return (
               <>
@@ -185,29 +184,29 @@ export default async function MyPage() {
                 {donePct > 0 && (
                   <div
                     className="absolute left-[15px] top-0 w-[2px] z-[1]"
-                    style={{
-                      height: `${donePct}%`,
-                      background: "var(--color-gold-primary)",
-                    }}
+                    style={{ height: `${donePct}%`, background: "var(--color-gold-primary)" }}
                   />
                 )}
-                {/* 次ステップへ伸びて消えるループライン */}
-                {!allDone && (
+                {/* 次ステップへ流れ落ちる光（スクロールインジケーター風） */}
+                {!allDone && segmentHeight > 0 && (
                   <div
-                    className="absolute left-[15px] w-[2px] z-[1]"
-                    style={{
-                      top: `${donePct}%`,
-                      background: "var(--color-gold-primary)",
-                      animation: `timeline-reach 2.5s ease-in-out infinite`,
-                    }}
-                  />
+                    className="absolute left-[15px] w-[2px] z-[1] overflow-hidden"
+                    style={{ top: `${donePct}%`, height: `${segmentHeight}%` }}
+                  >
+                    <div
+                      className="w-full"
+                      style={{
+                        height: "40%",
+                        background: "linear-gradient(to bottom, var(--color-gold-primary), transparent)",
+                        animation: "scroll-drop 2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+                      }}
+                    />
+                  </div>
                 )}
                 <style>{`
-                  @keyframes timeline-reach {
-                    0% { height: 0%; opacity: 0.3; }
-                    50% { height: ${activePct - donePct}%; opacity: 1; }
-                    80% { height: ${activePct - donePct}%; opacity: 0.6; }
-                    100% { height: 0%; opacity: 0; }
+                  @keyframes scroll-drop {
+                    0% { transform: translateY(-100%); }
+                    100% { transform: translateY(350%); }
                   }
                 `}</style>
               </>
