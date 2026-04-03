@@ -212,8 +212,6 @@ export default async function MyPage() {
                 `}</style>
               </>
             );
-              </>
-            );
           })()}
 
           {TIMELINE_STEPS.map((step, i) => {
