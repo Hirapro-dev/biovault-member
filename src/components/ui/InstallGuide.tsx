@@ -8,11 +8,16 @@ import { useState, useEffect } from "react";
  * - 一度閉じたら30日間非表示
  */
 export default function InstallGuide() {
+  // 一時的に非表示（ソースは残す）
+  const ENABLED = false;
+
   const [show, setShow] = useState(false);
   const [isIos, setIsIos] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
+    if (!ENABLED) return;
+
     // PWAとして起動している場合はスキップ
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||

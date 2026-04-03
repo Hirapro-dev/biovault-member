@@ -24,11 +24,12 @@ export async function GET() {
       })
     ).map((r) => r.contentUpdateId);
 
-    // 未読の最新通知を1件取得
+    // 未読のステータス変更通知を1件取得（ステータス変更時のみポップアップ表示）
     const latestUpdate = await prisma.contentUpdate.findFirst({
-      where: readIds.length > 0
-        ? { id: { notIn: readIds } }
-        : {},
+      where: {
+        contentType: "status",
+        ...(readIds.length > 0 ? { id: { notIn: readIds } } : {}),
+      },
       orderBy: { publishedAt: "desc" },
     });
 
