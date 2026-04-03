@@ -11,12 +11,14 @@ export default async function DocumentsPage() {
     where: { userId: user.id },
   });
 
-  // 書類を指定順にソート
-  const sortedDocs = [...documents].sort((a, b) => {
-    const ai = DOCUMENT_TYPE_ORDER.indexOf(a.type as DocumentType);
-    const bi = DOCUMENT_TYPE_ORDER.indexOf(b.type as DocumentType);
-    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-  });
+  // 同意規約(SIMPLE_AGREEMENT)を除外し、指定順にソート
+  const sortedDocs = [...documents]
+    .filter((d) => d.type !== "SIMPLE_AGREEMENT")
+    .sort((a, b) => {
+      const ai = DOCUMENT_TYPE_ORDER.indexOf(a.type as DocumentType);
+      const bi = DOCUMENT_TYPE_ORDER.indexOf(b.type as DocumentType);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
 
   const statusConfig = {
     SIGNED: { label: "署名済", variant: "success" as const },
