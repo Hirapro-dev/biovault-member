@@ -7,7 +7,7 @@ import type { IpsStatus } from "@prisma/client";
 
 // ステータスの日本語ラベル（通知用）
 const STATUS_LABELS: Record<string, string> = {
-  REGISTERED: "メンバー登録",
+  REGISTERED: "メンバーシップ登録",
   TERMS_AGREED: "iPS細胞作製適合確認",
   SERVICE_APPLIED: "サービス申込",
   SCHEDULE_ARRANGED: "日程調整",

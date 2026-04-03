@@ -29,12 +29,13 @@ export default function StatusTimeline({
     <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-4">
       {/* モバイル: 縦タイムライン */}
       <div className="block sm:hidden">
-        <div className="relative ml-2">
-          {/* 縦の接続線 */}
+        {/* ノードサイズ36px → 中心18px。ml-3(12px) + 18px = 30pxが線の位置 */}
+        <div className="relative ml-3">
+          {/* 縦の接続線 — ノード中心に正確に合わせる (left = ノード幅の半分 - 線幅の半分 = 17px) */}
           <div
-            className="absolute left-[14px] top-0 bottom-0 w-[2px]"
+            className="absolute left-[17px] top-[18px] bottom-[18px] w-[2px]"
             style={{
-              background: `linear-gradient(to bottom, var(--color-gold-primary) ${((currentIndex + 0.5) / IPS_STATUS_ORDER.length) * 100}%, var(--color-border) ${((currentIndex + 0.5) / IPS_STATUS_ORDER.length) * 100}%)`,
+              background: `linear-gradient(to bottom, var(--color-gold-primary) ${((currentIndex) / (IPS_STATUS_ORDER.length - 1)) * 100}%, var(--color-border) ${((currentIndex) / (IPS_STATUS_ORDER.length - 1)) * 100}%)`,
             }}
           />
           {IPS_STATUS_ORDER.map((status, i) => {
@@ -43,7 +44,7 @@ export default function StatusTimeline({
             const dateStr = done || active ? formatDate(statusDates?.[status]) : null;
 
             return (
-              <div key={status} className="flex items-start gap-4 pb-7 last:pb-0">
+              <div key={status} className="flex items-start gap-4 pb-7 last:pb-0 relative">
                 {/* ノード */}
                 <div
                   className={`relative z-[2] w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
