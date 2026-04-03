@@ -33,7 +33,7 @@ export default function ScheduleRequestButton() {
   }
 
   return (
-    <div className="mt-5 group">
+    <div className="mt-3 group">
       <button
         onClick={handleRequest}
         disabled={state === "loading"}

@@ -43,7 +43,7 @@ export default function LoginPage() {
     } else if (role === "AGENCY") {
       router.push("/agency");
     } else {
-      router.push("/dashboard");
+      router.push("/mypage");
     }
     router.refresh();
   };

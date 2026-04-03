@@ -9,7 +9,7 @@ export default withAuth(
     // ── 管理者エリア ──
     if (path.startsWith("/admin")) {
       if (token?.role !== "ADMIN" && token?.role !== "SUPER_ADMIN") {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.redirect(new URL("/mypage", req.url));
       }
       return NextResponse.next();
     }

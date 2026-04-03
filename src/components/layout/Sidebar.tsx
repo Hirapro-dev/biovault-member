@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 
 // 会員用ナビ（BottomNavと同じ構成）
 const memberNav = [
-  { href: "/dashboard", label: "トップ", icon: "◈" },
   { href: "/mypage", label: "マイページ", icon: "👤" },
   { href: "/info", label: "サービス詳細", icon: "◉" },
-  { href: "/favorites", label: "お気に入り", icon: "★" },
+  { href: "/pamphlet", label: "パンフレット", icon: "📖" },
+  { href: "/dashboard", label: "コンテンツ", icon: "🧬" },
 ];
 
 const adminNav = [
@@ -45,7 +45,7 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
       {/* ナビゲーション */}
       <nav className="flex-1 p-3 overflow-y-auto">
         {nav.map((item) => {
-          const active = pathname === item.href || (item.href !== "/admin" && item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const active = pathname === item.href || (item.href !== "/admin" && item.href !== "/mypage" && item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}

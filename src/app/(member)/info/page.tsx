@@ -3,22 +3,10 @@ import Link from "next/link";
 
 const menuItems = [
   {
-    href: "/pamphlet",
-    icon: "📖",
-    label: "BVパンフレット",
-    description: "BioVaultサービスの詳細情報",
-  },
-  {
     href: "/apply-service",
     icon: "✍️",
     label: "サービス申込",
     description: "iPSサービスへのお申込み",
-  },
-  {
-    href: "/documents",
-    icon: "◇",
-    label: "契約書類",
-    description: "契約書類の確認・署名",
   },
   {
     href: "/settings/terms",
@@ -46,7 +34,7 @@ export default async function InfoPage() {
   return (
     <div>
       <h2 className="font-serif-jp text-lg font-normal text-text-primary tracking-wider mb-5">
-        基本情報
+        サービス詳細
       </h2>
 
       <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
