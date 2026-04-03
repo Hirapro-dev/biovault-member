@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import HumanWireframe from "@/components/ui/HumanWireframe";
 
 export default async function HealthPage() {
   const user = await requireAuth();
@@ -29,7 +30,7 @@ export default async function HealthPage() {
   if (!fullUser) return null;
 
   return (
-    <div className="max-w-[600px]">
+    <div>
       {/* パンくず */}
       <div className="text-[11px] text-text-muted mb-5">
         <Link href="/mypage" className="hover:text-gold transition-colors">マイページ</Link>
@@ -41,22 +42,42 @@ export default async function HealthPage() {
         健康状態確認
       </h2>
 
-      <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
-        <div className="space-y-3">
-          <HealthItem label="現在治療中の病気" active={fullUser.currentIllness} detail={fullUser.currentIllnessDetail} />
-          <HealthItem label="過去の病気・手術歴" active={fullUser.pastIllness} detail={fullUser.pastIllnessDetail} />
-          <HealthItem label="現在使用中の薬" active={fullUser.currentMedication} detail={fullUser.currentMedicationDetail} />
-          <HealthItem label="持病" active={fullUser.chronicDisease} detail={fullUser.chronicDiseaseDetail} />
-          <HealthItem label="感染症の罹患歴" active={fullUser.infectiousDisease} detail={fullUser.infectiousDiseaseDetail} />
-          <HealthItem label="妊娠中・妊娠の可能性" active={fullUser.pregnancy} />
-          <HealthItem label="アレルギー" active={fullUser.allergy} detail={fullUser.allergyDetail} />
-          <HealthItem label="その他の健康上の事項" active={fullUser.otherHealth} detail={fullUser.otherHealthDetail} />
+      {/* スマホ: 人体ビジュアルをトップに */}
+      <div className="block lg:hidden mb-6">
+        <div className="max-w-[180px] mx-auto">
+          <HumanWireframe />
         </div>
-        {!fullUser.currentIllness && !fullUser.pastIllness && !fullUser.currentMedication &&
-         !fullUser.chronicDisease && !fullUser.infectiousDisease && !fullUser.pregnancy &&
-         !fullUser.allergy && !fullUser.otherHealth && (
-          <div className="text-center text-sm text-text-muted py-4">特記事項なし</div>
-        )}
+      </div>
+
+      {/* PC: 横並びレイアウト / スマホ: 縦並び */}
+      <div className="flex gap-8">
+        {/* 左: 健康状態一覧 */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
+            <div className="space-y-3">
+              <HealthItem label="現在治療中の病気" active={fullUser.currentIllness} detail={fullUser.currentIllnessDetail} />
+              <HealthItem label="過去の病気・手術歴" active={fullUser.pastIllness} detail={fullUser.pastIllnessDetail} />
+              <HealthItem label="現在使用中の薬" active={fullUser.currentMedication} detail={fullUser.currentMedicationDetail} />
+              <HealthItem label="持病" active={fullUser.chronicDisease} detail={fullUser.chronicDiseaseDetail} />
+              <HealthItem label="感染症の罹患歴" active={fullUser.infectiousDisease} detail={fullUser.infectiousDiseaseDetail} />
+              <HealthItem label="妊娠中・妊娠の可能性" active={fullUser.pregnancy} />
+              <HealthItem label="アレルギー" active={fullUser.allergy} detail={fullUser.allergyDetail} />
+              <HealthItem label="その他の健康上の事項" active={fullUser.otherHealth} detail={fullUser.otherHealthDetail} />
+            </div>
+            {!fullUser.currentIllness && !fullUser.pastIllness && !fullUser.currentMedication &&
+             !fullUser.chronicDisease && !fullUser.infectiousDisease && !fullUser.pregnancy &&
+             !fullUser.allergy && !fullUser.otherHealth && (
+              <div className="text-center text-sm text-text-muted py-4">特記事項なし</div>
+            )}
+          </div>
+        </div>
+
+        {/* 右: 人体ワイヤーフレーム（PCのみ） */}
+        <div className="hidden lg:block w-[240px] shrink-0">
+          <div className="sticky top-24">
+            <HumanWireframe />
+          </div>
+        </div>
       </div>
     </div>
   );
