@@ -131,7 +131,7 @@ export default async function MyPage() {
           <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
           {/* 斜めに流れるシルバーの光 */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 35%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08) 55%, transparent 65%, transparent 100%)", backgroundSize: "300% 100%", animation: "card-shine 5s ease-in-out infinite" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 35%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.08) 55%, transparent 65%, transparent 100%)", backgroundSize: "300% 100%", animation: "card-shine 10s ease-in-out infinite" }} />
           </div>
           <style>{`@keyframes card-shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
           <div className="relative z-10 flex items-center justify-between">
@@ -200,17 +200,19 @@ export default async function MyPage() {
                     <div
                       className="w-full"
                       style={{
-                        height: "70%",
-                        background: "linear-gradient(to bottom, var(--color-gold-primary), transparent)",
-                        animation: "scroll-drop 2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
+                        height: "30%",
+                        background: "linear-gradient(to bottom, transparent, var(--color-gold-primary) 30%, var(--color-gold-primary) 70%, transparent)",
+                        animation: "scroll-drop 3.5s cubic-bezier(0.15, 0.2, 0.1, 1) infinite",
                       }}
                     />
                   </div>
                 )}
                 <style>{`
                   @keyframes scroll-drop {
-                    0% { transform: translateY(-100%); }
-                    100% { transform: translateY(350%); }
+                    0% { transform: translateY(-100%); opacity: 0; }
+                    10% { opacity: 1; }
+                    80% { opacity: 1; }
+                    100% { transform: translateY(450%); opacity: 0; }
                   }
                 `}</style>
               </>
