@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 // 会員用ナビ（BottomNavと同じ構成）
 const memberNav = [
   { href: "/mypage", label: "マイページ", icon: "👤" },
-  { href: "/info", label: "サービス詳細", icon: "◉" },
+  { href: "/info", label: "サービス詳細", icon: "💼" },
   { href: "/pamphlet", label: "パンフレット", icon: "📖" },
-  { href: "/dashboard", label: "コンテンツ", icon: "🧬" },
+  { href: "/dashboard", label: "iPSとは？", icon: "🧬" },
 ];
 
 const adminNav = [

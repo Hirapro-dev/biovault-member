@@ -163,19 +163,47 @@ export default async function MyPage() {
         <div className="relative ml-1">
           {/* 縦の接続線 */}
           <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
-          {/* 完了部分のゴールドライン */}
+          {/* 完了〜アクティブまでのゴールドライン（アニメーション付き） */}
           {(() => {
-            let lastDoneIndex = -1;
-            TIMELINE_STEPS.forEach((step, i) => { if (isStepDone(step.key)) lastDoneIndex = i; });
-            const pct = lastDoneIndex >= 0 ? ((lastDoneIndex + 0.5) / TIMELINE_STEPS.length) * 100 : 0;
+            let activeIndex = -1;
+            for (let i = 0; i < TIMELINE_STEPS.length; i++) {
+              if (!isStepDone(TIMELINE_STEPS[i].key)) { activeIndex = i; break; }
+            }
+            // 全完了の場合は最後まで
+            if (activeIndex === -1) activeIndex = TIMELINE_STEPS.length - 1;
+            const pct = ((activeIndex + 0.3) / TIMELINE_STEPS.length) * 100;
             return (
-              <div
-                className="absolute left-[15px] top-0 w-[2px] z-[1]"
-                style={{
-                  height: `${pct}%`,
-                  background: "linear-gradient(to bottom, var(--color-gold-primary), var(--color-gold-light))",
-                }}
-              />
+              <>
+                <div
+                  className="absolute left-[15px] top-0 w-[2px] z-[1]"
+                  style={{
+                    height: `${pct}%`,
+                    background: "linear-gradient(to bottom, var(--color-gold-primary), var(--color-gold-light))",
+                    animation: "timeline-grow 1.5s ease-out forwards",
+                  }}
+                />
+                {/* アクティブステップへの光のパルス */}
+                <div
+                  className="absolute left-[13px] w-[6px] z-[1] rounded-full"
+                  style={{
+                    top: `${pct - 1}%`,
+                    height: "12px",
+                    background: "var(--color-gold-primary)",
+                    boxShadow: "0 0 8px rgba(191,160,75,0.6)",
+                    animation: "timeline-pulse 2s ease-in-out infinite",
+                  }}
+                />
+                <style>{`
+                  @keyframes timeline-grow {
+                    from { height: 0; }
+                    to { height: ${pct}%; }
+                  }
+                  @keyframes timeline-pulse {
+                    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+                    50% { opacity: 1; transform: scaleY(1.5); }
+                  }
+                `}</style>
+              </>
             );
           })()}
 

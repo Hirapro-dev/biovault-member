@@ -12,13 +12,14 @@ function UserIcon({ active }: { active: boolean }) {
   );
 }
 
-function InfoIcon({ active }: { active: boolean }) {
+// サービス詳細: ブリーフケース風アイコン
+function ServiceIcon({ active }: { active: boolean }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <line x1="12" y1="12" x2="12" y2="16" />
+      <line x1="10" y1="14" x2="14" y2="14" />
     </svg>
   );
 }
@@ -32,21 +33,27 @@ function BookIcon({ active }: { active: boolean }) {
   );
 }
 
+// iPSとは？: DNA二重螺旋風アイコン
 function DnaIcon({ active }: { active: boolean }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
+      <path d="M2 15c6.667-6 13.333 0 20-6" />
+      <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993" />
+      <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993" />
+      <path d="M17 6l-2.5 2.5" />
+      <path d="M14 8l-1 1" />
+      <path d="M7 18l2.5-2.5" />
+      <path d="M10 16l1-1" />
+      <path d="M2 9c6.667 6 13.333 0 20 6" />
     </svg>
   );
 }
 
 const navItems = [
   { href: "/mypage", label: "マイページ", Icon: UserIcon },
-  { href: "/info", label: "サービス詳細", Icon: InfoIcon },
+  { href: "/info", label: "サービス詳細", Icon: ServiceIcon },
   { href: "/pamphlet", label: "パンフレット", Icon: BookIcon },
-  { href: "/dashboard", label: "コンテンツ", Icon: DnaIcon },
+  { href: "/dashboard", label: "iPSとは？", Icon: DnaIcon },
 ];
 
 export default function BottomNav() {
