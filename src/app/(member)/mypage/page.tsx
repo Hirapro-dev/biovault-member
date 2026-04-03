@@ -1,8 +1,27 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import StatusTimeline from "@/components/ui/StatusTimeline";
 import ScheduleRequestButton from "./ScheduleRequestButton";
+
+// 表示用10ステップの定義
+const TIMELINE_STEPS = [
+  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
+  { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
+  { key: "REGISTERED", label: "メンバーシップ登録", icon: "👤" },
+  { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
+  { key: "DOC_CELL_STORAGE", label: "細胞提供・保管同意", icon: "🧫" },
+  { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
+  { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄" },
+  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
+  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
+  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️" },
+] as const;
+
+// IpsStatusの順序マッピング（DB上のステータス）
+const STATUS_ORDER = [
+  "REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED",
+  "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE",
+];
 
 export default async function MyPage() {
   const user = await requireAuth();
@@ -12,21 +31,15 @@ export default async function MyPage() {
       where: { id: user.id },
       select: {
         nameRomaji: true,
-        currentIllness: true,
-        currentIllnessDetail: true,
-        pastIllness: true,
-        pastIllnessDetail: true,
-        currentMedication: true,
-        currentMedicationDetail: true,
-        chronicDisease: true,
-        chronicDiseaseDetail: true,
-        infectiousDisease: true,
-        infectiousDiseaseDetail: true,
+        hasAgreedTerms: true,
+        currentIllness: true, currentIllnessDetail: true,
+        pastIllness: true, pastIllnessDetail: true,
+        currentMedication: true, currentMedicationDetail: true,
+        chronicDisease: true, chronicDiseaseDetail: true,
+        infectiousDisease: true, infectiousDiseaseDetail: true,
         pregnancy: true,
-        allergy: true,
-        allergyDetail: true,
-        otherHealth: true,
-        otherHealthDetail: true,
+        allergy: true, allergyDetail: true,
+        otherHealth: true, otherHealthDetail: true,
       },
     }),
     prisma.membership.findUnique({
@@ -43,9 +56,8 @@ export default async function MyPage() {
     }),
   ]);
 
-  const signedCount = documents.filter((d) => d.status === "SIGNED").length;
-
-  const statusDates: Partial<Record<string, string>> = {};
+  // ステータス到達日マッピング
+  const statusDates: Record<string, string> = {};
   if (membership) {
     statusDates["REGISTERED"] = membership.contractDate.toISOString();
   }
@@ -55,6 +67,42 @@ export default async function MyPage() {
     }
   }
 
+  // 書類署名日マッピング
+  const docSignedMap: Record<string, string | null> = {};
+  for (const doc of documents) {
+    if (doc.status === "SIGNED" && doc.signedAt) {
+      docSignedMap[doc.type] = doc.signedAt.toISOString();
+    }
+  }
+
+  // 各ステップの完了判定・日付取得
+  const currentStatusIndex = membership ? STATUS_ORDER.indexOf(membership.ipsStatus) : -1;
+
+  function isStepDone(key: string): boolean {
+    if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
+    if (key === "DOC_CELL_STORAGE") return !!docSignedMap["CONSENT_CELL_STORAGE"];
+    if (key === "DOC_INFORMED") return !!docSignedMap["INFORMED_CONSENT"];
+    const idx = STATUS_ORDER.indexOf(key);
+    if (idx === -1) return false;
+    return currentStatusIndex >= idx;
+  }
+
+  function getStepDate(key: string): string | null {
+    if (key === "DOC_PRIVACY") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
+    if (key === "DOC_CELL_STORAGE") return docSignedMap["CONSENT_CELL_STORAGE"] || null;
+    if (key === "DOC_INFORMED") return docSignedMap["INFORMED_CONSENT"] || null;
+    return statusDates[key] || null;
+  }
+
+  function isStepActive(key: string, index: number): boolean {
+    // 最初の未完了ステップがアクティブ
+    for (let i = 0; i < TIMELINE_STEPS.length; i++) {
+      if (!isStepDone(TIMELINE_STEPS[i].key)) return i === index;
+    }
+    return false;
+  }
+
+  // 保管期間
   const storageEndDate = membership?.storageStartAt
     ? (() => {
         const end = new Date(membership.storageStartAt);
@@ -62,6 +110,11 @@ export default async function MyPage() {
         return end;
       })()
     : null;
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
+  };
 
   return (
     <div>
@@ -86,9 +139,7 @@ export default async function MyPage() {
           <div className="relative z-10 flex items-end justify-between">
             <div>
               <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">CARD HOLDER</div>
-              <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">
-                {fullUser?.nameRomaji || user.name}
-              </div>
+              <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">{fullUser?.nameRomaji || user.name}</div>
             </div>
             <div className="text-right">
               <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">MEMBER SINCE</div>
@@ -100,19 +151,89 @@ export default async function MyPage() {
         </div>
       </div>
 
-      {/* ── 2. ステータス ── */}
+      {/* ── 2. ステータス（縦タイムライン 10ステップ） ── */}
       <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
         ステータス
       </h3>
-      {membership ? (
-        <StatusTimeline currentStatus={membership.ipsStatus} statusDates={statusDates} />
-      ) : (
-        <div className="bg-bg-secondary border border-border rounded-md p-6 sm:p-8 text-center text-text-muted text-sm">
-          会員権情報が見つかりません
-        </div>
-      )}
 
-      {/* ── 修正1: ステータス直下に契約・同意事項書類一覧リンク ── */}
+      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+        <div className="relative ml-1">
+          {/* 縦の接続線 */}
+          <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
+          {/* 完了部分のゴールドライン */}
+          {(() => {
+            let lastDoneIndex = -1;
+            TIMELINE_STEPS.forEach((step, i) => { if (isStepDone(step.key)) lastDoneIndex = i; });
+            const pct = lastDoneIndex >= 0 ? ((lastDoneIndex + 0.5) / TIMELINE_STEPS.length) * 100 : 0;
+            return (
+              <div
+                className="absolute left-[15px] top-0 w-[2px] z-[1]"
+                style={{
+                  height: `${pct}%`,
+                  background: "linear-gradient(to bottom, var(--color-gold-primary), var(--color-gold-light))",
+                }}
+              />
+            );
+          })()}
+
+          {TIMELINE_STEPS.map((step, i) => {
+            const done = isStepDone(step.key);
+            const active = isStepActive(step.key, i);
+            const dateStr = formatDate(getStepDate(step.key));
+            const isStorage = step.key === "STORAGE_ACTIVE";
+            const isFirstAdaptCheck = step.key === "TERMS_AGREED";
+
+            return (
+              <div key={step.key} className="flex items-start gap-4 pb-6 last:pb-0 relative">
+                {/* ノード */}
+                <div
+                  className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
+                    done
+                      ? "text-bg-primary font-bold"
+                      : active
+                      ? "border-2 border-gold text-gold"
+                      : "border border-border text-text-muted"
+                  } ${active ? "animate-pulse-gold" : ""}`}
+                  style={{
+                    background: done
+                      ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
+                      : active
+                      ? "var(--color-bg-primary)"
+                      : "var(--color-bg-elevated)",
+                  }}
+                >
+                  {done ? "✓" : step.icon}
+                </div>
+
+                {/* コンテンツ */}
+                <div className="pt-1 min-w-0 flex-1">
+                  <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                    {step.label}
+                  </div>
+                  {/* 日付 */}
+                  {dateStr && (
+                    <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                      {dateStr}
+                    </div>
+                  )}
+                  {/* 適合確認のサブテキスト */}
+                  {isFirstAdaptCheck && done && (
+                    <div className="text-[11px] text-status-active mt-0.5">適合の可能性が極めて高い</div>
+                  )}
+                  {/* 保管中の補足 */}
+                  {isStorage && done && storageEndDate && (
+                    <div className="text-[11px] text-gold mt-0.5">
+                      {membership?.storageYears}年間保管（〜{formatDate(storageEndDate.toISOString())}）
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── 契約・同意事項書類一覧 ── */}
       <div className="mt-4">
         <Link
           href="/documents"
@@ -121,13 +242,15 @@ export default async function MyPage() {
           <div className="w-10 h-10 rounded-full bg-bg-elevated flex items-center justify-center text-lg shrink-0">◇</div>
           <div className="flex-1">
             <div className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">契約・同意事項書類一覧</div>
-            <div className="text-[11px] text-text-muted mt-0.5">{signedCount} / {documents.length} 署名済み</div>
+            <div className="text-[11px] text-text-muted mt-0.5">
+              {documents.filter((d) => d.status === "SIGNED").length} / {documents.length} 署名済み
+            </div>
           </div>
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
       </div>
 
-      {/* ── 3. 次のステップ ── */}
+      {/* ── 次のステップ ── */}
       {membership && (
         <div className="mt-8">
           <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
@@ -140,10 +263,10 @@ export default async function MyPage() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📋</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">STEP 1</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製適合確認</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、iPS細胞作製の適合審査にお進みください。</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、適合審査にお進みください。</div>
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
                     確認へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -158,7 +281,7 @@ export default async function MyPage() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">✍️</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">STEP 2</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">サービス申込</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">適合確認が完了しました。iPSサービスへのお申込みに進めます。</div>
@@ -175,7 +298,7 @@ export default async function MyPage() {
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">📅</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">STEP 3</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
                 <div className="text-base sm:text-lg text-text-primary font-medium mb-2">日程調整</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-2">問診・採血の日程を調整いたします。</div>
@@ -189,7 +312,7 @@ export default async function MyPage() {
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">📅</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">STEP 4</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">予定</span>
                 </div>
                 <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の予定</div>
                 {membership.clinicDate ? (
@@ -227,10 +350,10 @@ export default async function MyPage() {
                 <div className="bg-bg-elevated border border-border rounded-md p-4">
                   <div className="text-[11px] text-text-muted mb-1">保管期限</div>
                   <div className="font-mono text-lg text-gold">
-                    {storageEndDate ? storageEndDate.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }) : "---"}
+                    {storageEndDate ? formatDate(storageEndDate.toISOString()) : "---"}
                   </div>
                   {membership.storageStartAt && (
-                    <div className="text-[11px] text-text-muted mt-2">保管開始日: {new Date(membership.storageStartAt).toLocaleDateString("ja-JP")}</div>
+                    <div className="text-[11px] text-text-muted mt-2">保管開始日: {formatDate(membership.storageStartAt.toISOString())}</div>
                   )}
                 </div>
               </div>
@@ -239,7 +362,7 @@ export default async function MyPage() {
         </div>
       )}
 
-      {/* ── 修正2: 健康状態確認（見出し + 一覧直接表示） ── */}
+      {/* ── 健康状態確認 ── */}
       {fullUser && (
         <div className="mt-8">
           <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
@@ -272,9 +395,7 @@ function HealthItem({ label, active, detail }: { label: string; active: boolean;
   return (
     <div className="flex items-start gap-3 py-2 border-b border-border last:border-b-0">
       <div className={`shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-        active
-          ? "bg-status-warning/20 text-status-warning border border-status-warning/30"
-          : "bg-bg-elevated text-text-muted border border-border"
+        active ? "bg-status-warning/20 text-status-warning border border-status-warning/30" : "bg-bg-elevated text-text-muted border border-border"
       }`}>
         {active ? "!" : "✓"}
       </div>
