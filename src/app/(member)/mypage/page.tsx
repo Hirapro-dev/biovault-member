@@ -200,7 +200,7 @@ export default async function MyPage() {
                     <div
                       className="w-full"
                       style={{
-                        height: "30%",
+                        height: "80%",
                         background: "linear-gradient(to bottom, transparent, var(--color-gold-primary) 30%, var(--color-gold-primary) 70%, transparent)",
                         animation: "scroll-drop 3.5s cubic-bezier(0.15, 0.2, 0.1, 1) infinite",
                       }}
