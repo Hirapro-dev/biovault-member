@@ -5,6 +5,7 @@ import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 import AgencyKarteActions from "./AgencyKarteActions";
+import ReferralUrlSection from "./ReferralUrlSection";
 import IssueIdSection from "../../members/[id]/IssueIdSection";
 import DeleteAccount from "../../members/[id]/DeleteAccount";
 
@@ -81,6 +82,9 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
           </div>
         </div>
       </div>
+
+      {/* 紹介URL発行 */}
+      <ReferralUrlSection agencyCode={profile?.agencyCode || ""} />
 
       {/* アカウント情報（ID発行・PW変更） */}
       <IssueIdSection userId={user.id} currentLoginId={user.loginId} nameKana={user.nameKana || ""} isIdIssued={user.isIdIssued} />

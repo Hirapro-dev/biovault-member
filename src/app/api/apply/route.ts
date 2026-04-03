@@ -18,6 +18,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 400 });
   }
 
+  // 0. 代理店コードから代理店名を自動解決
+  let referrerName: string | null = null;
+  const agencyCode = body.referredByAgency || null;
+  if (agencyCode) {
+    const agencyProfile = await prisma.agencyProfile.findUnique({
+      where: { agencyCode },
+      select: { companyName: true, user: { select: { name: true } } },
+    });
+    if (agencyProfile) {
+      referrerName = agencyProfile.companyName || agencyProfile.user.name || agencyCode;
+    }
+  }
+  // 営業担当者名はURLパラメータ経由で受け取る
+  const salesRepName = body.salesRepName || null;
+
   // 1. 申込データを保存
   const application = await prisma.application.create({
     data: {
@@ -32,8 +47,8 @@ export async function POST(req: Request) {
       paymentMethod: body.paymentMethod || "bank_transfer",
       paymentMethodOther: body.paymentMethodOther || null,
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,
-      referrerName: body.referrerName || null,
-      salesRepName: body.salesRepName || null,
+      referrerName,
+      salesRepName,
       currentIllness: body.currentIllness || false,
       currentIllnessDetail: body.currentIllnessDetail || null,
       pastIllness: body.pastIllness || false,
@@ -96,11 +111,11 @@ export async function POST(req: Request) {
       role: "MEMBER",
       isIdIssued: false,
       mustChangePassword: true,
-      referredByAgency: body.referredByAgency || null,
+      referredByAgency: agencyCode,
       applicationId: application.id,
       paymentMethod: body.paymentMethod || "bank_transfer",
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,
-      salesRepName: body.salesRepName || null,
+      salesRepName,
       // 健康状態
       currentIllness: body.currentIllness || false,
       currentIllnessDetail: body.currentIllnessDetail || null,
@@ -123,7 +138,7 @@ export async function POST(req: Request) {
           plan: "STANDARD",
           contractDate: new Date(),
           totalAmount: 8800000,
-          referrerName: body.referrerName || null,
+          referrerName,
         },
       },
     },

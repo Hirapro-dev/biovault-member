@@ -15,6 +15,7 @@ export default function ApplyPageWrapper() {
 function ApplyPage() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
+  const repName = searchParams.get("rep") || "";
 
   const [step, setStepRaw] = useState(1);
   const setStep = (s: number) => {
@@ -35,10 +36,7 @@ function ApplyPage() {
     phone: "",
     email: "",
     occupation: "",
-    // 2. 紹介情報
-    referrerName: "",
-    salesRepName: "",
-    // 3. 健康状態
+    // 2. 健康状態
     currentIllness: false,
     currentIllnessDetail: "",
     pastIllness: false,
@@ -79,7 +77,7 @@ function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, referredByAgency: refCode }),
+        body: JSON.stringify({ ...form, referredByAgency: refCode, salesRepName: repName }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -249,14 +247,7 @@ function ApplyPage() {
       {/* Step 2: 申込内容 + 健康状態 */}
       {step === 2 && (
         <FormSection title="2. 事前確認事項">
-          <Field label="紹介者名／代理店名">
-            <input value={form.referrerName} onChange={(e) => update("referrerName", e.target.value)} className={inputClass} />
-          </Field>
-          <Field label="担当営業者名">
-            <input value={form.salesRepName} onChange={(e) => update("salesRepName", e.target.value)} className={inputClass} />
-          </Field>
-
-          <div className="border-t border-border mt-6 pt-6">
+          <div>
             <h4 className="text-sm text-gold mb-3">健康状態の自己申告</h4>
             <div className="text-[11px] text-text-muted mb-5 space-y-1 leading-relaxed">
               <p>※ 以下は、提携医療機関等による問診・適格確認の参考情報として確認するものです。</p>
@@ -308,10 +299,6 @@ function ApplyPage() {
               <ConfirmRow label="電話番号" value={form.phone} />
               <ConfirmRow label="メール" value={form.email} />
               <ConfirmRow label="職業" value={form.occupation || "---"} />
-            </ConfirmGroup>
-            <ConfirmGroup title="その他">
-              <ConfirmRow label="紹介者" value={form.referrerName || "---"} />
-              <ConfirmRow label="営業担当" value={form.salesRepName || "---"} />
             </ConfirmGroup>
           </div>
 
