@@ -268,8 +268,13 @@ function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 3: 確認事項 + 受領文書 */}
+      {/* Step 3: 会員規約 */}
       {step === 3 && (
+        <TermsStep onBack={() => setStep(2)} onNext={() => setStep(4)} />
+      )}
+
+      {/* Step 4: 確認事項（チェック） */}
+      {step === 4 && (
         <FormSection title="4. 確認事項">
           <p className="text-xs text-text-secondary mb-4">
             以下の事項を確認し、理解したうえで申込みます。
@@ -279,13 +284,8 @@ function ApplyPage() {
           <Checkbox checked={form.confirmClinicRole} onChange={(v) => update("confirmClinicRole", v)} label="診察、問診、採血、医学的判断等は提携医療機関等が行うこと" />
           <Checkbox checked={form.confirmLabRole} onChange={(v) => update("confirmLabRole", v)} label="細胞作製、培養、品質評価、保管等は提携先機関が行うこと" />
           <Checkbox checked={form.confirmDocuments} onChange={(v) => update("confirmDocuments", v)} label="本申込に関連して、関連文書が一体として適用されること" />
-          <StepNav onBack={() => setStep(2)} onNext={() => setStep(4)} />
+          <StepNav onBack={() => setStep(3)} onNext={() => setStep(5)} />
         </FormSection>
-      )}
-
-      {/* Step 4: 利用規約 */}
-      {step === 4 && (
-        <TermsStep onBack={() => setStep(3)} onNext={() => setStep(5)} />
       )}
 
       {/* Step 5: 確認・送信 */}
@@ -438,7 +438,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
   }, []);
 
   return (
-    <FormSection title="5. BioVault会員規約">
+    <FormSection title="3. BioVault会員規約">
       <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
 
       <div ref={scrollRef} className="max-h-[50vh] overflow-y-auto bg-bg-elevated border border-border rounded-md p-4 sm:p-5 mb-4">
