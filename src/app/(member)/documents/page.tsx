@@ -1,8 +1,15 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_ORDER } from "@/types";
 import type { DocumentType } from "@/types";
+
+// 署名済み書類の内容確認リンク先
+const DOC_VIEW_LINKS: Record<string, string> = {
+  CONTRACT: "/important-notice",
+  PRIVACY_POLICY: "/important-notice",
+};
 
 export default async function DocumentsPage() {
   const user = await requireAuth();
@@ -27,7 +34,7 @@ export default async function DocumentsPage() {
     });
 
   const statusConfig = {
-    SIGNED: { label: "署名済", variant: "success" as const },
+    SIGNED: { label: "同意済", variant: "success" as const },
     SENT: { label: "送付済", variant: "warning" as const },
     PENDING: { label: "未署名", variant: "muted" as const },
     ARCHIVED: { label: "アーカイブ", variant: "muted" as const },
@@ -50,6 +57,8 @@ export default async function DocumentsPage() {
         {sortedDocs.map((doc) => {
           const st = statusConfig[doc.status];
           const docNum = docNumberMap[doc.type] || "";
+          const viewLink = DOC_VIEW_LINKS[doc.type];
+
           return (
             <div
               key={doc.id}
@@ -65,13 +74,14 @@ export default async function DocumentsPage() {
                   </div>
                   {doc.signedAt && (
                     <div className="text-xs text-text-secondary mt-0.5">
-                      署名日: {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
+                      同意日: {new Date(doc.signedAt).toLocaleDateString("ja-JP")}
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-3 pl-11 sm:pl-0">
                 <Badge variant={st.variant}>{st.label}</Badge>
+                {/* PDF がある場合はPDFリンク */}
                 {doc.fileUrl && (
                   <a
                     href={`/api/member/documents/${doc.id}`}
@@ -81,6 +91,15 @@ export default async function DocumentsPage() {
                   >
                     PDF を見る
                   </a>
+                )}
+                {/* PDF がなく、署名済みで内容確認リンクがある場合 */}
+                {!doc.fileUrl && doc.status === "SIGNED" && viewLink && (
+                  <Link
+                    href={viewLink}
+                    className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
+                  >
+                    内容を確認
+                  </Link>
                 )}
               </div>
             </div>
@@ -108,6 +127,14 @@ export default async function DocumentsPage() {
             <Badge variant={fullUser?.hasAgreedPamphlet ? "success" : "muted"}>
               {fullUser?.hasAgreedPamphlet ? "同意済" : "未同意"}
             </Badge>
+            {fullUser?.hasAgreedPamphlet && (
+              <Link
+                href="/pamphlet"
+                className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
+              >
+                内容を確認
+              </Link>
+            )}
           </div>
         </div>
 
