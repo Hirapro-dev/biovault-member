@@ -11,12 +11,27 @@ export async function POST() {
 
   const userId = (session.user as any).id;
 
+  const now = new Date();
+
   // ユーザーの重要事項同意フラグを更新
   await prisma.user.update({
     where: { id: userId },
     data: {
       hasAgreedTerms: true,
-      agreedTermsAt: new Date(),
+      agreedTermsAt: now,
+    },
+  });
+
+  // 書類のステータスを署名済みに更新（重要事項説明書 + 個人情報同意書）
+  await prisma.document.updateMany({
+    where: {
+      userId,
+      type: { in: ["CONTRACT", "PRIVACY_POLICY"] },
+      status: { not: "SIGNED" },
+    },
+    data: {
+      status: "SIGNED",
+      signedAt: now,
     },
   });
 

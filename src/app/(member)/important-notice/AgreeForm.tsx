@@ -91,14 +91,9 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
         </div>
       )}
 
-      {/* ══════════════════════════════════ */}
-      {/* 書類1: 重要事項説明書兼確認書 */}
-      {/* ══════════════════════════════════ */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">書類 1</span>
-          <h2 className="text-sm text-text-primary font-medium">BioVault 重要事項説明書兼確認書</h2>
-        </div>
+      {/* 重要事項説明書兼確認書 */}
+      <div className="mb-8">
+        <h2 className="text-sm text-text-primary font-medium mb-3">BioVault 重要事項説明書兼確認書</h2>
 
         <div
           ref={scroll1Ref}
@@ -129,14 +124,12 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
         )}
       </div>
 
-      {/* ══════════════════════════════════ */}
-      {/* 書類2: 個人情報同意書 */}
-      {/* ══════════════════════════════════ */}
+      {/* 区切り線 */}
+      <div className="border-t border-border-gold/30 my-8" />
+
+      {/* 個人情報同意書 */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">書類 2</span>
-          <h2 className="text-sm text-text-primary font-medium">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
-        </div>
+        <h2 className="text-sm text-text-primary font-medium mb-3">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
 
         <div
           ref={scroll2Ref}
