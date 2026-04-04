@@ -15,7 +15,8 @@ export default function ApplyPageWrapper() {
 function ApplyPage() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
-  const repName = searchParams.get("rep") || "";
+  const staffCode = searchParams.get("staff") || "";
+  const repName = searchParams.get("rep") || ""; // 後方互換
 
   const [step, setStepRaw] = useState(1);
   const setStep = (s: number) => {
@@ -77,7 +78,7 @@ function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, referredByAgency: refCode, salesRepName: repName }),
+        body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -100,10 +101,10 @@ function ApplyPage() {
           <h2 className="font-serif-jp text-xl text-gold mb-3">メンバーシップ登録を受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
-              お申し込みの内容をもとに、専用本部にてiPS細胞作製適合確認を行います。
+              お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
             </p>
             <p>
-              <span className="text-gold font-medium">3営業日以内</span>に、メンバーサイトのIDとパスワードをメールにてお届けいたします。
+              <span className="text-gold font-medium">3営業日以内</span>に、<br />専用サイトのIDとパスワードをメールにてお届けいたします。
             </p>
             <p className="text-xs text-text-muted">
               ※ iPS作成適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
@@ -124,7 +125,7 @@ function ApplyPage() {
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          本申込書に記載した内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
+          お申し込み内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
         </p>
       </div>
 
@@ -303,7 +304,7 @@ function ApplyPage() {
           </div>
 
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
-            上記の内容を真実かつ正確に記載し、各事項を確認・理解のうえ、
+            上記の内容を真実かつ正確に記載し、<br />各事項を確認・理解のうえ、
             <br />
             BioVaultメンバーシップ登録に申し込みます。
           </p>
@@ -317,7 +318,7 @@ function ApplyPage() {
               disabled={submitting}
               className="flex-1 py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? "送信中..." : "登録を申し込む"}
+              {submitting ? "送信中..." : "お申し込み"}
             </button>
           </div>
         </FormSection>

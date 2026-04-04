@@ -30,8 +30,18 @@ export async function POST(req: Request) {
       referrerName = agencyProfile.companyName || agencyProfile.user.name || agencyCode;
     }
   }
-  // 営業担当者名はURLパラメータ経由で受け取る
-  const salesRepName = body.salesRepName || null;
+  // 従業員コードから従業員名を自動解決
+  const staffCodeValue = body.staffCode || null;
+  let salesRepName: string | null = body.salesRepName || null;
+  if (staffCodeValue) {
+    const staffRecord = await prisma.staff.findUnique({
+      where: { staffCode: staffCodeValue },
+      select: { name: true },
+    });
+    if (staffRecord) {
+      salesRepName = staffRecord.name;
+    }
+  }
 
   // 1. 申込データを保存
   const application = await prisma.application.create({
@@ -49,6 +59,7 @@ export async function POST(req: Request) {
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,
       referrerName,
       salesRepName,
+      staffCode: staffCodeValue,
       currentIllness: body.currentIllness || false,
       currentIllnessDetail: body.currentIllnessDetail || null,
       pastIllness: body.pastIllness || false,
@@ -112,6 +123,7 @@ export async function POST(req: Request) {
       isIdIssued: false,
       mustChangePassword: true,
       referredByAgency: agencyCode,
+      referredByStaff: staffCodeValue,
       applicationId: application.id,
       paymentMethod: body.paymentMethod || "bank_transfer",
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,

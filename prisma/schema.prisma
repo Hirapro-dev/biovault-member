@@ -59,6 +59,7 @@ model User {
   otherHealthDetail    String?
 
   referredByAgency String?                  // 紹介元エージェントコード
+  referredByStaff  String?                  // 担当従業員コード (ST-0001形式)
 
   membership    Membership?
   notes         AdminNote[]
@@ -379,6 +380,7 @@ model Application {
   paymentDate       DateTime?                             // 支払予定日
   referrerName      String?                               // 紹介者名／代理店名
   salesRepName      String?                               // 担当営業者名
+  staffCode         String?                               // 担当従業員コード
 
   // 3. 事前確認事項（健康状態）
   currentIllness       Boolean  @default(false)           // 現在治療中の病気
@@ -574,4 +576,20 @@ model PushSubscription {
   createdAt    DateTime @default(now())
 
   @@index([userId])
+}
+
+// ────────────────────────────────────────
+// 従業員マスタ（営業担当者の管理用、ログイン不要）
+// ────────────────────────────────────────
+model Staff {
+  id        String   @id @default(cuid())
+  staffCode String   @unique              // ST-0001形式
+  name      String                        // 氏名
+  nameKana  String?                       // フリガナ
+  phone     String?                       // 電話番号
+  email     String?                       // メールアドレス
+  note      String?  @db.Text             // 備考
+  isActive  Boolean  @default(true)       // 有効/無効
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

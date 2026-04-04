@@ -40,6 +40,22 @@ export default async function MemberKartePage({
 
   const membership = user.membership;
 
+  // 担当従業員名を解決
+  let staffName: string | null = null;
+  if (user.referredByStaff) {
+    const staffRecord = await prisma.staff.findUnique({
+      where: { staffCode: user.referredByStaff },
+      select: { name: true },
+    });
+    staffName = staffRecord?.name || null;
+  }
+
+  // 営業担当／代理店の統合表示
+  const referralDisplay = [
+    staffName ? `${staffName}（${user.referredByStaff}）` : (user.salesRepName || null),
+    membership?.referrerName ? `代理店: ${membership.referrerName}` : null,
+  ].filter(Boolean).join(" ／ ") || "---";
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
@@ -96,7 +112,7 @@ export default async function MemberKartePage({
             }
             mono
           />
-          <InfoRow label="紹介者" value={membership?.referrerName || "---"} />
+          <InfoRow label="営業担当／代理店" value={referralDisplay} />
           <div className="flex items-center py-2 border-t border-border mt-1">
             <div className="w-24 text-[11px] text-text-muted shrink-0">重要事項同意</div>
             <div className="text-[13px]">
@@ -151,7 +167,11 @@ export default async function MemberKartePage({
             <InfoRow label="郵便番号" value={user.postalCode || "---"} />
             <InfoRow label="支払方法" value={user.paymentMethod === "bank_transfer" ? "銀行振込" : user.paymentMethod || "---"} />
             <InfoRow label="支払予定日" value={user.paymentDate ? new Date(user.paymentDate).toLocaleDateString("ja-JP") : "---"} />
-            <InfoRow label="営業担当" value={user.salesRepName || "---"} />
+            <InfoRow label="営業担当" value={
+              user.referredByStaff
+                ? `${staffName || user.salesRepName || "---"}（${user.referredByStaff}）`
+                : user.salesRepName || "---"
+            } />
           </div>
 
           <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
