@@ -11,6 +11,7 @@ const DOC_VIEW_LINKS: Record<string, string> = {
   PRIVACY_POLICY: "/important-notice",
   CONSENT_CELL_STORAGE: "/documents/contract",
   CELL_STORAGE_CONSENT: "/documents/cell-consent",
+  INFORMED_CONSENT: "/mypage/informed-consent",
 };
 
 export default async function DocumentsPage() {

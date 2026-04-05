@@ -68,6 +68,19 @@ export async function POST(req: Request) {
       });
     }
 
+    // 書類タイプ指定の場合、書類ステータスをSIGNEDに更新
+    const docTypeMap: Record<string, string> = {
+      CELL_STORAGE_CONSENT: "CELL_STORAGE_CONSENT",
+      INFORMED_CONSENT: "INFORMED_CONSENT",
+    };
+    const docType = body.documentType || body.documentId;
+    if (docTypeMap[docType]) {
+      await prisma.document.updateMany({
+        where: { userId, type: docTypeMap[docType] as any, status: { not: "SIGNED" } },
+        data: { status: "SIGNED", signedAt: new Date() },
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("同意ログ記録エラー:", error);

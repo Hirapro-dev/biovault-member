@@ -113,6 +113,8 @@ export const DOCUMENT_TYPE_ORDER: DocumentType[] = [
   "INFORMED_CONSENT",
 ];
 
+// 注: 書類番号は documents/page.tsx の docNumberMap で管理
+
 // 投与方法ラベル
 export const TREATMENT_TYPE_LABELS: Record<TreatmentType, string> = {
   IV_DRIP: "点滴（全身投与）",

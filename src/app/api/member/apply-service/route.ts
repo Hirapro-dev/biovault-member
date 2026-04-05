@@ -82,11 +82,11 @@ export async function POST(req: Request) {
           changedBy: "会員本人",
         },
       }),
-      // 4. iPSサービス契約書 + 細胞提供・保管同意書のステータスを署名済みに更新
+      // 4. iPSサービス契約書のステータスを署名済みに更新
       prisma.document.updateMany({
         where: {
           userId,
-          type: { in: ["CONSENT_CELL_STORAGE", "CELL_STORAGE_CONSENT"] },
+          type: "CONSENT_CELL_STORAGE",
           status: { not: "SIGNED" },
         },
         data: {

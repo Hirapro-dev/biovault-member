@@ -22,7 +22,7 @@ export default function ApplyServicePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // ステップ管理（1: 健康状態・支払, 2: 同意書, 3: 確認）
+  // ステップ管理（1: 情報・確認, 2: 利用規約, 3: iPSサービス契約書, 4: 最終確認）
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -46,15 +46,18 @@ export default function ApplyServicePage() {
   const [paymentYear, setPaymentYear] = useState("");
   const [paymentMonth, setPaymentMonth] = useState("");
 
-  // ステップ2: iPSサービス契約書スクロール
+  // 契約書希望
+  const [contractFormat, setContractFormat] = useState("electronic");
+
+  // ステップ2: 利用規約スクロール
+  const termsRef = useRef<HTMLDivElement>(null);
+  const [termsScrolled, setTermsScrolled] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+
+  // ステップ3: iPSサービス契約書スクロール
   const consentRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-
-  // ステップ3: 細胞提供・保管同意書スクロール
-  const cellConsentRef = useRef<HTMLDivElement>(null);
-  const [cellScrolledToBottom, setCellScrolledToBottom] = useState(false);
-  const [cellConsentChecked, setCellConsentChecked] = useState(false);
 
   // 確認チェック
   const [confirmChecks, setConfirmChecks] = useState({
@@ -102,21 +105,21 @@ export default function ApplyServicePage() {
       .catch(() => setHealthLoaded(true));
   }, [status, healthLoaded]);
 
+  // 利用規約スクロール検知
+  const handleTermsScroll = () => {
+    if (!termsRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = termsRef.current;
+    if (scrollTop + clientHeight >= scrollHeight - 20) {
+      setTermsScrolled(true);
+    }
+  };
+
   // iPSサービス契約書スクロール検知
   const handleConsentScroll = () => {
     if (!consentRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = consentRef.current;
     if (scrollTop + clientHeight >= scrollHeight - 20) {
       setScrolledToBottom(true);
-    }
-  };
-
-  // 細胞提供・保管同意書スクロール検知
-  const handleCellConsentScroll = () => {
-    if (!cellConsentRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = cellConsentRef.current;
-    if (scrollTop + clientHeight >= scrollHeight - 20) {
-      setCellScrolledToBottom(true);
     }
   };
 
@@ -150,6 +153,7 @@ export default function ApplyServicePage() {
           ...healthData,
           paymentMethod,
           paymentDate: paymentDate?.toISOString() || null,
+          contractFormat,
         }),
       });
 
@@ -410,6 +414,21 @@ export default function ApplyServicePage() {
             </div>
           </div>
 
+          {/* 契約書の希望 */}
+          <div className="bg-bg-secondary border border-border rounded-md p-6">
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">契約書の形式</h3>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="contractFormat" value="electronic" checked={contractFormat === "electronic"} onChange={(e) => setContractFormat(e.target.value)} className="accent-gold" />
+                <span className="text-sm text-text-secondary">電子署名</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="contractFormat" value="paper" checked={contractFormat === "paper"} onChange={(e) => setContractFormat(e.target.value)} className="accent-gold" />
+                <span className="text-sm text-text-secondary">紙の契約書</span>
+              </label>
+            </div>
+          </div>
+
           <button
             onClick={() => { setStep(2); window.scrollTo(0, 0); }}
             disabled={!allConfirmed}
@@ -419,13 +438,54 @@ export default function ApplyServicePage() {
                 : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
             }`}
           >
-            次へ：同意書の確認
+            次へ：利用規約の確認
           </button>
         </div>
       )}
 
-      {/* ステップ2: 同意書 */}
+      {/* ステップ2: 利用規約 */}
       {step === 2 && (
+        <div className="space-y-6">
+          <div className="bg-bg-secondary border border-border rounded-md p-6">
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 会員規約</h3>
+            <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
+            <div
+              ref={termsRef}
+              onScroll={handleTermsScroll}
+              className="max-h-[50vh] overflow-y-auto border border-border rounded p-4 bg-bg-tertiary text-xs sm:text-sm text-text-secondary leading-[2] space-y-4"
+            >
+              <TermsContent />
+            </div>
+
+            {!termsScrolled && (
+              <div className="mt-3 text-center text-xs text-gold animate-pulse">↓ 最後までスクロールしてください</div>
+            )}
+
+            <div className={`mt-4 transition-opacity ${termsScrolled ? "opacity-100" : "opacity-40"}`}>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={termsAgreed} onChange={(e) => termsScrolled && setTermsAgreed(e.target.checked)} disabled={!termsScrolled} className="accent-gold w-4 h-4" />
+                <span className="text-sm text-text-secondary">上記の BioVault会員規約の内容を確認し、同意します。</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={() => { setStep(1); window.scrollTo(0, 0); }} className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer">
+              戻る
+            </button>
+            <button
+              onClick={() => { setStep(3); window.scrollTo(0, 0); }}
+              disabled={!termsAgreed}
+              className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${termsAgreed ? "bg-gold-gradient text-bg-primary hover:opacity-90" : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"}`}
+            >
+              次へ：iPSサービス契約書
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ステップ3: iPSサービス契約書 */}
+      {step === 3 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
             <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault iPSサービス契約書</h3>
@@ -536,93 +596,6 @@ export default function ApplyServicePage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setStep(1); window.scrollTo(0, 0); }}
-              className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
-            >
-              戻る
-            </button>
-            <button
-              onClick={() => { setStep(3); window.scrollTo(0, 0); }}
-              disabled={!consentChecked}
-              className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${
-                consentChecked
-                  ? "bg-gold-gradient text-bg-primary hover:opacity-90"
-                  : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
-              }`}
-            >
-              次へ：細胞提供・保管同意書
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ステップ3: 細胞提供・保管同意書 */}
-      {step === 3 && (
-        <div className="space-y-6">
-          <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 細胞提供・保管同意書</h3>
-            <div
-              ref={cellConsentRef}
-              onScroll={handleCellConsentScroll}
-              className="max-h-[60vh] overflow-y-auto border border-border rounded p-4 bg-bg-tertiary text-xs sm:text-sm text-text-secondary leading-[2] space-y-5"
-            >
-              <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップ制サービスに関連して、メンバーシップ登録者本人（以下「乙」という。）より提供された細胞の取扱いについて、以下のとおり説明します。</p>
-              <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第1条（目的）</h4>
-              <p>本同意書は、乙から提供される血液その他の生体由来試料および当該試料から作製される細胞等の提供、保管、管理に関する条件を定めることを目的とします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第2条（提供する試料）</h4>
-              <p>乙は、iPS細胞作製のために必要な血液その他の生体由来試料（以下「本試料」という。）を、提携医療機関を通じて提供することに同意します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第3条（試料の利用目的）</h4>
-              <p>本試料は、乙本人のiPS細胞作製および保管の目的にのみ利用されます。その他の目的での利用は、別途乙の同意を得た場合を除き、行われません。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第4条（保管条件）</h4>
-              <p>作製された細胞は、提携保管施設において、適切な温度管理および品質管理のもと保管されます。保管期間は、乙が加入するプランに定める期間とします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第5条（品質に関する説明）</h4>
-              <p>生体由来試料および細胞には個体差があり、採取条件、作製条件、保存環境その他の影響を受けるため、品質、増殖性、分化能その他の性状が常に一定であるとは限りません。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第6条（保管終了時の取扱い）</h4>
-              <p>保管期間満了後、更新がなされない場合、または乙の退会等により保管契約が終了した場合、保管細胞は適切に廃棄されます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第7条（死亡時の取扱い）</h4>
-              <p>乙が死亡した場合における保管細胞の取扱いについては、iPSサービス契約書第17条の定めに従うものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第8条（同意の撤回）</h4>
-              <p>乙は、既に不可逆的な処理が実施済みの部分を除き、将来に向かって本同意を撤回することができます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第9条（免責）</h4>
-              <p>甲は、天災地変、感染症、設備故障その他甲の合理的支配を超える事由により生じた試料または細胞の損失について責任を負いません。</p>
-            </div>
-
-            {/* スクロール案内 */}
-            {!cellScrolledToBottom && (
-              <div className="mt-3 text-center text-xs text-gold animate-pulse">
-                ↓ 最後までスクロールしてください
-              </div>
-            )}
-
-            {/* 同意チェック */}
-            <div className={`mt-4 transition-opacity ${cellScrolledToBottom ? "opacity-100" : "opacity-40"}`}>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={cellConsentChecked}
-                  onChange={(e) => cellScrolledToBottom && setCellConsentChecked(e.target.checked)}
-                  disabled={!cellScrolledToBottom}
-                  className="accent-gold w-4 h-4"
-                />
-                <span className="text-sm text-text-secondary">
-                  上記の細胞提供・保管同意書の内容をすべて確認し、同意します
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button
               onClick={() => { setStep(2); window.scrollTo(0, 0); }}
               className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
             >
@@ -630,9 +603,9 @@ export default function ApplyServicePage() {
             </button>
             <button
               onClick={() => { setStep(4); window.scrollTo(0, 0); }}
-              disabled={!cellConsentChecked}
+              disabled={!consentChecked}
               className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${
-                cellConsentChecked
+                consentChecked
                   ? "bg-gold-gradient text-bg-primary hover:opacity-90"
                   : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
               }`}
@@ -680,12 +653,17 @@ export default function ApplyServicePage() {
               </div>
 
               <div className="border-b border-border pb-3">
-                <div className="text-xs text-text-muted mb-1">iPSサービス契約書</div>
+                <div className="text-xs text-text-muted mb-1">契約書の形式</div>
+                <div className="text-sm text-text-primary">{contractFormat === "electronic" ? "電子署名" : "紙の契約書"}</div>
+              </div>
+
+              <div className="border-b border-border pb-3">
+                <div className="text-xs text-text-muted mb-1">会員規約</div>
                 <div className="text-sm text-text-primary">同意済み ✓</div>
               </div>
 
               <div>
-                <div className="text-xs text-text-muted mb-1">細胞提供・保管同意書</div>
+                <div className="text-xs text-text-muted mb-1">iPSサービス契約書</div>
                 <div className="text-sm text-text-primary">同意済み ✓</div>
               </div>
             </div>
@@ -780,4 +758,38 @@ function ConfirmItem({
       <span className="text-sm text-text-secondary leading-relaxed">{label}</span>
     </label>
   );
+}
+
+// 利用規約コンテンツ
+function TermsContent() {
+  return (
+    <>
+      <TS t="第1条（目的）"><p>本規約は、株式会社SCPP（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p></TS>
+      <TS t="第2条（定義）"><p>「本サービス」とは、当社が「BioVault」の名称で運営するBioVaultメンバーシップサービスおよびこれに付随する一切のサービスをいいます。</p><p>「会員」とは、当社所定の手続きにより本サービスの申込みを行い、当社が承認し、会員資格を付与された個人または法人をいいます。</p><p>「会員権」とは、本サービスの利用資格として当社が付与する地位をいいます。</p></TS>
+      <TS t="第3条（本規約の適用）"><p>本規約は、会員と当社との間の本サービス利用に関する一切の関係に適用されます。</p></TS>
+      <TS t="第4条（本サービスの位置付け）"><p>当社は、本サービスの運営主体であり、会員に対し医療行為を行うものではありません。</p></TS>
+      <TS t="第5条（会員資格）"><p>会員資格は、当社が申込みを承認した時点で発生します。会員資格は会員本人に専属し、第三者へ譲渡できません。</p></TS>
+      <TS t="第6条（本サービスの内容）"><p>本サービスの中核は、CellAssetに関する案内、申込管理、連絡調整、提供連携および関連する会員向け付随サービスとします。</p></TS>
+      <TS t="第7条（会員限定サービス）"><p>当社は、会員に対し、情報配信サービス、個別相談またはコンシェルジュ案内、会員限定イベント等を提供することがあります。</p></TS>
+      <TS t="第8条（会員情報の管理）"><p>会員は、届出情報に変更があった場合、速やかに届け出るものとします。</p></TS>
+      <TS t="第9条（利用条件）"><p>本サービスは、会員本人のために提供されるものであり、第三者に利用させることはできません。</p></TS>
+      <TS t="第10条（禁止事項）"><p>会員は、法令違反、虚偽申告、権利侵害、業務妨害、反社会的勢力への利益供与等を行ってはなりません。</p></TS>
+      <TS t="第11条（知的財産権）"><p>本サービスに関連する知的財産権は、当社または正当な権利者に帰属します。</p></TS>
+      <TS t="第12条（秘密保持）"><p>会員は、本サービスに関連して知り得た非公知情報を第三者に開示してはなりません。</p></TS>
+      <TS t="第13条（個人情報等の取扱い）"><p>当社は、会員の個人情報を法令およびプライバシーポリシーに従って取り扱います。</p></TS>
+      <TS t="第14条（情報配信）"><p>当社は、運営上必要な通知を電子メール等により行うことができます。</p></TS>
+      <TS t="第15条（会員資格の停止・喪失）"><p>規約違反、虚偽申告、料金未払い等の場合、会員資格を停止または喪失させることができます。</p></TS>
+      <TS t="第16条（退会）"><p>会員は、当社所定の方法により退会を申し出ることができます。</p></TS>
+      <TS t="第17条（死亡時の取扱い）"><p>会員が死亡したときは、会員資格は当然に終了します。</p></TS>
+      <TS t="第18条（規約の変更）"><p>当社は、法令改正等の事由がある場合、本規約を変更することができます。</p></TS>
+      <TS t="第19条（免責）"><p>当社は、特定の結果、効果、効能を保証しません。天災等による損害について責任を負いません。</p></TS>
+      <TS t="第20条（反社会的勢力の排除）"><p>会員は、反社会的勢力に該当しないことを表明し、保証します。</p></TS>
+      <TS t="第21条（協議事項）"><p>本規約に定めのない事項は、誠実に協議して解決するものとします。</p></TS>
+      <TS t="第22条（準拠法・管轄）"><p>本規約は日本法に準拠します。紛争が生じた場合、当社本店所在地を管轄する裁判所を専属的合意管轄裁判所とします。</p></TS>
+    </>
+  );
+}
+
+function TS({ t, children }: { t: string; children: React.ReactNode }) {
+  return (<section><h4 className="text-sm text-text-primary font-medium mb-1">{t}</h4><div className="space-y-1.5">{children}</div></section>);
 }
