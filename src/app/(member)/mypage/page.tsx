@@ -11,7 +11,7 @@ const TIMELINE_STEPS = [
   { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
-  { key: "DOC_CELL_STORAGE", label: "契約書", icon: "📋" },
+  { key: "DOC_CELL_STORAGE", label: "メンバーシップ契約書", icon: "📋" },
   { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄" },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
