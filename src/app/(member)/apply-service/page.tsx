@@ -195,7 +195,7 @@ export default function ApplyServicePage() {
             担当者より改めてご連絡させていただきます。
           </p>
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/mypage")}
             className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
           >
             マイページに戻る
