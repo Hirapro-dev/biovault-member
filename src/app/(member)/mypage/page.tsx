@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import ScheduleRequestButton from "./ScheduleRequestButton";
 
-// 表示用10ステップの定義
+// 表示用ステップの定義
 const TIMELINE_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
@@ -336,7 +336,29 @@ export default async function MyPage() {
             </Link>
           )}
 
-          {membership.ipsStatus === "SERVICE_APPLIED" && (
+          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus !== "COMPLETED" && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                </div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">入金確認</div>
+                <div className="text-xs text-text-muted leading-relaxed">
+                  お申込みありがとうございます。入金の確認が取れ次第、次のステップへ進みます。
+                </div>
+                <div className="mt-4 bg-bg-elevated border border-border rounded-md p-4">
+                  <div className="text-[11px] text-text-muted mb-1">お支払い金額</div>
+                  <div className="font-mono text-lg text-gold">¥{membership.totalAmount.toLocaleString()}</div>
+                  <div className="text-[11px] text-text-muted mt-2">
+                    入金済: ¥{membership.paidAmount.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus === "COMPLETED" && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -344,7 +366,7 @@ export default async function MyPage() {
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
                 <div className="text-base sm:text-lg text-text-primary font-medium mb-2">日程調整</div>
-                <div className="text-xs text-text-muted leading-relaxed mb-2">問診・採血の日程を調整いたします。</div>
+                <div className="text-xs text-text-muted leading-relaxed mb-2">入金確認が完了しました。問診・採血の日程を調整いたします。</div>
                 <ScheduleRequestButton />
               </div>
             </div>
