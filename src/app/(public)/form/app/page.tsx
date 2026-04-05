@@ -15,8 +15,7 @@ export default function ApplyPageWrapper() {
 function ApplyPage() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
-  const staffCode = searchParams.get("staff") || "";
-  const repName = searchParams.get("rep") || ""; // 後方互換
+  const repName = searchParams.get("rep") || "";
 
   const [step, setStepRaw] = useState(1);
   const setStep = (s: number) => {
@@ -78,7 +77,7 @@ function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName }),
+        body: JSON.stringify({ ...form, referredByAgency: refCode, salesRepName: repName }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -98,16 +97,16 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS適合確認申請を受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">メンバーシップ登録を受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
               お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
             </p>
             <p>
-              <span className="text-gold font-medium">3営業日以内</span>に、<br />専用サイトのIDとパスワードをメールにてお届けいたします。
+              <span className="text-gold font-medium">3営業日以内</span>に、<br />担当スタッフよりご連絡させていただきます。
             </p>
             <p className="text-xs text-text-muted">
-              ※ iPS作成適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
+              ※ iPS作製適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
             </p>
           </div>
         </div>
@@ -121,17 +120,17 @@ function ApplyPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
-          BioVault iPS適合確認申請
+          BioVault メンバーシップ登録
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          お申し込み内容は、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
+          お申し込み内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
         </p>
       </div>
 
       {/* ステップインジケーター */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono ${
@@ -144,7 +143,7 @@ function ApplyPage() {
             >
               {step > s ? "✓" : s}
             </div>
-            {s < 4 && <div className={`w-6 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
+            {s < 5 && <div className={`w-6 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
           </div>
         ))}
       </div>
@@ -268,9 +267,9 @@ function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 3: 確認事項（チェック） */}
+      {/* Step 3: 確認事項 + 受領文書 */}
       {step === 3 && (
-        <FormSection title="3. 確認事項">
+        <FormSection title="4. 確認事項">
           <p className="text-xs text-text-secondary mb-4">
             以下の事項を確認し、理解したうえで申込みます。
           </p>
@@ -283,8 +282,13 @@ function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 4: 確認・送信 */}
+      {/* Step 4: 利用規約 */}
       {step === 4 && (
+        <TermsStep onBack={() => setStep(3)} onNext={() => setStep(5)} />
+      )}
+
+      {/* Step 5: 確認・送信 */}
+      {step === 5 && (
         <FormSection title="入力内容の確認">
           <div className="space-y-4 mb-6">
             <ConfirmGroup title="申込者情報">
@@ -301,11 +305,11 @@ function ApplyPage() {
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
             上記の内容を真実かつ正確に記載し、<br />各事項を確認・理解のうえ、
             <br />
-            BioVault iPS適合確認に申し込みます。
+            BioVaultメンバーシップ登録に申し込みます。
           </p>
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(3)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
+            <button onClick={() => setStep(4)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
               戻る
             </button>
             <button
@@ -433,7 +437,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
   }, []);
 
   return (
-    <FormSection title="3. BioVault会員規約">
+    <FormSection title="5. BioVault会員規約">
       <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
 
       <div ref={scrollRef} className="max-h-[50vh] overflow-y-auto bg-bg-elevated border border-border rounded-md p-4 sm:p-5 mb-4">
