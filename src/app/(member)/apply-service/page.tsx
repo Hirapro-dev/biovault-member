@@ -414,7 +414,7 @@ export default function ApplyServicePage() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 細胞提供・保管同意書</h3>
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 契約書</h3>
             <div
               ref={consentRef}
               onScroll={handleConsentScroll}
@@ -514,7 +514,7 @@ export default function ApplyServicePage() {
                   className="accent-gold w-4 h-4"
                 />
                 <span className="text-sm text-text-secondary">
-                  上記の細胞提供・保管同意書の内容をすべて確認し、同意します
+                  上記の契約書の内容をすべて確認し、同意します
                 </span>
               </label>
             </div>

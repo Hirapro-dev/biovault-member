@@ -160,7 +160,7 @@ export async function POST(req: Request) {
   await prisma.document.createMany({
     data: [
       { userId: user.id, type: "CONTRACT", title: "会員契約書（細胞保管委託契約書）", status: "PENDING" },
-      { userId: user.id, type: "CONSENT_CELL_STORAGE", title: "細胞保管同意書", status: "PENDING" },
+      { userId: user.id, type: "CONSENT_CELL_STORAGE", title: "契約書", status: "PENDING" },
       { userId: user.id, type: "INFORMED_CONSENT", title: "インフォームドコンセント", status: "PENDING" },
       { userId: user.id, type: "PRIVACY_POLICY", title: "個人情報取扱同意書", status: "PENDING" },
       { userId: user.id, type: "SIMPLE_AGREEMENT", title: "簡易規約", status: "PENDING" },

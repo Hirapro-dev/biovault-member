@@ -82,7 +82,7 @@ export async function POST(req: Request) {
           changedBy: "会員本人",
         },
       }),
-      // 4. 細胞提供・保管同意書のステータスを署名済みに更新
+      // 4. 契約書のステータスを署名済みに更新
       prisma.document.updateMany({
         where: {
           userId,
