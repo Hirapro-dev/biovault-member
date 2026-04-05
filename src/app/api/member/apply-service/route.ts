@@ -34,6 +34,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const now = new Date();
+
     // トランザクションで一括更新
     await prisma.$transaction([
       // 1. ユーザーの健康状態・支払情報を更新
@@ -66,7 +68,8 @@ export async function POST(req: Request) {
         where: { userId },
         data: {
           ipsStatus: "SERVICE_APPLIED",
-          serviceAppliedAt: new Date(),
+          serviceAppliedAt: now,
+          consentSignedAt: now,
         },
       }),
       // 3. ステータス履歴を記録
@@ -77,6 +80,18 @@ export async function POST(req: Request) {
           toStatus: "SERVICE_APPLIED",
           note: "会員本人によるiPSサービス申込",
           changedBy: "会員本人",
+        },
+      }),
+      // 4. 細胞提供・保管同意書のステータスを署名済みに更新
+      prisma.document.updateMany({
+        where: {
+          userId,
+          type: "CONSENT_CELL_STORAGE",
+          status: { not: "SIGNED" },
+        },
+        data: {
+          status: "SIGNED",
+          signedAt: now,
         },
       }),
     ]);
