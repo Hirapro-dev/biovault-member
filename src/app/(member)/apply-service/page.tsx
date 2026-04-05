@@ -218,7 +218,7 @@ export default function ApplyServicePage() {
 
       {/* ステップインジケーター */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono ${
@@ -231,7 +231,7 @@ export default function ApplyServicePage() {
             >
               {s < step ? "✓" : s}
             </div>
-            {s < 4 && (
+            {s < 3 && (
               <div
                 className={`w-12 h-[1px] ${
                   s < step ? "bg-gold" : "bg-border"
@@ -478,146 +478,14 @@ export default function ApplyServicePage() {
               disabled={!termsAgreed}
               className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${termsAgreed ? "bg-gold-gradient text-bg-primary hover:opacity-90" : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"}`}
             >
-              次へ：iPSサービス契約書
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ステップ3: iPSサービス契約書 */}
-      {step === 3 && (
-        <div className="space-y-6">
-          <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault iPSサービス契約書</h3>
-            <div
-              ref={consentRef}
-              onScroll={handleConsentScroll}
-              className="max-h-[60vh] overflow-y-auto border border-border rounded p-4 bg-bg-tertiary text-xs sm:text-sm text-text-secondary leading-[2] space-y-5"
-            >
-              <p className="text-text-secondary/80 text-[11px]">（自家iPS細胞等の提供、保管、将来利用および死亡時取扱いに関する同意書）</p>
-              <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップ制サービスに関連して、メンバーシップ登録者本人（以下「乙」という。）に由来する血液、細胞その他の試料ならびにこれらから作製される自家iPS細胞その他関連物および関連情報の提供、保管、管理、将来利用、死亡時取扱いその他必要事項について、以下のとおり説明します。</p>
-              <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第1条（目的）</h4>
-              <p>本同意書は、乙本人から採取された血液、細胞その他の試料を原料として作製される自家iPS細胞その他これに関連する細胞、加工物、検査記録および関連情報等の提供、保管、管理、利用条件、廃棄、死亡時取扱いその他必要事項を定めることを目的とします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第2条（適用関係）</h4>
-              <p>本同意書は、BioVaultメンバーシップ契約書、BioVaultメンバーシップ規約、重要事項説明書兼確認書、申込確認書、個人情報・個人遺伝情報等の取扱いに関する同意書その他関連文書と一体をなすものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第3条（定義）</h4>
-              <p>(1)「本試料」とは、乙本人から採取された血液、体液、細胞その他の生体由来試料をいいます。</p>
-              <p>(2)「本細胞等」とは、本試料を原料として作製された自家iPS細胞、原料細胞、中間生成物、培養物、凍結保存物、加工物、検査試料、品質記録、識別情報その他これらに付随する一切の物および情報をいいます。</p>
-              <p>(3)「関連生成物」とは、本細胞等から派生しまたは本細胞等を利用して得られる培養上清液その他の生成物をいいます。</p>
-              <p>(4)「提携先」とは、本試料または本細胞等の採取、輸送、加工、培養、保管、品質管理、検査、払出し、廃棄、研究、再生医療等提供その他関連業務に関与する医療機関、細胞培養加工施設、検査機関、研究機関、物流事業者その他の甲提携先をいいます。</p>
-              <p>(5)「保管サービス」とは、甲が乙向けに提供する、本細胞等の保管、管理、記録保存、照会対応その他の関連サービスをいいます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第4条（本同意書の位置付け）</h4>
-              <p>本同意書は、本試料および本細胞等の提供、保管、管理、将来利用および死亡時の取扱いに関する乙本人の同意を確認するための文書です。</p>
-              <p>甲は、BioVaultメンバーシップ制サービスの運営主体であり、乙に対し医療行為を直接提供するものではありません。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第5条（本試料の提供）</h4>
-              <p>乙は、本サービスの提供に必要な範囲で、本試料を提携医療機関または提携先に提供することに同意します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第6条（本細胞等の作製および保管）</h4>
-              <p>乙は、本試料を原料として、本細胞等が提携先において作製、加工または保管される場合があることに同意します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第7条（保管の目的）</h4>
-              <p>本細胞等の保管は、乙本人の将来利用可能性に備えることを主たる目的とします。</p>
-              <p>甲および提携先は、本細胞等の保管が、特定の治療、美容上の効果、研究成果、経済的利益、商品化または資産的価値を保証するものでないことを明示します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第8条（保管期間）</h4>
-              <p>本細胞等の基本保管期間は、乙が加入するプランまたは甲所定の申込条件に定める期間とします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第9条（保管方法および品質）</h4>
-              <p>乙は、生体由来試料および細胞には個体差があり、採取条件、作製条件、保存環境その他の影響を受けるため、本細胞等の品質、増殖性、分化能、利用適合性その他の性状が常に一定であるとは限らないことをあらかじめ承諾します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第10条（提携先への委託および情報共有）</h4>
-              <p>乙は、保管サービスの提供に必要な範囲で、甲が提携先との間で、本試料、本細胞等および関連情報を共有することに同意します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第11条（個人情報、要配慮個人情報および個人遺伝情報）</h4>
-              <p>甲は、乙の個人情報、要配慮個人情報、個人遺伝情報、診療関連情報、検査結果、細胞識別情報、保管記録その他本試料または本細胞等に関連する情報を、保管サービスの提供、本人確認、品質管理、問い合わせ対応、費用請求、法令対応その他関連文書で定める目的のために利用します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第12条（将来利用および別途同意）</h4>
-              <p>乙は、本細胞等が将来利用の可能性を見据えて保管されることを承諾します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第13条（払出し・移送）</h4>
-              <p>乙が本細胞等の払出し、移送、利用申請その他を希望する場合には、甲所定の手続きおよび本人確認を経るものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第14条（変更届出）</h4>
-              <p>乙は、氏名、住所、連絡先、緊急連絡先、死亡時意思表示その他甲所定の重要事項に変更が生じた場合には、遅滞なく甲に届け出るものとします。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第15条（同意の撤回）</h4>
-              <p>乙は、法令上撤回が制限される場合、既に不可逆的な処理が実施済みの部分、または安全管理上もしくは記録保存上保持が必要な部分を除き、将来に向かって本同意を撤回することができます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第16条（保管終了および廃棄）</h4>
-              <p>甲または提携先は、保管期間が満了し更新がなされなかった場合、メンバーシップ資格が終了した場合、その他所定の事由に該当する場合、本細胞等の保管を終了し、廃棄その他必要な措置を講じることができます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第17条（死亡時の取扱い）</h4>
-              <p>乙は、自身の死亡時における本細胞等の取扱いについて、あらかじめ次の各号のいずれかを選択するものとします。</p>
-              <p>(1) 研究検体として研究機関へ寄贈する</p>
-              <p>(2) 廃棄する</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第18条（非保証）</h4>
-              <p>甲および提携先は、本細胞等の保管が、乙に対し、将来の特定の医療行為、美容行為、研究成果、経済的利益または資産的価値を保証するものではないことを明示します。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第19条（免責）</h4>
-              <p>甲は、その故意または重過失による場合を除き、生体由来試料の品質変化、外部要因に起因する影響、天災地変その他甲の合理的支配を超える事由により乙に生じた損害について責任を負いません。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第20条（記録保存）</h4>
-              <p>甲または提携先は、本試料または本細胞等に関する同意記録、管理記録、入出庫履歴、検査記録、問い合わせ履歴その他必要な情報を、法令または甲所定の保存期間に従い保存することができます。</p>
-
-              <h4 className="text-sm text-text-primary font-medium">第21条（協議）</h4>
-              <p>本同意書に定めのない事項または本同意書の解釈に疑義が生じた場合には、甲および乙は、誠実に協議して解決を図るものとします。</p>
-            </div>
-
-            {/* スクロール案内 */}
-            {!scrolledToBottom && (
-              <div className="mt-3 text-center text-xs text-gold animate-pulse">
-                ↓ 最後までスクロールしてください
-              </div>
-            )}
-
-            {/* 同意チェック */}
-            <div className={`mt-4 transition-opacity ${scrolledToBottom ? "opacity-100" : "opacity-40"}`}>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={consentChecked}
-                  onChange={(e) => scrolledToBottom && setConsentChecked(e.target.checked)}
-                  disabled={!scrolledToBottom}
-                  className="accent-gold w-4 h-4"
-                />
-                <span className="text-sm text-text-secondary">
-                  上記のiPSサービス契約書の内容をすべて確認し、同意します
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => { setStep(2); window.scrollTo(0, 0); }}
-              className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
-            >
-              戻る
-            </button>
-            <button
-              onClick={() => { setStep(4); window.scrollTo(0, 0); }}
-              disabled={!consentChecked}
-              className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${
-                consentChecked
-                  ? "bg-gold-gradient text-bg-primary hover:opacity-90"
-                  : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
-              }`}
-            >
               次へ：最終確認
             </button>
           </div>
         </div>
       )}
 
-      {/* ステップ4: 最終確認 */}
-      {step === 4 && (
+      {/* ステップ3: 最終確認 */}
+      {step === 3 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
             <h3 className="text-sm text-text-primary tracking-wider mb-4">お申込み内容の確認</h3>
@@ -657,13 +525,8 @@ export default function ApplyServicePage() {
                 <div className="text-sm text-text-primary">{contractFormat === "electronic" ? "電子署名" : "紙の契約書"}</div>
               </div>
 
-              <div className="border-b border-border pb-3">
-                <div className="text-xs text-text-muted mb-1">会員規約</div>
-                <div className="text-sm text-text-primary">同意済み ✓</div>
-              </div>
-
               <div>
-                <div className="text-xs text-text-muted mb-1">iPSサービス契約書</div>
+                <div className="text-xs text-text-muted mb-1">会員規約</div>
                 <div className="text-sm text-text-primary">同意済み ✓</div>
               </div>
             </div>
@@ -677,7 +540,7 @@ export default function ApplyServicePage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setStep(3); window.scrollTo(0, 0); }}
+              onClick={() => { setStep(2); window.scrollTo(0, 0); }}
               className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
             >
               戻る

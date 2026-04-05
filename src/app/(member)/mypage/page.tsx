@@ -9,7 +9,6 @@ const TIMELINE_STEPS = [
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
   { key: "REGISTERED", label: "メンバーシップ登録", icon: "👤" },
   { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
-  { key: "DOC_CELL_STORAGE", label: "iPSサービス契約書", icon: "📋" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
@@ -82,7 +81,6 @@ export default async function MyPage() {
 
   function isStepDone(key: string): boolean {
     if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
-    if (key === "DOC_CELL_STORAGE") return !!docSignedMap["CONSENT_CELL_STORAGE"];
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
     if (key === "DOC_INFORMED") return !!docSignedMap["INFORMED_CONSENT"];
     if (key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED";
@@ -93,7 +91,6 @@ export default async function MyPage() {
 
   function getStepDate(key: string): string | null {
     if (key === "DOC_PRIVACY") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
-    if (key === "DOC_CELL_STORAGE") return docSignedMap["CONSENT_CELL_STORAGE"] || null;
     if (key === "DOC_CELL_CONSENT") return docSignedMap["CELL_STORAGE_CONSENT"] || null;
     if (key === "DOC_INFORMED") return docSignedMap["INFORMED_CONSENT"] || null;
     if (key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED" && membership?.updatedAt ? membership.updatedAt.toISOString() : null;
