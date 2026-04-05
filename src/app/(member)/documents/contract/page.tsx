@@ -18,11 +18,11 @@ export default async function ContractViewPage() {
       <div className="text-[11px] text-text-muted mb-5">
         <Link href="/documents" className="hover:text-gold transition-colors">契約書類</Link>
         <span className="mx-2">/</span>
-        <span className="text-text-secondary">メンバーシップ契約書</span>
+        <span className="text-text-secondary">iPSサービス契約書</span>
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">BioVault メンバーシップ契約書</h2>
+        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">BioVault iPSサービス契約書</h2>
         {isSigned && <Badge variant="success">同意済</Badge>}
       </div>
       {doc?.signedAt && (
