@@ -27,12 +27,14 @@ interface Props {
 
 export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms }: Props) {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  // チェック状態を管理（変更前の状態を保持）
+  const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
 
   const DB_ORDER = ["REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
   const currentIdx = DB_ORDER.indexOf(currentStatus);
 
-  const isDone = (key: string) => {
+  const isOriginallyDone = (key: string) => {
     if (key === "DOC_PRIVACY") return signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms;
     if (key === "DOC_CELL_CONSENT") return signedDocTypes.includes("CELL_STORAGE_CONSENT");
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
@@ -41,63 +43,80 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
     return idx !== -1 && currentIdx >= idx;
   };
 
-  // チェックボックスクリック時のハンドラ
-  const handleToggle = async (step: typeof ADMIN_TIMELINE[number], done: boolean) => {
-    if (loading) return;
-
-    // DB上のステータス変更が必要な場合
-    if (step.dbStatus) {
-      if (done) return; // 完了済みのDB ステータスはチェックボックスでは戻さない（ステータス変更フォームを使用）
-
-      setLoading(step.key);
-      try {
-        await fetch(`/api/admin/members/${userId}/status`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ newStatus: step.dbStatus, note: `管理者がステータスを「${step.label}」に変更` }),
-        });
-        router.refresh();
-      } finally {
-        setLoading(null);
-      }
-      return;
-    }
-
-    // 入金確認の場合
-    if (step.key === "PAYMENT_CONFIRMED" && !done) {
-      setLoading(step.key);
-      try {
-        await fetch(`/api/admin/members/${userId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentStatus: "COMPLETED", paidAmount: 8800000 }),
-        });
-        router.refresh();
-      } finally {
-        setLoading(null);
-      }
-      return;
-    }
-
-    // 書類同意の場合はチェックのみ（実際の同意は会員本人が行う）
+  // 表示上のチェック状態（元の状態 + ペンディング変更）
+  const isChecked = (key: string) => {
+    if (pendingChanges.has(key)) return !isOriginallyDone(key);
+    return isOriginallyDone(key);
   };
+
+  // チェックボックスをトグル
+  const handleToggle = (key: string) => {
+    setPendingChanges((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // 更新ボタン
+  const handleUpdate = async () => {
+    if (pendingChanges.size === 0 || loading) return;
+    setLoading(true);
+
+    try {
+      for (const key of pendingChanges) {
+        const step = ADMIN_TIMELINE.find((s) => s.key === key);
+        if (!step) continue;
+
+        const willBeChecked = !isOriginallyDone(key);
+
+        // DBステータス変更
+        if (step.dbStatus && willBeChecked) {
+          await fetch(`/api/admin/members/${userId}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newStatus: step.dbStatus, note: `管理者がステータスを「${step.label}」に変更` }),
+          });
+        }
+
+        // 入金確認
+        if (key === "PAYMENT_CONFIRMED" && willBeChecked) {
+          await fetch(`/api/admin/members/${userId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentStatus: "COMPLETED", paidAmount: 8800000 }),
+          });
+        }
+      }
+
+      setPendingChanges(new Set());
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasPending = pendingChanges.size > 0;
 
   return (
     <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
       <div className="space-y-1">
         {ADMIN_TIMELINE.map((step) => {
-          const done = isDone(step.key);
-          const isLoading = loading === step.key;
-          // 書類同意ステップかどうか
+          const done = isChecked(step.key);
+          const originalDone = isOriginallyDone(step.key);
           const isDocStep = ["DOC_PRIVACY", "DOC_CELL_CONSENT", "DOC_INFORMED"].includes(step.key);
-          // クリック可能かどうか（DB ステータスの場合は未完了のみ、書類は会員本人のみ、入金は未完了のみ）
-          const canToggle = !done && !isDocStep && !isLoading;
+          const canToggle = !isDocStep && !loading;
+          const isPending = pendingChanges.has(step.key);
 
           return (
             <div
               key={step.key}
-              onClick={() => canToggle && handleToggle(step, done)}
-              className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""}`}
+              onClick={() => canToggle && handleToggle(step.key)}
+              className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""} ${isPending ? "bg-gold/5" : ""}`}
             >
               {/* カスタムチェックボックス */}
               <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
@@ -119,16 +138,39 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
               <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>
                 {step.label}
               </span>
-              {/* ローディング */}
-              {isLoading && <span className="text-[10px] text-gold ml-auto animate-pulse">更新中...</span>}
+              {/* 変更予定マーク */}
+              {isPending && (
+                <span className="text-[10px] text-gold ml-auto">{done && !originalDone ? "← 変更予定" : originalDone && !done ? "← 解除予定" : ""}</span>
+              )}
               {/* 書類ステップの注記 */}
-              {isDocStep && !done && (
+              {isDocStep && !done && !isPending && (
                 <span className="text-[10px] text-text-muted ml-auto">会員本人が同意</span>
               )}
             </div>
           );
         })}
       </div>
+
+      {/* 更新ボタン */}
+      {hasPending && (
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPendingChanges(new Set())}
+              className="px-4 py-2 bg-transparent border border-border text-text-secondary rounded-sm text-xs cursor-pointer hover:border-border-gold transition-all"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handleUpdate}
+              disabled={loading}
+              className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer hover:opacity-90 transition-all disabled:opacity-50"
+            >
+              {loading ? "更新中..." : "ステータスを更新"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
