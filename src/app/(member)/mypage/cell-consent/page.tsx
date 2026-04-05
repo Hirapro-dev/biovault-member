@@ -25,12 +25,18 @@ export default function CellConsentPage() {
   const handleAgree = async () => {
     setLoading(true);
     try {
+      // 1. 細胞提供・保管同意書に同意
       const res = await fetch("/api/member/consent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documentType: "CELL_STORAGE_CONSENT" }),
       });
-      if (res.ok) setDone(true);
+      if (!res.ok) return;
+
+      // 2. 日程調整申請を自動送信
+      await fetch("/api/member/schedule-request", { method: "POST" });
+
+      setDone(true);
     } catch {
       // エラー
     } finally {
@@ -42,8 +48,9 @@ export default function CellConsentPage() {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
         <div className="text-4xl mb-4">✅</div>
-        <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意が完了しました</h2>
-        <p className="text-sm text-text-secondary mb-6">細胞提供・保管同意書へのご同意ありがとうございます。</p>
+        <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意・日程調整申請が完了しました</h2>
+        <p className="text-sm text-text-secondary mb-2">細胞提供・保管同意書へのご同意ありがとうございます。</p>
+        <p className="text-sm text-text-secondary mb-6">日程調整の申請を送信しました。担当スタッフより改めてご連絡いたします。</p>
         <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">
           マイページに戻る
         </button>
