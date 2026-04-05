@@ -36,9 +36,8 @@ function StatusChangeForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const currentIndex = IPS_STATUS_ORDER.indexOf(currentStatus);
-  // 次のステータス候補（現在より後のステータスのみ選択可能）
-  const availableStatuses = IPS_STATUS_ORDER.filter((_, i) => i > currentIndex);
+  // 全ステータスを選択可能（間違った際に戻せるように）
+  const availableStatuses = IPS_STATUS_ORDER.filter((s) => s !== currentStatus);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
