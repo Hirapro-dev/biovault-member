@@ -34,6 +34,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   // トランザクションで関連データを全て削除
   await prisma.$transaction([
+    prisma.accessLog.deleteMany({ where: { userId: id } }),
     prisma.adminNote.deleteMany({ where: { userId: id } }),
     prisma.statusHistory.deleteMany({ where: { userId: id } }),
     prisma.document.deleteMany({ where: { userId: id } }),
