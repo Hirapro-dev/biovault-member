@@ -94,31 +94,38 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
           const canToggle = !done && !isDocStep && !isLoading;
 
           return (
-            <label
+            <div
               key={step.key}
-              className={`flex items-center gap-3 py-2.5 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""}`}
+              onClick={() => canToggle && handleToggle(step, done)}
+              className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""}`}
             >
-              {/* チェックボックス */}
-              <input
-                type="checkbox"
-                checked={done}
-                onChange={() => canToggle && handleToggle(step, done)}
-                disabled={!canToggle || isLoading}
-                className="w-4 h-4 accent-gold shrink-0 cursor-pointer disabled:cursor-default"
-              />
+              {/* カスタムチェックボックス */}
+              <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
+                done
+                  ? "bg-gold border-gold"
+                  : canToggle
+                  ? "border-text-muted/40 hover:border-gold/60"
+                  : "border-border"
+              }`}>
+                {done && (
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 7L6 10L11 4" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
               {/* アイコン */}
-              <span className={`text-sm shrink-0 ${done ? "opacity-100" : "opacity-40"}`}>{step.icon}</span>
+              <span className={`text-base shrink-0 ${done ? "opacity-100" : "opacity-30"}`}>{step.icon}</span>
               {/* ラベル */}
-              <span className={`text-[13px] ${done ? "text-gold" : "text-text-muted"}`}>
+              <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>
                 {step.label}
               </span>
               {/* ローディング */}
-              {isLoading && <span className="text-[10px] text-gold ml-auto">更新中...</span>}
+              {isLoading && <span className="text-[10px] text-gold ml-auto animate-pulse">更新中...</span>}
               {/* 書類ステップの注記 */}
               {isDocStep && !done && (
                 <span className="text-[10px] text-text-muted ml-auto">会員本人が同意</span>
               )}
-            </label>
+            </div>
           );
         })}
       </div>
