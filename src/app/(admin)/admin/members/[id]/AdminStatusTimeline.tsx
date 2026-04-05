@@ -108,8 +108,10 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
         {ADMIN_TIMELINE.map((step) => {
           const done = isChecked(step.key);
           const originalDone = isOriginallyDone(step.key);
-          const isDocStep = ["DOC_PRIVACY", "DOC_CELL_CONSENT", "DOC_INFORMED"].includes(step.key);
-          const canToggle = !isDocStep && !loading;
+          // 管理者が操作可能: 入金確認・日程調整・問診採血・作製中・保管
+          const adminToggleKeys = ["PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
+          const canToggle = adminToggleKeys.includes(step.key) && !loading;
+          const isMemberOnly = !adminToggleKeys.includes(step.key);
           const isPending = pendingChanges.has(step.key);
 
           return (
@@ -142,8 +144,8 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
               {isPending && (
                 <span className="text-[10px] text-gold ml-auto">{done && !originalDone ? "← 変更予定" : originalDone && !done ? "← 解除予定" : ""}</span>
               )}
-              {/* 書類ステップの注記 */}
-              {isDocStep && !done && !isPending && (
+              {/* 会員本人操作の注記 */}
+              {isMemberOnly && !done && !isPending && (
                 <span className="text-[10px] text-text-muted ml-auto">会員本人が同意</span>
               )}
             </div>

@@ -197,11 +197,8 @@ export default async function MemberKartePage({
         </div>
       )}
 
-      {/* アクション（ステータス変更・メモ追加） */}
-      <MemberKarteActions
-        userId={user.id}
-        currentStatus={membership?.ipsStatus || "APPLICATION"}
-      />
+      {/* メモ追加 */}
+      <MemberKarteActions userId={user.id} />
 
       {/* 書類管理 */}
       <DocumentManager
