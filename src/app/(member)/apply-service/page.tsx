@@ -46,10 +46,15 @@ export default function ApplyServicePage() {
   const [paymentYear, setPaymentYear] = useState("");
   const [paymentMonth, setPaymentMonth] = useState("");
 
-  // 同意書スクロール
+  // ステップ2: iPSサービス契約書スクロール
   const consentRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+
+  // ステップ3: 細胞提供・保管同意書スクロール
+  const cellConsentRef = useRef<HTMLDivElement>(null);
+  const [cellScrolledToBottom, setCellScrolledToBottom] = useState(false);
+  const [cellConsentChecked, setCellConsentChecked] = useState(false);
 
   // 確認チェック
   const [confirmChecks, setConfirmChecks] = useState({
@@ -97,12 +102,21 @@ export default function ApplyServicePage() {
       .catch(() => setHealthLoaded(true));
   }, [status, healthLoaded]);
 
-  // 同意書スクロール検知
+  // iPSサービス契約書スクロール検知
   const handleConsentScroll = () => {
     if (!consentRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = consentRef.current;
     if (scrollTop + clientHeight >= scrollHeight - 20) {
       setScrolledToBottom(true);
+    }
+  };
+
+  // 細胞提供・保管同意書スクロール検知
+  const handleCellConsentScroll = () => {
+    if (!cellConsentRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = cellConsentRef.current;
+    if (scrollTop + clientHeight >= scrollHeight - 20) {
+      setCellScrolledToBottom(true);
     }
   };
 
@@ -200,7 +214,7 @@ export default function ApplyServicePage() {
 
       {/* ステップインジケーター */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono ${
@@ -213,7 +227,7 @@ export default function ApplyServicePage() {
             >
               {s < step ? "✓" : s}
             </div>
-            {s < 3 && (
+            {s < 4 && (
               <div
                 className={`w-12 h-[1px] ${
                   s < step ? "bg-gold" : "bg-border"
@@ -536,14 +550,101 @@ export default function ApplyServicePage() {
                   : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
               }`}
             >
+              次へ：細胞提供・保管同意書
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ステップ3: 細胞提供・保管同意書 */}
+      {step === 3 && (
+        <div className="space-y-6">
+          <div className="bg-bg-secondary border border-border rounded-md p-6">
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 細胞提供・保管同意書</h3>
+            <div
+              ref={cellConsentRef}
+              onScroll={handleCellConsentScroll}
+              className="max-h-[60vh] overflow-y-auto border border-border rounded p-4 bg-bg-tertiary text-xs sm:text-sm text-text-secondary leading-[2] space-y-5"
+            >
+              <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップ制サービスに関連して、メンバーシップ登録者本人（以下「乙」という。）より提供された細胞の取扱いについて、以下のとおり説明します。</p>
+              <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第1条（目的）</h4>
+              <p>本同意書は、乙から提供される血液その他の生体由来試料および当該試料から作製される細胞等の提供、保管、管理に関する条件を定めることを目的とします。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第2条（提供する試料）</h4>
+              <p>乙は、iPS細胞作製のために必要な血液その他の生体由来試料（以下「本試料」という。）を、提携医療機関を通じて提供することに同意します。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第3条（試料の利用目的）</h4>
+              <p>本試料は、乙本人のiPS細胞作製および保管の目的にのみ利用されます。その他の目的での利用は、別途乙の同意を得た場合を除き、行われません。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第4条（保管条件）</h4>
+              <p>作製された細胞は、提携保管施設において、適切な温度管理および品質管理のもと保管されます。保管期間は、乙が加入するプランに定める期間とします。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第5条（品質に関する説明）</h4>
+              <p>生体由来試料および細胞には個体差があり、採取条件、作製条件、保存環境その他の影響を受けるため、品質、増殖性、分化能その他の性状が常に一定であるとは限りません。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第6条（保管終了時の取扱い）</h4>
+              <p>保管期間満了後、更新がなされない場合、または乙の退会等により保管契約が終了した場合、保管細胞は適切に廃棄されます。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第7条（死亡時の取扱い）</h4>
+              <p>乙が死亡した場合における保管細胞の取扱いについては、iPSサービス契約書第17条の定めに従うものとします。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第8条（同意の撤回）</h4>
+              <p>乙は、既に不可逆的な処理が実施済みの部分を除き、将来に向かって本同意を撤回することができます。</p>
+
+              <h4 className="text-sm text-text-primary font-medium">第9条（免責）</h4>
+              <p>甲は、天災地変、感染症、設備故障その他甲の合理的支配を超える事由により生じた試料または細胞の損失について責任を負いません。</p>
+            </div>
+
+            {/* スクロール案内 */}
+            {!cellScrolledToBottom && (
+              <div className="mt-3 text-center text-xs text-gold animate-pulse">
+                ↓ 最後までスクロールしてください
+              </div>
+            )}
+
+            {/* 同意チェック */}
+            <div className={`mt-4 transition-opacity ${cellScrolledToBottom ? "opacity-100" : "opacity-40"}`}>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cellConsentChecked}
+                  onChange={(e) => cellScrolledToBottom && setCellConsentChecked(e.target.checked)}
+                  disabled={!cellScrolledToBottom}
+                  className="accent-gold w-4 h-4"
+                />
+                <span className="text-sm text-text-secondary">
+                  上記の細胞提供・保管同意書の内容をすべて確認し、同意します
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+              className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
+            >
+              戻る
+            </button>
+            <button
+              onClick={() => { setStep(4); window.scrollTo(0, 0); }}
+              disabled={!cellConsentChecked}
+              className={`flex-1 py-3 rounded text-sm tracking-wider transition-all cursor-pointer ${
+                cellConsentChecked
+                  ? "bg-gold-gradient text-bg-primary hover:opacity-90"
+                  : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
+              }`}
+            >
               次へ：最終確認
             </button>
           </div>
         </div>
       )}
 
-      {/* ステップ3: 最終確認 */}
-      {step === 3 && (
+      {/* ステップ4: 最終確認 */}
+      {step === 4 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
             <h3 className="text-sm text-text-primary tracking-wider mb-4">お申込み内容の確認</h3>
@@ -578,8 +679,13 @@ export default function ApplyServicePage() {
                 <div className="text-sm text-text-primary">全項目確認済み ✓</div>
               </div>
 
+              <div className="border-b border-border pb-3">
+                <div className="text-xs text-text-muted mb-1">iPSサービス契約書</div>
+                <div className="text-sm text-text-primary">同意済み ✓</div>
+              </div>
+
               <div>
-                <div className="text-xs text-text-muted mb-1">同意書</div>
+                <div className="text-xs text-text-muted mb-1">細胞提供・保管同意書</div>
                 <div className="text-sm text-text-primary">同意済み ✓</div>
               </div>
             </div>
@@ -593,7 +699,7 @@ export default function ApplyServicePage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setStep(2); window.scrollTo(0, 0); }}
+              onClick={() => { setStep(3); window.scrollTo(0, 0); }}
               className="flex-1 py-3 border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
             >
               戻る
