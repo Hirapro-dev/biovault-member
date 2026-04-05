@@ -10,6 +10,7 @@ import {
 import { notFound } from "next/navigation";
 import DocumentManager from "./DocumentManager";
 import MemberKarteActions from "./MemberKarteActions";
+import AdminStatusTimeline from "./AdminStatusTimeline";
 import IssueIdSection from "./IssueIdSection";
 import DeleteAccount from "./DeleteAccount";
 
@@ -138,66 +139,20 @@ export default async function MemberKartePage({
         </div>
       </div>
 
-      {/* iPSステータス（ユーザーページと統一した全ステップ） */}
+      {/* iPSステータス（チェックボックス式） */}
       <div className="mb-6">
         <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
           iPS 細胞ステータス
         </h3>
-        {membership && (() => {
-          const ADMIN_TIMELINE = [
-            { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
-            { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
-            { key: "REGISTERED", label: "メンバーシップ登録", icon: "👤" },
-            { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
-            { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
-            { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
-            { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
-            { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄" },
-            { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
-            { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
-            { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️" },
-          ];
-          const DB_ORDER = ["REGISTERED","TERMS_AGREED","SERVICE_APPLIED","SCHEDULE_ARRANGED","BLOOD_COLLECTED","IPS_CREATING","STORAGE_ACTIVE"];
-          const currentIdx = DB_ORDER.indexOf(membership.ipsStatus);
-          const docSignedTypes = user.documents.filter(d => d.status === "SIGNED").map(d => d.type);
-
-          const isDone = (key: string) => {
-            if (key === "DOC_PRIVACY") return docSignedTypes.includes("PRIVACY_POLICY") || user.hasAgreedTerms;
-            if (key === "DOC_CELL_CONSENT") return docSignedTypes.includes("CELL_STORAGE_CONSENT");
-            if (key === "DOC_INFORMED") return docSignedTypes.includes("INFORMED_CONSENT");
-            if (key === "PAYMENT_CONFIRMED") return membership.paymentStatus === "COMPLETED";
-            const idx = DB_ORDER.indexOf(key);
-            return idx !== -1 && currentIdx >= idx;
-          };
-
-          return (
-            <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-              <div className="relative ml-1">
-                <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
-                {ADMIN_TIMELINE.map((step, i) => {
-                  const done = isDone(step.key);
-                  let active = false;
-                  for (let j = 0; j < ADMIN_TIMELINE.length; j++) {
-                    if (!isDone(ADMIN_TIMELINE[j].key)) { active = j === i; break; }
-                  }
-                  return (
-                    <div key={step.key} className="flex items-start gap-4 pb-5 last:pb-0 relative">
-                      <div className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm ${done ? "text-bg-primary font-bold" : active ? "border-2 border-gold text-gold" : "border border-border text-text-muted"}`}
-                        style={{ background: done ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))" : active ? "var(--color-bg-primary)" : "var(--color-bg-elevated)" }}>
-                        {done ? "✓" : step.icon}
-                      </div>
-                      <div className="pt-1 min-w-0">
-                        <div className={`text-[13px] ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`}>
-                          {step.label}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
+        {membership && (
+          <AdminStatusTimeline
+            userId={user.id}
+            currentStatus={membership.ipsStatus}
+            paymentStatus={membership.paymentStatus}
+            signedDocTypes={user.documents.filter(d => d.status === "SIGNED").map(d => d.type)}
+            hasAgreedTerms={user.hasAgreedTerms}
+          />
+        )}
       </div>
 
       {/* アカウント情報（ID発行・PW変更） */}
