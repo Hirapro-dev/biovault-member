@@ -64,7 +64,6 @@ const adminNav = [
   { href: "/admin/articles", label: "記事管理", icon: "📰" },
   { href: "/admin/news", label: "ニュース管理", icon: "📡" },
   { href: "/admin/videos", label: "動画管理", icon: "🎬" },
-  { href: "/admin/access-logs", label: "アクセスログ", icon: "📊" },
   { href: "/admin/settings", label: "規約・書類管理", icon: "⚙" },
 ];
 
