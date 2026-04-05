@@ -45,7 +45,8 @@ export default async function DocumentsPage() {
     CONTRACT: "001",
     PRIVACY_POLICY: "002",
     CONSENT_CELL_STORAGE: "003",
-    INFORMED_CONSENT: "004",
+    CELL_STORAGE_CONSENT: "004",
+    INFORMED_CONSENT: "005",
   };
 
   return (
@@ -111,7 +112,7 @@ export default async function DocumentsPage() {
         <div className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
-              005
+              006
             </div>
             <div className="min-w-0">
               <div className="text-sm sm:text-base text-text-primary leading-snug">

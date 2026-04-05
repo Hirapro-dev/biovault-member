@@ -99,6 +99,7 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   CONTRACT: "重要事項説明書兼確認書",
   PRIVACY_POLICY: "個人情報・個人遺伝情報等の取扱いに関する同意書",
   CONSENT_CELL_STORAGE: "iPSサービス契約書",
+  CELL_STORAGE_CONSENT: "細胞提供・保管同意書",
   INFORMED_CONSENT: "インフォームドコンセント（自家iPS細胞作製に関する説明書兼同意書）",
   SIMPLE_AGREEMENT: "簡易規約",
 };
@@ -108,6 +109,7 @@ export const DOCUMENT_TYPE_ORDER: DocumentType[] = [
   "CONTRACT",
   "PRIVACY_POLICY",
   "CONSENT_CELL_STORAGE",
+  "CELL_STORAGE_CONSENT",
   "INFORMED_CONSENT",
 ];
 
