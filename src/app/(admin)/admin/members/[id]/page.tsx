@@ -207,6 +207,8 @@ export default async function MemberKartePage({
           fileUrl: doc.fileUrl,
           signedAt: doc.signedAt ? doc.signedAt.toISOString() : null,
         }))}
+        hasAgreedPamphlet={user.hasAgreedPamphlet}
+        agreedPamphletAt={user.agreedPamphletAt ? user.agreedPamphletAt.toISOString() : null}
       />
 
       {/* 培養上清液投与記録 */}
