@@ -264,26 +264,6 @@ export default async function MyPage() {
 
           {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
             <div className="space-y-4">
-              {/* iPS細胞作製における事前説明・同意 未同意の場合 */}
-              {!isStepDone("DOC_INFORMED") && (
-                <Link href="/mypage/informed-consent" className="block group">
-                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
-                    <div className="p-5 sm:p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-2xl">📄</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
-                      </div>
-                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
-                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
-                      <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
-                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
-                        同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )}
-
               {/* 日程確定カード（問診・採血完了まで表示） */}
               <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
                 <div className="p-5 sm:p-6">
@@ -316,6 +296,26 @@ export default async function MyPage() {
                   )}
                 </div>
               </div>
+
+              {/* iPS細胞作製における事前説明・同意（日程確定後のみ表示） */}
+              {membership.clinicDate && !isStepDone("DOC_INFORMED") && (
+                <Link href="/mypage/informed-consent" className="block group">
+                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">📄</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
+                      </div>
+                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
+                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
+                      <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                        同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
             </div>
           )}
 
