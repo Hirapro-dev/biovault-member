@@ -33,6 +33,23 @@ export async function POST() {
     return NextResponse.json({ error: "現在のステータスでは日程調整リクエストはできません" }, { status: 400 });
   }
 
+  // ステータスを SCHEDULE_ARRANGED に更新
+  await prisma.$transaction([
+    prisma.membership.update({
+      where: { userId },
+      data: { ipsStatus: "SCHEDULE_ARRANGED" },
+    }),
+    prisma.statusHistory.create({
+      data: {
+        userId,
+        fromStatus: "SERVICE_APPLIED",
+        toStatus: "SCHEDULE_ARRANGED",
+        note: "細胞提供・保管同意書に同意 → 日程調整申請",
+        changedBy: "会員本人",
+      },
+    }),
+  ]);
+
   // 管理者メモに記録
   await prisma.adminNote.create({
     data: {
