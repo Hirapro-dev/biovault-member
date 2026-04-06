@@ -86,35 +86,38 @@ export default function LegalPage() {
             </div>
           </section>
 
-          {/* 申込みの撤回・契約の解除 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">申込みの撤回・契約の解除に関する事項</h2>
-            <div className="text-xs text-text-muted space-y-3">
-              <div>
-                <h3 className="text-text-primary font-medium mb-1">【通信販売の場合】</h3>
+          {/* 申込みの撤回・契約の解除（クーリング・オフ） */}
+          <section className="bg-status-warning/5 border-2 border-status-warning/30 rounded-lg p-5 sm:p-6 -mx-1">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">⚠️</span>
+              <h2 className="text-sm text-status-warning font-bold">申込みの撤回・契約の解除に関する事項（クーリング・オフ）</h2>
+            </div>
+            <div className="text-xs text-text-secondary space-y-4">
+              <div className="bg-bg-primary/50 border border-border rounded-md p-4">
+                <h3 className="text-text-primary font-bold mb-2">【通信販売の場合】</h3>
                 <p>通信販売には、電話勧誘販売や訪問販売のような法定クーリング・オフ制度は通常ありません。返品・解約の可否や条件は、事業者が表示した特約に従うことになります。</p>
               </div>
-              <div>
-                <h3 className="text-text-primary font-medium mb-1">【訪問販売・電話勧誘販売の場合】</h3>
-                <p>本契約が特定商取引法上の訪問販売または電話勧誘販売に該当する場合、お客様は、この書面を受領した日を含めて8日以内であれば、書面または電磁的記録により、契約の申込みの撤回または契約の解除をすることができます。</p>
-                <p>クーリング・オフが行われた場合、当社は、原則として損害賠償または違約金の請求を行いません。既に受領した金員がある場合には、速やかに返還します。</p>
+              <div className="bg-status-warning/10 border border-status-warning/20 rounded-md p-4">
+                <h3 className="text-status-warning font-bold mb-2">【訪問販売・電話勧誘販売の場合】</h3>
+                <p className="mb-2">本契約が特定商取引法上の訪問販売または電話勧誘販売に該当する場合、お客様は、<span className="text-status-warning font-bold">この書面を受領した日を含めて8日以内</span>であれば、書面または電磁的記録により、契約の申込みの撤回または契約の解除をすることができます。</p>
+                <p className="mb-2">クーリング・オフが行われた場合、当社は、原則として損害賠償または違約金の請求を行いません。既に受領した金員がある場合には、速やかに返還します。</p>
                 <p>なお、法定書面の不交付または重要事項の記載不備がある場合、クーリング・オフ期間の起算に影響する可能性があります。</p>
               </div>
-              <div>
-                <h3 className="text-text-primary font-medium mb-1">【クーリング・オフ期間経過後の解約・解除】</h3>
-                <p>クーリング・オフ期間経過後の解約または解除については、会員契約書、重要事項説明書兼確認書および申込確認書に定める返金・精算条件に従います。</p>
+              <div className="bg-bg-primary/50 border border-border rounded-md p-4">
+                <h3 className="text-text-primary font-bold mb-2">【クーリング・オフ期間経過後の解約・解除】</h3>
+                <p className="mb-2">クーリング・オフ期間経過後の解約または解除については、会員契約書、重要事項説明書兼確認書および申込確認書に定める返金・精算条件に従います。</p>
                 <p>返金または精算の有無およびその範囲は、解除申出時点における進行段階、既発生費用、既提供済みサービス、提携先に対する支払確定額その他の事情を踏まえて定められます。</p>
               </div>
-              <div>
-                <h3 className="text-text-primary font-medium mb-1">【中途解約・返金の一般的な考え方】</h3>
-                <ul className="space-y-1 list-none">
+              <div className="bg-bg-primary/50 border border-border rounded-md p-4">
+                <h3 className="text-text-primary font-bold mb-2">【中途解約・返金の一般的な考え方】</h3>
+                <ul className="space-y-1 list-none mb-2">
                   <li>・採血予約前</li>
                   <li>・採血予約後かつ採血前</li>
                   <li>・採血後かつ加工着手前</li>
                   <li>・加工着手後</li>
                   <li>・保管開始後</li>
                 </ul>
-                <p className="mt-1">上記の各段階に応じて、控除対象費目、既発生費用、未実施部分の範囲が異なります。詳細は契約書類をご確認ください。</p>
+                <p>上記の各段階に応じて、控除対象費目、既発生費用、未実施部分の範囲が異なります。詳細は契約書類をご確認ください。</p>
               </div>
             </div>
           </section>
@@ -163,8 +166,11 @@ export default function LegalPage() {
           </section>
 
           {/* クーリング・オフ通知先 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">クーリング・オフ通知先</h2>
+          <section className="bg-gold/5 border-2 border-gold/30 rounded-lg p-5 sm:p-6 -mx-1">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">📮</span>
+              <h2 className="text-sm text-gold font-bold">クーリング・オフ通知先</h2>
+            </div>
             <div className="space-y-0">
               <LegalRow label="事業者名" value="株式会社SCPP" />
               <LegalRow label="所在地" value="〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F" />
