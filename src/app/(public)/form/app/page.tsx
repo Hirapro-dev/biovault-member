@@ -96,7 +96,7 @@ function ApplyPage() {
     return (
       <PageWrapper>
         <div className="text-center py-16">
-          <div className="text-5xl mb-6">✓</div>
+          <div className="text-5xl mb-6">✔️</div>
           <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製適合確認申請を受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
@@ -124,7 +124,7 @@ function ApplyPage() {
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          お申し込み内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用させていただきます。
+          お申し込み内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用させていただきます。
         </p>
       </div>
 
@@ -375,7 +375,7 @@ function HealthCheck({ label, checked, onChange, detail, onDetail, placeholder }
 function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <label className="flex items-start gap-3 mb-3 cursor-pointer">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 cursor-pointer shrink-0" />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold" />
       <span className="text-xs text-text-secondary leading-relaxed">{label}</span>
     </label>
   );
@@ -533,7 +533,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
       )}
 
       <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
-        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 cursor-pointer shrink-0" />
+        <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold" />
         <span className="text-sm text-text-primary leading-relaxed">上記の BioVault会員規約の内容を確認し、同意します。</span>
       </label>
 

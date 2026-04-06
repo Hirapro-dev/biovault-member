@@ -57,7 +57,7 @@ export default function CellConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✓</div>
+        <div className="text-5xl mb-6">✔️</div>
         <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">同意が完了しました</h2>
         <div className="text-sm text-text-secondary leading-relaxed space-y-3 mb-8">
           <p>細胞提供・保管同意書へのご同意ありがとうございます。</p>
@@ -127,7 +127,7 @@ export default function CellConsentPage() {
             <p className="text-xs text-gold text-center mb-2 animate-pulse">↓ 最後までスクロールしてください</p>
           )}
           <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
-            <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 cursor-pointer shrink-0 accent-gold" />
+            <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold" />
             <span className="text-[13px] text-text-primary leading-relaxed">
               上記の細胞提供・保管同意書の内容を確認し、同意します。
             </span>
@@ -146,7 +146,7 @@ export default function CellConsentPage() {
             クリニックの予約を行った以降の、<span className="text-status-warning font-medium">変更・キャンセルはできかねます。</span>
           </p>
           <label className="flex items-start gap-3 mb-5 cursor-pointer">
-            <input type="checkbox" checked={cancelChecked} onChange={(e) => setCancelChecked(e.target.checked)} className="mt-0.5 w-4 h-4 accent-gold cursor-pointer shrink-0" />
+            <input type="checkbox" checked={cancelChecked} onChange={(e) => setCancelChecked(e.target.checked)} className="mt-0.5 w-5 h-5 accent-gold cursor-pointer shrink-0" />
             <span className="text-[13px] text-text-primary leading-relaxed">
               上記の内容を理解し、同意します。
             </span>

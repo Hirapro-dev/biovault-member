@@ -129,7 +129,7 @@ export default function AgencyAgreeForm() {
       {!scrolled && <p className="text-xs text-text-muted text-center mb-3 animate-pulse">↓ 最後までスクロールしてください</p>}
 
       <label className={`flex items-start gap-3 mb-4 ${scrolled ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
-        <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolled} className="mt-0.5 cursor-pointer shrink-0" />
+        <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolled} className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold" />
         <span className="text-sm text-text-primary leading-relaxed">
           上記の代理店契約書、遵守誓約書、および秘密保持契約書（NDA）の内容を確認し、全てに同意します。
         </span>

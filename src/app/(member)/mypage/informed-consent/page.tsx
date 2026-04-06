@@ -48,7 +48,7 @@ export default function InformedConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-4xl mb-4">✅</div>
+        <div className="text-5xl mb-6">✔️</div>
         <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意が完了しました</h2>
         <p className="text-sm text-text-secondary mb-6">iPS細胞作製における事前説明・同意へのご同意ありがとうございます。</p>
         <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">
@@ -154,7 +154,7 @@ export default function InformedConsentPage() {
             "本書は費用承諾書ではなく、費用や契約条件は別途書面で確認済みであること",
           ].map((label, i) => (
             <label key={i} className="flex items-start gap-2.5 cursor-pointer">
-              <input type="checkbox" checked={confirms[i]} onChange={() => toggleConfirm(i)} className="mt-0.5 w-4 h-4 accent-gold shrink-0 cursor-pointer" />
+              <input type="checkbox" checked={confirms[i]} onChange={() => toggleConfirm(i)} className="mt-0.5 w-5 h-5 accent-gold shrink-0 cursor-pointer" />
               <span className={`text-xs sm:text-sm leading-relaxed ${confirms[i] ? "text-text-primary" : "text-text-muted"}`}>{label}</span>
             </label>
           ))}
@@ -177,7 +177,7 @@ export default function InformedConsentPage() {
             checked={checked}
             onChange={(e) => setChecked(e.target.checked)}
             disabled={!scrolledToBottom || !allConfirmed}
-            className="mt-0.5 cursor-pointer shrink-0 accent-gold w-4 h-4"
+            className="mt-0.5 cursor-pointer shrink-0 accent-gold w-5 h-5"
           />
           <span className="text-[13px] text-text-primary leading-relaxed">
             上記の説明を受け、確認事項をすべて理解したうえで、自家iPS細胞作製に関する説明書兼同意書に同意します。

@@ -114,7 +114,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
                 checked={checked1}
                 onChange={(e) => setChecked1(e.target.checked)}
                 disabled={!scrolled1}
-                className="mt-0.5 cursor-pointer shrink-0 accent-gold"
+                className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold"
               />
               <span className="text-[13px] text-text-primary leading-relaxed">
                 重要事項説明書兼確認書の内容を確認し、同意します。
@@ -150,7 +150,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
                 checked={checked2}
                 onChange={(e) => setChecked2(e.target.checked)}
                 disabled={!scrolled2}
-                className="mt-0.5 cursor-pointer shrink-0 accent-gold"
+                className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold"
               />
               <span className="text-[13px] text-text-primary leading-relaxed">
                 個人情報・個人遺伝情報等の取扱いに関する同意書の内容を確認し、同意します。

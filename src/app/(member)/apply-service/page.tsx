@@ -183,7 +183,7 @@ export default function ApplyServicePage() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="bg-bg-secondary border border-border-gold rounded-md p-8 sm:p-12 text-center">
-          <div className="text-4xl mb-4">✨</div>
+          <div className="text-5xl mb-6">✔️</div>
           <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">
             お申込みありがとうございます
           </h2>
@@ -358,7 +358,7 @@ export default function ApplyServicePage() {
                   type="checkbox"
                   checked={healthData.pregnancy}
                   onChange={(e) => updateHealth("pregnancy", e.target.checked)}
-                  className="accent-gold w-4 h-4"
+                  className="accent-gold w-5 h-5"
                 />
                 <span className="text-sm text-text-secondary">
                   妊娠中、もしくは妊娠の可能性がある
@@ -463,7 +463,7 @@ export default function ApplyServicePage() {
 
             <div className={`mt-4 transition-opacity ${termsScrolled ? "opacity-100" : "opacity-40"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={termsAgreed} onChange={(e) => termsScrolled && setTermsAgreed(e.target.checked)} disabled={!termsScrolled} className="accent-gold w-4 h-4" />
+                <input type="checkbox" checked={termsAgreed} onChange={(e) => termsScrolled && setTermsAgreed(e.target.checked)} disabled={!termsScrolled} className="accent-gold w-5 h-5" />
                 <span className="text-sm text-text-secondary">上記の メンバーシップ会員規約の内容を確認し、同意します。</span>
               </label>
             </div>
@@ -580,7 +580,7 @@ function HealthCheckItem({
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="accent-gold w-4 h-4"
+          className="accent-gold w-5 h-5"
         />
         <span className="text-sm text-text-secondary">
           {label}
@@ -616,7 +616,7 @@ function ConfirmItem({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="accent-gold w-4 h-4 mt-0.5 shrink-0"
+        className="accent-gold w-5 h-5 mt-0.5 shrink-0"
       />
       <span className="text-sm text-text-secondary leading-relaxed">{label}</span>
     </label>

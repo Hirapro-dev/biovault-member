@@ -45,7 +45,7 @@ export default function AgencyApplyPage() {
     return (
       <Wrapper>
         <div className="text-center py-16">
-          <div className="text-5xl mb-6">✓</div>
+          <div className="text-5xl mb-6">✔️</div>
           <h2 className="font-serif-jp text-xl text-gold mb-3">エージェント登録を受け付けました</h2>
           <p className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto">
             担当者より改めてログイン情報をご連絡させていただきます。
