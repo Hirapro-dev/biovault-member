@@ -8,7 +8,7 @@ const TIMELINE_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
   { key: "REGISTERED", label: "ID/パス発行", icon: "🔑" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
-  { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
+  { key: "SERVICE_APPLIED", label: "メンバーシップサービス申込", icon: "✍️" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
@@ -203,7 +203,7 @@ export default async function MyPage() {
                     <span className="text-2xl">✍️</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">サービス申込</div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">メンバーシップサービス申込</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞作製適合の可能性が極めて高いと判断いたしました。サービスへのお申込みに進めます。</div>
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
                     申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>

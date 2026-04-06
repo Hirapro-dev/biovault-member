@@ -22,7 +22,7 @@ export default function AccessLogger() {
       "/mypage": "マイページ",
       "/info": "サービス詳細",
       "/favorites": "お気に入り",
-      "/apply-service": "サービス申込",
+      "/apply-service": "メンバーシップサービス申込",
       "/documents": "契約書類",
       "/status": "ステータス詳細",
       "/pamphlet": "パンフレット",

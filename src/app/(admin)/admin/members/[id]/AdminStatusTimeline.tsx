@@ -8,7 +8,7 @@ const ADMIN_TIMELINE = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋", dbStatus: "TERMS_AGREED" },
   { key: "REGISTERED", label: "ID/パス発行", icon: "🔑", dbStatus: "REGISTERED" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜", dbStatus: null },
-  { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️", dbStatus: "SERVICE_APPLIED" },
+  { key: "SERVICE_APPLIED", label: "メンバーシップサービス申込", icon: "✍️", dbStatus: "SERVICE_APPLIED" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", dbStatus: null },
   { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅", dbStatus: "SCHEDULE_ARRANGED" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", dbStatus: null },

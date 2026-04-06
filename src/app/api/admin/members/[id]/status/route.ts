@@ -9,7 +9,7 @@ import type { IpsStatus } from "@prisma/client";
 const STATUS_LABELS: Record<string, string> = {
   REGISTERED: "メンバーシップ登録",
   TERMS_AGREED: "iPS細胞作製適合確認",
-  SERVICE_APPLIED: "サービス申込",
+  SERVICE_APPLIED: "メンバーシップサービス申込",
   SCHEDULE_ARRANGED: "iPS細胞作製におけるクリニックの日程調整",
   BLOOD_COLLECTED: "問診・採血",
   IPS_CREATING: "iPS細胞 作製中",

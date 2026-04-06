@@ -43,8 +43,7 @@ export default function ApplyServicePage() {
 
   // 支払情報
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
-  const [paymentYear, setPaymentYear] = useState("");
-  const [paymentMonth, setPaymentMonth] = useState("");
+  const [paymentDate, setPaymentDate] = useState("");
 
   // 契約書希望
   const [contractFormat, setContractFormat] = useState("electronic");
@@ -142,17 +141,13 @@ export default function ApplyServicePage() {
     setError("");
 
     try {
-      const paymentDate = paymentYear && paymentMonth
-        ? new Date(`${paymentYear}-${paymentMonth}-01`)
-        : null;
-
       const res = await fetch("/api/member/apply-service", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...healthData,
           paymentMethod,
-          paymentDate: paymentDate?.toISOString() || null,
+          paymentDate: paymentDate ? new Date(paymentDate).toISOString() : null,
           contractFormat,
         }),
       });
@@ -211,7 +206,7 @@ export default function ApplyServicePage() {
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
         <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
-          メンバーシップ申込
+          メンバーシップサービス申込
         </h2>
         <GoldDivider />
       </div>
@@ -284,28 +279,12 @@ export default function ApplyServicePage() {
             {/* 支払予定日 */}
             <div className="mt-4">
               <label className="text-xs text-text-muted mb-2 block">お支払い予定日</label>
-              <div className="flex gap-2">
-                <select
-                  value={paymentYear}
-                  onChange={(e) => setPaymentYear(e.target.value)}
-                  className="bg-bg-tertiary border border-border rounded px-3 py-2 text-sm text-text-primary flex-1"
-                >
-                  <option value="">年</option>
-                  {[2026, 2027].map((y) => (
-                    <option key={y} value={y}>{y}年</option>
-                  ))}
-                </select>
-                <select
-                  value={paymentMonth}
-                  onChange={(e) => setPaymentMonth(e.target.value)}
-                  className="bg-bg-tertiary border border-border rounded px-3 py-2 text-sm text-text-primary flex-1"
-                >
-                  <option value="">月</option>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <option key={m} value={String(m).padStart(2, "0")}>{m}月</option>
-                  ))}
-                </select>
-              </div>
+              <input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+                className="w-full bg-bg-tertiary border border-border rounded px-3 py-2.5 text-sm text-text-primary outline-none focus:border-border-gold"
+              />
             </div>
           </div>
 
@@ -353,17 +332,16 @@ export default function ApplyServicePage() {
                 detail={healthData.infectiousDiseaseDetail}
                 onDetailChange={(v) => updateHealth("infectiousDiseaseDetail", v)}
               />
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={healthData.pregnancy}
-                  onChange={(e) => updateHealth("pregnancy", e.target.checked)}
-                  className="accent-gold w-5 h-5"
-                />
-                <span className="text-sm text-text-secondary">
-                  妊娠中、もしくは妊娠の可能性がある
-                  {!healthData.pregnancy && <span className="ml-2 text-[11px] text-text-muted font-normal">【なし】</span>}
-                </span>
+              <div className="mb-4">
+                <div className="text-sm text-text-primary mb-2">妊娠中、もしくは妊娠の可能性がある</div>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                    <input type="radio" checked={!healthData.pregnancy} onChange={() => updateHealth("pregnancy", false)} className="accent-gold cursor-pointer" /> なし
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+                    <input type="radio" checked={healthData.pregnancy} onChange={() => updateHealth("pregnancy", true)} className="accent-gold cursor-pointer" /> あり
+                  </label>
+                </div>
               </div>
               <HealthCheckItem
                 label="アレルギーはありますか？"
@@ -503,10 +481,10 @@ export default function ApplyServicePage() {
                 </div>
               </div>
 
-              {paymentYear && paymentMonth && (
+              {paymentDate && (
                 <div className="border-b border-border pb-3">
                   <div className="text-xs text-text-muted mb-1">お支払い予定日</div>
-                  <div className="text-sm text-text-primary">{paymentYear}年{parseInt(paymentMonth)}月</div>
+                  <div className="text-sm text-text-primary">{new Date(paymentDate).toLocaleDateString("ja-JP")}</div>
                 </div>
               )}
 
@@ -559,7 +537,7 @@ export default function ApplyServicePage() {
   );
 }
 
-// 健康状態チェック項目コンポーネント
+// 健康状態チェック項目コンポーネント（ラジオボタン式）
 function HealthCheckItem({
   label,
   checked,
@@ -574,18 +552,15 @@ function HealthCheckItem({
   onDetailChange: (v: string) => void;
 }) {
   return (
-    <div>
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="accent-gold w-5 h-5"
-        />
-        <span className="text-sm text-text-secondary">
-          {label}
-          {!checked && <span className="ml-2 text-[11px] text-text-muted font-normal">【なし】</span>}
-        </span>
+    <div className="mb-4">
+      <div className="text-sm text-text-primary mb-2">{label}</div>
+      <div className="flex gap-4 mb-2">
+        <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+          <input type="radio" checked={!checked} onChange={() => onChange(false)} className="accent-gold cursor-pointer" /> なし
+        </label>
+        <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
+          <input type="radio" checked={checked} onChange={() => onChange(true)} className="accent-gold cursor-pointer" /> あり
+        </label>
       </div>
       {checked && (
         <input
@@ -593,7 +568,7 @@ function HealthCheckItem({
           value={detail}
           onChange={(e) => onDetailChange(e.target.value)}
           placeholder="詳細を入力してください"
-          className="mt-2 ml-7 w-[calc(100%-28px)] bg-bg-tertiary border border-border rounded px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+          className="w-full bg-bg-tertiary border border-border rounded px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
         />
       )}
     </div>

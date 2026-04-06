@@ -5,7 +5,7 @@ const menuItems = [
   {
     href: "/apply-service",
     icon: "✍️",
-    label: "サービス申込",
+    label: "メンバーシップサービス申込",
     description: "メンバーシップへのお申込み",
   },
   {
