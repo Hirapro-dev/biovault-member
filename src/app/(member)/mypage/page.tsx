@@ -59,6 +59,9 @@ export default async function MyPage() {
     }),
   ]);
 
+  // 振込先情報
+  const bankInfo = await prisma.siteSetting.findUnique({ where: { key: "bank_info" } });
+
   // ステータス到達日マッピング
   const statusDates: Record<string, string> = {};
   if (membership) {
@@ -167,7 +170,186 @@ export default async function MyPage() {
         </div>
       </div>
 
-      {/* ── 2. ステータス（縦タイムライン 10ステップ） ── */}
+      {/* ── 2. 次のステップ（カードの下・ステータスの上） ── */}
+      {membership && (
+        <div className="mb-6">
+          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+            次のステップ
+          </h3>
+
+          {membership.ipsStatus === "REGISTERED" && (
+            <Link href="/important-notice" className="block group">
+              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">📋</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製適合確認</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、適合審査にお進みください。</div>
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                    確認へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          {membership.ipsStatus === "TERMS_AGREED" && (
+            <Link href="/apply-service" className="block group">
+              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">✍️</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">サービス申込</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞作製適合の可能性が極めて高いと判断いたしました。サービスへのお申込みに進めます。</div>
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                    申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus !== "COMPLETED" && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                </div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">入金確認</div>
+                <div className="text-xs text-text-muted leading-relaxed mb-4">
+                  お申込みありがとうございます。入金の確認が取れ次第、次のステップへ進みます。
+                </div>
+                <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                  <div>
+                    <div className="text-[11px] text-text-muted mb-1">お支払い金額</div>
+                    <div className="font-mono text-lg text-gold">¥{membership.totalAmount.toLocaleString()}</div>
+                    <div className="text-[11px] text-text-muted mt-1">入金済: ¥{membership.paidAmount.toLocaleString()}</div>
+                  </div>
+                  {bankInfo?.content && (
+                    <div className="border-t border-border pt-3">
+                      <div className="text-[11px] text-text-muted mb-1">お振込先</div>
+                      <div className="text-xs text-text-primary whitespace-pre-line leading-relaxed">{bankInfo.content}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus === "COMPLETED" && (
+            <Link href="/mypage/cell-consent" className="block group">
+              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">📅</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製におけるクリニックの日程調整</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                    クリニックの日程調整へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
+            <div className="space-y-4">
+              {/* iPS細胞作製における事前説明・同意 未同意の場合 */}
+              {!isStepDone("DOC_INFORMED") && (
+                <Link href="/mypage/informed-consent" className="block group">
+                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">📄</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
+                      </div>
+                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
+                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
+                      <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
+                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                        同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* 日程確定カード（問診・採血完了まで表示） */}
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">🏥</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">{membership.clinicDate ? "確定" : "調整中"}</span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の日程</div>
+                  {membership.clinicDate ? (
+                    <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                      <div>
+                        <div className="text-[11px] text-text-muted mb-1">予定日</div>
+                        <div className="font-mono text-lg text-gold">
+                          {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                        </div>
+                      </div>
+                      {membership.clinicName && (
+                        <div>
+                          <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
+                          <div className="text-sm text-text-primary">{membership.clinicName}</div>
+                          {membership.clinicAddress && (
+                            <div className="text-xs text-text-muted mt-1">{membership.clinicAddress}</div>
+                          )}
+                        </div>
+                      )}
+                      <div className="text-[11px] text-status-danger mt-2">※ 予約の日程の変更・キャンセルはできません</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-text-secondary">日程を調整中です。確定次第こちらに表示されます。</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(membership.ipsStatus === "BLOOD_COLLECTED" || membership.ipsStatus === "IPS_CREATING") && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6 text-center">
+                <div className="text-4xl mb-3">🧬</div>
+                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
+                <div className="text-xs text-text-muted leading-relaxed">お客様のiPS細胞を丁寧に作製しております。<br />今しばらくお待ちください。</div>
+              </div>
+            </div>
+          )}
+
+          {membership.ipsStatus === "STORAGE_ACTIVE" && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🏛️</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">保管中</span>
+                </div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">iPS細胞 安全に保管中</div>
+                <div className="bg-bg-elevated border border-border rounded-md p-4">
+                  <div className="text-[11px] text-text-muted mb-1">保管期限</div>
+                  <div className="font-mono text-lg text-gold">
+                    {storageEndDate ? formatDate(storageEndDate.toISOString()) : "---"}
+                  </div>
+                  {membership.storageStartAt && (
+                    <div className="text-[11px] text-text-muted mt-2">保管開始日: {formatDate(membership.storageStartAt.toISOString())}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 3. ステータス（縦タイムライン） ── */}
       <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
         ステータス
       </h3>
@@ -308,178 +490,6 @@ export default async function MyPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
       </div>
-
-      {/* ── 次のステップ ── */}
-      {membership && (
-        <div className="mt-8">
-          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
-            次のステップ
-          </h3>
-
-          {membership.ipsStatus === "REGISTERED" && (
-            <Link href="/important-notice" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">📋</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
-                  </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製適合確認</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、適合審査にお進みください。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
-                    確認へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {membership.ipsStatus === "TERMS_AGREED" && (
-            <Link href="/apply-service" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">✍️</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
-                  </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">サービス申込</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態を確認させていただき、iPS細胞作製適合の可能性が極めて高いと判断いたしました。iPS細胞サービスへのお申込みに進めます。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
-                    申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus !== "COMPLETED" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">💰</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
-                </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">入金確認</div>
-                <div className="text-xs text-text-muted leading-relaxed">
-                  お申込みありがとうございます。入金の確認が取れ次第、次のステップへ進みます。
-                </div>
-                <div className="mt-4 bg-bg-elevated border border-border rounded-md p-4">
-                  <div className="text-[11px] text-text-muted mb-1">お支払い金額</div>
-                  <div className="font-mono text-lg text-gold">¥{membership.totalAmount.toLocaleString()}</div>
-                  <div className="text-[11px] text-text-muted mt-2">
-                    入金済: ¥{membership.paidAmount.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus === "COMPLETED" && (
-            <Link href="/mypage/cell-consent" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">📅</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
-                  </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製におけるクリニックの日程調整</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
-                    クリニックの日程調整へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
-            <div className="space-y-4">
-              {/* iPS細胞作製における事前説明・同意未同意の場合 */}
-              {!isStepDone("DOC_INFORMED") && (
-                <Link href="/mypage/informed-consent" className="block group">
-                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
-                    <div className="p-5 sm:p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-2xl">📄</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
-                      </div>
-                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
-                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
-                      <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
-                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
-                        同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )}
-
-              {/* 日程確定カード */}
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">🏥</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">{membership.clinicDate ? "確定" : "調整中"}</span>
-                  </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の日程</div>
-                  {membership.clinicDate ? (
-                    <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
-                      <div>
-                        <div className="text-[11px] text-text-muted mb-1">予定日</div>
-                        <div className="font-mono text-lg text-gold">
-                          {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
-                        </div>
-                      </div>
-                      {membership.clinicName && (
-                        <div>
-                          <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
-                          <div className="text-sm text-text-primary">{membership.clinicName}</div>
-                          {membership.clinicAddress && (
-                            <div className="text-xs text-text-muted mt-1">{membership.clinicAddress}</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-text-secondary">日程を調整中です。確定次第こちらに表示されます。</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {(membership.ipsStatus === "BLOOD_COLLECTED" || membership.ipsStatus === "IPS_CREATING") && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6 text-center">
-                <div className="text-4xl mb-3">🧬</div>
-                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
-                <div className="text-xs text-text-muted leading-relaxed">お客様のiPS細胞を丁寧に作製しております。<br />今しばらくお待ちください。</div>
-              </div>
-            </div>
-          )}
-
-          {membership.ipsStatus === "STORAGE_ACTIVE" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">🏛️</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">保管中</span>
-                </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">iPS細胞 安全に保管中</div>
-                <div className="bg-bg-elevated border border-border rounded-md p-4">
-                  <div className="text-[11px] text-text-muted mb-1">保管期限</div>
-                  <div className="font-mono text-lg text-gold">
-                    {storageEndDate ? formatDate(storageEndDate.toISOString()) : "---"}
-                  </div>
-                  {membership.storageStartAt && (
-                    <div className="text-[11px] text-text-muted mt-2">保管開始日: {formatDate(membership.storageStartAt.toISOString())}</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── 健康状態確認 ── */}
       {fullUser && (

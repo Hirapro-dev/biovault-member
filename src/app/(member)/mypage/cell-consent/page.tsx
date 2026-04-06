@@ -11,6 +11,9 @@ export default function CellConsentPage() {
   const [checked, setChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  // ステップ2: キャンセル不可確認
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelChecked, setCancelChecked] = useState(false);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -22,7 +25,14 @@ export default function CellConsentPage() {
     return () => el.removeEventListener("scroll", handler);
   }, []);
 
-  const handleAgree = async () => {
+  // 同意書の同意ボタン → キャンセル不可確認画面へ
+  const handleFirstAgree = () => {
+    setShowCancelConfirm(true);
+    window.scrollTo(0, 0);
+  };
+
+  // 最終同意 → API送信
+  const handleFinalAgree = async () => {
     setLoading(true);
     try {
       // 1. 細胞提供・保管同意書に同意
@@ -111,20 +121,46 @@ export default function CellConsentPage() {
         </article>
       </div>
 
-      <div className="mt-4">
-        {!scrolledToBottom && (
-          <p className="text-xs text-gold text-center mb-2 animate-pulse">↓ 最後までスクロールしてください</p>
-        )}
-        <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
-          <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 cursor-pointer shrink-0 accent-gold" />
-          <span className="text-[13px] text-text-primary leading-relaxed">
-            上記の細胞提供・保管同意書の内容を確認し、同意します。
-          </span>
-        </label>
-        <button onClick={handleAgree} disabled={!checked || loading} className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
-          {loading ? "処理中..." : "同意する"}
-        </button>
-      </div>
+      {!showCancelConfirm ? (
+        <div className="mt-4">
+          {!scrolledToBottom && (
+            <p className="text-xs text-gold text-center mb-2 animate-pulse">↓ 最後までスクロールしてください</p>
+          )}
+          <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
+            <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 cursor-pointer shrink-0 accent-gold" />
+            <span className="text-[13px] text-text-primary leading-relaxed">
+              上記の細胞提供・保管同意書の内容を確認し、同意します。
+            </span>
+          </label>
+          <button onClick={handleFirstAgree} disabled={!checked} className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
+            次へ
+          </button>
+        </div>
+      ) : (
+        <div className="mt-6 bg-bg-secondary border border-status-warning/30 rounded-md p-5 sm:p-7">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">⚠️</span>
+            <h3 className="text-sm text-status-warning font-medium">予約に関する注意事項</h3>
+          </div>
+          <p className="text-sm text-text-secondary leading-relaxed mb-5">
+            クリニックの予約を行った以降の、<span className="text-status-warning font-medium">変更・キャンセルはできかねます。</span>
+          </p>
+          <label className="flex items-start gap-3 mb-5 cursor-pointer">
+            <input type="checkbox" checked={cancelChecked} onChange={(e) => setCancelChecked(e.target.checked)} className="mt-0.5 w-4 h-4 accent-gold cursor-pointer shrink-0" />
+            <span className="text-[13px] text-text-primary leading-relaxed">
+              上記の内容を理解し、同意します。
+            </span>
+          </label>
+          <div className="flex gap-3">
+            <button onClick={() => { setShowCancelConfirm(false); setCancelChecked(false); }} className="flex-1 py-3 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
+              戻る
+            </button>
+            <button onClick={handleFinalAgree} disabled={!cancelChecked || loading} className="flex-1 py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
+              {loading ? "処理中..." : "同意して日程調整を申請する"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
