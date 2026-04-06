@@ -358,69 +358,25 @@ export default async function MyPage() {
       </h3>
 
       <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-        <div className="relative ml-1">
-          {/* 縦の接続線 */}
-          <div className="absolute left-[15px] top-0 bottom-0 w-[2px] bg-border" />
-          {/* ゴールドライン: 完了分は固定 + 次ステップへ光が流れ落ちるループ */}
-          {(() => {
-            let activeIndex = -1;
-            for (let i = 0; i < TIMELINE_STEPS.length; i++) {
-              if (!isStepDone(TIMELINE_STEPS[i].key)) { activeIndex = i; break; }
-            }
-            const allDone = activeIndex === -1;
-            if (allDone) activeIndex = TIMELINE_STEPS.length - 1;
-
-            // 現在のアクティブステップのノード中心まで固定ライン
-            const donePct = ((activeIndex + 0.3) / TIMELINE_STEPS.length) * 100;
-            // 次のステップのノード中心まで
-            const nextIndex = Math.min(activeIndex + 1, TIMELINE_STEPS.length - 1);
-            const activePct = ((nextIndex + 0.3) / TIMELINE_STEPS.length) * 100;
-            const segmentHeight = activePct - donePct;
-
-            return (
-              <>
-                {/* 完了〜現在ステップまでの固定ゴールドライン */}
-                <div
-                  className="absolute left-[15px] top-0 w-[2px] z-[1]"
-                  style={{ height: `${donePct}%`, background: "var(--color-gold-primary)" }}
-                />
-                {/* 次ステップへ流れ落ちる光（スクロールインジケーター風） */}
-                {!allDone && segmentHeight > 0 && (
-                  <div
-                    className="absolute left-[15px] w-[2px] z-[1] overflow-hidden"
-                    style={{ top: `${donePct}%`, height: `${segmentHeight}%` }}
-                  >
-                    <div
-                      className="w-full"
-                      style={{
-                        height: "80%",
-                        background: "linear-gradient(to bottom, transparent, var(--color-gold-primary) 30%, var(--color-gold-primary) 70%, transparent)",
-                        animation: "scroll-drop 3.5s cubic-bezier(0.15, 0.2, 0.1, 1) infinite",
-                      }}
-                    />
-                  </div>
-                )}
-                <style>{`
-                  @keyframes scroll-drop {
-                    0% { transform: translateY(-100%); opacity: 0; }
-                    10% { opacity: 1; }
-                    80% { opacity: 1; }
-                    100% { transform: translateY(450%); opacity: 0; }
-                  }
-                `}</style>
-              </>
-            );
-          })()}
-
+        <div className="relative">
           {TIMELINE_STEPS.map((step, i) => {
             const done = isStepDone(step.key);
             const active = isStepActive(step.key, i);
             const dateStr = formatDate(getStepDate(step.key));
             const isStorage = step.key === "STORAGE_ACTIVE";
             const isFirstAdaptCheck = step.key === "TERMS_AGREED";
+            const isLast = i === TIMELINE_STEPS.length - 1;
+            const nextDone = !isLast && isStepDone(TIMELINE_STEPS[i + 1].key);
 
             return (
-              <div key={step.key} className="flex items-start gap-4 pb-6 last:pb-0 relative">
+              <div key={step.key} className={`flex items-start gap-4 relative ${isLast ? "" : "pb-6"}`}>
+                {/* 縦の接続線（各ステップの下に個別描画） */}
+                {!isLast && (
+                  <div
+                    className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
+                    style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }}
+                  />
+                )}
                 {/* ノード */}
                 <div
                   className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
