@@ -95,6 +95,7 @@ model Membership {
   ipsStatus       IpsStatus       @default(REGISTERED)
   clinicDate      DateTime?
   clinicName      String?                       // 提携クリニック名
+  clinicAddress   String?                       // クリニック住所
   ipsCompletedAt  DateTime?
   storageStartAt  DateTime?
   storageYears    Int             @default(10)

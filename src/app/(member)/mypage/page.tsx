@@ -423,6 +423,9 @@ export default async function MyPage() {
                         <div>
                           <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
                           <div className="text-sm text-text-primary">{membership.clinicName}</div>
+                          {membership.clinicAddress && (
+                            <div className="text-xs text-text-muted mt-1">{membership.clinicAddress}</div>
+                          )}
                         </div>
                       )}
                     </div>

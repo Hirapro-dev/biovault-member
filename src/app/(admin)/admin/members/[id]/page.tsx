@@ -164,6 +164,7 @@ export default async function MemberKartePage({
             nameKana={user.nameKana || ""}
             clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null}
             clinicName={membership.clinicName || null}
+            clinicAddress={membership.clinicAddress || null}
           />
         )}
       </div>

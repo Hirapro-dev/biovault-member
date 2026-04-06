@@ -35,9 +35,10 @@ interface Props {
   nameKana: string;
   clinicDate: string | null;
   clinicName: string | null;
+  clinicAddress: string | null;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
@@ -46,6 +47,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const [showClinicPopup, setShowClinicPopup] = useState(false);
   const [inputClinicDate, setInputClinicDate] = useState(clinicDate ? clinicDate.split("T")[0] : "");
   const [inputClinicName, setInputClinicName] = useState(clinicName || "");
+  const [inputClinicAddress, setInputClinicAddress] = useState(clinicAddress || "");
   const [clinicLoading, setClinicLoading] = useState(false);
 
   // ID発行ポップアップ
@@ -247,6 +249,10 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 <label className="block text-xs text-text-secondary mb-1">提携クリニック名</label>
                 <input value={inputClinicName} onChange={(e) => setInputClinicName(e.target.value)} placeholder="例: ○○クリニック 東京院" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none" />
               </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">住所</label>
+                <input value={inputClinicAddress} onChange={(e) => setInputClinicAddress(e.target.value)} placeholder="例: 東京都港区..." className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none" />
+              </div>
               <div className="flex gap-2 pt-2">
                 <button onClick={() => setShowClinicPopup(false)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
                 <button
@@ -256,7 +262,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                     try {
                       await fetch(`/api/admin/members/${userId}`, {
                         method: "PATCH", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null } }),
+                        body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null, clinicAddress: inputClinicAddress || null } }),
                       });
                       setShowClinicPopup(false);
                       router.refresh();
