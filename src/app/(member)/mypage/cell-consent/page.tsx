@@ -47,13 +47,18 @@ export default function CellConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-4xl mb-4">✅</div>
-        <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意・日程調整申請が完了しました</h2>
-        <p className="text-sm text-text-secondary mb-2">細胞提供・保管同意書へのご同意ありがとうございます。</p>
-        <p className="text-sm text-text-secondary mb-6">日程調整の申請を送信しました。担当スタッフより改めてご連絡いたします。</p>
-        <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">
+        <div className="text-5xl mb-6">✓</div>
+        <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">同意が完了しました</h2>
+        <div className="text-sm text-text-secondary leading-relaxed space-y-3 mb-8">
+          <p>細胞提供・保管同意書へのご同意ありがとうございます。</p>
+          <p>
+            日程調整のご連絡を担当より<br />
+            <span className="text-gold font-medium">3営業日以内</span>に行わせていただきます。
+          </p>
+        </div>
+        <Link href="/mypage" className="inline-block px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity">
           マイページに戻る
-        </button>
+        </Link>
       </div>
     );
   }

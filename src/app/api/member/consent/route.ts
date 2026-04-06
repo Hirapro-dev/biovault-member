@@ -34,19 +34,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
+  // 書類タイプのラベルマッピング
+  const DOC_LABELS: Record<string, string> = {
+    CELL_STORAGE_CONSENT: "細胞提供・保管同意書",
+    INFORMED_CONSENT: "インフォームドコンセント",
+  };
+
   try {
+    const docType = body.documentType || body.documentId || "unknown";
+    const docLabel = DOC_LABELS[docType] || body.documentTitle || docType;
+
     // 同意ログを記録
     await prisma.consentLog.create({
       data: {
         userId,
         memberEmail: user.email,
         membershipStatus: user.membership?.ipsStatus || "UNKNOWN",
-        documentId: body.documentId,
-        documentTitle: body.documentTitle,
-        documentVersion: body.documentVersion,
+        documentId: body.documentId || docType,
+        documentTitle: body.documentTitle || docLabel,
+        documentVersion: body.documentVersion || "1.0",
         documentUrl: body.documentUrl || null,
-        consentTextVersion: body.consentTextVersion,
-        consentTextSnapshot: body.consentTextSnapshot,
+        consentTextVersion: body.consentTextVersion || "1.0",
+        consentTextSnapshot: body.consentTextSnapshot || `${docLabel}に同意`,
         consentAction: "agreed",
         popupDisplayedAt: body.popupDisplayedAt ? new Date(body.popupDisplayedAt) : null,
         consentedAt: new Date(),
