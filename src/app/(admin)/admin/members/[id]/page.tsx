@@ -139,6 +139,14 @@ export default async function MemberKartePage({
         </div>
       </div>
 
+      {/* アカウント情報（ID発行・PW変更） */}
+      <IssueIdSection
+        userId={user.id}
+        currentLoginId={user.loginId}
+        nameKana={user.nameKana || ""}
+        isIdIssued={user.isIdIssued}
+      />
+
       {/* iPSステータス（チェックボックス式） */}
       <div className="mb-6">
         <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
@@ -157,14 +165,6 @@ export default async function MemberKartePage({
           />
         )}
       </div>
-
-      {/* アカウント情報（ID発行・PW変更） */}
-      <IssueIdSection
-        userId={user.id}
-        currentLoginId={user.loginId}
-        nameKana={user.nameKana || ""}
-        isIdIssued={user.isIdIssued}
-      />
 
       {/* 申込情報・健康状態 */}
       {(user.occupation || user.paymentMethod || user.currentIllness !== undefined) && (
