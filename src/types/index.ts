@@ -4,7 +4,7 @@ export type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentT
 
 // iPS ステータスの日本語ラベル
 export const IPS_STATUS_LABELS: Record<IpsStatus, string> = {
-  REGISTERED: "メンバーシップ登録",
+  REGISTERED: "ID/パス発行",
   TERMS_AGREED: "iPS細胞作製適合確認",
   SERVICE_APPLIED: "サービス申込",
   SCHEDULE_ARRANGED: "日程調整",
