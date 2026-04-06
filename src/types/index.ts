@@ -7,7 +7,7 @@ export const IPS_STATUS_LABELS: Record<IpsStatus, string> = {
   REGISTERED: "ID/パス発行",
   TERMS_AGREED: "iPS細胞作製適合確認",
   SERVICE_APPLIED: "サービス申込",
-  SCHEDULE_ARRANGED: "日程調整",
+  SCHEDULE_ARRANGED: "iPS細胞作製におけるクリニックの日程調整",
   BLOOD_COLLECTED: "問診・採血",
   IPS_CREATING: "iPS細胞 作製中",
   STORAGE_ACTIVE: "iPS細胞 保管中",

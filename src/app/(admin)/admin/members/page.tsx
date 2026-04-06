@@ -25,7 +25,7 @@ function getDisplayStatus(m: {
   if (status === "SCHEDULE_ARRANGED") {
     if (signedTypes.includes("INFORMED_CONSENT")) return { label: "IC同意済", color: "text-gold" };
     if (signedTypes.includes("CELL_STORAGE_CONSENT")) return { label: "細胞提供同意済", color: "text-gold" };
-    return { label: "日程調整中", color: "text-gold" };
+    return { label: "クリニック日程調整中", color: "text-gold" };
   }
 
   if (status === "SERVICE_APPLIED") {
