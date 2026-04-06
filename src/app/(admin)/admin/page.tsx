@@ -133,8 +133,7 @@ export default async function AdminDashboardPage() {
         <div className="space-y-2">
           {IPS_STATUS_ORDER.map((status, i) => {
             const count = countMap[status] || 0;
-            const maxCount = Math.max(...IPS_STATUS_ORDER.map((s) => countMap[s] || 0), 1);
-            const widthPercent = (count / maxCount) * 100;
+            const widthPercent = totalMembers > 0 ? (count / totalMembers) * 100 : 0;
             // 成約ライン（SERVICE_APPLIED）の前に区切り
             const isServiceLine = status === "SERVICE_APPLIED";
 
