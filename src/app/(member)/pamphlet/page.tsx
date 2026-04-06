@@ -22,7 +22,7 @@ export default function PamphletPage() {
   const [alreadyAgreed, setAlreadyAgreed] = useState(false);
   const [checked, setChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [pamphletUrl, setPamphletUrl] = useState("https://drive.google.com/file/d/1gGko6WSnt8jSR8k6GbsLby5kp3hQbXtE/view?usp=sharing");
+  const [pamphletUrl, setPamphletUrl] = useState("https://sc-project-partners.co.jp/files/bv/pamphlet.pdf");
   const popupDisplayedAt = useRef<string>(new Date().toISOString());
 
   // 同意済みか確認 + パンフレットURLを取得

@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   const setting = await prisma.siteSetting.findUnique({ where: { key: "pamphlet_url" } });
-  const url = setting?.content || "https://drive.google.com/file/d/1gGko6WSnt8jSR8k6GbsLby5kp3hQbXtE/view?usp=sharing";
+  const url = setting?.content || "https://sc-project-partners.co.jp/files/bv/pamphlet.pdf";
 
   return NextResponse.json({ url });
 }
