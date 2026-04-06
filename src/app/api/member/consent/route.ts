@@ -82,7 +82,6 @@ export async function POST(req: Request) {
       CELL_STORAGE_CONSENT: "CELL_STORAGE_CONSENT",
       INFORMED_CONSENT: "INFORMED_CONSENT",
     };
-    const docType = body.documentType || body.documentId;
     if (docTypeMap[docType]) {
       await prisma.document.updateMany({
         where: { userId, type: docTypeMap[docType] as any, status: { not: "SIGNED" } },
