@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 const ADMIN_TIMELINE = [
@@ -190,8 +191,8 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
       </div>
 
       {/* ID発行ポップアップ */}
-      {showIdPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowIdPopup(false)}>
+      {showIdPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowIdPopup(false)}>
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">ID・パスワードを発行</h3>
@@ -226,12 +227,12 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
               </div>
             </div>
           </div>
-        </div>
+        </div>, document.body
       )}
 
       {/* 日程確定ポップアップ */}
-      {showClinicPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowClinicPopup(false)}>
+      {showClinicPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowClinicPopup(false)}>
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">日程・クリニックを確定</h3>
@@ -269,7 +270,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
               </div>
             </div>
           </div>
-        </div>
+        </div>, document.body
       )}
     </>
   );
