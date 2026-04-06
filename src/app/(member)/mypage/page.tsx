@@ -6,8 +6,8 @@ import ScheduleRequestButton from "./ScheduleRequestButton";
 // 表示用ステップの定義
 const TIMELINE_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
+  { key: "REGISTERED", label: "ID/パス発行", icon: "🔑" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
-  { key: "REGISTERED", label: "メンバーシップ登録", icon: "👤" },
   { key: "SERVICE_APPLIED", label: "サービス申込", icon: "✍️" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
