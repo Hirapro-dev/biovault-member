@@ -7,7 +7,11 @@ import { signOut } from "next-auth/react";
 
 // 会員用トグルメニュー
 const memberNav = [
-  { href: "/documents", label: "契約・同意事項書類一覧", icon: "◇" },
+  { href: "/important-notice", label: "重要事項説明書兼確認書", icon: "📜" },
+  { href: "/important-notice#privacy", label: "個人情報同意書", icon: "📜" },
+  { href: "/documents/contract", label: "メンバーシップ契約書", icon: "📋" },
+  { href: "/documents/cell-consent", label: "細胞提供・保管同意書", icon: "🧫" },
+  { href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
   { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
   { href: "/settings/notifications", label: "通知設定", icon: "🔔" },
@@ -99,12 +103,12 @@ export default function MobileNav({
 
           {/* ナビゲーション */}
           <nav className="flex-1 p-3 overflow-y-auto">
-            {nav.map((item) => {
+            {nav.map((item, idx) => {
               const active =
                 pathname === item.href || pathname.startsWith(item.href);
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-${idx}`}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base ${

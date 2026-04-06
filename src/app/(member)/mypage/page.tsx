@@ -443,7 +443,7 @@ export default async function MyPage() {
           <div className="flex-1">
             <div className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">契約・同意事項書類一覧</div>
             <div className="text-[11px] text-text-muted mt-0.5">
-              {documents.filter((d) => d.status === "SIGNED").length} / {documents.length} 署名済み
+              {documents.filter((d) => d.status === "SIGNED" && d.type !== "SIMPLE_AGREEMENT").length} / {documents.filter((d) => d.type !== "SIMPLE_AGREEMENT").length} 署名済み
             </div>
           </div>
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
