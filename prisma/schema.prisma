@@ -596,3 +596,49 @@ model Staff {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ────────────────────────────────────────
+// 振込先一覧（入金先情報マスタ）
+// ────────────────────────────────────────
+model BankAccount {
+  id            String   @id @default(cuid())
+  bankName      String                        // 銀行名
+  branchName    String                        // 支店名
+  accountType   String   @default("普通")     // 口座種別（普通/当座）
+  accountNumber String                        // 口座番号
+  accountName   String                        // 口座名義
+  isDefault     Boolean  @default(false)      // デフォルト振込先
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ────────────────────────────────────────
+// クリニック一覧（提携クリニック マスタ）
+// ────────────────────────────────────────
+model Clinic {
+  id        String   @id @default(cuid())
+  name      String                        // クリニック名
+  address   String?                       // 住所
+  phone     String?                       // 電話番号
+  note      String?  @db.Text             // 備考
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ────────────────────────────────────────
+// 用語集（iPSとは？ページの用語管理）
+// ────────────────────────────────────────
+model GlossaryTerm {
+  id          String   @id @default(cuid())
+  term        String                        // 用語名
+  reading     String?                       // 読み
+  english     String?                       // 英語名
+  description String   @db.Text             // 説明
+  category    String   @default("basic")    // basic/medical/biovault
+  sortOrder   Int      @default(0)          // 表示順
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

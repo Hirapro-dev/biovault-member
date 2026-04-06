@@ -22,12 +22,20 @@ export default function PamphletPage() {
   const [alreadyAgreed, setAlreadyAgreed] = useState(false);
   const [checked, setChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pamphletUrl, setPamphletUrl] = useState("https://drive.google.com/file/d/1gGko6WSnt8jSR8k6GbsLby5kp3hQbXtE/view?usp=sharing");
   const popupDisplayedAt = useRef<string>(new Date().toISOString());
 
-  // 同意済みか確認
+  // 同意済みか確認 + パンフレットURLを取得
   useEffect(() => {
-    const checkConsent = async () => {
+    const init = async () => {
       try {
+        // パンフレットURLをDBから取得
+        const urlRes = await fetch("/api/member/pamphlet-url");
+        if (urlRes.ok) {
+          const { url } = await urlRes.json();
+          if (url) setPamphletUrl(url);
+        }
+        // 同意済み確認
         const res = await fetch("/api/member/consent");
         if (res.ok) {
           const logs = await res.json();
@@ -45,7 +53,7 @@ export default function PamphletPage() {
         setLoading(false);
       }
     };
-    checkConsent();
+    init();
   }, []);
 
   // 同意してパンフレットを開く
@@ -64,10 +72,10 @@ export default function PamphletPage() {
       });
 
       // 同意完了 → パンフレットを開いてページを同意済み状態にリフレッシュ
-      window.open(PAMPHLET_CONFIG.documentUrl, "_blank");
+      window.open(pamphletUrl, "_blank");
       setAlreadyAgreed(true);
     } catch {
-      window.open(PAMPHLET_CONFIG.documentUrl, "_blank");
+      window.open(pamphletUrl, "_blank");
       setAlreadyAgreed(true);
     } finally {
       setSubmitting(false);
@@ -95,7 +103,7 @@ export default function PamphletPage() {
           免責事項への同意は確認済みです
         </p>
         <a
-          href={PAMPHLET_CONFIG.documentUrl}
+          href={pamphletUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity"

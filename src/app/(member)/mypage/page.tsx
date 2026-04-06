@@ -59,8 +59,8 @@ export default async function MyPage() {
     }),
   ]);
 
-  // 振込先情報
-  const bankInfo = await prisma.siteSetting.findUnique({ where: { key: "bank_info" } });
+  // 振込先情報（デフォルト口座を取得）
+  const defaultBank = await prisma.bankAccount.findFirst({ where: { isDefault: true, isActive: true } });
 
   // ステータス到達日マッピング
   const statusDates: Record<string, string> = {};
@@ -230,10 +230,14 @@ export default async function MyPage() {
                     <div className="font-mono text-lg text-gold">¥{membership.totalAmount.toLocaleString()}</div>
                     <div className="text-[11px] text-text-muted mt-1">入金済: ¥{membership.paidAmount.toLocaleString()}</div>
                   </div>
-                  {bankInfo?.content && (
+                  {defaultBank && (
                     <div className="border-t border-border pt-3">
-                      <div className="text-[11px] text-text-muted mb-1">お振込先</div>
-                      <div className="text-xs text-text-primary whitespace-pre-line leading-relaxed">{bankInfo.content}</div>
+                      <div className="text-[11px] text-text-muted mb-2">お振込先</div>
+                      <div className="text-xs text-text-primary leading-relaxed space-y-0.5">
+                        <div>{defaultBank.bankName} {defaultBank.branchName}</div>
+                        <div>{defaultBank.accountType} {defaultBank.accountNumber}</div>
+                        <div>{defaultBank.accountName}</div>
+                      </div>
                     </div>
                   )}
                 </div>
