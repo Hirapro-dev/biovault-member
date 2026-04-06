@@ -69,21 +69,16 @@ export default async function GlossaryPage() {
                   key={item.id}
                   className="bg-bg-secondary border border-border rounded-md p-5 transition-colors duration-300 hover:border-border-gold"
                 >
-                  <div className="flex items-baseline gap-3 mb-2">
+                  <div className="mb-2">
                     <h3 className="text-[15px] text-text-primary font-medium">
                       {item.term}
                     </h3>
                     {item.reading && (
-                      <span className="text-[11px] text-text-muted">
+                      <div className="text-[11px] text-text-muted mt-0.5">
                         {item.reading}
-                      </span>
+                      </div>
                     )}
                   </div>
-                  {item.english && (
-                    <div className="text-[11px] text-gold-dark font-mono mb-2">
-                      {item.english}
-                    </div>
-                  )}
                   <p className="text-[13px] text-text-secondary leading-[1.8]">
                     {item.description}
                   </p>

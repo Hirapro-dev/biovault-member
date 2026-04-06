@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function VideoUrlEditor({ currentUrl }: { currentUrl: string }) {
+export default function VideoUrlEditor({ currentUrl, currentTitle }: { currentUrl: string; currentTitle: string }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [url, setUrl] = useState(currentUrl);
+  const [title, setTitle] = useState(currentTitle);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -22,11 +23,18 @@ export default function VideoUrlEditor({ currentUrl }: { currentUrl: string }) {
     setSaving(true);
     setMessage("");
     try {
-      await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: "ips_video_url", title: "iPSとは？動画URL", content: url.trim() }),
-      });
+      await Promise.all([
+        fetch("/api/admin/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "ips_video_url", title: "iPSとは？動画URL", content: url.trim() }),
+        }),
+        fetch("/api/admin/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "ips_video_title", title: "iPSとは？動画タイトル", content: title.trim() }),
+        }),
+      ]);
       setMessage("保存しました");
       setEditing(false);
       router.refresh();
@@ -61,6 +69,7 @@ export default function VideoUrlEditor({ currentUrl }: { currentUrl: string }) {
       {!editing ? (
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
+            {currentTitle && <div className="text-sm text-text-primary mb-1">{currentTitle}</div>}
             <div className="text-[11px] text-text-muted mb-1">現在のURL</div>
             <div className="text-xs text-text-secondary font-mono break-all">{currentUrl || "未設定"}</div>
           </div>
@@ -70,6 +79,15 @@ export default function VideoUrlEditor({ currentUrl }: { currentUrl: string }) {
         </div>
       ) : (
         <div className="space-y-3">
+          <div>
+            <label className="block text-[11px] text-text-muted mb-1">動画タイトル</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="例: iPS細胞について"
+              className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold"
+            />
+          </div>
           <div>
             <label className="block text-[11px] text-text-muted mb-1">YouTube URL</label>
             <input

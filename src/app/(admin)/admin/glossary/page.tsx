@@ -13,9 +13,13 @@ export default async function AdminGlossaryPage() {
     ],
   });
 
-  // 現在の動画URL
-  const videoSetting = await prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } });
+  // 現在の動画URL・タイトル
+  const [videoSetting, videoTitleSetting] = await Promise.all([
+    prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } }),
+    prisma.siteSetting.findUnique({ where: { key: "ips_video_title" } }),
+  ]);
   const currentVideoUrl = videoSetting?.content || "";
+  const currentVideoTitle = videoTitleSetting?.content || "";
 
   return (
     <div>
@@ -24,7 +28,7 @@ export default async function AdminGlossaryPage() {
       </h2>
 
       {/* 動画URL管理 */}
-      <VideoUrlEditor currentUrl={currentVideoUrl} />
+      <VideoUrlEditor currentUrl={currentVideoUrl} currentTitle={currentVideoTitle} />
 
       {/* 用語集セクション */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">

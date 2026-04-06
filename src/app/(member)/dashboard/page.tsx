@@ -5,8 +5,11 @@ import Link from "next/link";
 export default async function ContentPage() {
   await requireAuth();
 
-  // 動画URL（SiteSettingから取得、なければVideoモデル）
-  const videoSetting = await prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } });
+  // 動画URL・タイトル（SiteSettingから取得、なければVideoモデル）
+  const [videoSetting, videoTitleSetting] = await Promise.all([
+    prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } }),
+    prisma.siteSetting.findUnique({ where: { key: "ips_video_title" } }),
+  ]);
   const latestVideo = videoSetting?.content
     ? null
     : await prisma.video.findFirst({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } });
@@ -17,6 +20,7 @@ export default async function ContentPage() {
     return m?.[1] || null;
   };
   const youtubeId = videoSetting?.content ? extractId(videoSetting.content) : latestVideo?.youtubeId || null;
+  const videoTitle = videoTitleSetting?.content || latestVideo?.title || "";
 
   return (
     <div>
@@ -36,10 +40,10 @@ export default async function ContentPage() {
               className="w-full h-full"
             />
           </div>
-          {latestVideo && (
+          {videoTitle && (
             <div className="mt-3">
-              <h3 className="text-sm text-text-primary font-medium leading-snug">{latestVideo.title}</h3>
-              {latestVideo.description && (
+              <h3 className="text-sm text-text-primary font-medium leading-snug">{videoTitle}</h3>
+              {latestVideo?.description && (
                 <p className="text-[12px] text-text-muted mt-1 line-clamp-2">{latestVideo.description}</p>
               )}
             </div>
