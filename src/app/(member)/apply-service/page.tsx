@@ -178,7 +178,7 @@ export default function ApplyServicePage() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="bg-bg-secondary border border-border-gold rounded-md p-8 sm:p-12 text-center">
-          <div className="text-5xl mb-6">✔️</div>
+          <div className="text-5xl mb-6">✓</div>
           <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">
             お申込みありがとうございます
           </h2>

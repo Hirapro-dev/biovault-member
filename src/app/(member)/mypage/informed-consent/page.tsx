@@ -48,7 +48,7 @@ export default function InformedConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✔️</div>
+        <div className="text-5xl mb-6">✓</div>
         <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意が完了しました</h2>
         <p className="text-sm text-text-secondary mb-6">iPS細胞作製における事前説明・同意へのご同意ありがとうございます。</p>
         <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">

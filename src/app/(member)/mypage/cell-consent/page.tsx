@@ -57,7 +57,7 @@ export default function CellConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✔️</div>
+        <div className="text-5xl mb-6">✓</div>
         <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">同意が完了しました</h2>
         <div className="text-sm text-text-secondary leading-relaxed space-y-3 mb-8">
           <p>細胞提供・保管同意書へのご同意ありがとうございます。</p>

@@ -228,7 +228,6 @@ export default async function MyPage() {
                   <div>
                     <div className="text-[11px] text-text-muted mb-1">お支払い金額</div>
                     <div className="font-mono text-lg text-gold">¥{membership.totalAmount.toLocaleString()}</div>
-                    <div className="text-[11px] text-text-muted mt-1">入金済: ¥{membership.paidAmount.toLocaleString()}</div>
                   </div>
                   {defaultBank && (
                     <div className="border-t border-border pt-3">
