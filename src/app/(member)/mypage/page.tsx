@@ -526,20 +526,19 @@ export default async function MyPage() {
 
 function HealthItem({ label, active, detail }: { label: string; active: boolean; detail?: string | null }) {
   return (
-    <div className="flex items-start gap-3 py-2 border-b border-border last:border-b-0">
-      <div className={`shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-        active ? "bg-status-warning/20 text-status-warning border border-status-warning/30" : "bg-bg-elevated text-text-muted border border-border"
-      }`}>
-        {active ? "!" : "✓"}
+    <div className="py-3 border-b border-border last:border-b-0">
+      <div className="text-[13px] text-text-primary mb-2">{label}</div>
+      <div className="flex gap-4 mb-1">
+        <label className="flex items-center gap-2 text-xs text-text-secondary">
+          <input type="radio" checked={!active} readOnly className="accent-gold pointer-events-none" /> なし
+        </label>
+        <label className="flex items-center gap-2 text-xs text-text-secondary">
+          <input type="radio" checked={active} readOnly className="accent-gold pointer-events-none" /> あり
+        </label>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[13px] text-text-primary">{label}</div>
-        {active ? (
-          <div className="text-[12px] text-text-secondary mt-0.5">{detail || "あり"}</div>
-        ) : (
-          <div className="text-[12px] text-text-muted mt-0.5">なし</div>
-        )}
-      </div>
+      {active && detail && (
+        <div className="text-[12px] text-text-secondary mt-1 pl-1">{detail}</div>
+      )}
     </div>
   );
 }
