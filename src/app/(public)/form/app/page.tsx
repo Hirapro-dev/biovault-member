@@ -97,7 +97,7 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">メンバーシップ登録を受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製適合確認申請を受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
               お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
@@ -120,7 +120,7 @@ function ApplyPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
-          BioVault メンバーシップ登録
+          BioVault iPS細胞作製適合確認申請
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
@@ -305,7 +305,7 @@ function ApplyPage() {
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
             上記の内容を真実かつ正確に記載し、<br />各事項を確認・理解のうえ、
             <br />
-            BioVaultメンバーシップ登録に申し込みます。
+            BioVault iPS細胞作製適合確認に申し込みます。
           </p>
 
           <div className="flex gap-3">
