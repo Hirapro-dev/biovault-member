@@ -13,7 +13,7 @@ const ADMIN_TIMELINE = [
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅", dbStatus: "SCHEDULE_ARRANGED" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", dbStatus: null },
   { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥", dbStatus: null },
-  { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄", dbStatus: null },
+  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄", dbStatus: null },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", dbStatus: "BLOOD_COLLECTED" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", dbStatus: "IPS_CREATING" },
   { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", dbStatus: "STORAGE_ACTIVE" },

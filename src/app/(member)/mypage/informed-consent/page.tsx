@@ -50,7 +50,7 @@ export default function InformedConsentPage() {
       <div className="max-w-[700px] mx-auto text-center py-12">
         <div className="text-4xl mb-4">✅</div>
         <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意が完了しました</h2>
-        <p className="text-sm text-text-secondary mb-6">インフォームドコンセントへのご同意ありがとうございます。</p>
+        <p className="text-sm text-text-secondary mb-6">iPS細胞作製における事前説明・同意へのご同意ありがとうございます。</p>
         <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">
           マイページに戻る
         </button>
@@ -63,7 +63,7 @@ export default function InformedConsentPage() {
       <div className="text-[11px] text-text-muted mb-5">
         <Link href="/mypage" className="hover:text-gold transition-colors">マイページ</Link>
         <span className="mx-2">/</span>
-        <span className="text-text-secondary">インフォームドコンセント</span>
+        <span className="text-text-secondary">iPS細胞作製における事前説明・同意</span>
       </div>
 
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">

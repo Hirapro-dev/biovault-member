@@ -13,7 +13,7 @@ const TIMELINE_STEPS = [
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
   { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥" },
-  { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄" },
+  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
   { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️" },
@@ -394,7 +394,7 @@ export default async function MyPage() {
 
           {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
             <div className="space-y-4">
-              {/* インフォームドコンセント未同意の場合 */}
+              {/* iPS細胞作製における事前説明・同意未同意の場合 */}
               {!isStepDone("DOC_INFORMED") && (
                 <Link href="/mypage/informed-consent" className="block group">
                   <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
@@ -403,7 +403,7 @@ export default async function MyPage() {
                         <span className="text-2xl">📄</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
                       </div>
-                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">インフォームドコンセント</div>
+                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
                       <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
                       <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
                       <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>

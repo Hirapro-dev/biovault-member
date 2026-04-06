@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   // 書類タイプのラベルマッピング
   const DOC_LABELS: Record<string, string> = {
     CELL_STORAGE_CONSENT: "細胞提供・保管同意書",
-    INFORMED_CONSENT: "インフォームドコンセント",
+    INFORMED_CONSENT: "iPS細胞作製における事前説明・同意",
   };
 
   try {

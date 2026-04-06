@@ -100,7 +100,7 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   PRIVACY_POLICY: "個人情報・個人遺伝情報等の取扱いに関する同意書",
   CONSENT_CELL_STORAGE: "メンバーシップ契約書",
   CELL_STORAGE_CONSENT: "細胞提供・保管同意書",
-  INFORMED_CONSENT: "インフォームドコンセント（自家iPS細胞作製に関する説明書兼同意書）",
+  INFORMED_CONSENT: "iPS細胞作製における事前説明・同意（自家iPS細胞作製に関する説明書兼同意書）",
   SIMPLE_AGREEMENT: "簡易規約",
 };
 
