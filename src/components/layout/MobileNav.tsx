@@ -18,7 +18,6 @@ const adminNav = [
   { href: "/admin/agencies", label: "代理店管理", icon: "🤝" },
   { href: "/admin/staff", label: "従業員管理", icon: "👔" },
   { href: "/admin/print-requests", label: "印刷依頼管理", icon: "🖨️" },
-  { href: "/admin/videos", label: "動画管理", icon: "🎬" },
   { href: "/admin/access-logs", label: "アクセスログ", icon: "📊" },
   { href: "/admin/bank-accounts", label: "振込先管理", icon: "🏦" },
   { href: "/admin/clinics", label: "クリニック管理", icon: "🏥" },
