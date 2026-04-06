@@ -185,9 +185,9 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
             };
 
             return (
-              <div key={step.key} onClick={handleClick} className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""} ${isPending ? "bg-gold/5" : ""}`}>
-                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-all ${done ? "bg-gold border-gold" : canToggle ? "border-text-muted/40 hover:border-gold/60" : "border-border"}`}>
-                  {done && (<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>)}
+              <div key={step.key} onClick={handleClick} className={`flex items-center gap-3 py-3.5 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""} ${isPending ? "bg-gold/5" : ""}`}>
+                <div className={`w-8 h-8 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${done ? "bg-gold border-gold" : canToggle ? "border-text-muted/40 hover:border-gold/60" : "border-border"}`}>
+                  {done && (<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9L7.5 12.5L14 5.5" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>)}
                 </div>
                 <span className={`text-base shrink-0 ${done ? "opacity-100" : "opacity-30"}`}>{step.icon}</span>
                 <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>{step.label}</span>
