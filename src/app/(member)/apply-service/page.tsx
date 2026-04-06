@@ -22,7 +22,7 @@ export default function ApplyServicePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // ステップ管理（1: 情報・確認, 2: 利用規約, 3: iPSサービス契約書, 4: 最終確認）
+  // ステップ管理（1: 情報・確認, 2: 利用規約, 3: メンバーシップ契約書, 4: 最終確認）
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -54,7 +54,7 @@ export default function ApplyServicePage() {
   const [termsScrolled, setTermsScrolled] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
 
-  // ステップ3: iPSサービス契約書スクロール
+  // ステップ3: メンバーシップ契約書スクロール
   const consentRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -114,7 +114,7 @@ export default function ApplyServicePage() {
     }
   };
 
-  // iPSサービス契約書スクロール検知
+  // メンバーシップ契約書スクロール検知
   const handleConsentScroll = () => {
     if (!consentRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = consentRef.current;
@@ -189,7 +189,7 @@ export default function ApplyServicePage() {
           </h2>
           <GoldDivider />
           <p className="text-text-secondary text-sm leading-relaxed mt-6 mb-2">
-            iPSサービスへのお申込みを受け付けました。
+            メンバーシップへのお申込みを受け付けました。
           </p>
           <p className="text-text-secondary text-sm leading-relaxed mb-8">
             担当者より改めてご連絡させていただきます。
@@ -211,7 +211,7 @@ export default function ApplyServicePage() {
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
         <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
-          iPSサービス申込
+          メンバーシップ申込
         </h2>
         <GoldDivider />
       </div>
@@ -291,7 +291,7 @@ export default function ApplyServicePage() {
                   className="bg-bg-tertiary border border-border rounded px-3 py-2 text-sm text-text-primary flex-1"
                 >
                   <option value="">年</option>
-                  {[2025, 2026, 2027].map((y) => (
+                  {[2026, 2027].map((y) => (
                     <option key={y} value={y}>{y}年</option>
                   ))}
                 </select>
@@ -314,7 +314,7 @@ export default function ApplyServicePage() {
             <h3 className="text-sm text-text-primary tracking-wider mb-3">事前確認事項（健康状態）</h3>
             <div className="bg-gold/5 border-l-2 border-gold px-4 py-3 rounded-r-md mb-5">
               <p className="text-[12px] sm:text-[13px] text-text-secondary leading-relaxed">
-                iPS細胞作製にあたり、事前に適合確認のため現在の健康状態の確認をさせていただいております。メンバーシップ申込時より、健康状態に変更がある場合は、その旨ご記載ください。
+                iPS細胞作製にあたり、再度、現在の健康状態の確認をさせていただいております。当初の適合確認時より、健康状態に変更がある場合は、その旨ご記載ください。
               </p>
             </div>
             <div className="space-y-4">
@@ -420,11 +420,11 @@ export default function ApplyServicePage() {
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="radio" name="contractFormat" value="electronic" checked={contractFormat === "electronic"} onChange={(e) => setContractFormat(e.target.value)} className="accent-gold" />
-                <span className="text-sm text-text-secondary">電子署名</span>
+                <span className="text-sm text-text-secondary">電子署名希望</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="radio" name="contractFormat" value="paper" checked={contractFormat === "paper"} onChange={(e) => setContractFormat(e.target.value)} className="accent-gold" />
-                <span className="text-sm text-text-secondary">紙の契約書</span>
+                <span className="text-sm text-text-secondary">紙の契約書希望</span>
               </label>
             </div>
           </div>
@@ -438,7 +438,7 @@ export default function ApplyServicePage() {
                 : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
             }`}
           >
-            次へ：利用規約の確認
+            メンバーシップ会員規約の確認へ進む
           </button>
         </div>
       )}
@@ -447,7 +447,7 @@ export default function ApplyServicePage() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">BioVault 会員規約</h3>
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">メンバーシップ会員規約</h3>
             <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
             <div
               ref={termsRef}
@@ -464,7 +464,7 @@ export default function ApplyServicePage() {
             <div className={`mt-4 transition-opacity ${termsScrolled ? "opacity-100" : "opacity-40"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={termsAgreed} onChange={(e) => termsScrolled && setTermsAgreed(e.target.checked)} disabled={!termsScrolled} className="accent-gold w-4 h-4" />
-                <span className="text-sm text-text-secondary">上記の BioVault会員規約の内容を確認し、同意します。</span>
+                <span className="text-sm text-text-secondary">上記の メンバーシップ会員規約の内容を確認し、同意します。</span>
               </label>
             </div>
           </div>

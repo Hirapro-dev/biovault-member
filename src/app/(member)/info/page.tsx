@@ -6,7 +6,7 @@ const menuItems = [
     href: "/apply-service",
     icon: "✍️",
     label: "サービス申込",
-    description: "iPSサービスへのお申込み",
+    description: "メンバーシップへのお申込み",
   },
   {
     href: "/settings/terms",

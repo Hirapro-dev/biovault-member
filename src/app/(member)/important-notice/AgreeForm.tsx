@@ -93,7 +93,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 
       {/* 重要事項説明書兼確認書 */}
       <div className="mb-8">
-        <h2 className="text-sm text-text-primary font-medium mb-3">BioVault 重要事項説明書兼確認書</h2>
+        <h2 className="text-sm text-text-primary font-medium mb-3">重要事項説明書兼確認書</h2>
 
         <div
           ref={scroll1Ref}
@@ -250,7 +250,7 @@ function ImportantNoticeContent() {
 function PrivacyConsentContent() {
   return (
     <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-6">
-      <p>株式会社SCPP（以下「甲」という。）は、BioVault制サービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
+      <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップサービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
       <p>乙は、本書の内容を確認し、理解したうえで、必要な範囲について同意するものとします。</p>
 
       <S t="第1条（目的）">

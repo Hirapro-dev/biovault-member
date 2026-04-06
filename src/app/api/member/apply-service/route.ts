@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 /**
- * iPSサービス申込API
+ * メンバーシップ申込API
  * 会員がサイト内からサービスに申し込む（880万円）
  */
 export async function POST(req: Request) {
@@ -78,11 +78,11 @@ export async function POST(req: Request) {
           userId,
           fromStatus: "TERMS_AGREED",
           toStatus: "SERVICE_APPLIED",
-          note: "会員本人によるiPSサービス申込",
+          note: "会員本人によるメンバーシップ申込",
           changedBy: "会員本人",
         },
       }),
-      // 4. iPSサービス契約書のステータスを署名済みに更新
+      // 4. メンバーシップ契約書のステータスを署名済みに更新
       prisma.document.updateMany({
         where: {
           userId,
