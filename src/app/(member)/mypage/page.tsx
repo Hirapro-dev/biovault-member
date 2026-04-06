@@ -324,7 +324,7 @@ export default async function MyPage() {
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">🧬</div>
                 <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
-                <div className="text-xs text-text-muted leading-relaxed">お客様のiPS細胞を丁寧に作製しております。<br />今しばらくお待ちください。</div>
+                <div className="text-xs text-text-muted leading-relaxed">{user.name}様のiPS細胞の作製に進んでおります。<br />今しばらくお待ちください。</div>
               </div>
             </div>
           )}
