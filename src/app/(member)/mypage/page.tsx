@@ -12,6 +12,7 @@ const TIMELINE_STEPS = [
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
+  { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥" },
   { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄" },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
@@ -84,6 +85,7 @@ export default async function MyPage() {
     if (key === "REGISTERED") return !!fullUser?.isIdIssued;
     if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
+    if (key === "CLINIC_CONFIRMED") return !!membership?.clinicDate;
     if (key === "DOC_INFORMED") return !!docSignedMap["INFORMED_CONSENT"];
     if (key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED";
     const idx = STATUS_ORDER.indexOf(key);
@@ -94,6 +96,7 @@ export default async function MyPage() {
   function getStepDate(key: string): string | null {
     if (key === "DOC_PRIVACY") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
     if (key === "DOC_CELL_CONSENT") return docSignedMap["CELL_STORAGE_CONSENT"] || null;
+    if (key === "CLINIC_CONFIRMED") return membership?.clinicDate ? membership.clinicDate.toISOString() : null;
     if (key === "DOC_INFORMED") return docSignedMap["INFORMED_CONSENT"] || null;
     if (key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED" && membership?.updatedAt ? membership.updatedAt.toISOString() : null;
     return statusDates[key] || null;
@@ -390,7 +393,7 @@ export default async function MyPage() {
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
                       </div>
                       <div className="text-base sm:text-lg text-text-primary font-medium mb-2">インフォームドコンセント</div>
-                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ こちらの同意がないと、問診・採血に進めません</div>
+                      <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
                       <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
                       <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
                         同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -400,20 +403,28 @@ export default async function MyPage() {
                 </Link>
               )}
 
-              {/* 日程情報 */}
+              {/* 日程確定カード */}
               <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">📅</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">予定</span>
+                    <span className="text-2xl">🏥</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">{membership.clinicDate ? "確定" : "調整中"}</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の予定</div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の日程</div>
                   {membership.clinicDate ? (
-                    <div className="bg-bg-elevated border border-border rounded-md p-4">
-                      <div className="text-[11px] text-text-muted mb-1">問診・採血予定日</div>
-                      <div className="font-mono text-lg text-gold">
-                        {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                    <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                      <div>
+                        <div className="text-[11px] text-text-muted mb-1">予定日</div>
+                        <div className="font-mono text-lg text-gold">
+                          {new Date(membership.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+                        </div>
                       </div>
+                      {membership.clinicName && (
+                        <div>
+                          <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
+                          <div className="text-sm text-text-primary">{membership.clinicName}</div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-sm text-text-secondary">日程を調整中です。確定次第こちらに表示されます。</div>

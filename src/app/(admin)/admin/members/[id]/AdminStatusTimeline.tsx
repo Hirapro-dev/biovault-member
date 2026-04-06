@@ -11,6 +11,7 @@ const ADMIN_TIMELINE = [
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", dbStatus: null },
   { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅", dbStatus: "SCHEDULE_ARRANGED" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", dbStatus: null },
+  { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥", dbStatus: null },
   { key: "DOC_INFORMED", label: "インフォームドコンセント", icon: "📄", dbStatus: null },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", dbStatus: "BLOOD_COLLECTED" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", dbStatus: "IPS_CREATING" },
@@ -31,12 +32,20 @@ interface Props {
   isIdIssued: boolean;
   currentLoginId: string;
   nameKana: string;
+  clinicDate: string | null;
+  clinicName: string | null;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
+
+  // 日程確定ポップアップ
+  const [showClinicPopup, setShowClinicPopup] = useState(false);
+  const [inputClinicDate, setInputClinicDate] = useState(clinicDate ? clinicDate.split("T")[0] : "");
+  const [inputClinicName, setInputClinicName] = useState(clinicName || "");
+  const [clinicLoading, setClinicLoading] = useState(false);
 
   // ID発行ポップアップ
   const [showIdPopup, setShowIdPopup] = useState(false);
@@ -54,6 +63,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
     if (key === "REGISTERED") return isIdIssued; // ID/パス発行は実際に発行済みかで判定
     if (key === "DOC_PRIVACY") return signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms;
     if (key === "DOC_CELL_CONSENT") return signedDocTypes.includes("CELL_STORAGE_CONSENT");
+    if (key === "CLINIC_CONFIRMED") return !!clinicDate;
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
     if (key === "PAYMENT_CONFIRMED") return paymentStatus === "COMPLETED";
     const idx = DB_ORDER.indexOf(key);
@@ -139,13 +149,23 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
           {ADMIN_TIMELINE.map((step) => {
             const done = isChecked(step.key);
             const originalDone = isOriginallyDone(step.key);
-            const adminToggleKeys = ["TERMS_AGREED", "PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
+            const adminToggleKeys = ["TERMS_AGREED", "PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "CLINIC_CONFIRMED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
             const canToggle = adminToggleKeys.includes(step.key) && !loading;
             const isMemberOnly = !adminToggleKeys.includes(step.key);
             const isPending = pendingChanges.has(step.key);
 
+            const handleClick = () => {
+              if (!canToggle) return;
+              // 日程確定はポップアップ表示
+              if (step.key === "CLINIC_CONFIRMED" && !done) {
+                setShowClinicPopup(true);
+                return;
+              }
+              handleToggle(step.key);
+            };
+
             return (
-              <div key={step.key} onClick={() => canToggle && handleToggle(step.key)} className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""} ${isPending ? "bg-gold/5" : ""}`}>
+              <div key={step.key} onClick={handleClick} className={`flex items-center gap-3 py-3 px-3 rounded transition-colors ${canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""} ${isPending ? "bg-gold/5" : ""}`}>
                 <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-all ${done ? "bg-gold border-gold" : canToggle ? "border-text-muted/40 hover:border-gold/60" : "border-border"}`}>
                   {done && (<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L6 10L11 4" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>)}
                 </div>
@@ -202,6 +222,49 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 <button onClick={() => setShowIdPopup(false)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">後で</button>
                 <button onClick={handleIssueId} disabled={idLoading || !loginId || !password} className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50">
                   {idLoading ? "発行中..." : "発行する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 日程確定ポップアップ */}
+      {showClinicPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowClinicPopup(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">日程・クリニックを確定</h3>
+            <p className="text-xs text-text-muted mb-5">問診・採血の日程と提携クリニックを入力してください。</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">予定日</label>
+                <input type="date" value={inputClinicDate} onChange={(e) => setInputClinicDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">提携クリニック名</label>
+                <input value={inputClinicName} onChange={(e) => setInputClinicName(e.target.value)} placeholder="例: ○○クリニック 東京院" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none" />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button onClick={() => setShowClinicPopup(false)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
+                <button
+                  onClick={async () => {
+                    if (!inputClinicDate) return;
+                    setClinicLoading(true);
+                    try {
+                      await fetch(`/api/admin/members/${userId}`, {
+                        method: "PATCH", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null } }),
+                      });
+                      setShowClinicPopup(false);
+                      router.refresh();
+                    } finally { setClinicLoading(false); }
+                  }}
+                  disabled={clinicLoading || !inputClinicDate}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {clinicLoading ? "保存中..." : "確定する"}
                 </button>
               </div>
             </div>
