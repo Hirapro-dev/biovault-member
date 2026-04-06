@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { IPS_STATUS_LABELS, IPS_STATUS_ORDER, IPS_STATUS_ICONS } from "@/types";
+import Link from "next/link";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
@@ -31,6 +32,37 @@ export default async function AdminDashboardPage() {
   startOfMonth.setHours(0, 0, 0, 0);
   const newThisMonth = await prisma.user.count({
     where: { role: "MEMBER", createdAt: { gte: startOfMonth } },
+  });
+
+  // ── 対応が必要な会員を取得 ──
+  const pendingActions = await prisma.user.findMany({
+    where: {
+      role: "MEMBER",
+      OR: [
+        // 適合確認待ち（登録済みでTERMS_AGREEDチェック前）
+        { membership: { ipsStatus: "REGISTERED" } },
+        // ID発行待ち（適合確認済みでID未発行）
+        { membership: { ipsStatus: "TERMS_AGREED" }, isIdIssued: false },
+        // 入金確認待ち（サービス申込済みで未入金）
+        { membership: { ipsStatus: "SERVICE_APPLIED", paymentStatus: { not: "COMPLETED" } } },
+        // 日程調整中（日程未確定）
+        { membership: { ipsStatus: "SCHEDULE_ARRANGED", clinicDate: null } },
+      ],
+    },
+    include: { membership: true },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+  // 対応タイプを判定
+  type ActionItem = { user: typeof pendingActions[0]; action: string; icon: string; color: string };
+  const actionItems: ActionItem[] = pendingActions.map((u) => {
+    const s = u.membership?.ipsStatus;
+    if (s === "REGISTERED") return { user: u, action: "適合確認待ち", icon: "📋", color: "text-status-warning" };
+    if (s === "TERMS_AGREED" && !u.isIdIssued) return { user: u, action: "ID発行待ち", icon: "🔑", color: "text-status-warning" };
+    if (s === "SERVICE_APPLIED") return { user: u, action: "入金確認待ち", icon: "💰", color: "text-status-danger" };
+    if (s === "SCHEDULE_ARRANGED") return { user: u, action: "日程調整リクエスト", icon: "📅", color: "text-gold" };
+    return { user: u, action: "確認が必要", icon: "⚠️", color: "text-text-muted" };
   });
 
   // サマリー統計（従来の4カード）
@@ -64,6 +96,34 @@ export default async function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* 対応が必要な会員 */}
+      {actionItems.length > 0 && (
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+            対応が必要な会員 <span className="text-gold font-mono ml-2">{actionItems.length}</span>
+          </h3>
+          <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+            {actionItems.map((item) => (
+              <Link
+                key={item.user.id}
+                href={`/admin/members/${item.user.id}`}
+                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
+              >
+                <span className="text-lg shrink-0">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
+                    <span className="text-sm text-text-primary">{item.user.name}</span>
+                  </div>
+                  <span className={`text-[11px] ${item.color}`}>{item.action}</span>
+                </div>
+                <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ファネル表示 */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
