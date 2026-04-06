@@ -95,7 +95,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
         if (key === "PAYMENT_CONFIRMED" && willBeChecked) {
           await fetch(`/api/admin/members/${userId}`, {
             method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paymentStatus: "COMPLETED", paidAmount: 8800000 }),
+            body: JSON.stringify({ membership: { paymentStatus: "COMPLETED", paidAmount: 8800000 } }),
           });
         }
       }
