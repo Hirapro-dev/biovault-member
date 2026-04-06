@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 
 // 会員用トグルメニュー
 const memberNav = [
+  { href: "/documents", label: "契約・同意事項書類一覧", icon: "◇" },
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
   { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
   { href: "/settings/notifications", label: "通知設定", icon: "🔔" },

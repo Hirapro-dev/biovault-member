@@ -110,38 +110,6 @@ export default async function DocumentsPage() {
           );
         })}
 
-        {/* パンフレット免責事項（一番下に表示） */}
-        <div className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
-              006
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm sm:text-base text-text-primary leading-snug">
-                パンフレット免責事項
-              </div>
-              {fullUser?.agreedPamphletAt && (
-                <div className="text-xs text-text-secondary mt-0.5">
-                  同意日: {new Date(fullUser.agreedPamphletAt).toLocaleDateString("ja-JP")}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3 pl-11 sm:pl-0">
-            <Badge variant={fullUser?.hasAgreedPamphlet ? "success" : "muted"}>
-              {fullUser?.hasAgreedPamphlet ? "同意済" : "未同意"}
-            </Badge>
-            {fullUser?.hasAgreedPamphlet && (
-              <Link
-                href="/pamphlet"
-                className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
-              >
-                内容を確認
-              </Link>
-            )}
-          </div>
-        </div>
-
         {sortedDocs.length === 0 && (
           <div className="text-center py-12 text-text-muted text-sm">
             書類が登録されていません

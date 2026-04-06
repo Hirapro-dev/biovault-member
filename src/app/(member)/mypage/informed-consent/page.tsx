@@ -67,7 +67,7 @@ export default function InformedConsentPage() {
       </div>
 
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">
-        自家iPS細胞作製に関する説明書兼同意書
+        iPS細胞作製における事前説明・同意
       </h2>
       <p className="text-xs text-text-muted mb-5">※ こちらの同意がないと、問診・採血に進めません</p>
 
