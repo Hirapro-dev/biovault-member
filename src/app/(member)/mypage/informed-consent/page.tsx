@@ -12,6 +12,11 @@ export default function InformedConsentPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
+  // 確認事項チェックボックス（11項目）
+  const [confirms, setConfirms] = useState<boolean[]>(new Array(11).fill(false));
+  const allConfirmed = confirms.every(Boolean);
+  const toggleConfirm = (i: number) => setConfirms((prev) => { const next = [...prev]; next[i] = !next[i]; return next; });
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -128,45 +133,58 @@ export default function InformedConsentPage() {
             <p>また、法令上または工程上撤回が制限される場合を除き、将来に向かって同意を撤回できる場合があることについて説明を受けました。</p>
           </Sec>
 
-          <Sec t="10. 確認事項">
-            <p>私は、以下の事項を理解しました。</p>
-            <ul className="list-none space-y-1.5 pl-2">
-              <li>□ 株式会社SCPPは医療行為の実施主体ではないこと</li>
-              <li>□ 診察、採血、医学的判断は提携医療機関等が行うこと</li>
-              <li>□ 細胞作製、培養、品質評価、保管等は提携先機関が行うこと</li>
-              <li>□ 本書への同意によって自家iPS細胞作製の完了または成功が保証されるものではないこと</li>
-              <li>□ 採血後であっても細胞作製ができない場合があること</li>
-              <li>□ 作製完了までの期間には個人差があること</li>
-              <li>□ 一度の採血で十分な細胞作製に至らず、再採血その他の追加対応が必要となる場合があること</li>
-              <li>□ 妊娠中、感染症罹患中、悪性腫瘍治療中または最近治療歴のある場合等には、作製工程に進めない場合があること</li>
-              <li>□ 将来の治療、美容、研究利用等は別途説明・同意を要すること</li>
-              <li>□ 試料、本細胞等または関連生成物は、法令、品質管理上の要請等により本人へ直接交付されない場合があること</li>
-              <li>□ 本書は費用承諾書ではなく、費用や契約条件は別途書面で確認済みであること</li>
-            </ul>
-          </Sec>
+          <section>
+            <h4 className="text-sm text-text-primary font-medium mb-2">10. 確認事項</h4>
+            <p className="mb-3">私は、以下の事項を理解しました。</p>
+            <div className="space-y-2.5">
+              {[
+                "株式会社SCPPは医療行為の実施主体ではないこと",
+                "診察、採血、医学的判断は提携医療機関等が行うこと",
+                "細胞作製、培養、品質評価、保管等は提携先機関が行うこと",
+                "本書への同意によって自家iPS細胞作製の完了または成功が保証されるものではないこと",
+                "採血後であっても細胞作製ができない場合があること",
+                "作製完了までの期間には個人差があること",
+                "一度の採血で十分な細胞作製に至らず、再採血その他の追加対応が必要となる場合があること",
+                "妊娠中、感染症罹患中、悪性腫瘍治療中または最近治療歴のある場合等には、作製工程に進めない場合があること",
+                "将来の治療、美容、研究利用等は別途説明・同意を要すること",
+                "試料、本細胞等または関連生成物は、法令、品質管理上の要請等により本人へ直接交付されない場合があること",
+                "本書は費用承諾書ではなく、費用や契約条件は別途書面で確認済みであること",
+              ].map((label, i) => (
+                <label key={i} className="flex items-start gap-2.5 cursor-pointer">
+                  <input type="checkbox" checked={confirms[i]} onChange={() => toggleConfirm(i)} className="mt-0.5 w-4 h-4 accent-gold shrink-0 cursor-pointer" />
+                  <span className={`text-xs sm:text-sm leading-relaxed ${confirms[i] ? "text-text-primary" : "text-text-muted"}`}>{label}</span>
+                </label>
+              ))}
+            </div>
+          </section>
         </article>
       </div>
 
       {/* 同意チェック */}
-      <div className="mt-4">
+      <div className="mt-6">
         {!scrolledToBottom && (
           <p className="text-xs text-gold text-center mb-2 animate-pulse">↓ 最後までスクロールしてください</p>
         )}
-        <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
+
+        {!allConfirmed && scrolledToBottom && (
+          <p className="text-xs text-status-warning text-center mb-3">※ 確認事項のすべてにチェックを入れてください</p>
+        )}
+
+        <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom && allConfirmed ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
           <input
             type="checkbox"
             checked={checked}
             onChange={(e) => setChecked(e.target.checked)}
-            disabled={!scrolledToBottom}
-            className="mt-0.5 cursor-pointer shrink-0 accent-gold"
+            disabled={!scrolledToBottom || !allConfirmed}
+            className="mt-0.5 cursor-pointer shrink-0 accent-gold w-4 h-4"
           />
           <span className="text-[13px] text-text-primary leading-relaxed">
-            上記の説明を受け、内容を理解したうえで、自家iPS細胞作製に関する説明書兼同意書に同意します。
+            上記の説明を受け、確認事項をすべて理解したうえで、自家iPS細胞作製に関する説明書兼同意書に同意します。
           </span>
         </label>
         <button
           onClick={handleAgree}
-          disabled={!checked || loading}
+          disabled={!checked || !allConfirmed || loading}
           className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30"
         >
           {loading ? "処理中..." : "同意する"}
