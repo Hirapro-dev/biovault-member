@@ -48,7 +48,10 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const [inputClinicDate, setInputClinicDate] = useState(clinicDate ? clinicDate.split("T")[0] : "");
   const [inputClinicName, setInputClinicName] = useState(clinicName || "");
   const [inputClinicAddress, setInputClinicAddress] = useState(clinicAddress || "");
+  const [inputClinicPhone, setInputClinicPhone] = useState("");
   const [clinicLoading, setClinicLoading] = useState(false);
+  const [clinicList, setClinicList] = useState<{ id: string; name: string; address: string | null; phone: string | null }[]>([]);
+  const [selectedClinicId, setSelectedClinicId] = useState("");
 
   // 日付入力ポップアップ（問診・採血、iPS作製中、iPS保管）
   const [showDatePopup, setShowDatePopup] = useState<string | null>(null);
@@ -172,6 +175,10 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
               if (!canToggle) return;
               // 日程確定はポップアップ表示
               if (step.key === "CLINIC_CONFIRMED" && !done) {
+                // クリニック一覧をfetch
+                fetch("/api/admin/clinics").then(r => r.json()).then(data => {
+                  setClinicList(Array.isArray(data) ? data.filter((c: { isActive: boolean }) => c.isActive) : []);
+                }).catch(() => {});
                 setShowClinicPopup(true);
                 return;
               }
@@ -263,18 +270,43 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 <input type="date" value={inputClinicDate} onChange={(e) => setInputClinicDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
               </div>
               <div>
-                <label className="block text-xs text-text-secondary mb-1">提携クリニック名</label>
-                <input value={inputClinicName} onChange={(e) => setInputClinicName(e.target.value)} placeholder="例: ○○クリニック 東京院" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none" />
+                <label className="block text-xs text-text-secondary mb-1">提携クリニック</label>
+                <select
+                  value={selectedClinicId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedClinicId(id);
+                    const clinic = clinicList.find(c => c.id === id);
+                    if (clinic) {
+                      setInputClinicName(clinic.name);
+                      setInputClinicAddress(clinic.address || "");
+                      setInputClinicPhone(clinic.phone || "");
+                    } else {
+                      setInputClinicName("");
+                      setInputClinicAddress("");
+                      setInputClinicPhone("");
+                    }
+                  }}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer"
+                >
+                  <option value="">クリニックを選択</option>
+                  {clinicList.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label className="block text-xs text-text-secondary mb-1">住所</label>
-                <input value={inputClinicAddress} onChange={(e) => setInputClinicAddress(e.target.value)} placeholder="例: 東京都港区..." className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none" />
-              </div>
+              {selectedClinicId && (
+                <div className="bg-bg-elevated border border-border rounded-md p-3 space-y-1.5">
+                  <div className="text-sm text-text-primary font-medium">{inputClinicName}</div>
+                  {inputClinicAddress && <div className="text-xs text-text-muted">{inputClinicAddress}</div>}
+                  {inputClinicPhone && <div className="text-xs text-text-muted">TEL: {inputClinicPhone}</div>}
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 <button onClick={() => setShowClinicPopup(false)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
                 <button
                   onClick={async () => {
-                    if (!inputClinicDate) return;
+                    if (!inputClinicDate || !inputClinicName) return;
                     setClinicLoading(true);
                     try {
                       await fetch(`/api/admin/members/${userId}`, {
