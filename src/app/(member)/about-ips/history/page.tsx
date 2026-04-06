@@ -140,9 +140,9 @@ export default async function HistoryPage() {
 
       {/* タイムライン */}
       <div className="relative">
-        {/* 中央の縦線 */}
+        {/* 中央の縦線（z-0でノードの後ろに） */}
         <div
-          className="absolute left-8 top-0 bottom-0 w-[2px]"
+          className="absolute left-8 top-0 bottom-0 w-[2px] z-0"
           style={{
             background:
               "linear-gradient(to bottom, transparent, var(--color-gold-dark) 5%, var(--color-gold-primary) 50%, var(--color-gold-dark) 95%, transparent)",
@@ -154,15 +154,13 @@ export default async function HistoryPage() {
             <div key={i} className="relative pl-20">
               {/* 年号ノード */}
               <div
-                className={`absolute left-0 top-0 w-16 h-16 rounded-full flex flex-col items-center justify-center z-10 ${
+                className={`absolute left-0 top-0 w-16 h-16 rounded-full flex flex-col items-center justify-center z-[2] ${
                   item.highlight
                     ? "border-2 border-gold shadow-[0_0_20px_rgba(201,168,76,0.3)]"
                     : "border border-border"
                 }`}
                 style={{
-                  background: item.highlight
-                    ? "linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))"
-                    : "var(--color-bg-secondary)",
+                  background: item.highlight ? "#1A1A22" : "#111116",
                 }}
               >
                 <span className="text-base">{item.icon}</span>
