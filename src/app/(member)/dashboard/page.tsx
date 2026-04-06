@@ -5,11 +5,18 @@ import Link from "next/link";
 export default async function ContentPage() {
   await requireAuth();
 
-  // 公開中の動画を1件取得（最新のもの）
-  const latestVideo = await prisma.video.findFirst({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-  });
+  // 動画URL（SiteSettingから取得、なければVideoモデル）
+  const videoSetting = await prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } });
+  const latestVideo = videoSetting?.content
+    ? null
+    : await prisma.video.findFirst({ where: { isPublished: true }, orderBy: { publishedAt: "desc" } });
+
+  // YouTube IDを抽出
+  const extractId = (url: string) => {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&]+)/);
+    return m?.[1] || null;
+  };
+  const youtubeId = videoSetting?.content ? extractId(videoSetting.content) : latestVideo?.youtubeId || null;
 
   return (
     <div>
@@ -18,23 +25,25 @@ export default async function ContentPage() {
       </h2>
 
       {/* ── 動画セクション ── */}
-      {latestVideo && (
+      {youtubeId && (
         <div className="mb-8">
           <div className="aspect-video rounded-lg overflow-hidden bg-black">
             <iframe
-              src={`https://www.youtube.com/embed/${latestVideo.youtubeId}`}
-              title={latestVideo.title}
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title={latestVideo?.title || "iPS細胞について"}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="w-full h-full"
             />
           </div>
-          <div className="mt-3">
-            <h3 className="text-sm text-text-primary font-medium leading-snug">{latestVideo.title}</h3>
-            {latestVideo.description && (
-              <p className="text-[12px] text-text-muted mt-1 line-clamp-2">{latestVideo.description}</p>
-            )}
-          </div>
+          {latestVideo && (
+            <div className="mt-3">
+              <h3 className="text-sm text-text-primary font-medium leading-snug">{latestVideo.title}</h3>
+              {latestVideo.description && (
+                <p className="text-[12px] text-text-muted mt-1 line-clamp-2">{latestVideo.description}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 

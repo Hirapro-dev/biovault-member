@@ -22,7 +22,7 @@ const adminNav = [
   { href: "/admin/access-logs", label: "アクセスログ", icon: "📊" },
   { href: "/admin/bank-accounts", label: "振込先管理", icon: "🏦" },
   { href: "/admin/clinics", label: "クリニック管理", icon: "🏥" },
-  { href: "/admin/glossary", label: "用語集管理", icon: "📖" },
+  { href: "/admin/glossary", label: "iPSとは？管理", icon: "🧬" },
   { href: "/admin/settings", label: "規約・書類管理", icon: "⚙" },
 ];
 

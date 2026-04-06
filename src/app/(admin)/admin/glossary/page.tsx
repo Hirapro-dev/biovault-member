@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { GlossaryForm, GlossaryEditButton, GlossaryDeleteButton, CategoryBadge } from "./GlossaryActions";
+import VideoUrlEditor from "./VideoUrlEditor";
 
 export default async function AdminGlossaryPage() {
   await requireAdmin();
@@ -12,11 +13,23 @@ export default async function AdminGlossaryPage() {
     ],
   });
 
+  // 現在の動画URL
+  const videoSetting = await prisma.siteSetting.findUnique({ where: { key: "ips_video_url" } });
+  const currentVideoUrl = videoSetting?.content || "";
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
-        用語集管理
+        iPSとは？管理
       </h2>
+
+      {/* 動画URL管理 */}
+      <VideoUrlEditor currentUrl={currentVideoUrl} />
+
+      {/* 用語集セクション */}
+      <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+        用語集管理
+      </h3>
 
       {/* 新規作成フォーム */}
       <GlossaryForm />
