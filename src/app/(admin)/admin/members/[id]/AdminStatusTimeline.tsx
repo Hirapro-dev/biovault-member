@@ -50,6 +50,17 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const [inputClinicAddress, setInputClinicAddress] = useState(clinicAddress || "");
   const [clinicLoading, setClinicLoading] = useState(false);
 
+  // 日付入力ポップアップ（問診・採血、iPS作製中、iPS保管）
+  const [showDatePopup, setShowDatePopup] = useState<string | null>(null);
+  const [inputDate, setInputDate] = useState("");
+  const [dateLoading, setDateLoading] = useState(false);
+
+  const DATE_POPUP_CONFIG: Record<string, { title: string; label: string; dbStatus: string }> = {
+    BLOOD_COLLECTED: { title: "問診・採血", label: "問診・採血日", dbStatus: "BLOOD_COLLECTED" },
+    IPS_CREATING: { title: "iPS細胞作製開始", label: "作製開始日", dbStatus: "IPS_CREATING" },
+    STORAGE_ACTIVE: { title: "iPS細胞保管開始", label: "保管開始日", dbStatus: "STORAGE_ACTIVE" },
+  };
+
   // ID発行ポップアップ
   const [showIdPopup, setShowIdPopup] = useState(false);
   const [loginId, setLoginId] = useState(currentLoginId || "");
@@ -164,6 +175,12 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 setShowClinicPopup(true);
                 return;
               }
+              // 日付入力が必要なステップ
+              if (DATE_POPUP_CONFIG[step.key] && !done) {
+                setInputDate(new Date().toISOString().split("T")[0]);
+                setShowDatePopup(step.key);
+                return;
+              }
               handleToggle(step.key);
             };
 
@@ -272,6 +289,48 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                   className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
                 >
                   {clinicLoading ? "保存中..." : "確定する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>, document.body
+      )}
+
+      {/* 日付入力ポップアップ（問診・採血 / iPS作製中 / iPS保管） */}
+      {showDatePopup && DATE_POPUP_CONFIG[showDatePopup] && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowDatePopup(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">{DATE_POPUP_CONFIG[showDatePopup].title}</h3>
+            <p className="text-xs text-text-muted mb-5">日付を入力してステータスを更新します。</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">{DATE_POPUP_CONFIG[showDatePopup].label}</label>
+                <input type="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button onClick={() => setShowDatePopup(null)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
+                <button
+                  onClick={async () => {
+                    if (!inputDate) return;
+                    setDateLoading(true);
+                    try {
+                      await fetch(`/api/admin/members/${userId}/status`, {
+                        method: "PATCH", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          newStatus: DATE_POPUP_CONFIG[showDatePopup!].dbStatus,
+                          note: `管理者がステータスを「${DATE_POPUP_CONFIG[showDatePopup!].title}」に変更（${inputDate}）`,
+                          date: new Date(inputDate).toISOString(),
+                        }),
+                      });
+                      setShowDatePopup(null);
+                      router.refresh();
+                    } finally { setDateLoading(false); }
+                  }}
+                  disabled={dateLoading || !inputDate}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {dateLoading ? "更新中..." : "確定する"}
                 </button>
               </div>
             </div>

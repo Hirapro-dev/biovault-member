@@ -99,6 +99,9 @@ export default async function MyPage() {
     if (key === "CLINIC_CONFIRMED") return membership?.clinicDate ? membership.clinicDate.toISOString() : null;
     if (key === "DOC_INFORMED") return docSignedMap["INFORMED_CONSENT"] || null;
     if (key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED" && membership?.updatedAt ? membership.updatedAt.toISOString() : null;
+    if (key === "BLOOD_COLLECTED") return membership?.clinicDate ? membership.clinicDate.toISOString() : statusDates[key] || null;
+    if (key === "IPS_CREATING") return membership?.ipsCompletedAt ? membership.ipsCompletedAt.toISOString() : statusDates[key] || null;
+    if (key === "STORAGE_ACTIVE") return membership?.storageStartAt ? membership.storageStartAt.toISOString() : statusDates[key] || null;
     return statusDates[key] || null;
   }
 

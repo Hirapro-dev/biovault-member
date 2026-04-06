@@ -23,7 +23,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const { id } = await params;
-  const { newStatus, note } = await req.json();
+  const { newStatus, note, date } = await req.json();
 
   if (!newStatus || !note) {
     return NextResponse.json({ error: "ステータスと変更理由は必須です" }, { status: 400 });
@@ -44,12 +44,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     ipsStatus: newStatus as IpsStatus,
   };
 
+  // 日付指定がある場合はそれを使用
+  const specifiedDate = date ? new Date(date) : new Date();
+
+  // 問診・採血の場合は clinicDate を設定
+  if (newStatus === "BLOOD_COLLECTED") {
+    updateData.clinicDate = membership.clinicDate || specifiedDate;
+  }
+
+  // iPS作製中の場合は ipsCompletedAt を作製開始日として設定
+  if (newStatus === "IPS_CREATING") {
+    updateData.ipsCompletedAt = specifiedDate;
+  }
+
   // 保管中になった場合は保管開始日を設定
-  if (newStatus === "STORAGE_ACTIVE" && !membership.storageStartAt) {
-    updateData.storageStartAt = new Date();
-    // 保管開始 = iPS作製完了でもあるので、ipsCompletedAtも設定
+  if (newStatus === "STORAGE_ACTIVE") {
+    updateData.storageStartAt = specifiedDate;
     if (!membership.ipsCompletedAt) {
-      updateData.ipsCompletedAt = new Date();
+      updateData.ipsCompletedAt = specifiedDate;
     }
   }
 
