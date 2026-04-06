@@ -261,12 +261,20 @@ export default async function MyPage() {
                   <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`}>
                     {step.label}
                   </div>
-                  {/* 日付 */}
-                  {dateStr && (
-                    <div className="text-[10px] text-text-muted font-mono mt-0.5">
-                      {dateStr}
-                    </div>
-                  )}
+                  {/* 日付（ラベル付き） */}
+                  {dateStr && (() => {
+                    const dateLabels: Record<string, string> = {
+                      BLOOD_COLLECTED: "問診・採血日",
+                      IPS_CREATING: "作製開始日",
+                      STORAGE_ACTIVE: "保管開始日",
+                    };
+                    const label = dateLabels[step.key];
+                    return (
+                      <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                        {label ? `${label}：${dateStr}` : dateStr}
+                      </div>
+                    );
+                  })()}
                   {/* 適合確認のサブテキスト */}
                   {isFirstAdaptCheck && done && (
                     <div className="text-[11px] text-status-active mt-0.5">適合の可能性が極めて高い</div>
