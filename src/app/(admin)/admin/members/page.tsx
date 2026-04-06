@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 import Link from "next/link";
 import MemberSearch from "./MemberSearch";
-import IssueIdModal from "./IssueIdModal";
+// IssueIdModal は会員カルテのステータスチェックに統合
 
 export default async function AdminMembersPage({
   searchParams,
@@ -88,7 +88,6 @@ export default async function AdminMembersPage({
                 <Link href={`/admin/members/${m.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                   カルテ
                 </Link>
-                <IssueIdModal userId={m.id} loginId={m.loginId} nameKana={m.nameKana || ""} isIdIssued={m.isIdIssued} />
               </div>
             </div>
           </div>
@@ -105,7 +104,7 @@ export default async function AdminMembersPage({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-border">
-              {["会員番号", "氏名", "iPSステータス", "入金状況", "申込日", "ID", ""].map((h, i) => (
+              {["会員番号", "氏名", "iPSステータス", "入金状況", "申込日", ""].map((h, i) => (
                 <th
                   key={i}
                   className="px-5 py-3.5 text-left text-[11px] text-text-muted tracking-wider font-normal"
@@ -143,9 +142,6 @@ export default async function AdminMembersPage({
                 </td>
                 <td className="px-5 py-3.5 text-xs text-text-muted font-mono">
                   {new Date(m.createdAt).toLocaleDateString("ja-JP")}
-                </td>
-                <td className="px-5 py-3.5">
-                  <IssueIdModal userId={m.id} loginId={m.loginId} nameKana={m.nameKana || ""} isIdIssued={m.isIdIssued} />
                 </td>
                 <td className="px-5 py-3.5">
                   <Link

@@ -151,6 +151,9 @@ export default async function MemberKartePage({
             paymentStatus={membership.paymentStatus}
             signedDocTypes={user.documents.filter(d => d.status === "SIGNED").map(d => d.type)}
             hasAgreedTerms={user.hasAgreedTerms}
+            isIdIssued={user.isIdIssued}
+            currentLoginId={user.loginId}
+            nameKana={user.nameKana || ""}
           />
         )}
       </div>
