@@ -130,7 +130,7 @@ function ApplyPage() {
 
       {/* ステップインジケーター */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        {[1, 2, 3, 4, 5].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono ${
@@ -143,7 +143,7 @@ function ApplyPage() {
             >
               {step > s ? "✓" : s}
             </div>
-            {s < 5 && <div className={`w-6 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
+            {s < 4 && <div className={`w-6 h-[1px] ${step > s ? "bg-gold/30" : "bg-border"}`} />}
           </div>
         ))}
       </div>
@@ -269,7 +269,7 @@ function ApplyPage() {
 
       {/* Step 3: 確認事項 + 受領文書 */}
       {step === 3 && (
-        <FormSection title="4. 確認事項">
+        <FormSection title="3. 確認事項">
           <p className="text-xs text-text-secondary mb-4">
             以下の事項を確認し、理解したうえで申込みます。
           </p>
@@ -282,13 +282,8 @@ function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 4: 利用規約 */}
+      {/* Step 4: 確認・送信 */}
       {step === 4 && (
-        <TermsStep onBack={() => setStep(3)} onNext={() => setStep(5)} />
-      )}
-
-      {/* Step 5: 確認・送信 */}
-      {step === 5 && (
         <FormSection title="入力内容の確認">
           <div className="space-y-4 mb-6">
             <ConfirmGroup title="申込者情報">
@@ -309,7 +304,7 @@ function ApplyPage() {
           </p>
 
           <div className="flex gap-3">
-            <button onClick={() => setStep(4)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
+            <button onClick={() => setStep(3)} className="flex-1 py-3.5 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">
               戻る
             </button>
             <button
