@@ -29,9 +29,30 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  // 表示順の再正規化アクション
+  if (body.action === "reorder") {
+    const allTerms = await prisma.glossaryTerm.findMany({
+      orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+    });
+    for (let i = 0; i < allTerms.length; i++) {
+      await prisma.glossaryTerm.update({
+        where: { id: allTerms[i].id },
+        data: { sortOrder: i },
+      });
+    }
+    return NextResponse.json({ success: true });
+  }
+
   if (!body.term || !body.description) {
     return NextResponse.json({ error: "用語名と説明は必須です" }, { status: 400 });
   }
+
+  // 新規作成時は末尾に追加（同カテゴリの最大sortOrder + 1）
+  const maxOrder = await prisma.glossaryTerm.findFirst({
+    where: { category: body.category || "basic" },
+    orderBy: { sortOrder: "desc" },
+    select: { sortOrder: true },
+  });
 
   const term = await prisma.glossaryTerm.create({
     data: {
@@ -40,7 +61,7 @@ export async function POST(req: Request) {
       english: body.english || null,
       description: body.description,
       category: body.category || "basic",
-      sortOrder: body.sortOrder || 0,
+      sortOrder: (maxOrder?.sortOrder ?? -1) + 1,
     },
   });
 
