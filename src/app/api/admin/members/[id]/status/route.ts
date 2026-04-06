@@ -2,19 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { sendPushToAll } from "@/lib/push-notification";
 import type { IpsStatus } from "@prisma/client";
-
-// ステータスの日本語ラベル（通知用）
-const STATUS_LABELS: Record<string, string> = {
-  REGISTERED: "メンバーシップ登録",
-  TERMS_AGREED: "iPS細胞作製適合確認",
-  SERVICE_APPLIED: "メンバーシップサービス申込",
-  SCHEDULE_ARRANGED: "iPS細胞作製におけるクリニックの日程調整",
-  BLOOD_COLLECTED: "問診・採血",
-  IPS_CREATING: "iPS細胞 作製中",
-  STORAGE_ACTIVE: "iPS細胞 保管中",
-};
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -86,56 +74,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       },
     }),
   ]);
-
-  // ── 会員への通知 ──
-  const statusLabel = STATUS_LABELS[newStatus] || newStatus;
-  const notificationTitle = `ステータスが「${statusLabel}」に更新されました`;
-
-  // ContentUpdate（ログイン時ポップアップ用）を作成
-  await prisma.contentUpdate.create({
-    data: {
-      title: notificationTitle,
-      contentType: "status",
-      contentId: id,
-      linkUrl: "/mypage",
-    },
-  });
-
-  // 該当ユーザーのPush Subscriptionにのみ通知送信
-  const userSubscriptions = await prisma.pushSubscription.findMany({
-    where: { userId: id },
-  });
-
-  if (userSubscriptions.length > 0) {
-    const webpush = await import("web-push");
-    const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
-    const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
-    const VAPID_EMAIL = process.env.VAPID_EMAIL || "mailto:info@biovault.jp";
-
-    if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-      webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-
-      const payload = JSON.stringify({
-        title: "BioVault - ステータス更新",
-        body: notificationTitle,
-        url: "/mypage",
-      });
-
-      for (const sub of userSubscriptions) {
-        try {
-          await webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            payload
-          );
-        } catch (error: unknown) {
-          // 410 Gone = サブスクリプションが無効 → 削除
-          if (error && typeof error === "object" && "statusCode" in error && (error as { statusCode: number }).statusCode === 410) {
-            await prisma.pushSubscription.delete({ where: { id: sub.id } });
-          }
-        }
-      }
-    }
-  }
 
   return NextResponse.json({ success: true });
 }
