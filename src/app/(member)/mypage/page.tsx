@@ -33,6 +33,7 @@ export default async function MyPage() {
       select: {
         nameRomaji: true,
         hasAgreedTerms: true,
+        isIdIssued: true,
         currentIllness: true, currentIllnessDetail: true,
         pastIllness: true, pastIllnessDetail: true,
         currentMedication: true, currentMedicationDetail: true,
@@ -80,6 +81,7 @@ export default async function MyPage() {
   const currentStatusIndex = membership ? STATUS_ORDER.indexOf(membership.ipsStatus) : -1;
 
   function isStepDone(key: string): boolean {
+    if (key === "REGISTERED") return !!fullUser?.isIdIssued;
     if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
     if (key === "DOC_INFORMED") return !!docSignedMap["INFORMED_CONSENT"];

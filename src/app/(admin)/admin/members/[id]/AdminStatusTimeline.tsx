@@ -51,6 +51,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const currentIdx = DB_ORDER.indexOf(currentStatus);
 
   const isOriginallyDone = (key: string) => {
+    if (key === "REGISTERED") return isIdIssued; // ID/パス発行は実際に発行済みかで判定
     if (key === "DOC_PRIVACY") return signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms;
     if (key === "DOC_CELL_CONSENT") return signedDocTypes.includes("CELL_STORAGE_CONSENT");
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
@@ -151,7 +152,8 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 <span className={`text-base shrink-0 ${done ? "opacity-100" : "opacity-30"}`}>{step.icon}</span>
                 <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>{step.label}</span>
                 {isPending && (<span className="text-[10px] text-gold ml-auto">{done && !originalDone ? "← 変更予定" : originalDone && !done ? "← 解除予定" : ""}</span>)}
-                {isMemberOnly && !done && !isPending && (<span className="text-[10px] text-text-muted ml-auto">会員本人が同意</span>)}
+                {step.key === "REGISTERED" && !done && !isPending && (<span className="text-[10px] text-text-muted ml-auto">ID発行で自動チェック</span>)}
+                {isMemberOnly && step.key !== "REGISTERED" && !done && !isPending && (<span className="text-[10px] text-text-muted ml-auto">会員本人が同意</span>)}
               </div>
             );
           })}
