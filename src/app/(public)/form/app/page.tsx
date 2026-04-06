@@ -120,11 +120,11 @@ function ApplyPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
-          BioVault iPS細胞作製適合確認申請
+          iPS細胞作製適合確認申請
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          お申し込み内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
+          お申し込み内容は、会員契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用させていただきます。
         </p>
       </div>
 
@@ -300,7 +300,7 @@ function ApplyPage() {
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
             上記の内容を真実かつ正確に記載し、<br />各事項を確認・理解のうえ、
             <br />
-            BioVault iPS細胞作製適合確認に申し込みます。
+            iPS細胞作製適合確認に申し込みます。
           </p>
 
           <div className="flex gap-3">

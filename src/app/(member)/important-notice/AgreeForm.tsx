@@ -73,7 +73,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
         <div className="text-center mb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="BioVault" className="h-7 w-auto mx-auto mb-4" />
-          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱い同意</h1>
+          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <GoldDivider width={60} className="mx-auto mb-3" />
           <p className="text-xs text-text-secondary leading-relaxed">
             サービスのご利用にあたり、以下の2つの書類をそれぞれお読みいただき、ご同意ください。
@@ -83,7 +83,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 
       {isAgreed && (
         <div className="mb-6">
-          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱い同意</h1>
+          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <div className="flex items-center gap-2 text-xs">
             <span className="text-status-active">✓ 同意済み</span>
             {agreedAt && <span className="text-text-muted">({new Date(agreedAt).toLocaleDateString("ja-JP")})</span>}
