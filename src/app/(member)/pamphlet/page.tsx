@@ -63,12 +63,12 @@ export default function PamphletPage() {
         }),
       });
 
-      // パンフレットを開く
+      // 同意完了 → パンフレットを開いてページを同意済み状態にリフレッシュ
       window.open(PAMPHLET_CONFIG.documentUrl, "_blank");
-      router.back();
+      setAlreadyAgreed(true);
     } catch {
-      // エラーでも開く
       window.open(PAMPHLET_CONFIG.documentUrl, "_blank");
+      setAlreadyAgreed(true);
     } finally {
       setSubmitting(false);
     }
