@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth-helpers";
+import prisma from "@/lib/prisma";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
@@ -17,6 +18,13 @@ export default async function MemberLayout({
 
   // セッション（JWT）から同意状態を取得（DBクエリ不要）
   const hasAgreedTerms = (user as any).hasAgreedTerms !== false;
+
+  // 署名済み書類のタイプを取得（トグルメニュー用）
+  const signedDocs = await prisma.document.findMany({
+    where: { userId: user.id, status: "SIGNED" },
+    select: { type: true },
+  });
+  const signedDocTypes = signedDocs.map((d) => d.type);
 
   // 未同意時はメニューバーを非表示（重要事項説明ページ用）
   if (!hasAgreedTerms) {
@@ -38,7 +46,7 @@ export default async function MemberLayout({
 
       <div className="flex-1 overflow-y-auto relative w-full">
         {/* モバイル: ハンバーガーナビ */}
-        <MobileNav isAdmin={false} userName={user.name} />
+        <MobileNav isAdmin={false} userName={user.name} signedDocTypes={signedDocTypes} />
 
         {/* PC: ヘッダー */}
         <div className="hidden lg:block">

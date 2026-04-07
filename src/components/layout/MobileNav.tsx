@@ -5,13 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
-// 会員用トグルメニュー
-const memberNav = [
-  { href: "/important-notice", label: "重要事項説明書兼確認書", icon: "📜" },
-  { href: "/important-notice#privacy", label: "個人情報同意書", icon: "📜" },
-  { href: "/documents/contract", label: "メンバーシップ契約書", icon: "📋" },
-  { href: "/documents/cell-consent", label: "細胞提供・保管同意書", icon: "🧫" },
-  { href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
+// 書類メニュー（同意済みのもののみ表示）
+const DOC_MENU_ITEMS = [
+  { docType: "CONTRACT", href: "/important-notice", label: "重要事項説明書兼確認書", icon: "📜" },
+  { docType: "PRIVACY_POLICY", href: "/important-notice", label: "個人情報同意書", icon: "📜" },
+  { docType: "CONSENT_CELL_STORAGE", href: "/documents/contract", label: "メンバーシップ契約書", icon: "📋" },
+  { docType: "CELL_STORAGE_CONSENT", href: "/documents/cell-consent", label: "細胞提供・保管同意書", icon: "🧫" },
+  { docType: "INFORMED_CONSENT", href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
+];
+
+// 設定メニュー（常に表示）
+const settingsNav = [
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
   { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
 ];
@@ -31,12 +35,20 @@ const adminNav = [
 export default function MobileNav({
   isAdmin,
   userName,
+  signedDocTypes = [],
 }: {
   isAdmin: boolean;
   userName: string;
+  signedDocTypes?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  // 会員メニュー: 同意済み書類 + 設定
+  const memberNav = [
+    ...DOC_MENU_ITEMS.filter((item) => signedDocTypes.includes(item.docType)),
+    ...settingsNav,
+  ];
   const nav = isAdmin ? adminNav : memberNav;
 
   return (
