@@ -18,9 +18,8 @@ export default async function AdminStaffPage() {
         select: { membership: { select: { paidAmount: true, totalAmount: true } } },
       });
       const customerCount = customers.length;
-      const totalSales = customers.reduce((sum, c) => sum + (c.membership?.totalAmount || 0), 0);
       const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
-      return { ...s, customerCount, totalSales, paidAmount };
+      return { ...s, customerCount, paidAmount };
     })
   );
 
@@ -44,7 +43,7 @@ export default async function AdminStaffPage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-border">
-                    {["コード", "氏名", "担当数", "売上計上", "入金済", "ステータス", ""].map((h, i) => (
+                    {["コード", "氏名", "担当数", "入金済売上", "ステータス", ""].map((h, i) => (
                       <th key={i} className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal">{h}</th>
                     ))}
                   </tr>
@@ -55,8 +54,7 @@ export default async function AdminStaffPage() {
                       <td className="px-4 py-3 font-mono text-[13px] text-gold">{s.staffCode}</td>
                       <td className="px-4 py-3 text-sm">{s.name}</td>
                       <td className="px-4 py-3 text-xs text-text-secondary font-mono">{s.customerCount}名</td>
-                      <td className="px-4 py-3 text-xs text-gold font-mono">¥{s.totalSales.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-xs text-text-secondary font-mono">¥{s.paidAmount.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-xs text-gold font-mono">¥{s.paidAmount.toLocaleString()}</td>
                       <td className="px-4 py-3">
                         {s.isActive ? (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/10 text-status-active border border-status-active/20">有効</span>
@@ -89,7 +87,7 @@ export default async function AdminStaffPage() {
                   </div>
                   <div className="text-sm text-text-primary mb-1">{s.name}</div>
                   <div className="text-[11px] text-text-muted mb-2">
-                    担当 {s.customerCount}名 ・ 売上 ¥{s.totalSales.toLocaleString()} ・ 入金済 ¥{s.paidAmount.toLocaleString()}
+                    担当 {s.customerCount}名 ・ 入金済売上 ¥{s.paidAmount.toLocaleString()}
                   </div>
                   <Link href={`/admin/staff/${s.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                     カルテ

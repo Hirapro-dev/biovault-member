@@ -22,9 +22,8 @@ export async function GET() {
         select: { id: true, membership: { select: { paidAmount: true, totalAmount: true } } },
       });
       const customerCount = customers.length;
-      const totalSales = customers.reduce((sum, c) => sum + (c.membership?.totalAmount || 0), 0);
       const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
-      return { ...s, customerCount, totalSales, paidAmount };
+      return { ...s, customerCount, paidAmount };
     })
   );
 

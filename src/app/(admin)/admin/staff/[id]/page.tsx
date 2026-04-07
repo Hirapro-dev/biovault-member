@@ -20,8 +20,7 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
     orderBy: { createdAt: "desc" },
   });
 
-  // 売上サマリー
-  const totalSales = customers.reduce((sum, c) => sum + (c.membership?.totalAmount || 0), 0);
+  // 売上サマリー（入金済み金額のみ）
   const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
 
   return (
@@ -60,18 +59,14 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
 
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">実績サマリー</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="text-center">
               <div className="text-[10px] text-text-muted tracking-wider mb-1">担当数</div>
               <div className="font-mono text-xl text-gold">{customers.length}</div>
               <div className="text-[10px] text-text-muted">名</div>
             </div>
             <div className="text-center">
-              <div className="text-[10px] text-text-muted tracking-wider mb-1">売上計上</div>
-              <div className="font-mono text-lg text-gold">¥{totalSales.toLocaleString()}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[10px] text-text-muted tracking-wider mb-1">入金済</div>
+              <div className="text-[10px] text-text-muted tracking-wider mb-1">入金済売上</div>
               <div className="font-mono text-lg text-status-active">¥{paidAmount.toLocaleString()}</div>
             </div>
           </div>
