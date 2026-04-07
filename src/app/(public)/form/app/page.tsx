@@ -15,6 +15,7 @@ export default function ApplyPageWrapper() {
 function ApplyPage() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || "";
+  const staffCode = searchParams.get("staff") || "";
   const repName = searchParams.get("rep") || "";
 
   const [step, setStepRaw] = useState(1);
@@ -77,7 +78,7 @@ function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, referredByAgency: refCode, salesRepName: repName }),
+        body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName }),
       });
       if (!res.ok) {
         const data = await res.json();
