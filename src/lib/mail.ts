@@ -18,7 +18,7 @@ const ses = new SESClient({
   },
 });
 
-const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@biovault.jp";
+const FROM_EMAIL = process.env.EMAIL_FROM || "support@biovault.jp";
 const FROM_NAME = "BioVault";
 
 export async function sendEmail({
