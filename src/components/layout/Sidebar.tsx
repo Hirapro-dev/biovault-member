@@ -77,7 +77,7 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
         <div className="text-[9px] tracking-[3px] text-text-muted mt-2">
-          {isAdmin ? "ADMIN CONSOLE" : "MEMBER'S PORTAL"}
+          {isAdmin ? "ADMIN CONSOLE" : "MEMBER Site"}
         </div>
       </div>
 

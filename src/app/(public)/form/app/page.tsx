@@ -98,7 +98,7 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製適合確認申請を受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製適合確認申請を<br />受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
               お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
@@ -107,7 +107,7 @@ function ApplyPage() {
               <span className="text-gold font-medium">3営業日以内</span>に、<br />担当スタッフよりご連絡させていただきます。
             </p>
             <p className="text-xs text-text-muted">
-              ※ iPS作製適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
+              ※ iPS作製適合確認を行わせていただく上で、<br />適格でない場合がございます。<br />その際はあらかじめご了承ください。
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ function ApplyPage() {
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          お申し込み内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用させていただきます。
+          お申し込み内容は、メンバーシップ契約手続き、<br />提携医療機関等による問診・適格確認、細胞作製・保管に関する<br />各種手続きの参考資料として利用させていただきます。
         </p>
       </div>
 

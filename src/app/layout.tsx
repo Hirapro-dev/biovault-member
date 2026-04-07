@@ -37,8 +37,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BioVault | Member's Portal",
-  description: "BioVault メンバー専用ポータル",
+  title: "BioVault | Member's Site",
+  description: "BioVault メンバーサイト",
 };
 
 export default function RootLayout({

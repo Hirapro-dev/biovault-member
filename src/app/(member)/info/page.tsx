@@ -18,7 +18,7 @@ const menuItems = [
     href: "/settings/product",
     icon: "📋",
     label: "商品定義",
-    description: "BioVault会員権の商品内容",
+    description: "BioVaultメンバーシップの商品内容",
   },
   {
     href: "/settings/legal",

@@ -44,17 +44,6 @@ export default async function SettingsPage() {
         </Link>
       </div>
 
-      {/* 通知設定 */}
-      <div className="bg-bg-secondary border border-border rounded-md overflow-hidden mb-5">
-        <Link
-          href="/settings/notifications"
-          className="flex items-center justify-between px-5 sm:px-6 py-5 text-base text-text-primary hover:bg-bg-elevated hover:text-gold transition-all"
-        >
-          <span>通知設定</span>
-          <span className="text-text-muted text-xs">→</span>
-        </Link>
-      </div>
-
       {/* 規約・ポリシー */}
       <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
         <SettingsLink href="/settings/terms" label="利用規約" />

@@ -14,7 +14,6 @@ const memberNav = [
   { href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
   { href: "/settings/profile", label: "登録情報", icon: "👤" },
   { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
-  { href: "/settings/notifications", label: "通知設定", icon: "🔔" },
 ];
 
 const adminNav = [

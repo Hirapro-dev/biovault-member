@@ -12,7 +12,7 @@ export default function ProductDefinitionPage() {
 
       <div className="text-center mb-8">
         <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
-          BioVault会員権｜商品定義
+          BioVaultメンバーシップ｜商品定義
         </h1>
         <GoldDivider width={60} className="mx-auto" />
       </div>
@@ -24,7 +24,7 @@ export default function ProductDefinitionPage() {
           <section>
             <h2 className="text-sm text-text-primary font-medium mb-3">1. 商品名</h2>
             <p>BioVault（細胞を資産化する・細胞を保管する）</p>
-            <p>販売商品：BioVault会員権</p>
+            <p>販売商品：BioVaultメンバーシップ</p>
           </section>
 
           {/* 販売価格 */}
@@ -37,7 +37,7 @@ export default function ProductDefinitionPage() {
           {/* 事業カテゴリ */}
           <section>
             <h2 className="text-sm text-text-primary font-medium mb-3">3. サービスカテゴリ</h2>
-            <p className="font-medium text-text-primary">会員制長寿サービス：BioVault iPS OrderMade Membership</p>
+            <p className="font-medium text-text-primary">メンバーシップサービス：BioVault iPS OrderMade Membership</p>
           </section>
 
           {/* メインサービス */}
