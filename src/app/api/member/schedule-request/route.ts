@@ -59,16 +59,13 @@ export async function POST() {
     },
   });
 
-  // 管理者（ADMIN/SUPER_ADMIN）のメールアドレスを取得して通知
-  const admins = await prisma.user.findMany({
-    where: { role: { in: ["ADMIN", "SUPER_ADMIN"] }, isActive: true },
-    select: { email: true },
-  });
+  // 通知先メールアドレス
+  const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || "app@biovault.jp";
 
-  // 管理者にメール通知（並列送信）
-  const emailPromises = admins.map((admin) =>
+  // 管理者にメール通知
+  const emailPromises = [notifyEmail].map((to) =>
     sendEmail({
-      to: admin.email,
+      to,
       subject: "【BioVault】日程調整リクエストが届きました",
       bodyText: `以下の会員様より、日程調整のリクエストがありました。
 
