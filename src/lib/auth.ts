@@ -69,12 +69,6 @@ export const authOptions: NextAuthOptions = {
         token.mustChangePassword = (user as any).mustChangePassword;
         token.hasAgreedTerms = (user as any).hasAgreedTerms;
         token.agencyAgreed = (user as any).agencyAgreed;
-        token.rememberMe = (user as any).rememberMe;
-
-        // rememberMeがオフの場合、トークンの有効期限を1日に短縮
-        if (!(user as any).rememberMe) {
-          token.maxAge = 24 * 60 * 60; // 1日
-        }
       }
       // セッション更新時にDBから最新の同意状態を取得
       if (trigger === "update") {
