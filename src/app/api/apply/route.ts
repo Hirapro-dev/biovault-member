@@ -79,7 +79,6 @@ export async function POST(req: Request) {
       confirmScppRole: body.confirmScppRole || false,
       confirmClinicRole: body.confirmClinicRole || false,
       confirmLabRole: body.confirmLabRole || false,
-      confirmDocuments: body.confirmDocuments || false,
       receivedContract: body.receivedContract || false,
       receivedTerms: body.receivedTerms || false,
       receivedImportant: body.receivedImportant || false,
@@ -160,6 +159,7 @@ export async function POST(req: Request) {
   await prisma.document.createMany({
     data: [
       { userId: user.id, type: "CONTRACT", title: "会員契約書（細胞保管委託契約書）", status: "PENDING" },
+      { userId: user.id, type: "SERVICE_TERMS", title: "iPSサービス利用規約", status: "PENDING" },
       { userId: user.id, type: "CONSENT_CELL_STORAGE", title: "iPSサービス利用契約書", status: "PENDING" },
       { userId: user.id, type: "CELL_STORAGE_CONSENT", title: "細胞提供・保管同意書", status: "PENDING" },
       { userId: user.id, type: "INFORMED_CONSENT", title: "iPS細胞作製における事前説明・同意", status: "PENDING" },

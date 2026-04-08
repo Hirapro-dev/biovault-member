@@ -16,7 +16,7 @@ const nav = [
 export default function AgencySidebar() {
   const pathname = usePathname();
   return (
-    <div className="w-60 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
+    <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       <div className="px-6 py-7 border-b border-border">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />

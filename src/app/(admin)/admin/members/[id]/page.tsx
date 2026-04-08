@@ -153,6 +153,7 @@ export default async function MemberKartePage({
             clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null}
             clinicName={membership.clinicName || null}
             clinicAddress={membership.clinicAddress || null}
+            contractSignedAt={membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null}
           />
         )}
       </div>

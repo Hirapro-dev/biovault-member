@@ -33,6 +33,17 @@ function BookSvg() {
   );
 }
 
+// 培養上清液: フラスコ風アイコン
+function FlaskSvg() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 3h6" />
+      <path d="M10 3v7.4a2 2 0 0 1-.5 1.3L4 19a2 2 0 0 0 1.5 3.5h13A2 2 0 0 0 20 19l-5.5-7.3a2 2 0 0 1-.5-1.3V3" />
+      <path d="M8.5 16h7" />
+    </svg>
+  );
+}
+
 function DnaSvg() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -50,7 +61,8 @@ function DnaSvg() {
 
 const memberNav = [
   { href: "/mypage", label: "マイページ", Icon: UserSvg },
-  { href: "/info", label: "サービス詳細", Icon: ServiceSvg },
+  { href: "/info", label: "①iPS作製・保管サービス詳細", Icon: ServiceSvg },
+  { href: "/culture-fluid", label: "②培養上清液サービス詳細", Icon: FlaskSvg },
   { href: "https://sc-project-partners.co.jp/files/bv/pamphlet.pdf", label: "パンフレット", Icon: BookSvg, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaSvg },
 ];
@@ -71,7 +83,7 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
 
   return (
-    <div className="w-60 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
+    <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       {/* ロゴ */}
       <div className="px-6 py-7 border-b border-border">
         {/* eslint-disable-next-line @next/next/no-img-element */}

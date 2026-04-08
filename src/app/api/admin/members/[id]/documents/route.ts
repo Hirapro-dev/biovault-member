@@ -54,15 +54,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     "application/pdf"
   );
 
+  const now = new Date();
+
   // DB更新
   const document = await prisma.document.update({
     where: { id: documentId },
     data: {
       fileUrl,
       status: "SIGNED",
-      signedAt: new Date(),
+      signedAt: now,
     },
   });
+
+  // iPSサービス利用契約書のPDFアップ時は、契約書署名完了日も自動設定
+  if (document.type === "CONSENT_CELL_STORAGE") {
+    await prisma.membership.updateMany({
+      where: { userId: id, contractSignedAt: null },
+      data: { contractSignedAt: now },
+    });
+  }
 
   return NextResponse.json({ document, url: fileUrl });
 }

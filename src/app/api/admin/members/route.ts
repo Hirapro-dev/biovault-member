@@ -95,6 +95,7 @@ export async function POST(req: Request) {
   // デフォルト書類を作成
   const documentTypes = [
     { type: "CONTRACT" as const, title: "会員契約書（細胞保管委託契約書）" },
+    { type: "SERVICE_TERMS" as const, title: "iPSサービス利用規約" },
     { type: "CONSENT_CELL_STORAGE" as const, title: "iPSサービス利用契約書" },
     { type: "CELL_STORAGE_CONSENT" as const, title: "細胞提供・保管同意書" },
     { type: "INFORMED_CONSENT" as const, title: "iPS細胞作製における事前説明・同意" },

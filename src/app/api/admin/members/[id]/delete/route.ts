@@ -38,6 +38,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     prisma.adminNote.deleteMany({ where: { userId: id } }),
     prisma.statusHistory.deleteMany({ where: { userId: id } }),
     prisma.document.deleteMany({ where: { userId: id } }),
+    prisma.favorite.deleteMany({ where: { userId: id } }),
+    prisma.consentLog.deleteMany({ where: { userId: id } }),
+    prisma.contentUpdateRead.deleteMany({ where: { userId: id } }),
+    prisma.pushSubscription.deleteMany({ where: { userId: id } }),
     ...(user.membership
       ? [prisma.treatment.deleteMany({ where: { membershipId: user.membership.id } }),
          prisma.membership.delete({ where: { userId: id } })]

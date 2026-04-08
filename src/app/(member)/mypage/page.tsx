@@ -9,7 +9,8 @@ const TIMELINE_STEPS = [
   { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
   { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️" },
-  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
+  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝" },
+  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰" },
   { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
   { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥" },
@@ -87,6 +88,7 @@ export default async function MyPage() {
   function isStepDone(key: string): boolean {
     if (key === "REGISTERED") return !!fullUser?.isIdIssued;
     if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
+    if (key === "CONTRACT_SIGNING") return !!membership?.contractSignedAt;
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
     if (key === "CLINIC_CONFIRMED") return !!membership?.clinicDate;
     if (key === "DOC_INFORMED") return !!docSignedMap["INFORMED_CONSENT"];
@@ -98,6 +100,7 @@ export default async function MyPage() {
 
   function getStepDate(key: string): string | null {
     if (key === "DOC_PRIVACY") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
+    if (key === "CONTRACT_SIGNING") return membership?.contractSignedAt ? membership.contractSignedAt.toISOString() : null;
     if (key === "DOC_CELL_CONSENT") return docSignedMap["CELL_STORAGE_CONSENT"] || null;
     if (key === "CLINIC_CONFIRMED") return membership?.clinicDate ? membership.clinicDate.toISOString() : null;
     if (key === "DOC_INFORMED") return docSignedMap["INFORMED_CONSENT"] || null;
@@ -213,16 +216,39 @@ export default async function MyPage() {
             </Link>
           )}
 
-          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus !== "COMPLETED" && (
+          {/* 契約書署名カード（申込済み & 契約書未署名） */}
+          {membership.ipsStatus === "SERVICE_APPLIED" && !membership.contractSignedAt && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">📝</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                </div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用契約書署名</div>
+                <div className="text-xs text-text-muted leading-relaxed mb-4">
+                  担当スタッフより、ご希望の契約方法でのご案内をさせていただきます。
+                </div>
+                <div className="bg-bg-elevated border border-border rounded-md p-4">
+                  <div className="text-[11px] text-text-muted mb-1">希望契約方法</div>
+                  <div className="text-sm text-gold font-medium">
+                    {membership.contractFormat === "paper" ? "書面契約" : "電子署名契約"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 契約締結・入金確認カード（契約書署名済み & 未入金） */}
+          {membership.ipsStatus === "SERVICE_APPLIED" && !!membership.contractSignedAt && membership.paymentStatus !== "COMPLETED" && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">💰</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">入金確認</div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用契約締結・入金確認</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
-                  お申込みありがとうございます。入金の確認が取れ次第、次のステップへ進みます。
+                  契約書の署名が完了しました。入金の確認が取れ次第、次のステップへ進みます。
                 </div>
                 <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
                   <div>
@@ -244,7 +270,8 @@ export default async function MyPage() {
             </div>
           )}
 
-          {membership.ipsStatus === "SERVICE_APPLIED" && membership.paymentStatus === "COMPLETED" && (
+          {/* 日程調整カード（契約署名済み & 入金済み） */}
+          {membership.ipsStatus === "SERVICE_APPLIED" && !!membership.contractSignedAt && membership.paymentStatus === "COMPLETED" && (
             <Link href="/mypage/cell-consent" className="block group">
               <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
                 <div className="p-5 sm:p-6">
@@ -253,7 +280,7 @@ export default async function MyPage() {
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製におけるクリニックの日程調整</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">契約締結・入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
                     クリニックの日程調整へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -322,15 +349,39 @@ export default async function MyPage() {
             </div>
           )}
 
-          {(membership.ipsStatus === "BLOOD_COLLECTED" || membership.ipsStatus === "IPS_CREATING") && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6 text-center">
-                <div className="text-4xl mb-3">🧬</div>
-                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
-                <div className="text-xs text-text-muted leading-relaxed">{user.name}様のiPS細胞の作製に進んでおります。<br />今しばらくお待ちください。</div>
+          {(membership.ipsStatus === "BLOOD_COLLECTED" || membership.ipsStatus === "IPS_CREATING") && (() => {
+            // 作製開始日から4〜6ヶ月後の完了予定を算出
+            const ipsStartDate = membership.ipsCompletedAt;
+            let estimateFrom: Date | null = null;
+            let estimateTo: Date | null = null;
+            if (ipsStartDate) {
+              estimateFrom = new Date(ipsStartDate);
+              estimateFrom.setMonth(estimateFrom.getMonth() + 4);
+              estimateTo = new Date(ipsStartDate);
+              estimateTo.setMonth(estimateTo.getMonth() + 6);
+            }
+            const fmtMonth = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月頃`;
+
+            return (
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6 text-center">
+                  <div className="text-4xl mb-3">🧬</div>
+                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
+                  <div className="text-xs text-text-muted leading-relaxed">{user.name}様のiPS細胞の作製に進んでおります。<br />今しばらくお待ちください。</div>
+                  {estimateFrom && estimateTo && (
+                    <div className="mt-4 bg-bg-elevated border border-border rounded-md p-4">
+                      <div className="text-[11px] text-text-muted mb-1">作製完了予定</div>
+                      <div className="font-mono text-base text-gold">
+                        {fmtMonth(estimateFrom)} 〜 {fmtMonth(estimateTo)}
+                      </div>
+                      <div className="text-[10px] text-text-muted mt-1">※ 作製開始日より4〜6ヶ月程度が目安です</div>
+                      <div className="text-[10px] text-text-muted">※ 状況により前後する場合がございます</div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {membership.ipsStatus === "STORAGE_ACTIVE" && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
@@ -339,7 +390,7 @@ export default async function MyPage() {
                   <span className="text-2xl">🏛️</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">保管中</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">iPS細胞 安全に保管中</div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">iPS細胞保管中</div>
                 <div className="bg-bg-elevated border border-border rounded-md p-4">
                   <div className="text-[11px] text-text-muted mb-1">保管期限</div>
                   <div className="font-mono text-lg text-gold">
@@ -348,6 +399,23 @@ export default async function MyPage() {
                   {membership.storageStartAt && (
                     <div className="text-[11px] text-text-muted mt-2">保管開始日: {formatDate(membership.storageStartAt.toISOString())}</div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 培養上清液サービスへ申込カード（保管中の場合に表示） */}
+          {membership.ipsStatus === "STORAGE_ACTIVE" && (
+            <div className="mt-4 rounded-xl border border-border-gold overflow-hidden group cursor-pointer" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🧪</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEW</span>
+                </div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">培養上清液サービスへ申込</div>
+                <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞から培養上清液を生成するサービスにお申込みいただけます。</div>
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                  申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
             </div>
@@ -402,9 +470,28 @@ export default async function MyPage() {
 
                 {/* コンテンツ */}
                 <div className="pt-1 min-w-0 flex-1">
-                  <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`}>
-                    {step.label}
-                  </div>
+                  {(() => {
+                    // 書類があるステップのリンク先マッピング
+                    const stepDocLinks: Record<string, string> = {
+                      DOC_PRIVACY: "/important-notice",
+                      SERVICE_APPLIED: "/documents/service-terms",
+                      CONTRACT_SIGNING: "/documents/contract",
+                      DOC_CELL_CONSENT: "/documents/cell-consent",
+                      DOC_INFORMED: "/mypage/informed-consent",
+                    };
+                    const docLink = stepDocLinks[step.key];
+                    const labelClass = `text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`;
+
+                    if (docLink && done) {
+                      return (
+                        <Link href={docLink} className={`${labelClass} hover:underline underline-offset-2`}>
+                          {step.label}
+                          <span className="text-[10px] ml-1 opacity-60">📄</span>
+                        </Link>
+                      );
+                    }
+                    return <div className={labelClass}>{step.label}</div>;
+                  })()}
                   {/* 日付（ラベル付き） */}
                   {dateStr && (() => {
                     const dateLabels: Record<string, string> = {

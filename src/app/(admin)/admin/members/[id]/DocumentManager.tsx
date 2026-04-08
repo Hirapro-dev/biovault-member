@@ -17,9 +17,10 @@ interface Doc {
 const DOC_NUMBER_MAP: Record<string, string> = {
   CONTRACT: "001",
   PRIVACY_POLICY: "002",
-  CONSENT_CELL_STORAGE: "003",
-  CELL_STORAGE_CONSENT: "004",
-  INFORMED_CONSENT: "005",
+  SERVICE_TERMS: "003",
+  CONSENT_CELL_STORAGE: "004",
+  CELL_STORAGE_CONSENT: "005",
+  INFORMED_CONSENT: "006",
 };
 
 export default function DocumentManager({

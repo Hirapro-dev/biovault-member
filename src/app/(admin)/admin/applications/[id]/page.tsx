@@ -88,7 +88,6 @@ export default async function ApplicationDetailPage({
         <CheckRow checked={app.confirmScppRole} label="SCPP の役割確認" />
         <CheckRow checked={app.confirmClinicRole} label="提携医療機関の役割確認" />
         <CheckRow checked={app.confirmLabRole} label="提携先機関の役割確認" />
-        <CheckRow checked={app.confirmDocuments} label="関連文書の確認" />
         <div className="border-t border-border mt-3 pt-3">
           <CheckRow checked={app.receivedContract} label="会員契約書" />
           <CheckRow checked={app.receivedTerms} label="会員規約" />

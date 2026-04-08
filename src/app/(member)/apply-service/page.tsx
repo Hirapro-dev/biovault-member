@@ -28,6 +28,23 @@ export default function ApplyServicePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // 既に申込済みかチェック
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [statusChecked, setStatusChecked] = useState(false);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    fetch("/api/member/membership-status")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ipsStatus && data.ipsStatus !== "TERMS_AGREED") {
+          setAlreadyApplied(true);
+        }
+        setStatusChecked(true);
+      })
+      .catch(() => setStatusChecked(true));
+  }, [status]);
+
   // 健康状態
   const [healthData, setHealthData] = useState({
     currentIllness: false, currentIllnessDetail: "",
@@ -64,7 +81,6 @@ export default function ApplyServicePage() {
     confirmScppRole: false,
     confirmClinicRole: false,
     confirmLabRole: false,
-    confirmDocuments: false,
   });
 
   // セッションチェック
@@ -165,10 +181,35 @@ export default function ApplyServicePage() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "loading" || !statusChecked) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-text-muted text-sm">読み込み中...</div>
+      </div>
+    );
+  }
+
+  // 既に申込済みの場合
+  if (alreadyApplied) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-bg-secondary border border-border-gold rounded-md p-8 sm:p-12 text-center">
+          <div className="text-5xl mb-6">✓</div>
+          <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">
+            お申込み済みです
+          </h2>
+          <GoldDivider />
+          <p className="text-text-secondary text-sm leading-relaxed mt-6 mb-8">
+            iPSサービス利用申込は既に完了しています。<br />
+            現在のステータスはマイページからご確認いただけます。
+          </p>
+          <button
+            onClick={() => router.push("/mypage")}
+            className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
+          >
+            マイページに戻る
+          </button>
+        </div>
       </div>
     );
   }
@@ -383,11 +424,6 @@ export default function ApplyServicePage() {
                 label="提携先施設の役割について理解しました"
                 checked={confirmChecks.confirmLabRole}
                 onChange={(v) => updateConfirm("confirmLabRole", v)}
-              />
-              <ConfirmItem
-                label="関連文書を確認しました"
-                checked={confirmChecks.confirmDocuments}
-                onChange={(v) => updateConfirm("confirmDocuments", v)}
               />
             </div>
           </div>

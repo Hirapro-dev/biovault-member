@@ -33,6 +33,17 @@ function BookIcon({ active }: { active: boolean }) {
   );
 }
 
+// 培養上清液: フラスコ風アイコン
+function FlaskIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 3h6" />
+      <path d="M10 3v7.4a2 2 0 0 1-.5 1.3L4 19a2 2 0 0 0 1.5 3.5h13A2 2 0 0 0 20 19l-5.5-7.3a2 2 0 0 1-.5-1.3V3" />
+      <path d="M8.5 16h7" />
+    </svg>
+  );
+}
+
 // iPSとは？: DNA二重螺旋風アイコン
 function DnaIcon({ active }: { active: boolean }) {
   return (
@@ -51,7 +62,8 @@ function DnaIcon({ active }: { active: boolean }) {
 
 const navItems = [
   { href: "/mypage", label: "マイページ", Icon: UserIcon },
-  { href: "/info", label: "サービス詳細", Icon: ServiceIcon },
+  { href: "/info", label: "①iPS作製・保管", Icon: ServiceIcon },
+  { href: "/culture-fluid", label: "②培養上清液", Icon: FlaskIcon },
   { href: "https://sc-project-partners.co.jp/files/bv/pamphlet.pdf", label: "パンフレット", Icon: BookIcon, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaIcon },
 ];
@@ -76,7 +88,7 @@ export default function BottomNav() {
                 className="flex flex-col items-center justify-center gap-1 w-full h-full transition-colors text-text-muted"
               >
                 <item.Icon active={false} />
-                <span className="text-[10px] tracking-wider">{item.label}</span>
+                <span className="text-[9px] tracking-wide">{item.label}</span>
               </a>
             );
           }
@@ -90,7 +102,7 @@ export default function BottomNav() {
               }`}
             >
               <item.Icon active={isActive} />
-              <span className="text-[10px] tracking-wider">{item.label}</span>
+              <span className="text-[9px] tracking-wide">{item.label}</span>
             </Link>
           );
         })}

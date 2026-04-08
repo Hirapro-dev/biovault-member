@@ -9,6 +9,7 @@ import type { DocumentType } from "@/types";
 const DOC_VIEW_LINKS: Record<string, string> = {
   CONTRACT: "/important-notice",
   PRIVACY_POLICY: "/important-notice",
+  SERVICE_TERMS: "/documents/service-terms",
   CONSENT_CELL_STORAGE: "/documents/contract",
   CELL_STORAGE_CONSENT: "/documents/cell-consent",
   INFORMED_CONSENT: "/mypage/informed-consent",
@@ -40,9 +41,10 @@ export default async function DocumentsPage() {
   const docNumberMap: Record<string, string> = {
     CONTRACT: "001",
     PRIVACY_POLICY: "002",
-    CONSENT_CELL_STORAGE: "003",
-    CELL_STORAGE_CONSENT: "004",
-    INFORMED_CONSENT: "005",
+    SERVICE_TERMS: "003",
+    CONSENT_CELL_STORAGE: "004",
+    CELL_STORAGE_CONSENT: "005",
+    INFORMED_CONSENT: "006",
   };
 
   return (

@@ -58,7 +58,6 @@ function ApplyPage() {
     confirmScppRole: false,
     confirmClinicRole: false,
     confirmLabRole: false,
-    confirmDocuments: false,
     // 5. 受領確認
     receivedContract: false,
     receivedTerms: false,
@@ -278,7 +277,6 @@ function ApplyPage() {
           <Checkbox checked={form.confirmScppRole} onChange={(v) => update("confirmScppRole", v)} label="株式会社SCPPは、本サービスの運営主体であり、医療行為の実施主体ではないこと" />
           <Checkbox checked={form.confirmClinicRole} onChange={(v) => update("confirmClinicRole", v)} label="診察、問診、採血、医学的判断等は提携医療機関等が行うこと" />
           <Checkbox checked={form.confirmLabRole} onChange={(v) => update("confirmLabRole", v)} label="細胞作製、培養、品質評価、保管等は提携先機関が行うこと" />
-          <Checkbox checked={form.confirmDocuments} onChange={(v) => update("confirmDocuments", v)} label="本申込に関連して、関連文書が一体として適用されること" />
           <StepNav onBack={() => setStep(2)} onNext={() => setStep(4)} />
         </FormSection>
       )}

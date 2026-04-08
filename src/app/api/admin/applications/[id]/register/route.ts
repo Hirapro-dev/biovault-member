@@ -78,6 +78,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await tx.document.createMany({
       data: [
         { userId: newUser.id, type: "CONTRACT", title: "会員契約書（細胞保管委託契約書）", status: "PENDING" },
+        { userId: newUser.id, type: "SERVICE_TERMS", title: "iPSサービス利用規約", status: "PENDING" },
         { userId: newUser.id, type: "CONSENT_CELL_STORAGE", title: "iPSサービス利用契約書", status: "PENDING" },
         { userId: newUser.id, type: "CELL_STORAGE_CONSENT", title: "細胞提供・保管同意書", status: "PENDING" },
         { userId: newUser.id, type: "INFORMED_CONSENT", title: "iPS細胞作製における事前説明・同意", status: "PENDING" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -9,7 +9,8 @@ const ADMIN_TIMELINE = [
   { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑", dbStatus: "REGISTERED" },
   { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜", dbStatus: null },
   { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️", dbStatus: "SERVICE_APPLIED" },
-  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", dbStatus: null },
+  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝", dbStatus: null },
+  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰", dbStatus: null },
   { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅", dbStatus: "SCHEDULE_ARRANGED" },
   { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", dbStatus: null },
   { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥", dbStatus: null },
@@ -36,9 +37,10 @@ interface Props {
   clinicDate: string | null;
   clinicName: string | null;
   clinicAddress: string | null;
+  contractSignedAt: string | null;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
@@ -64,6 +66,13 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
     STORAGE_ACTIVE: { title: "iPS細胞保管開始", label: "保管開始日", dbStatus: "STORAGE_ACTIVE" },
   };
 
+  // 契約書PDFアップロードポップアップ
+  const [showContractPopup, setShowContractPopup] = useState(false);
+  const [contractUploading, setContractUploading] = useState(false);
+  const [contractMessage, setContractMessage] = useState("");
+  const [contractError, setContractError] = useState("");
+  const contractFileRef = useRef<HTMLInputElement>(null);
+
   // ID発行ポップアップ
   const [showIdPopup, setShowIdPopup] = useState(false);
   const [loginId, setLoginId] = useState(currentLoginId || "");
@@ -79,6 +88,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const isOriginallyDone = (key: string) => {
     if (key === "REGISTERED") return isIdIssued; // メンバーシップ会員ID発行は実際に発行済みかで判定
     if (key === "DOC_PRIVACY") return signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms;
+    if (key === "CONTRACT_SIGNING") return !!contractSignedAt;
     if (key === "DOC_CELL_CONSENT") return signedDocTypes.includes("CELL_STORAGE_CONSENT");
     if (key === "CLINIC_CONFIRMED") return !!clinicDate;
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
@@ -166,13 +176,20 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
           {ADMIN_TIMELINE.map((step) => {
             const done = isChecked(step.key);
             const originalDone = isOriginallyDone(step.key);
-            const adminToggleKeys = ["TERMS_AGREED", "PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "CLINIC_CONFIRMED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
+            const adminToggleKeys = ["TERMS_AGREED", "CONTRACT_SIGNING", "PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "CLINIC_CONFIRMED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
             const canToggle = adminToggleKeys.includes(step.key) && !loading;
             const isMemberOnly = !adminToggleKeys.includes(step.key);
             const isPending = pendingChanges.has(step.key);
 
             const handleClick = () => {
               if (!canToggle) return;
+              // 契約書署名はPDFアップロードポップアップ表示
+              if (step.key === "CONTRACT_SIGNING" && !done) {
+                setContractMessage("");
+                setContractError("");
+                setShowContractPopup(true);
+                return;
+              }
               // 日程確定はポップアップ表示
               if (step.key === "CLINIC_CONFIRMED" && !done) {
                 // クリニック一覧をfetch
@@ -340,6 +357,15 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 <label className="block text-xs text-text-secondary mb-1">{DATE_POPUP_CONFIG[showDatePopup].label}</label>
                 <input type="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
               </div>
+              {/* 問診・採血の場合、iPS作製中自動設定の案内 */}
+              {showDatePopup === "BLOOD_COLLECTED" && inputDate && (
+                <div className="bg-gold/5 border border-gold/20 rounded-md p-3">
+                  <div className="text-[11px] text-gold font-medium mb-1">自動設定</div>
+                  <div className="text-xs text-text-secondary">
+                    問診・採血日の7日後（<span className="font-mono text-gold">{(() => { const d = new Date(inputDate); d.setDate(d.getDate() + 7); return d.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }); })()}</span>）が<br />iPS細胞作製開始日として自動設定されます。
+                  </div>
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 <button onClick={() => setShowDatePopup(null)} className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
                 <button
@@ -364,6 +390,94 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                 >
                   {dateLoading ? "更新中..." : "確定する"}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>, document.body
+      )}
+
+      {/* 契約書PDFアップロードポップアップ */}
+      {showContractPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowContractPopup(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">iPSサービス利用契約書署名</h3>
+            <p className="text-xs text-text-muted mb-5">顧客の契約書PDFをアップロードしてください。<br />アップロード完了でステータスが自動更新されます。</p>
+
+            {contractMessage && <div className="mb-3 p-2 bg-status-active/10 border border-status-active/20 rounded text-status-active text-[11px]">{contractMessage}</div>}
+            {contractError && <div className="mb-3 p-2 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-[11px]">{contractError}</div>}
+
+            {/* 隠しファイルインプット */}
+            <input
+              ref={contractFileRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.type !== "application/pdf") {
+                  setContractError("PDFファイルのみアップロードできます");
+                  return;
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                  setContractError("ファイルサイズは10MB以下にしてください");
+                  return;
+                }
+                setContractUploading(true);
+                setContractMessage("");
+                setContractError("");
+                try {
+                  // まずCONSENT_CELL_STORAGEのdocumentIdを取得
+                  const docsRes = await fetch(`/api/admin/members/${userId}/documents`);
+                  const docs = await docsRes.json();
+                  const contractDoc = (docs as { id: string; type: string }[]).find((d) => d.type === "CONSENT_CELL_STORAGE");
+                  if (!contractDoc) {
+                    setContractError("契約書の書類レコードが見つかりません");
+                    return;
+                  }
+                  // PDFアップロード
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  formData.append("documentId", contractDoc.id);
+                  const res = await fetch(`/api/admin/members/${userId}/documents`, {
+                    method: "POST",
+                    body: formData,
+                  });
+                  if (res.ok) {
+                    setContractMessage("契約書PDFをアップロードしました");
+                    setTimeout(() => { setShowContractPopup(false); router.refresh(); }, 1500);
+                  } else {
+                    const data = await res.json();
+                    setContractError(data.error || "アップロードに失敗しました");
+                  }
+                } catch {
+                  setContractError("エラーが発生しました");
+                } finally {
+                  setContractUploading(false);
+                  if (contractFileRef.current) contractFileRef.current.value = "";
+                }
+              }}
+            />
+
+            <div className="space-y-4">
+              {/* アップロードエリア */}
+              <button
+                onClick={() => contractFileRef.current?.click()}
+                disabled={contractUploading}
+                className="w-full py-8 border-2 border-dashed border-border rounded-lg hover:border-gold/50 transition-all cursor-pointer bg-bg-elevated/50 disabled:opacity-50"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-3xl">{contractUploading ? "⏳" : "📄"}</div>
+                  <div className="text-sm text-text-secondary">
+                    {contractUploading ? "アップロード中..." : "クリックしてPDFを選択"}
+                  </div>
+                  <div className="text-[10px] text-text-muted">PDF形式・10MB以下</div>
+                </div>
+              </button>
+
+              <div className="flex gap-2 pt-2">
+                <button onClick={() => setShowContractPopup(false)} className="flex-1 px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
               </div>
             </div>
           </div>

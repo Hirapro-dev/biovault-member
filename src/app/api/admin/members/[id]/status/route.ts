@@ -35,9 +35,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // 日付指定がある場合はそれを使用
   const specifiedDate = date ? new Date(date) : new Date();
 
-  // 問診・採血の場合は clinicDate を設定
+  // 問診・採血の場合は clinicDate を設定し、7日後にiPS作製開始も自動設定
   if (newStatus === "BLOOD_COLLECTED") {
     updateData.clinicDate = membership.clinicDate || specifiedDate;
+    // 7日後をiPS作製開始日として自動設定
+    const ipsStartDate = new Date(specifiedDate);
+    ipsStartDate.setDate(ipsStartDate.getDate() + 7);
+    updateData.ipsStatus = "IPS_CREATING" as IpsStatus;
+    updateData.ipsCompletedAt = ipsStartDate;
   }
 
   // iPS作製中の場合は ipsCompletedAt を作製開始日として設定
@@ -59,7 +64,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   // トランザクション: ステータス更新 + 履歴記録
-  await prisma.$transaction([
+  const transactionOps = [
     prisma.membership.update({
       where: { userId: id },
       data: updateData,
@@ -73,7 +78,26 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         changedBy: session.user.name || "管理者",
       },
     }),
-  ]);
+  ];
+
+  // 問診・採血の場合、IPS_CREATINGの履歴も自動追加
+  if (newStatus === "BLOOD_COLLECTED") {
+    const ipsStartDate = new Date(specifiedDate);
+    ipsStartDate.setDate(ipsStartDate.getDate() + 7);
+    transactionOps.push(
+      prisma.statusHistory.create({
+        data: {
+          userId: id,
+          fromStatus: "BLOOD_COLLECTED" as IpsStatus,
+          toStatus: "IPS_CREATING" as IpsStatus,
+          note: `問診・採血日の7日後（${ipsStartDate.toISOString().split("T")[0]}）を作製開始日として自動設定`,
+          changedBy: session.user.name || "管理者",
+        },
+      })
+    );
+  }
+
+  await prisma.$transaction(transactionOps);
 
   return NextResponse.json({ success: true });
 }

@@ -1,7 +1,7 @@
 export default function GoldDivider({ width = 80, className = "" }: { width?: number; className?: string }) {
   return (
     <div
-      className={className}
+      className={`mx-auto ${className}`}
       style={{
         width,
         height: 1,

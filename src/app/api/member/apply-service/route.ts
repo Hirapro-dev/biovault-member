@@ -70,6 +70,7 @@ export async function POST(req: Request) {
           ipsStatus: "SERVICE_APPLIED",
           serviceAppliedAt: now,
           consentSignedAt: now,
+          contractFormat: body.contractFormat || "electronic",
         },
       }),
       // 3. ステータス履歴を記録
@@ -80,18 +81,6 @@ export async function POST(req: Request) {
           toStatus: "SERVICE_APPLIED",
           note: "会員本人によるiPSサービス利用申込",
           changedBy: "会員本人",
-        },
-      }),
-      // 4. iPSサービス利用契約書のステータスを署名済みに更新
-      prisma.document.updateMany({
-        where: {
-          userId,
-          type: "CONSENT_CELL_STORAGE",
-          status: { not: "SIGNED" },
-        },
-        data: {
-          status: "SIGNED",
-          signedAt: now,
         },
       }),
     ]);

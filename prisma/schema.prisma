@@ -103,6 +103,8 @@ model Membership {
 
   serviceAppliedAt  DateTime?       // サービス申込日時
   consentSignedAt   DateTime?       // 同意書署名日時
+  contractFormat    String?         // 契約書の形式（electronic=電子署名, paper=書面契約）
+  contractSignedAt  DateTime?       // 契約書署名完了日時
 
   treatments      Treatment[]
 
@@ -192,6 +194,7 @@ model Document {
 
 enum DocumentType {
   CONTRACT
+  SERVICE_TERMS             // iPSサービス利用規約
   CONSENT_CELL_STORAGE
   CELL_STORAGE_CONSENT      // 細胞提供・保管同意書
   INFORMED_CONSENT
