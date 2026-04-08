@@ -66,6 +66,7 @@ model User {
   documents     Document[]
   statusHistory StatusHistory[]
   agencyProfile AgencyProfile?
+  staffProfile  Staff?
   favorites     Favorite[]
   consentLogs   ConsentLog[]
   accessLogs    AccessLog[]
@@ -76,6 +77,7 @@ enum Role {
   ADMIN
   SUPER_ADMIN
   AGENCY
+  STAFF
 }
 
 // ────────────────────────────────────────
@@ -586,19 +588,22 @@ model PushSubscription {
 }
 
 // ────────────────────────────────────────
-// 従業員マスタ（営業担当者の管理用、ログイン不要）
+// 従業員マスタ（営業担当者の管理用）
 // ────────────────────────────────────────
 model Staff {
   id        String   @id @default(cuid())
   staffCode String   @unique              // ST-0001形式
   name      String                        // 氏名
   nameKana  String?                       // フリガナ
-  phone     String?                       // 電話番号
   email     String?                       // メールアドレス
   note      String?  @db.Text             // 備考
   isActive  Boolean  @default(true)       // 有効/無効
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ログイン用Userとの紐付け（ID発行時に設定）
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 // ────────────────────────────────────────

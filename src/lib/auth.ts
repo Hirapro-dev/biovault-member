@@ -41,6 +41,16 @@ export const authOptions: NextAuthOptions = {
           agencyAgreed = !!(profile?.hasAgreedContract && profile?.hasAgreedPledge && profile?.hasAgreedNda);
         }
 
+        // スタッフの場合はstaffCodeを取得
+        let staffCode: string | null = null;
+        if (user.role === "STAFF") {
+          const staffProfile = await prisma.staff.findUnique({
+            where: { userId: user.id },
+            select: { staffCode: true },
+          });
+          staffCode = staffProfile?.staffCode || null;
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -49,6 +59,7 @@ export const authOptions: NextAuthOptions = {
           mustChangePassword: user.mustChangePassword,
           hasAgreedTerms: user.hasAgreedTerms,
           agencyAgreed,
+          staffCode,
           rememberMe: credentials.rememberMe === "true",
         };
       },
@@ -69,6 +80,7 @@ export const authOptions: NextAuthOptions = {
         token.mustChangePassword = (user as any).mustChangePassword;
         token.hasAgreedTerms = (user as any).hasAgreedTerms;
         token.agencyAgreed = (user as any).agencyAgreed;
+        token.staffCode = (user as any).staffCode;
       }
       // セッション更新時にDBから最新の同意状態を取得
       if (trigger === "update") {
@@ -98,6 +110,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).mustChangePassword = token.mustChangePassword;
         (session.user as any).hasAgreedTerms = token.hasAgreedTerms;
         (session.user as any).agencyAgreed = token.agencyAgreed;
+        (session.user as any).staffCode = token.staffCode;
       }
       return session;
     },

@@ -7,7 +7,6 @@ export default function StaffKarteActions({
   staffId,
   currentName,
   currentNameKana,
-  currentPhone,
   currentEmail,
   currentNote,
   isActive,
@@ -15,7 +14,6 @@ export default function StaffKarteActions({
   staffId: string;
   currentName: string;
   currentNameKana: string;
-  currentPhone: string;
   currentEmail: string;
   currentNote: string;
   isActive: boolean;
@@ -25,7 +23,6 @@ export default function StaffKarteActions({
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState(currentName);
   const [nameKana, setNameKana] = useState(currentNameKana);
-  const [phone, setPhone] = useState(currentPhone);
   const [email, setEmail] = useState(currentEmail);
   const [note, setNote] = useState(currentNote);
 
@@ -36,7 +33,7 @@ export default function StaffKarteActions({
       await fetch(`/api/admin/staff/${staffId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), nameKana: nameKana.trim(), phone: phone.trim(), email: email.trim(), note: note.trim() }),
+        body: JSON.stringify({ name: name.trim(), nameKana: nameKana.trim(), email: email.trim(), note: note.trim() }),
       });
       setEditing(false);
       router.refresh();
@@ -96,10 +93,6 @@ export default function StaffKarteActions({
             <div>
               <label className="block text-[11px] text-text-muted mb-1">フリガナ</label>
               <input value={nameKana} onChange={(e) => setNameKana(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
-            </div>
-            <div>
-              <label className="block text-[11px] text-text-muted mb-1">電話番号</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
             </div>
             <div>
               <label className="block text-[11px] text-text-muted mb-1">メール</label>

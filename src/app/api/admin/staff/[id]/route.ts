@@ -40,7 +40,6 @@ export async function PATCH(
     data: {
       ...(body.name !== undefined && { name: body.name }),
       ...(body.nameKana !== undefined && { nameKana: body.nameKana || null }),
-      ...(body.phone !== undefined && { phone: body.phone || null }),
       ...(body.email !== undefined && { email: body.email || null }),
       ...(body.note !== undefined && { note: body.note || null }),
       ...(body.isActive !== undefined && { isActive: body.isActive }),

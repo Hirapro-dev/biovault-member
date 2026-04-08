@@ -31,3 +31,16 @@ export async function requireAgency(): Promise<SessionUser> {
   }
   return user;
 }
+
+export async function requireStaff(): Promise<SessionUser & { staffCode: string }> {
+  const user = await requireAuth();
+  if (user.role !== "STAFF") {
+    redirect("/login");
+  }
+  const session = await getSession();
+  const staffCode = (session?.user as any)?.staffCode;
+  if (!staffCode) {
+    redirect("/login");
+  }
+  return { ...user, staffCode };
+}

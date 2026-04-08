@@ -41,6 +41,8 @@ export default function LoginPage() {
       router.push("/admin");
     } else if (role === "AGENCY") {
       router.push("/agency");
+    } else if (role === "STAFF") {
+      router.push("/staff");
     } else {
       router.push("/mypage");
     }

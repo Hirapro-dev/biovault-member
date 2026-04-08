@@ -14,6 +14,14 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // ── スタッフエリア ──
+    if (path.startsWith("/staff")) {
+      if (token?.role !== "STAFF") {
+        return NextResponse.redirect(new URL("/login", req.url));
+      }
+      return NextResponse.next();
+    }
+
     // ── 代理店エリア ──
     if (path.startsWith("/agency")) {
       // 代理店申込フォームは公開ページ（認証不要）
@@ -52,6 +60,11 @@ export default withAuth(
       return NextResponse.redirect(new URL("/agency", req.url));
     }
 
+    // スタッフユーザーが会員ページにアクセスしようとした場合
+    if (token?.role === "STAFF") {
+      return NextResponse.redirect(new URL("/staff", req.url));
+    }
+
     // 重要事項説明に未同意の場合
     if (token?.hasAgreedTerms === false) {
       return NextResponse.redirect(new URL("/important-notice", req.url));
@@ -79,5 +92,6 @@ export const config = {
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
     "/important-notice", "/apply-service/:path*", "/favorites/:path*", "/info/:path*", "/pamphlet/:path*",
     "/agency/:path*", "/agency-agree",
+    "/staff/:path*",
   ],
 };

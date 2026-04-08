@@ -131,4 +131,5 @@ export interface SessionUser {
   role: Role;
   mustChangePassword: boolean;
   hasAgreedTerms?: boolean;
+  staffCode?: string;
 }

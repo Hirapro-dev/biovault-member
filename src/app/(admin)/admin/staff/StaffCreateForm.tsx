@@ -9,7 +9,6 @@ export default function StaffCreateForm() {
   const [submitting, setSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [nameKana, setNameKana] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
   const handleSubmit = async () => {
@@ -19,12 +18,11 @@ export default function StaffCreateForm() {
       const res = await fetch("/api/admin/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), nameKana: nameKana.trim(), phone: phone.trim(), email: email.trim() }),
+        body: JSON.stringify({ name: name.trim(), nameKana: nameKana.trim(), email: email.trim() }),
       });
       if (res.ok) {
         setName("");
         setNameKana("");
-        setPhone("");
         setEmail("");
         setOpen(false);
         router.refresh();
@@ -54,10 +52,6 @@ export default function StaffCreateForm() {
             <div>
               <label className="block text-[11px] text-text-muted mb-1">フリガナ</label>
               <input value={nameKana} onChange={(e) => setNameKana(e.target.value)} placeholder="タナカ タロウ" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
-            </div>
-            <div>
-              <label className="block text-[11px] text-text-muted mb-1">電話番号</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="09012345678" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
             </div>
             <div>
               <label className="block text-[11px] text-text-muted mb-1">メール</label>

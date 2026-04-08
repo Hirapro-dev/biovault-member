@@ -5,12 +5,16 @@ import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 import StaffReferralUrlSection from "./StaffReferralUrlSection";
 import StaffKarteActions from "./StaffKarteActions";
+import StaffLoginSection from "./StaffLoginSection";
 
 export default async function StaffKartePage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
   const { id } = await params;
 
-  const staff = await prisma.staff.findUnique({ where: { id } });
+  const staff = await prisma.staff.findUnique({
+    where: { id },
+    include: { user: { select: { loginId: true } } },
+  });
   if (!staff) notFound();
 
   // 担当顧客一覧
@@ -42,7 +46,6 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
           <Row label="従業員コード" value={staff.staffCode} mono />
           <Row label="氏名" value={staff.name} />
           <Row label="フリガナ" value={staff.nameKana || "---"} />
-          <Row label="電話番号" value={staff.phone || "---"} />
           <Row label="メール" value={staff.email || "---"} />
           <Row label="登録日" value={new Date(staff.createdAt).toLocaleDateString("ja-JP")} />
           <div className="flex items-center py-2 border-t border-border mt-1">
@@ -78,10 +81,17 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
         staffId={staff.id}
         currentName={staff.name}
         currentNameKana={staff.nameKana || ""}
-        currentPhone={staff.phone || ""}
         currentEmail={staff.email || ""}
         currentNote={staff.note || ""}
         isActive={staff.isActive}
+      />
+
+      {/* ログインアカウント */}
+      <StaffLoginSection
+        staffId={staff.id}
+        currentLoginId={staff.user?.loginId || null}
+        nameKana={staff.nameKana || ""}
+        isIssued={!!staff.userId}
       />
 
       {/* 紹介URL発行 */}

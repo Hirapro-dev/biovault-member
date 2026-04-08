@@ -56,7 +56,6 @@ export async function POST(req: Request) {
       staffCode,
       name: body.name,
       nameKana: body.nameKana || null,
-      phone: body.phone || null,
       email: body.email || null,
       note: body.note || null,
     },
