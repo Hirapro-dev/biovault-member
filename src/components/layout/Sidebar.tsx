@@ -51,6 +51,7 @@ function DnaSvg() {
 const memberNav = [
   { href: "/mypage", label: "マイページ", Icon: UserSvg },
   { href: "/info", label: "サービス詳細", Icon: ServiceSvg },
+  { href: "https://sc-project-partners.co.jp/files/bv/pamphlet.pdf", label: "パンフレット", Icon: BookSvg, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaSvg },
 ];
 
@@ -102,7 +103,24 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
           })
         ) : (
           memberNav.map((item) => {
-            const active = pathname === item.href || (item.href !== "/mypage" && item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const isExternal = "external" in item && item.external;
+            const active = !isExternal && (pathname === item.href || (item.href !== "/mypage" && item.href !== "/dashboard" && pathname.startsWith(item.href)));
+
+            if (isExternal) {
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide border border-transparent text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                >
+                  <span className="opacity-50"><item.Icon /></span>
+                  {item.label}
+                </a>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
