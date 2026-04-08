@@ -21,12 +21,6 @@ export default async function DocumentsPage() {
     where: { userId: user.id },
   });
 
-  // パンフレット同意状態を取得
-  const fullUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { hasAgreedPamphlet: true, agreedPamphletAt: true },
-  });
-
   // 同意規約(SIMPLE_AGREEMENT)を除外し、指定順にソート
   const sortedDocs = [...documents]
     .filter((d) => d.type !== "SIMPLE_AGREEMENT")

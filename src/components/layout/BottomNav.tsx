@@ -52,7 +52,7 @@ function DnaIcon({ active }: { active: boolean }) {
 const navItems = [
   { href: "/mypage", label: "マイページ", Icon: UserIcon },
   { href: "/info", label: "サービス詳細", Icon: ServiceIcon },
-  { href: "/pamphlet", label: "パンフレット", Icon: BookIcon },
+  { href: "https://sc-project-partners.co.jp/files/bv/pamphlet.pdf", label: "パンフレット", Icon: BookIcon, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaIcon },
 ];
 
@@ -63,7 +63,23 @@ export default function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-bg-secondary/95 backdrop-blur-md border-t border-border lg:hidden">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/mypage" && item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const isExternal = "external" in item && item.external;
+          const isActive = !isExternal && (pathname === item.href || (item.href !== "/mypage" && item.href !== "/dashboard" && pathname.startsWith(item.href)));
+
+          if (isExternal) {
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center gap-1 w-full h-full transition-colors text-text-muted"
+              >
+                <item.Icon active={false} />
+                <span className="text-[10px] tracking-wider">{item.label}</span>
+              </a>
+            );
+          }
 
           return (
             <Link

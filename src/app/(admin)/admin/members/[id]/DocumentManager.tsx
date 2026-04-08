@@ -25,13 +25,9 @@ const DOC_NUMBER_MAP: Record<string, string> = {
 export default function DocumentManager({
   userId,
   documents,
-  hasAgreedPamphlet,
-  agreedPamphletAt,
 }: {
   userId: string;
   documents: Doc[];
-  hasAgreedPamphlet: boolean;
-  agreedPamphletAt: string | null;
 }) {
   const router = useRouter();
   const [uploading, setUploading] = useState<string | null>(null);
@@ -186,25 +182,6 @@ export default function DocumentManager({
         );
       })}
 
-      {/* パンフレット免責事項 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 border-t border-border gap-2">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-7 h-7 rounded bg-bg-elevated flex items-center justify-center text-[10px] text-gold font-mono shrink-0">006</div>
-          <div>
-            <div className="text-[13px] text-text-primary">パンフレット免責事項</div>
-            {agreedPamphletAt && (
-              <div className="text-[11px] text-text-muted mt-0.5">
-                同意日: {new Date(agreedPamphletAt).toLocaleDateString("ja-JP")}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className={`text-[11px] px-2.5 py-1 rounded-full border ${hasAgreedPamphlet ? "bg-status-active/10 text-status-active border-status-active/20" : "bg-text-muted/10 text-text-muted border-text-muted/20"}`}>
-            {hasAgreedPamphlet ? "同意済" : "未同意"}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }
