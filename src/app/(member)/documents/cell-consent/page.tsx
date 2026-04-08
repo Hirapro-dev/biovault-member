@@ -32,7 +32,7 @@ export default async function CellConsentViewPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
-          <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップ制サービスに関連して、メンバーシップ登録者本人（以下「乙」という。）より提供された細胞の取扱いについて、以下のとおり説明します。</p>
+          <p>株式会社SCPP（以下「甲」という。）は、BioVault iPSサービス利用に関連して、iPSサービス利用者本人（以下「乙」という。）より提供された細胞の取扱いについて、以下のとおり説明します。</p>
           <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
 
           <S t="第1条（目的）">
@@ -54,7 +54,7 @@ export default async function CellConsentViewPage() {
             <p>保管期間満了後、更新がなされない場合、または乙の退会等により保管契約が終了した場合、保管細胞は適切に廃棄されます。</p>
           </S>
           <S t="第7条（死亡時の取扱い）">
-            <p>乙が死亡した場合における保管細胞の取扱いについては、メンバーシップ契約書第17条の定めに従うものとします。</p>
+            <p>乙が死亡した場合における保管細胞の取扱いについては、iPSサービス利用契約書第17条の定めに従うものとします。</p>
           </S>
           <S t="第8条（同意の撤回）">
             <p>乙は、既に不可逆的な処理が実施済みの部分を除き、将来に向かって本同意を撤回することができます。</p>

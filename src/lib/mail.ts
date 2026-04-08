@@ -61,7 +61,7 @@ export function applicationReceivedEmail(name: string) {
   const subject = "【BioVault】お申込みを受け付けました";
   const bodyText = `${name} 様
 
-BioVault メンバーシップへのお申込みをいただき、誠にありがとうございます。
+BioVault iPSサービスへのお申込みをいただき、誠にありがとうございます。
 
 お申込み内容を確認のうえ、担当者より改めてご連絡させていただきます。
 通常、1〜3営業日以内にご連絡いたします。
@@ -91,7 +91,7 @@ MAIL: info@biovault.jp
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
       <p style="font-size:16px;color:#ffffff;margin:0 0 24px;">${name} 様</p>
       <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
-        BioVault メンバーシップへのお申込みをいただき、誠にありがとうございます。
+        BioVault iPSサービスへのお申込みをいただき、誠にありがとうございます。
       </p>
       <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
         お申込み内容を確認のうえ、担当者より改めてご連絡させていただきます。<br>

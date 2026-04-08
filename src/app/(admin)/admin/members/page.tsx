@@ -35,12 +35,12 @@ function getDisplayStatus(m: {
 
   if (status === "TERMS_AGREED") {
     if (m.hasAgreedTerms) return { label: "重要事項同意済", color: "text-gold" };
-    if (m.isIdIssued) return { label: "ID発行済", color: "text-gold" };
+    if (m.isIdIssued) return { label: "会員ID発行済", color: "text-gold" };
     return { label: "適合確認済", color: "text-gold" };
   }
 
   if (status === "REGISTERED") {
-    if (m.isIdIssued) return { label: "ID発行済", color: "text-gold" };
+    if (m.isIdIssued) return { label: "会員ID発行済", color: "text-gold" };
     return { label: "適合確認待ち", color: "text-text-muted" };
   }
 

@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react";
 const DOC_MENU_ITEMS = [
   { docType: "CONTRACT", href: "/important-notice", label: "重要事項説明書兼確認書", icon: "📜" },
   { docType: "PRIVACY_POLICY", href: "/important-notice", label: "個人情報同意書", icon: "📜" },
-  { docType: "CONSENT_CELL_STORAGE", href: "/documents/contract", label: "メンバーシップ契約書", icon: "📋" },
+  { docType: "CONSENT_CELL_STORAGE", href: "/documents/contract", label: "iPSサービス利用契約書", icon: "📋" },
   { docType: "CELL_STORAGE_CONSENT", href: "/documents/cell-consent", label: "細胞提供・保管同意書", icon: "🧫" },
   { docType: "INFORMED_CONSENT", href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
 ];

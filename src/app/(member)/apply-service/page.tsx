@@ -22,7 +22,7 @@ export default function ApplyServicePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // ステップ管理（1: 情報・確認, 2: 利用規約, 3: メンバーシップ契約書, 4: 最終確認）
+  // ステップ管理（1: 情報・確認, 2: 利用規約, 3: iPSサービス利用契約書, 4: 最終確認）
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +53,7 @@ export default function ApplyServicePage() {
   const [termsScrolled, setTermsScrolled] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
 
-  // ステップ3: メンバーシップ契約書スクロール
+  // ステップ3: iPSサービス利用契約書スクロール
   const consentRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -113,7 +113,7 @@ export default function ApplyServicePage() {
     }
   };
 
-  // メンバーシップ契約書スクロール検知
+  // iPSサービス利用契約書スクロール検知
   const handleConsentScroll = () => {
     if (!consentRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = consentRef.current;
@@ -184,7 +184,7 @@ export default function ApplyServicePage() {
           </h2>
           <GoldDivider />
           <p className="text-text-secondary text-sm leading-relaxed mt-6 mb-2">
-            メンバーシップへのお申込みを受け付けました。
+          iPSサービス利用お申込みを受け付けました。
           </p>
           <p className="text-text-secondary text-sm leading-relaxed mb-8">
             担当者より改めてご連絡させていただきます。
@@ -206,7 +206,7 @@ export default function ApplyServicePage() {
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
         <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
-          メンバーシップサービス申込
+        iPSサービス利用申込
         </h2>
         <GoldDivider />
       </div>
@@ -416,7 +416,7 @@ export default function ApplyServicePage() {
                 : "bg-bg-elevated text-text-muted opacity-40 cursor-not-allowed"
             }`}
           >
-            メンバーシップ会員規約の確認へ進む
+            iPSサービス利用規約の確認へ進む
           </button>
         </div>
       )}
@@ -425,7 +425,7 @@ export default function ApplyServicePage() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">メンバーシップ会員規約</h3>
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">iPSサービス利用規約</h3>
             <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
             <div
               ref={termsRef}
@@ -442,7 +442,7 @@ export default function ApplyServicePage() {
             <div className={`mt-4 transition-opacity ${termsScrolled ? "opacity-100" : "opacity-40"}`}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={termsAgreed} onChange={(e) => termsScrolled && setTermsAgreed(e.target.checked)} disabled={!termsScrolled} className="accent-gold w-5 h-5" />
-                <span className="text-sm text-text-secondary">上記の メンバーシップ会員規約の内容を確認し、同意します。</span>
+                <span className="text-sm text-text-secondary">上記の iPSサービス利用規約の内容を確認し、同意します。</span>
               </label>
             </div>
           </div>

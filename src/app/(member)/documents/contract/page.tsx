@@ -18,11 +18,11 @@ export default async function ContractViewPage() {
       <div className="text-[11px] text-text-muted mb-5">
         <Link href="/documents" className="hover:text-gold transition-colors">契約書類</Link>
         <span className="mx-2">/</span>
-        <span className="text-text-secondary">メンバーシップ契約書</span>
+        <span className="text-text-secondary">iPSサービス利用契約書</span>
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">BioVault メンバーシップ契約書</h2>
+        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">BioVault iPSサービス利用契約書</h2>
         {isSigned && <Badge variant="success">同意済</Badge>}
       </div>
       {doc?.signedAt && (
@@ -41,7 +41,7 @@ export default async function ContractViewPage() {
             <p>本同意書は、乙本人から採取された血液、細胞その他の試料を原料として作製される自家iPS細胞その他これに関連する細胞、加工物、検査記録および関連情報等の提供、保管、管理、利用条件、廃棄、死亡時取扱いその他必要事項を定めることを目的とします。</p>
           </S>
           <S t="第2条（適用関係）">
-            <p>本同意書は、BioVaultメンバーシップ契約書、BioVaultメンバーシップ規約、重要事項説明書兼確認書、申込確認書、個人情報・個人遺伝情報等の取扱いに関する同意書その他関連文書と一体をなすものとします。</p>
+            <p>本同意書は、BioVaultiPSサービス利用契約書、BioVaultメンバーシップ規約、重要事項説明書兼確認書、申込確認書、個人情報・個人遺伝情報等の取扱いに関する同意書その他関連文書と一体をなすものとします。</p>
           </S>
           <S t="第3条（定義）">
             <p>(1)「本試料」とは、乙本人から採取された血液、体液、細胞その他の生体由来試料をいいます。</p>

@@ -4,9 +4,9 @@ export type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentT
 
 // iPS ステータスの日本語ラベル
 export const IPS_STATUS_LABELS: Record<IpsStatus, string> = {
-  REGISTERED: "ID/パス発行",
+  REGISTERED: "メンバーシップ会員ID発行",
   TERMS_AGREED: "iPS細胞作製適合確認",
-  SERVICE_APPLIED: "メンバーシップサービス申込",
+  SERVICE_APPLIED: "iPSサービス利用申込",
   SCHEDULE_ARRANGED: "iPS細胞作製におけるクリニックの日程調整",
   BLOOD_COLLECTED: "問診・採血",
   IPS_CREATING: "iPS細胞 作製中",
@@ -98,7 +98,7 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   CONTRACT: "重要事項説明書兼確認書",
   PRIVACY_POLICY: "個人情報・個人遺伝情報等の取扱いに関する同意書",
-  CONSENT_CELL_STORAGE: "メンバーシップ契約書",
+  CONSENT_CELL_STORAGE: "iPSサービス利用契約書",
   CELL_STORAGE_CONSENT: "細胞提供・保管同意書",
   INFORMED_CONSENT: "iPS細胞作製における事前説明・同意",
   // 注: 旧名「（自家iPS細胞作製に関する説明書兼同意書）」は削除済み
