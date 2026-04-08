@@ -13,6 +13,8 @@ import MemberKarteActions from "./MemberKarteActions";
 import AdminStatusTimeline from "./AdminStatusTimeline";
 import IssueIdSection from "./IssueIdSection";
 import DeleteAccount from "./DeleteAccount";
+import CultureFluidStatusManager from "./CultureFluidStatusManager";
+import StatusTabs from "./StatusTabs";
 
 export default async function MemberKartePage({
   params,
@@ -29,6 +31,7 @@ export default async function MemberKartePage({
         include: { treatments: { orderBy: { createdAt: "desc" } } },
       },
       documents: { orderBy: { createdAt: "asc" } },
+      cultureFluidOrders: { orderBy: { createdAt: "desc" } },
       notes: { orderBy: { createdAt: "desc" } },
       statusHistory: { orderBy: { changedAt: "desc" } },
       accessLogs: { orderBy: { accessedAt: "desc" }, take: 20 },
@@ -135,28 +138,48 @@ export default async function MemberKartePage({
         isIdIssued={user.isIdIssued}
       />
 
-      {/* iPSステータス（チェックボックス式） */}
-      <div className="mb-6">
-        <h3 className="font-serif-jp text-sm font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
-          iPS 細胞ステータス
-        </h3>
-        {membership && (
-          <AdminStatusTimeline
+      {/* ステータス（タブ切り替え） */}
+      <StatusTabs
+        hasCultureFluidOrders={user.cultureFluidOrders.length > 0}
+        ipsTab={
+          membership ? (
+            <AdminStatusTimeline
+              userId={user.id}
+              currentStatus={membership.ipsStatus}
+              paymentStatus={membership.paymentStatus}
+              signedDocTypes={user.documents.filter(d => d.status === "SIGNED").map(d => d.type)}
+              hasAgreedTerms={user.hasAgreedTerms}
+              isIdIssued={user.isIdIssued}
+              currentLoginId={user.loginId}
+              nameKana={user.nameKana || ""}
+              clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null}
+              clinicName={membership.clinicName || null}
+              clinicAddress={membership.clinicAddress || null}
+              contractSignedAt={membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null}
+            />
+          ) : <div className="text-text-muted text-sm py-4 text-center">会員権情報なし</div>
+        }
+        cultureFluidTab={
+          <CultureFluidStatusManager
             userId={user.id}
-            currentStatus={membership.ipsStatus}
-            paymentStatus={membership.paymentStatus}
-            signedDocTypes={user.documents.filter(d => d.status === "SIGNED").map(d => d.type)}
-            hasAgreedTerms={user.hasAgreedTerms}
-            isIdIssued={user.isIdIssued}
-            currentLoginId={user.loginId}
-            nameKana={user.nameKana || ""}
-            clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null}
-            clinicName={membership.clinicName || null}
-            clinicAddress={membership.clinicAddress || null}
-            contractSignedAt={membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null}
+            orders={user.cultureFluidOrders.map(o => ({
+              id: o.id,
+              planType: o.planType,
+              planLabel: o.planLabel,
+              totalAmount: o.totalAmount,
+              status: o.status,
+              paymentStatus: o.paymentStatus,
+              producedAt: o.producedAt ? o.producedAt.toISOString() : null,
+              expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
+              clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
+              clinicName: o.clinicName,
+              cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null,
+              informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
+              createdAt: o.createdAt.toISOString(),
+            }))}
           />
-        )}
-      </div>
+        }
+      />
 
       {/* 申込情報・健康状態 */}
       {(user.occupation || user.paymentMethod || user.currentIllness !== undefined) && (

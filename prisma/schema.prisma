@@ -67,9 +67,10 @@ model User {
   statusHistory StatusHistory[]
   agencyProfile AgencyProfile?
   staffProfile  Staff?
-  favorites     Favorite[]
-  consentLogs   ConsentLog[]
-  accessLogs    AccessLog[]
+  favorites           Favorite[]
+  consentLogs         ConsentLog[]
+  accessLogs          AccessLog[]
+  cultureFluidOrders  CultureFluidOrder[]
 }
 
 enum Role {
@@ -107,6 +108,7 @@ model Membership {
   consentSignedAt   DateTime?       // 同意書署名日時
   contractFormat    String?         // 契約書の形式（electronic=電子署名, paper=書面契約）
   contractSignedAt  DateTime?       // 契約書署名完了日時
+  deathWish         String?         // 死亡時意思表示（donate=寄贈, dispose=廃棄）
 
   treatments      Treatment[]
 
@@ -650,4 +652,45 @@ model GlossaryTerm {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ────────────────────────────────────────
+// 培養上清液注文
+// ────────────────────────────────────────
+model CultureFluidOrder {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+
+  // 注文内容
+  planType        String                          // iv_drip_1, iv_drip_5, injection_1, injection_5
+  planLabel       String                          // 表示ラベル
+  totalAmount     Int                             // 金額（税込）
+  paymentStatus   String    @default("PENDING")   // PENDING / COMPLETED
+  paymentDate     DateTime?                       // 入金予定日
+  paidAt          DateTime?                       // 入金確認日
+
+  // ステータス（7段階）
+  status          String    @default("APPLIED")
+  // APPLIED → PAYMENT_CONFIRMED → PRODUCING → CLINIC_BOOKING →
+  // INFORMED_AGREED → RESERVATION_CONFIRMED → COMPLETED
+
+  // 精製・管理
+  producedAt      DateTime?                       // 精製完了日
+  expiresAt       DateTime?                       // 管理期限（精製日+8ヶ月）
+
+  // クリニック情報
+  clinicDate      DateTime?
+  clinicName      String?
+  clinicAddress   String?
+  clinicPhone     String?
+
+  // 書類同意
+  cautionAgreedAt  DateTime?                      // 留意事項同意日
+  informedAgreedAt DateTime?                      // 事前説明同意日
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
 }

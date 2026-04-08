@@ -89,6 +89,14 @@ export async function POST(req: Request) {
       });
     }
 
+    // 細胞提供・保管同意書の場合、死亡時意思表示を保存
+    if (docType === "CELL_STORAGE_CONSENT" && body.deathWish) {
+      await prisma.membership.updateMany({
+        where: { userId },
+        data: { deathWish: body.deathWish },
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("同意ログ記録エラー:", error);

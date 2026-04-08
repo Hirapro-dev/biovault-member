@@ -97,7 +97,7 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製適合確認申請を<br />受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製の適合確認申込を<br />受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
               お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
@@ -120,11 +120,11 @@ function ApplyPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto mx-auto mb-4" />
         <h1 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-2">
-          iPS細胞作製適合確認申請
+          iPS細胞作製の適合確認申込書
         </h1>
         <GoldDivider width={60} className="mx-auto mb-3" />
         <p className="text-xs text-text-muted leading-relaxed max-w-lg mx-auto text-left sm:text-center">
-          お申し込み内容は、メンバーシップ契約手続き、<br />提携医療機関等による問診・適格確認、細胞作製・保管に関する<br />各種手続きの参考資料として利用させていただきます。
+          本申込みはBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。
         </p>
       </div>
 
@@ -267,16 +267,15 @@ function ApplyPage() {
         </FormSection>
       )}
 
-      {/* Step 3: 確認事項 + 受領文書 */}
+      {/* Step 3: 申込情報取扱いに関する同意 */}
       {step === 3 && (
-        <FormSection title="3. 確認事項">
-          <p className="text-xs text-text-secondary mb-4">
-            以下の事項を確認し、理解したうえで申込みます。
-          </p>
-          <Checkbox checked={form.confirmNotMedical} onChange={(v) => update("confirmNotMedical", v)} label="本サービスは、医療行為そのものの直接提供契約ではないこと" />
-          <Checkbox checked={form.confirmScppRole} onChange={(v) => update("confirmScppRole", v)} label="株式会社SCPPは、本サービスの運営主体であり、医療行為の実施主体ではないこと" />
-          <Checkbox checked={form.confirmClinicRole} onChange={(v) => update("confirmClinicRole", v)} label="診察、問診、採血、医学的判断等は提携医療機関等が行うこと" />
-          <Checkbox checked={form.confirmLabRole} onChange={(v) => update("confirmLabRole", v)} label="細胞作製、培養、品質評価、保管等は提携先機関が行うこと" />
+        <FormSection title="3. 申込情報取扱いに関する同意">
+          <div className="bg-bg-elevated border border-border rounded-md p-4 mb-4">
+            <p className="text-xs text-text-secondary leading-relaxed">
+              本申込書に記載した内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
+            </p>
+          </div>
+          <Checkbox checked={form.confirmNotMedical} onChange={(v) => update("confirmNotMedical", v)} label="上記の内容を理解し、承諾します" />
           <StepNav onBack={() => setStep(2)} onNext={() => setStep(4)} />
         </FormSection>
       )}
@@ -299,7 +298,7 @@ function ApplyPage() {
           <p className="text-xs text-text-secondary text-center mb-6 leading-relaxed">
             上記の内容を真実かつ正確に記載し、<br />各事項を確認・理解のうえ、
             <br />
-            iPS細胞作製適合確認に申し込みます。
+            iPS細胞作製の適合確認に申し込みます。
           </p>
 
           <div className="flex gap-3">

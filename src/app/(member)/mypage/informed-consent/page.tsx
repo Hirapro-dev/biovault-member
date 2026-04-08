@@ -59,11 +59,11 @@ export default function InformedConsentPage() {
       <div className="text-[11px] text-text-muted mb-5">
         <Link href="/mypage" className="hover:text-gold transition-colors">マイページ</Link>
         <span className="mx-2">/</span>
-        <span className="text-text-secondary">iPS細胞作製における事前説明・同意</span>
+        <span className="text-text-secondary">自家iPS細胞作製に関する説明書兼同意書</span>
       </div>
 
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">
-        iPS細胞作製における事前説明・同意
+        自家iPS細胞作製に関する説明書兼同意書
       </h2>
       <p className="text-xs text-text-muted mb-5">※ こちらの同意がないと、問診・採血に進めません</p>
 
@@ -81,7 +81,7 @@ export default function InformedConsentPage() {
           <Sec t="2. 自家iPS細胞作製について">
             <p>自家iPS細胞作製とは、私自身から採取した血液その他の試料を原料として、私自身に由来するiPS細胞の作製を試みるものです。</p>
             <p>この作製は、将来に備えて細胞を確保し、必要に応じて保管することを目的としています。</p>
-            <p>ただし、本書に基づく同意は、自家iPS細胞の作製に向けた説明を受けたことおよびその工程に進むことへの同意であり、将来の治療、美容施術、研究利用その他の具体的な利用について包括的に同意するものではありません。</p>
+            <p>ただし、本書に基づく同意は、自家iPS細胞の作製に向けた説明を受けたことおよびその工程に進むことへの同意であり、将来の治療、美容施術、研究利用その他の具体的な利用について包括的に同意するものではありません。これらについては、必要に応じて別途説明および同意が行われます。</p>
           </Sec>
 
           <Sec t="3. 株式会社SCPPの立場について">
@@ -122,6 +122,7 @@ export default function InformedConsentPage() {
 
           <Sec t="8. 個人情報等の取扱い">
             <p>自家iPS細胞作製に関連して、私の個人情報、要配慮個人情報、個人遺伝情報、検査結果、試料識別情報その他必要な情報が取得、利用、保管および提携先へ提供される場合があります。</p>
+            <p>その詳細については、別紙「個人情報・個人遺伝情報等の取扱いに関する同意書」に定められていることを確認しました。</p>
           </Sec>
 
           <Sec t="9. 同意の自由">

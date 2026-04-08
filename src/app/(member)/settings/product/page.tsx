@@ -12,111 +12,186 @@ export default function ProductDefinitionPage() {
 
       <div className="text-center mb-8">
         <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
-          BioVaultメンバーシップ｜商品定義
+          商品定義書
         </h1>
         <GoldDivider width={60} className="mx-auto" />
       </div>
 
+      {/* 文書目的 */}
+      <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8 mb-6">
+        <h2 className="text-sm text-gold font-medium mb-3">文書目的</h2>
+        <p className="text-[13px] text-text-secondary leading-[2]">
+          本書は、BioVault Membership Serviceの内容、提供範囲、提供条件、顧客提供プロセス、関連役務との関係、表示上の留意事項その他の基本条件を社内外で統一的に整理することを目的とする。本書は、営業資料、契約書、重要事項説明書、FAQ、申込導線、審査資料その他関連文書の作成及び整合確認の基礎資料として用いる。
+        </p>
+      </div>
+
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8">
-        <article className="text-[13px] text-text-secondary leading-[2] space-y-8">
+        <article className="space-y-8">
 
-          {/* 商品名 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">1. 商品名</h2>
-            <p>BioVault（細胞を資産化する・細胞を保管する）</p>
-            <p>販売商品：BioVaultメンバーシップ</p>
-          </section>
+          <Section title="第1条　商品定義">
+            <p>BioVault Membership Serviceとは、顧客本人の血液を起点として自家iPS細胞の作製、保管及びこれに付随する一定の会員向け提供内容を組み合わせた会員制サービスをいう。</p>
+            <p>本商品は、顧客自身の細胞を「細胞資産（CellAsset）」という概念のもとで長期保管・管理し、将来に向けた備え及び現在におけるコンディショニング支援のための選択肢を設計することを目的とする。</p>
+          </Section>
 
-          {/* 販売価格 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">2. 販売価格</h2>
-            <p className="text-gold font-medium text-base">会員権価格：880万円（税込）</p>
-            <p className="text-xs text-text-muted mt-1">※ 自身の血液からiPS細胞を作製し、所有、管理、活用できる権利を含みます</p>
-          </section>
+          <Section title="第2条　商品分類">
+            <p>本商品は、当社が提供主体となる会員制サービスであり、医療行為そのものを内容とする商品ではない。</p>
+            <p>本商品に関連して実施される問診、適応判断、採血、施術説明、施術実施その他医療判断又は医療行為に該当し得る事項については、提携医療機関又は医師その他の医療従事者が、関係法令及び各機関の運用基準に基づき個別に実施するものとする。</p>
+            <p>したがって、本商品の販売、契約及び会員管理と、個別の医療判断又は医療行為とは法的・実務的に区別して整理される。</p>
+          </Section>
 
-          {/* 事業カテゴリ */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">3. サービスカテゴリ</h2>
-            <p className="font-medium text-text-primary">メンバーシップサービス：BioVault iPS OrderMade Membership</p>
-          </section>
+          <Section title="第3条　商品コンセプト">
+            <p>本商品の基本思想は、「将来の選択肢を自ら保有する」という点にある。</p>
+            <p>顧客自身の細胞を将来に備えて保管・管理するという概念的説明であり、特定の医療上の利益、治療結果又は身体上の改善結果を保証する趣旨ではない。</p>
+          </Section>
 
-          {/* メインサービス */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">4. メインサービス</h2>
-            <div className="bg-bg-elevated border border-border-gold rounded-md p-4 mb-3">
-              <div className="text-gold font-medium mb-2">CellAsset｜あなた自身の細胞資産を作製する</div>
-              <p className="text-xs leading-relaxed">お客様自身の血液からiPS細胞を作製し、凍結保存で10年間の保管が可能です。これにより「ご自身のための細胞資産」を確保いただけます。また、作製したiPS細胞から培養上清液を精製することで、美容領域から医療領域での活用が可能となります。</p>
-            </div>
-          </section>
+          <Section title="第4条　商品の構成要素">
+            <p>本商品の基本構成要素は、以下の各号のとおりとする。</p>
+            <NumberedList items={[
+              "顧客によるサービス申込み及び事前確認",
+              "所定条件充足後の会員契約締結",
+              "顧客本人由来の血液採取に向けた予約及び手配支援",
+              "血液の輸送及び自家iPS細胞の作製手配",
+              "作製された自家iPS細胞の一定期間保管及び品質管理",
+              "保管期間中におけるiPS培養上清液の精製に関する所定の提供内容",
+              "提携医療機関における所定施術への接続支援又は付帯内容",
+            ]} />
+            <p className="mt-3">なお、上記各要素のうち、当社が直接提供する内容と、提携先が実施主体となる内容とは、契約書、重要事項説明書その他の文書において個別に区分して明示するものとする。</p>
+          </Section>
 
-          {/* 商品の提供価値 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">5. 提供価値</h2>
-            <div className="space-y-3">
-              <div className="bg-bg-elevated border border-border rounded-md p-4">
-                <div className="text-xs text-gold tracking-wider mb-2">現在の価値</div>
-                <p className="text-xs leading-relaxed">iPS培養上清液を活用したコンディショニング体験をご提供いたします。iPS由来の培養上清液には、230種類以上の有効性のあるタンパク質が確認されており、スキンケア・スカルプケア・サンケアに適するとされています。</p>
-              </div>
-              <div className="bg-bg-elevated border border-border rounded-md p-4">
-                <div className="text-xs text-gold tracking-wider mb-2">将来の価値</div>
-                <p className="text-xs leading-relaxed">5年後、10年後に広がる再生医療・個別化医療の選択肢に備えることができます。細胞バンクを起点に、将来は「ご自身に最も合う薬」「ご自身に最も合う治療」「治療に最適な医療施設のご紹介」へつなぐ構想がございます。</p>
-              </div>
-            </div>
-          </section>
+          <Section title="第5条　中核サービスの内容">
+            <p>中核サービスであるCellAssetは、自家iPS細胞の作製・保管・運用に関する会員向け提供内容を指す。</p>
+            <p>CellAssetについては、指定機関での採血、血液輸送、細胞培養士によるiPS細胞の作製、10年間の凍結保存権利及び品質管理が含まれる。</p>
+            <p>また、保管期間中には、作製した細胞資産から培養上清液を精製し、提携医療機関を通じた施術利用の導線が設計されている。</p>
+            <p>ただし、実際の精製可否、提供可否、施術可否、施術内容、適応判断その他の具体条件は、個別事情、医師判断、提携機関の運用その他の要素により左右される。</p>
+          </Section>
 
-          {/* 商品構成 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">6. 商品構成</h2>
-            <div className="mb-4">
-              <h3 className="text-xs text-gold tracking-wider mb-2">本体サービス</h3>
-              <ul className="text-xs space-y-1.5 list-none">
-                <li>・自家iPS細胞の作製</li>
-                <li>・iPSパーソナル・バンキング（10年間）</li>
-                <li>・HAL型病気リスク診断表</li>
-                <li>・iPS培養上清液を活用した施術プログラム</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xs text-gold tracking-wider mb-2">会員特典</h3>
-              <ul className="text-xs space-y-1.5 list-none">
-                <li>① Biocouture — 高濃度iPSオーダーコスメ開発製造権</li>
-                <li>② BioVault NFT — 資産証明・デジタル鑑定書</li>
-                <li>③ iPS Information — エビデンス・レポート・ニュースレター</li>
-                <li>④ iPS Concierge — 担当制の総合サポート</li>
-                <li>⑤ BV Invitation — 催事全般の招待・優遇</li>
-                <li>⑥ BV Inheritance — 相続・手続き</li>
-              </ul>
-            </div>
-          </section>
+          <Section title="第6条　価格">
+            <p>本商品の販売価格は、税込880万円とする。</p>
+            <p>当該価格には、CellAssetの全費用に加え、iPS培養上清液の点滴1回分（10ml）の精製・施術費用が含まれるものとして設計されている。</p>
+            <p>もっとも、交通費、旅費その他顧客本人の移動又は周辺対応に要する費用等、商品本体価格に含まれない費用が存在し得るため、申込時及び契約時に別途明示する。</p>
+          </Section>
 
-          {/* 別途費用 */}
-          <section>
-            <h2 className="text-sm text-text-primary font-medium mb-3">7. 別途費用について</h2>
-            <p className="text-xs text-text-muted mb-2">以下は会員権価格に含まれず、別途費用となります。</p>
-            <ul className="text-xs space-y-1.5 list-none">
-              <li>・血液検査代</li>
-              <li>・血液送料</li>
-              <li>・医師問診費用</li>
-              <li>・施術時の消耗品費</li>
-              <li>・クリニックで個別に発生する費用</li>
-            </ul>
-          </section>
+          <Section title="第7条　追加購入商品及び運用オプション">
+            <p>本商品の保管期間中、顧客は必要に応じてiPS培養上清液の追加購入を申し込むことができる。</p>
+            <p>サービスの基本設計としては、点滴用10mlの追加購入価格を88万円（税込）とし、一定の同時購入特典が示されている。また、継続運用オプションとして、点滴及び注射に関する価格設定が記載されている。</p>
+            <p>ただし、追加購入商品又は継続運用オプションは、本商品の初回契約に当然に含まれるものではなく、提供条件、提供時期、精製可否、使用期限、施術実施可否その他の条件を前提として都度案内・確認されるものとする。</p>
+          </Section>
 
-          {/* 注意事項 */}
-          <section className="bg-status-warning/5 border border-status-warning/20 rounded-md p-4">
-            <h2 className="text-sm text-status-warning font-medium mb-3">ご注意事項</h2>
-            <ul className="text-xs text-text-secondary space-y-2 list-none">
-              <li>・感染症（HIV等）やがんを罹患されている場合、iPS細胞の作製ができない場合がございます。</li>
-              <li>・その他の持病に関しては、最終的な導入可否は医師問診・検査・既往歴確認によって判断されます。</li>
-              <li>・本サービスは、特定の治療効果、美容上の効果、医療的効能を保証するものではございません。</li>
-            </ul>
-          </section>
+          <Section title="第8条　提供期間及び工程">
+            <p>本商品の標準的な提供工程は、次の各段階によって構成される。</p>
+            <NumberedList items={[
+              "申込み及び事前確認",
+              "契約手続及び支払い",
+              "予約手配",
+              "指定クリニックにおける問診及び採血",
+              "細胞作製",
+              "iPS培養上清液の精製・加工・納品",
+              "提携医療機関における施術",
+            ]} />
+            <p className="mt-3">自家iPS細胞の完成までの目安は約4ヶ月から6ヶ月とされている。ただし、これは一般的目安であり、個別案件ごとの作製期間、精製期間、予約調整期間、物流事情、検査結果その他により変動し得る。</p>
+            <p>したがって、当社は固定的納期又は特定日までの完成を保証するものではない。</p>
+          </Section>
+
+          <Section title="第9条　品質管理体制">
+            <p>本商品に係るiPS細胞の作製及び保管については、クリーンルーム内での製造工程及びGMP基準に準拠した品質管理体制が示されている。</p>
+            <p>また、各工程における衛生管理及びトレーサビリティを徹底し、安定した環境下で細胞資産を維持・保管する体制を構築している。</p>
+            <p>ただし、当社が品質管理体制の存在を説明することと、個々の顧客に対する特定の結果、安全性、有用性又は将来利用可能性を保証することとは同義ではない。</p>
+          </Section>
+
+          <Section title="第10条　技術要素の位置づけ">
+            <p>本商品には、iPS培養上清液に関する説明として、成長因子その他の成分、並びにハイブリッド・ナノリポソーム化と呼ばれる加工技術に関する記載が含まれる。</p>
+            <p>これらは、商品背景、品質設計、差別化要素又は一般的技術説明として位置づけられるものであり、顧客に対し特定の医療効果、身体改善効果、治療成績、予防効果又は美容結果を保証するものではない。</p>
+            <p>社外説明においては、当該技術要素を過度に断定的又は誇張的に表現してはならない。</p>
+          </Section>
+
+          <Section title="第11条　訴求上の基本価値">
+            <p>本商品に関して顧客へ説明し得る基本価値は、次の範囲に限定的に整理する。</p>
+            <NumberedList items={[
+              "顧客自身の細胞を長期保管・管理するという新しい所有概念",
+              "将来に備えた選択肢設計",
+              "現在のコンディショニング支援への接続可能性",
+              "品質管理体制及び提供工程の一体設計",
+              "メンバーシップサービスとしての専任的サポート体制",
+            ]} />
+            <p className="mt-3">これに対し、疾病の改善、予防、治療、若返り、身体機能回復、美容結果等について断定的に説明してはならない。</p>
+          </Section>
+
+          <Section title="第12条　禁止又は制限される表現">
+            <p>本商品に関する広告、営業資料、口頭説明、メッセージ配信、SNS投稿、FAQその他一切の対外表現においては、次の表現を原則として禁止又は厳格管理対象とする。</p>
+            <NumberedList items={[
+              "特定疾病の診断、治療、予防を目的とするとの表現",
+              "個別の治療効果、施術結果、安全性又は有用性を保証する表現",
+              "若返り、回復、改善、再生等についての断定表現",
+              "医師判断を経ず当然に施術可能であるかのような表現",
+              "顧客の身体状況にかかわらず一律に有効であると受け取られる表現",
+              "法令上の位置づけを曖昧にし、当社自らが医療行為主体であるかのような表現",
+              "不特定多数への一般広告又は広範勧誘を前提とした過度な訴求表現",
+            ]} />
+          </Section>
+
+          <Section title="第13条　提携医療機関との役割分担">
+            <p>提携医療機関は、少なくとも以下の事項について主体的役割を担う。</p>
+            <NumberedList items={[
+              "問診",
+              "検査",
+              "既往歴確認",
+              "適応判断",
+              "医学的説明",
+              "同意取得",
+              "施術実施",
+            ]} />
+            <p className="mt-3">当社は、これら医療機関又は医療従事者による判断又は実施内容に代わって医学的保証を行うものではない。</p>
+            <p>当社の役割は、会員契約の管理、提供工程の調整、提携体制の整備、情報提供、予約支援その他非医療行為領域を中心とした運営支援である。</p>
+          </Section>
+
+          <Section title="第14条　提供可否に関する留意事項">
+            <p>本商品に関連する各種提供内容は、すべての顧客に対して無条件かつ画一的に提供されるものではない。</p>
+            <p>問診結果、既往歴、検査結果、医師判断、作製工程上の事情、品質管理上の判断、提携機関の受入体制その他の理由により、全部又は一部の提供が制限され、延期され、又は実施できない場合がある。</p>
+            <p>この場合の具体的取扱いは、契約書、重要事項説明書、個別同意書その他関連文書において別途定める。</p>
+          </Section>
+
+          <Section title="第15条　保管期間">
+            <p>細胞保管期間は作成日を起点に10年間とされている。</p>
+            <p>期間満了後の更新、延長、再契約、保管終了時の取扱い、廃棄、再契約条件その他の詳細は、別途契約条件又は会員規約に定めるものとする。</p>
+          </Section>
+
+          <Section title="第16条　資料上の位置づけ">
+            <p>本商品に関するパンフレット、提案資料、説明資料、FAQその他の関連資料に記載される技術情報、成分情報、一般的説明、概念図、相場比較、工程説明その他の内容は、原則として商品理解のための補助説明資料である。</p>
+            <p>これらは、最終的な契約条件、医療判断、施術可否、効果効能又は法的義務を単独で確定するものではなく、最終的には契約書、重要事項説明書、個別同意書その他正式文書に従う。</p>
+          </Section>
 
           <div className="text-[11px] text-text-muted pt-4 border-t border-border">
             <p>株式会社SCPP</p>
           </div>
         </article>
       </div>
+    </div>
+  );
+}
+
+/* 条文セクション */
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="text-sm text-text-primary font-medium mb-3 pb-2 border-b border-border">{title}</h2>
+      <div className="text-[13px] text-text-secondary leading-[2] space-y-3">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/* 番号付きリスト（一、二、三...） */
+function NumberedList({ items }: { items: string[] }) {
+  const kanjiNumbers = ["一", "二", "三", "四", "五", "六", "七"];
+  return (
+    <div className="space-y-1 pl-1">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-2 text-[13px] text-text-secondary">
+          <span className="shrink-0">{kanjiNumbers[i] || `${i + 1}`}</span>
+          <span>{item}</span>
+        </div>
+      ))}
     </div>
   );
 }

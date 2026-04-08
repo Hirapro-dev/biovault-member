@@ -9,6 +9,7 @@ export default function CellConsentPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [deathWish, setDeathWish] = useState<"donate" | "dispose" | "">("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   // ステップ2: キャンセル不可確認
@@ -39,7 +40,7 @@ export default function CellConsentPage() {
       const res = await fetch("/api/member/consent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentType: "CELL_STORAGE_CONSENT" }),
+        body: JSON.stringify({ documentType: "CELL_STORAGE_CONSENT", deathWish }),
       });
       if (!res.ok) return;
 
@@ -126,13 +127,52 @@ export default function CellConsentPage() {
           {!scrolledToBottom && (
             <p className="text-xs text-gold text-center mb-2 animate-pulse">↓ 最後までスクロールしてください</p>
           )}
+
+          {/* 死亡時意思表示欄 */}
+          <div className={`mb-5 bg-bg-secondary border border-border rounded-md p-5 ${scrolledToBottom ? "" : "opacity-40 pointer-events-none"}`}>
+            <h3 className="text-sm text-text-primary font-medium mb-3">死亡時意思表示欄</h3>
+            <p className="text-xs text-text-secondary leading-relaxed mb-4">
+              私は、私の死亡時における本細胞等の取扱いについて、以下のとおり意思表示します。
+            </p>
+            <div className="space-y-3 mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="deathWish"
+                  value="donate"
+                  checked={deathWish === "donate"}
+                  onChange={() => setDeathWish("donate")}
+                  disabled={!scrolledToBottom}
+                  className="accent-gold w-5 h-5 shrink-0"
+                />
+                <span className="text-[13px] text-text-primary">研究検体として研究機関へ寄贈する</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="deathWish"
+                  value="dispose"
+                  checked={deathWish === "dispose"}
+                  onChange={() => setDeathWish("dispose")}
+                  disabled={!scrolledToBottom}
+                  className="accent-gold w-5 h-5 shrink-0"
+                />
+                <span className="text-[13px] text-text-primary">廃棄する</span>
+              </label>
+            </div>
+            <div className="text-[10px] text-text-muted leading-relaxed space-y-1">
+              <p>※「研究検体として研究機関へ寄贈する」を選択した場合であっても、受入先の有無、研究計画、倫理審査、法令上の制約、保管状態その他の事情により、寄贈が実施できない場合があります。</p>
+              <p>※ 選択した希望意志が実施できない場合、または必要な条件を満たさない場合には、廃棄その他相当な方法により処理されることがあります。</p>
+            </div>
+          </div>
+
           <label className={`flex items-start gap-3 mb-4 ${scrolledToBottom ? "cursor-pointer" : "opacity-40 pointer-events-none"}`}>
             <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} disabled={!scrolledToBottom} className="mt-0.5 w-5 h-5 cursor-pointer shrink-0 accent-gold" />
             <span className="text-[13px] text-text-primary leading-relaxed">
               上記の細胞提供・保管同意書の内容を確認し、同意します。
             </span>
           </label>
-          <button onClick={handleFirstAgree} disabled={!checked} className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
+          <button onClick={handleFirstAgree} disabled={!checked || !deathWish} className="w-full py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
             次へ
           </button>
         </div>

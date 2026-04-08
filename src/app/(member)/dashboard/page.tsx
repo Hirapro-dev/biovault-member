@@ -71,6 +71,24 @@ export default async function ContentPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
 
+        <Link href="/about-ips/culture-fluid" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">🧪</div>
+          <div className="flex-1">
+            <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">iPS培養上清液に関する基礎知識</h3>
+            <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">培養上清液の成分、期待される働き、研究結果について</p>
+          </div>
+          <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
+        </Link>
+
+        <Link href="/about-ips/nano-liposome" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">💊</div>
+          <div className="flex-1">
+            <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">ハイブリッド・ナノリポソーム化に関する基礎知識</h3>
+            <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">送達技術の仕組み、期待される利点、iPS培養上清液との組み合わせ</p>
+          </div>
+          <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
+        </Link>
+
         <Link href="/about-ips/glossary" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
           <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">📖</div>
           <div className="flex-1">
