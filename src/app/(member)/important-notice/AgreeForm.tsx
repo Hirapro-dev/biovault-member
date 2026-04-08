@@ -76,7 +76,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
           <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <GoldDivider width={60} className="mx-auto mb-3" />
           <p className="text-xs text-text-secondary leading-relaxed">
-            サービスのご利用にあたり、以下の2つの書類をそれぞれお読みいただき、ご同意ください。
+            サービスのご利用にあたり、<br />以下の2つの書類をそれぞれお読みいただき、ご同意ください。
           </p>
         </div>
       )}

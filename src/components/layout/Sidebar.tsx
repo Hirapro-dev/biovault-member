@@ -51,7 +51,6 @@ function DnaSvg() {
 const memberNav = [
   { href: "/mypage", label: "マイページ", Icon: UserSvg },
   { href: "/info", label: "サービス詳細", Icon: ServiceSvg },
-  { href: "/pamphlet", label: "パンフレット", Icon: BookSvg },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaSvg },
 ];
 
