@@ -63,6 +63,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         clinicDate: body.membership.clinicDate ? new Date(body.membership.clinicDate) : undefined,
         clinicName: body.membership.clinicName !== undefined ? body.membership.clinicName : undefined,
         clinicAddress: body.membership.clinicAddress !== undefined ? body.membership.clinicAddress : undefined,
+        clinicPhone: body.membership.clinicPhone !== undefined ? body.membership.clinicPhone : undefined,
         referrerName: body.membership.referrerName,
       },
     });

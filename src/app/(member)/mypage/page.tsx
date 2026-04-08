@@ -287,6 +287,9 @@ export default async function MyPage() {
                           {membership.clinicAddress && (
                             <div className="text-xs text-text-muted mt-1">{membership.clinicAddress}</div>
                           )}
+                          {membership.clinicPhone && (
+                            <div className="text-xs text-text-muted mt-1">TEL: {membership.clinicPhone}</div>
+                          )}
                         </div>
                       )}
                       <div className="text-[11px] text-status-danger mt-2">※ 予約の日程の変更・キャンセルはできません</div>

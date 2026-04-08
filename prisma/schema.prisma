@@ -96,6 +96,7 @@ model Membership {
   clinicDate      DateTime?
   clinicName      String?                       // 提携クリニック名
   clinicAddress   String?                       // クリニック住所
+  clinicPhone     String?                       // クリニック電話番号
   ipsCompletedAt  DateTime?
   storageStartAt  DateTime?
   storageYears    Int             @default(10)

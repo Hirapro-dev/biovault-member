@@ -311,7 +311,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                     try {
                       await fetch(`/api/admin/members/${userId}`, {
                         method: "PATCH", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null, clinicAddress: inputClinicAddress || null } }),
+                        body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null, clinicAddress: inputClinicAddress || null, clinicPhone: inputClinicPhone || null } }),
                       });
                       setShowClinicPopup(false);
                       router.refresh();
