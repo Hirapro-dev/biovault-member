@@ -4,9 +4,13 @@ import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 import StaffFormUrl from "./StaffFormUrl";
 
-// 手続き必要な顧客の判定ロジック
-function getActionRequired(c: {
+// 手続き必要な顧客の判定ロジック（管理者ダッシュボードと同等）
+// 1人の顧客に対して複数のアクションを返せるように配列で返す
+type ActionItem = { label: string; icon: string; urgency: "high" | "medium" | "low" };
+
+function getActionsRequired(c: {
   name: string;
+  isIdIssued: boolean;
   membership: {
     memberNumber: string;
     ipsStatus: string;
@@ -15,34 +19,44 @@ function getActionRequired(c: {
     contractSignedAt: Date | null;
   } | null;
   cultureFluidOrders: { status: string; paymentStatus: string }[];
-}): { label: string; urgency: "high" | "medium" | "low" } | null {
+}): ActionItem[] {
   const m = c.membership;
-  if (!m) return null;
+  if (!m) return [];
 
+  const actions: ActionItem[] = [];
+
+  // 適合確認待ち（登録済みでTERMS_AGREEDチェック前）
+  if (m.ipsStatus === "REGISTERED") {
+    actions.push({ label: "適合確認待ち", icon: "📋", urgency: "medium" });
+  }
+  // ID発行待ち（適合確認済みでID未発行）
+  if (m.ipsStatus === "TERMS_AGREED" && !c.isIdIssued) {
+    actions.push({ label: "ID発行待ち", icon: "🔑", urgency: "medium" });
+  }
   // 契約書署名待ち
   if (m.ipsStatus === "SERVICE_APPLIED" && !m.contractSignedAt) {
-    return { label: "契約書署名待ち", urgency: "high" };
+    actions.push({ label: "契約書署名待ち", icon: "📝", urgency: "high" });
   }
   // 入金確認待ち
   if (m.ipsStatus === "SERVICE_APPLIED" && m.contractSignedAt && m.paymentStatus !== "COMPLETED") {
-    return { label: "入金確認待ち", urgency: "high" };
+    actions.push({ label: "入金確認待ち", icon: "💰", urgency: "high" });
   }
   // 日程調整中（クリニック未確定）
   if (m.ipsStatus === "SCHEDULE_ARRANGED" && !m.clinicDate) {
-    return { label: "クリニック日程調整中", urgency: "medium" };
+    actions.push({ label: "日程調整リクエスト", icon: "📅", urgency: "medium" });
   }
   // 培養上清液の入金待ち
   const cfPending = c.cultureFluidOrders.find(o => o.status === "APPLIED" && o.paymentStatus !== "COMPLETED");
   if (cfPending) {
-    return { label: "培養上清液 入金確認待ち", urgency: "medium" };
+    actions.push({ label: "培養上清液 入金確認待ち", icon: "🧪", urgency: "medium" });
   }
   // 培養上清液の予約手配
   const cfBooking = c.cultureFluidOrders.find(o => o.status === "PRODUCING" || o.status === "CLINIC_BOOKING");
   if (cfBooking) {
-    return { label: "培養上清液 予約手配", urgency: "low" };
+    actions.push({ label: "培養上清液 予約手配", icon: "🧪", urgency: "low" });
   }
 
-  return null;
+  return actions;
 }
 
 export default async function StaffDashboardPage() {
@@ -67,13 +81,18 @@ export default async function StaffDashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const thisMonthNew = customers.filter(c => new Date(c.createdAt) >= monthStart).length;
 
-  // 手続きが必要な顧客
-  const actionRequired = customers
-    .map(c => {
-      const action = getActionRequired(c);
-      return action ? { user: c, action } : null;
-    })
-    .filter((x): x is NonNullable<typeof x> => x !== null);
+  // 手続きが必要な顧客（管理者ダッシュボードと同等のロジック）
+  type ActionRequiredItem = { user: typeof customers[0]; action: ActionItem };
+  const actionRequired: ActionRequiredItem[] = [];
+  for (const c of customers) {
+    const actions = getActionsRequired(c);
+    for (const action of actions) {
+      actionRequired.push({ user: c, action });
+    }
+  }
+  // 緊急度順にソート（high → medium → low）
+  const urgencyOrder = { high: 0, medium: 1, low: 2 };
+  actionRequired.sort((a, b) => urgencyOrder[a.action.urgency] - urgencyOrder[b.action.urgency]);
 
   // ステータス別集計
   const statusCounts: Record<string, number> = {};
@@ -100,35 +119,35 @@ export default async function StaffDashboardPage() {
         <StatCard label="今月新規" value={String(thisMonthNew)} unit="名" color="text-gold" />
       </div>
 
-      {/* 手続きが必要な顧客 */}
+      {/* 対応が必要な顧客（管理者ダッシュボードと同等） */}
       {actionRequired.length > 0 && (
-        <div className="bg-bg-secondary border border-status-warning/30 rounded-md p-4 sm:p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
-            <span className="text-lg">⚠️</span>
-            <h3 className="font-serif-jp text-sm text-status-warning tracking-wider">手続きが必要な顧客（{actionRequired.length}件）</h3>
-          </div>
-          <div className="divide-y divide-border">
-            {actionRequired.map(({ user: c, action }) => (
-              <div key={c.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</span>
-                    <span className="text-sm text-text-primary">{c.name}</span>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+            対応が必要な顧客 <span className="text-gold font-mono ml-2">{actionRequired.length}</span>
+          </h3>
+          <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+            {actionRequired.map((item, idx) => (
+              <Link
+                key={`${item.user.id}-${item.action.label}-${idx}`}
+                href="/staff/members"
+                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
+              >
+                <span className="text-lg shrink-0">{item.action.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
+                    <span className="text-sm text-text-primary">{item.user.name}</span>
                   </div>
-                  <div className="text-[11px] text-text-muted mt-0.5">
-                    {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"}
-                  </div>
+                  <span className={`text-[11px] ${
+                    item.action.urgency === "high"
+                      ? "text-status-danger"
+                      : item.action.urgency === "medium"
+                      ? "text-status-warning"
+                      : "text-gold"
+                  }`}>{item.action.label}</span>
                 </div>
-                <span className={`text-[10px] px-2.5 py-1 rounded-full border shrink-0 ${
-                  action.urgency === "high"
-                    ? "bg-status-danger/10 text-status-danger border-status-danger/20"
-                    : action.urgency === "medium"
-                    ? "bg-status-warning/10 text-status-warning border-status-warning/20"
-                    : "bg-gold/10 text-gold border-gold/20"
-                }`}>
-                  {action.label}
-                </span>
-              </div>
+                <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
+              </Link>
             ))}
           </div>
         </div>
