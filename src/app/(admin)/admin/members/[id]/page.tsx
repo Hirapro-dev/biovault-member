@@ -179,6 +179,7 @@ export default async function MemberKartePage({
               cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null,
               informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
               completedAt: o.completedAt ? o.completedAt.toISOString() : null,
+              completedSessions: o.completedSessions ?? 0,
               createdAt: o.createdAt.toISOString(),
             }))}
           />

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { getTotalSessions, isAllSessionsCompleted } from "@/lib/culture-fluid-plans";
 
 type Clinic = {
   id: string;
@@ -12,19 +13,24 @@ type Clinic = {
   isActive: boolean;
 };
 
-// 培養上清液の注文ステータスステップ
-const CF_STEPS = [
+// フェーズ1：保管まで（4ステップ）
+const PHASE1_STEPS = [
   { key: "APPLIED", label: "追加購入申込み", adminToggle: false },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", adminToggle: true },
-  { key: "PRODUCING", label: "精製完了・管理保管", adminToggle: true },
-  { key: "CLINIC_BOOKING", label: "クリニック予約手配", adminToggle: true },
+  { key: "PRODUCING", label: "iPS培養上清液の精製", adminToggle: true },
+  { key: "STORAGE", label: "iPS培養上清液の管理保管", adminToggle: false },
+] as const;
+
+// フェーズ2：施術まで（4ステップ）
+const PHASE2_STEPS = [
+  { key: "CLINIC_BOOKING", label: "クリニックの施術予約", adminToggle: true },
   { key: "INFORMED_AGREED", label: "事前説明・同意", adminToggle: false },
   { key: "RESERVATION_CONFIRMED", label: "予約確定", adminToggle: true },
   { key: "COMPLETED", label: "施術完了", adminToggle: true },
 ] as const;
 
-// ステータスの進行順序
-const STATUS_ORDER: string[] = CF_STEPS.map((s) => s.key);
+// フェーズ2のDB status 順序（進行判定用）
+const PHASE2_DB_ORDER = ["CLINIC_BOOKING", "INFORMED_AGREED", "RESERVATION_CONFIRMED", "COMPLETED"];
 
 // ステータスバッジの色マッピング
 const STATUS_BADGE: Record<string, { label: string; color: string }> = {
@@ -56,6 +62,7 @@ interface Props {
     cautionAgreedAt: string | null;
     informedAgreedAt: string | null;
     completedAt: string | null;
+    completedSessions: number;
     createdAt: string;
   }[];
 }
@@ -110,30 +117,33 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
     );
   }
 
-  // 注文のステータスからステップの完了状態を判定
-  const isStepDone = (order: Props["orders"][number], stepKey: string): boolean => {
-    const orderStatusIdx = STATUS_ORDER.indexOf(order.status);
-    const stepIdx = STATUS_ORDER.indexOf(stepKey);
-
+  // フェーズ1のステップ完了判定
+  const isPhase1StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
     switch (stepKey) {
       case "APPLIED":
-        // 申込は常に完了
         return true;
       case "PAYMENT_CONFIRMED":
         return order.paymentStatus === "COMPLETED";
       case "PRODUCING":
         return !!order.producedAt;
-      case "CLINIC_BOOKING":
-        return !!order.clinicDate && !!order.clinicName;
-      case "INFORMED_AGREED":
-        return !!order.informedAgreedAt;
-      case "RESERVATION_CONFIRMED":
-        return orderStatusIdx >= stepIdx;
-      case "COMPLETED":
-        return order.status === "COMPLETED";
+      case "STORAGE":
+        return !!order.producedAt && !!order.expiresAt;
       default:
         return false;
     }
+  };
+
+  // フェーズ2のステップ完了判定
+  // 施術完了後に残回数がある場合は status が CLINIC_BOOKING に戻るため、
+  // その場合はフェーズ2のすべてのステップが未完了として扱う
+  const isPhase2StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
+    const isPhase1Complete = isPhase1StepDone(order, "STORAGE");
+    if (!isPhase1Complete) return false;
+
+    const statusIdx = PHASE2_DB_ORDER.indexOf(order.status);
+    if (statusIdx === -1) return false;
+    const stepIdx = PHASE2_DB_ORDER.indexOf(stepKey);
+    return stepIdx !== -1 && statusIdx >= stepIdx;
   };
 
   // PATCH APIを呼び出す共通関数
@@ -150,9 +160,9 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
   };
 
   // 各ステップクリック時の処理
-  const handleStepClick = async (order: Props["orders"][number], stepKey: string) => {
+  const handleStepClick = async (order: Props["orders"][number], stepKey: string, phase: 1 | 2) => {
     if (loadingOrder) return;
-    const done = isStepDone(order, stepKey);
+    const done = phase === 1 ? isPhase1StepDone(order, stepKey) : isPhase2StepDone(order, stepKey);
     if (done) return; // 既に完了済みのステップは操作不可
 
     switch (stepKey) {
@@ -195,6 +205,20 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
     }
   };
 
+  // 「次の予約をする」アクション
+  const handleNextSession = async (orderId: string) => {
+    if (loadingOrder) return;
+    setLoadingOrder(orderId);
+    try {
+      await patchOrder(orderId, { action: "next_session" });
+      router.refresh();
+    } catch {
+      // エラーは静かに処理
+    } finally {
+      setLoadingOrder(null);
+    }
+  };
+
   // 金額フォーマット
   const formatAmount = (amount: number) =>
     new Intl.NumberFormat("ja-JP").format(amount);
@@ -205,12 +229,109 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
     return d.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
   };
 
+  // 共通のステップ行レンダラー
+  const renderStep = (
+    order: Props["orders"][number],
+    step: { key: string; label: string; adminToggle: boolean },
+    phase: 1 | 2,
+    isLoading: boolean
+  ) => {
+    const done = phase === 1 ? isPhase1StepDone(order, step.key) : isPhase2StepDone(order, step.key);
+    const canToggle = step.adminToggle && !done && !isLoading;
+
+    return (
+      <div
+        key={step.key}
+        onClick={() => canToggle ? handleStepClick(order, step.key, phase) : undefined}
+        className={`flex items-center gap-3 py-3.5 px-3 rounded transition-colors ${
+          canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""
+        }`}
+      >
+        {/* チェックボックス */}
+        <div
+          className={`w-8 h-8 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+            done
+              ? "bg-gold border-gold"
+              : canToggle
+              ? "border-text-muted/40 hover:border-gold/60"
+              : "border-border"
+          }`}
+        >
+          {done && (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 9L7.5 12.5L14 5.5" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+
+        {/* ラベル */}
+        <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>
+          {step.label}
+        </span>
+
+        {/* 会員操作ヒント（非admin切替ステップ） */}
+        {!step.adminToggle && !done && step.key !== "APPLIED" && step.key !== "STORAGE" && (
+          <span className="text-[10px] text-text-muted ml-auto">会員本人が操作</span>
+        )}
+
+        {/* 入金日の表示 */}
+        {step.key === "PAYMENT_CONFIRMED" && order.paidAt && (
+          <span className="text-[10px] text-text-muted ml-auto font-mono">
+            入金: {formatDate(order.paidAt)}
+          </span>
+        )}
+
+        {/* 精製日の表示 */}
+        {step.key === "PRODUCING" && order.producedAt && (
+          <span className="text-[10px] text-text-muted ml-auto font-mono">
+            精製: {formatDate(order.producedAt)}
+          </span>
+        )}
+
+        {/* 管理期限の表示 */}
+        {step.key === "STORAGE" && order.expiresAt && (
+          <span className="text-[10px] text-text-muted ml-auto font-mono">
+            期限: {formatDate(order.expiresAt)}
+          </span>
+        )}
+
+        {/* クリニック情報の表示 */}
+        {step.key === "CLINIC_BOOKING" && order.clinicDate && (
+          <span className="text-[10px] text-text-muted ml-auto font-mono">
+            {formatDate(order.clinicDate)} {order.clinicName || ""}
+          </span>
+        )}
+
+        {/* 施術完了日の表示 */}
+        {step.key === "COMPLETED" && order.completedAt && (
+          <span className="text-[10px] text-text-muted ml-auto font-mono">
+            完了: {formatDate(order.completedAt)}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="space-y-4">
         {orders.map((order) => {
           const badge = STATUS_BADGE[order.status] || { label: order.status, color: "bg-text-muted/20 text-text-muted" };
           const isLoading = loadingOrder === order.id;
+          const totalSessions = getTotalSessions(order.planType);
+          const currentSession = Math.min((order.completedSessions ?? 0) + 1, totalSessions);
+          const isPhase1Complete = isPhase1StepDone(order, "STORAGE");
+          const allCompleted = isAllSessionsCompleted(order.planType, order.completedSessions ?? 0);
+          // 「次の予約をする」ボタン表示条件:
+          // - 全体は未完了（残回数あり）
+          // - status が CLINIC_BOOKING に戻っている
+          // - かつ 2回目以降（= completedSessions >= 1）
+          const showNextSessionButton =
+            !allCompleted &&
+            order.status === "CLINIC_BOOKING" &&
+            (order.completedSessions ?? 0) >= 1 &&
+            !order.clinicDate &&
+            !order.informedAgreedAt;
 
           return (
             <div key={order.id} className="bg-bg-secondary border border-border rounded-md overflow-hidden">
@@ -220,81 +341,58 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                 <span className="text-sm text-gold font-mono">&yen;{formatAmount(order.totalAmount)}</span>
                 <span className="text-xs text-text-muted">{formatDate(order.createdAt)}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                {totalSessions > 1 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
+                    {order.completedSessions ?? 0} / {totalSessions} 回完了
+                  </span>
+                )}
                 {isLoading && <span className="text-[10px] text-gold animate-pulse ml-auto">更新中...</span>}
               </div>
 
-              {/* ステータスチェックリスト */}
-              <div className="p-4 sm:p-6 space-y-1">
-                {CF_STEPS.map((step) => {
-                  const done = isStepDone(order, step.key);
-                  const canToggle = step.adminToggle && !done && !isLoading;
+              {/* フェーズ1：保管まで */}
+              <div className="px-4 sm:px-6 pt-4 pb-1">
+                <div className="text-[11px] text-gold tracking-wider mb-1">フェーズ1：保管まで</div>
+              </div>
+              <div className="px-4 sm:px-6 pb-4 space-y-1">
+                {PHASE1_STEPS.map((step) => renderStep(order, step, 1, isLoading))}
+              </div>
 
-                  return (
-                    <div
-                      key={step.key}
-                      onClick={() => canToggle ? handleStepClick(order, step.key) : undefined}
-                      className={`flex items-center gap-3 py-3.5 px-3 rounded transition-colors ${
-                        canToggle ? "cursor-pointer hover:bg-bg-elevated" : ""
-                      }`}
-                    >
-                      {/* チェックボックス */}
-                      <div
-                        className={`w-8 h-8 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
-                          done
-                            ? "bg-gold border-gold"
-                            : canToggle
-                            ? "border-text-muted/40 hover:border-gold/60"
-                            : "border-border"
-                        }`}
-                      >
-                        {done && (
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <path d="M4 9L7.5 12.5L14 5.5" stroke="#070709" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
+              {/* フェーズ2：施術まで */}
+              <div className="px-4 sm:px-6 pt-2 pb-1 border-t border-border">
+                <div className="flex items-center gap-2 mt-3 mb-1">
+                  <div className="text-[11px] text-gold tracking-wider">フェーズ2：施術まで</div>
+                  {totalSessions > 1 && isPhase1Complete && !allCompleted && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20 ml-auto">
+                      {currentSession}回目 / 全{totalSessions}回
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="px-4 sm:px-6 pb-4 space-y-1">
+                {isPhase1Complete ? (
+                  <>
+                    {PHASE2_STEPS.map((step) => renderStep(order, step, 2, isLoading))}
+                    {/* 「次の予約をする」ボタン（2回目以降かつ未着手時） */}
+                    {showNextSessionButton && (
+                      <div className="pt-3 mt-2 border-t border-border">
+                        <button
+                          onClick={() => handleNextSession(order.id)}
+                          disabled={isLoading}
+                          className="w-full py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50 hover:opacity-90 transition-all"
+                        >
+                          {isLoading ? "処理中..." : `次の予約をする（${currentSession}回目）`}
+                        </button>
+                        <p className="text-[10px] text-text-muted mt-2 text-center">
+                          前回の施術が完了しました。次回の施術サイクルを開始します。
+                        </p>
                       </div>
-
-                      {/* ラベル */}
-                      <span className={`text-sm ${done ? "text-gold font-medium" : "text-text-muted"}`}>
-                        {step.label}
-                      </span>
-
-                      {/* 会員操作ヒント（非admin切替ステップ） */}
-                      {!step.adminToggle && !done && (
-                        <span className="text-[10px] text-text-muted ml-auto">会員本人が操作</span>
-                      )}
-
-                      {/* 入金日の表示 */}
-                      {step.key === "PAYMENT_CONFIRMED" && order.paidAt && (
-                        <span className="text-[10px] text-text-muted ml-auto font-mono">
-                          入金: {formatDate(order.paidAt)}
-                        </span>
-                      )}
-
-                      {/* 精製日・有効期限の表示 */}
-                      {step.key === "PRODUCING" && order.producedAt && (
-                        <span className="text-[10px] text-text-muted ml-auto font-mono">
-                          精製: {formatDate(order.producedAt)}
-                          {order.expiresAt && ` / 期限: ${formatDate(order.expiresAt)}`}
-                        </span>
-                      )}
-
-                      {/* クリニック情報の表示 */}
-                      {step.key === "CLINIC_BOOKING" && order.clinicDate && (
-                        <span className="text-[10px] text-text-muted ml-auto font-mono">
-                          {formatDate(order.clinicDate)} {order.clinicName || ""}
-                        </span>
-                      )}
-
-                      {/* 施術完了日の表示 */}
-                      {step.key === "COMPLETED" && order.completedAt && (
-                        <span className="text-[10px] text-text-muted ml-auto font-mono">
-                          完了: {formatDate(order.completedAt)}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                    )}
+                  </>
+                ) : (
+                  <div className="py-4 text-center text-xs text-text-muted">
+                    フェーズ1の「管理保管」完了後に操作可能になります
+                  </div>
+                )}
               </div>
             </div>
           );

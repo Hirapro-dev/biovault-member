@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getTotalSessions } from "@/lib/culture-fluid-plans";
 
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
@@ -52,10 +53,42 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.clinicAddress !== undefined) updateData.clinicAddress = body.clinicAddress;
   if (body.clinicPhone !== undefined) updateData.clinicPhone = body.clinicPhone;
 
-  // 施術完了日 → 指定された日付を completedAt に保存、ステータスも COMPLETED に遷移
+  // 施術完了日 → 指定された日付を completedAt に保存
+  // 複数回施術プランの場合は completedSessions をインクリメント
+  // 残り回数がある場合は次の施術サイクルのためにフェーズ2（施術工程）をリセット
   if (body.completedAt) {
+    const newCompletedSessions = order.completedSessions + 1;
+    const totalSessions = getTotalSessions(order.planType);
+
     updateData.completedAt = new Date(body.completedAt);
-    updateData.status = "COMPLETED";
+    updateData.completedSessions = newCompletedSessions;
+
+    if (newCompletedSessions >= totalSessions) {
+      // 全回数完了 → COMPLETED で固定
+      updateData.status = "COMPLETED";
+    } else {
+      // 残り回数あり → 次の施術サイクル開始のためフェーズ2をリセット
+      updateData.status = "CLINIC_BOOKING";
+      updateData.clinicDate = null;
+      updateData.clinicName = null;
+      updateData.clinicAddress = null;
+      updateData.clinicPhone = null;
+      updateData.informedAgreedAt = null;
+    }
+  }
+
+  // 「次の予約をする」アクション（残回数ありの状態で COMPLETED → CLINIC_BOOKING に明示戻し）
+  if (body.action === "next_session") {
+    if (order.completedSessions >= getTotalSessions(order.planType)) {
+      return NextResponse.json({ error: "残り施術回数がありません" }, { status: 400 });
+    }
+    updateData.status = "CLINIC_BOOKING";
+    updateData.clinicDate = null;
+    updateData.clinicName = null;
+    updateData.clinicAddress = null;
+    updateData.clinicPhone = null;
+    updateData.informedAgreedAt = null;
+    updateData.completedAt = null;
   }
 
   const updated = await prisma.cultureFluidOrder.update({
