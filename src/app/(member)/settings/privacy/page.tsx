@@ -73,10 +73,10 @@ export default function PrivacyPage() {
           <Section title="8. お問い合わせ窓口">
             <p>個人情報の取り扱いに関するお問い合わせは、以下までご連絡ください。</p>
             <div className="mt-2 p-4 bg-bg-elevated rounded-md text-[12px] space-y-1">
-              <p>株式会社SCPP 個人情報保護担当</p>
+              <p>株式会社SCPP サポートデスク</p>
               <p>〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F</p>
               <p>TEL: 0120-788-839</p>
-              <p>MAIL: privacy@biovault.jp</p>
+              <p>MAIL: support@biovault.jp</p>
             </div>
           </Section>
 
