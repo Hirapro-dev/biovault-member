@@ -505,6 +505,11 @@ export default async function MyPage() {
                           pdfUrl={pdfUrl}
                           pageUrl={pageUrl}
                           done={done}
+                          deathWish={
+                            step.key === "DOC_CELL_CONSENT"
+                              ? ((membership?.deathWish ?? null) as "donate" | "dispose" | null)
+                              : null
+                          }
                         />
                       );
                     }

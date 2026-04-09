@@ -18,9 +18,18 @@ const DOC_VIEW_LINKS: Record<string, string> = {
 export default async function DocumentsPage() {
   const user = await requireAuth();
 
-  const documents = await prisma.document.findMany({
-    where: { userId: user.id },
-  });
+  const [documents, membership] = await Promise.all([
+    prisma.document.findMany({
+      where: { userId: user.id },
+    }),
+    prisma.membership.findUnique({
+      where: { userId: user.id },
+      select: { deathWish: true },
+    }),
+  ]);
+
+  // 死亡時意思表示（"donate" | "dispose" | null）
+  const deathWish = (membership?.deathWish ?? null) as "donate" | "dispose" | null;
 
   // 同意規約(SIMPLE_AGREEMENT)を除外し、指定順にソート
   const sortedDocs = [...documents]
@@ -93,6 +102,7 @@ export default async function DocumentsPage() {
                     done={isSigned}
                     triggerLabel={doc.fileUrl ? "PDF を見る" : "内容を確認"}
                     variant="button"
+                    deathWish={doc.type === "CELL_STORAGE_CONSENT" ? deathWish : null}
                   />
                 )}
               </div>

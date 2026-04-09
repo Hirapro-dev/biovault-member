@@ -12,6 +12,13 @@ type DocumentModalProps = {
   triggerLabel?: string;
   /** トリガーの見た目 "link"（デフォルト・ゴールド下線） or "button"（枠付き） */
   variant?: "link" | "button";
+  /**
+   * 死亡時意思表示の選択内容（CELL_STORAGE_CONSENT 専用）
+   * - "donate": 研究機関へ寄贈
+   * - "dispose": 廃棄
+   * - null/undefined: 未選択（セクション自体を非表示）
+   */
+  deathWish?: "donate" | "dispose" | null;
 };
 
 /**
@@ -33,6 +40,7 @@ export default function DocumentModal({
   done,
   triggerLabel,
   variant = "link",
+  deathWish,
 }: DocumentModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
@@ -242,10 +250,41 @@ export default function DocumentModal({
                 <div className="text-text-muted text-sm">読み込み中...</div>
               </div>
             ) : content ? (
-              <article
-                className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-text-primary [&_h2]:font-medium [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-text-primary [&_h3]:font-medium [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-text-primary [&_h4]:font-medium [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
-                dangerouslySetInnerHTML={{ __html: content }}
-              />
+              <>
+                <article
+                  className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-text-primary [&_h2]:font-medium [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-text-primary [&_h3]:font-medium [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-text-primary [&_h4]:font-medium [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+                {/* 死亡時意思表示（CELL_STORAGE_CONSENT専用・選択済みの場合のみ） */}
+                {deathWish && (
+                  <div className="mt-5 bg-bg-elevated border border-border rounded-md p-4 sm:p-5">
+                    <h3 className="text-sm text-text-primary font-medium mb-2">死亡時意思表示</h3>
+                    <p className="text-[11px] text-text-muted mb-3">同意時にご選択いただいた内容</p>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${deathWish === "donate" ? "border-gold" : "border-border"}`}>
+                          {deathWish === "donate" && <div className="w-2.5 h-2.5 rounded-full bg-gold" />}
+                        </div>
+                        <span className={`text-[13px] ${deathWish === "donate" ? "text-gold font-medium" : "text-text-muted"}`}>
+                          研究検体として研究機関へ寄贈する
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${deathWish === "dispose" ? "border-gold" : "border-border"}`}>
+                          {deathWish === "dispose" && <div className="w-2.5 h-2.5 rounded-full bg-gold" />}
+                        </div>
+                        <span className={`text-[13px] ${deathWish === "dispose" ? "text-gold font-medium" : "text-text-muted"}`}>
+                          廃棄する
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-[10px] text-text-muted leading-relaxed space-y-1">
+                      <p>※「研究検体として研究機関へ寄贈する」を選択した場合であっても、受入先の有無、研究計画、倫理審査、法令上の制約、保管状態その他の事情により、寄贈が実施できない場合があります。</p>
+                      <p>※ 選択した希望意志が実施できない場合、または必要な条件を満たさない場合には、廃棄その他相当な方法により処理されることがあります。</p>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : null}
           </div>
         )}
