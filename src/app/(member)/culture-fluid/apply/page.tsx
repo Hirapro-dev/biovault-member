@@ -373,16 +373,6 @@ export default function CultureFluidApplyPage() {
             </div>
           </div>
 
-          {/* 振込先情報 */}
-          <div className="bg-bg-secondary border border-border-gold rounded-md p-6">
-            <h3 className="text-sm text-gold mb-3">お振込先</h3>
-            <div className="text-sm text-text-secondary leading-relaxed space-y-1">
-              <p>三井住友銀行　渋谷駅前支店</p>
-              <p>普通　9876540</p>
-              <p>カ）エスシーピーピー</p>
-            </div>
-          </div>
-
           <div className="bg-gold/5 border-l-2 border-gold px-4 py-3 rounded-r-md">
             <p className="text-[12px] sm:text-[13px] text-text-secondary leading-relaxed">
               上記の内容を確認し、iPS培養上清液の追加購入に申し込みます。
