@@ -6,11 +6,18 @@ import Badge from "@/components/ui/Badge";
 export default async function CellConsentViewPage() {
   const sessionUser = await requireAuth();
 
-  const doc = await prisma.document.findFirst({
-    where: { userId: sessionUser.id, type: "CELL_STORAGE_CONSENT" },
-  });
+  const [doc, membership] = await Promise.all([
+    prisma.document.findFirst({
+      where: { userId: sessionUser.id, type: "CELL_STORAGE_CONSENT" },
+    }),
+    prisma.membership.findUnique({
+      where: { userId: sessionUser.id },
+      select: { deathWish: true },
+    }),
+  ]);
 
   const isSigned = doc?.status === "SIGNED";
+  const deathWish = membership?.deathWish;
 
   return (
     <div className="max-w-[760px] mx-auto">
@@ -166,6 +173,36 @@ export default async function CellConsentViewPage() {
           </S>
         </article>
       </div>
+
+      {/* 死亡時意思表示の選択内容 */}
+      {isSigned && deathWish && (
+        <div className="mt-5 bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
+          <h3 className="text-sm text-text-primary font-medium mb-3">死亡時意思表示</h3>
+          <p className="text-xs text-text-muted mb-4">同意時にご選択いただいた内容</p>
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${deathWish === "donate" ? "border-gold" : "border-border"}`}>
+                {deathWish === "donate" && <div className="w-2.5 h-2.5 rounded-full bg-gold" />}
+              </div>
+              <span className={`text-[13px] ${deathWish === "donate" ? "text-gold font-medium" : "text-text-muted"}`}>
+                研究検体として研究機関へ寄贈する
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${deathWish === "dispose" ? "border-gold" : "border-border"}`}>
+                {deathWish === "dispose" && <div className="w-2.5 h-2.5 rounded-full bg-gold" />}
+              </div>
+              <span className={`text-[13px] ${deathWish === "dispose" ? "text-gold font-medium" : "text-text-muted"}`}>
+                廃棄する
+              </span>
+            </div>
+          </div>
+          <div className="mt-4 text-[10px] text-text-muted leading-relaxed space-y-1">
+            <p>※「研究検体として研究機関へ寄贈する」を選択した場合であっても、受入先の有無、研究計画、倫理審査、法令上の制約、保管状態その他の事情により、寄贈が実施できない場合があります。</p>
+            <p>※ 選択した希望意志が実施できない場合、または必要な条件を満たさない場合には、廃棄その他相当な方法により処理されることがあります。</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
