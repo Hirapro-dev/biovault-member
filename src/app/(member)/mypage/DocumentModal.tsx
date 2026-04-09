@@ -12,9 +12,15 @@ type DocumentModalProps = {
 
 /**
  * 書類モーダルコンポーネント
- * - PDFがある場合 → A4アスペクト比のモーダル内でPDFをiframe表示
+ * - PDFがある場合 → Google Docs Viewerで全ページ表示（ページ送り対応）
  * - PDFがない場合 → fetchで書類本文のみ取得し、モーダルで表示
  * - createPortalでbody直下にレンダリングし、確実にビューポート中央に表示
+ *
+ * サイズ設計:
+ *   PC PDF: 幅600px × 高さ70vh（大きすぎない）
+ *   SP PDF: 画面幅-24px × 高さ80dvh
+ *   PC HTML: 幅760px × 高さ自動（最大80dvh）
+ *   SP HTML: 画面幅-24px × 高さ自動（最大85dvh）
  */
 export default function DocumentModal({ label, pdfUrl, pageUrl, done }: DocumentModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +85,11 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
 
   const isPdf = !!pdfUrl;
 
+  // Google Docs ViewerでPDFを表示（全ページスクロール・ページ番号付き）
+  const viewerUrl = isPdf
+    ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl!)}`
+    : null;
+
   const modalContent = isOpen && mounted ? createPortal(
     <div
       style={{
@@ -108,26 +119,15 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
         }}
       />
 
-      {/* モーダル本体 — PDF時はA4比率、HTML時は従来通り */}
+      {/* モーダル本体 */}
       <div
         style={{
           position: "relative",
           zIndex: 1,
-          // PDFの場合: A4比率（幅:高さ = 1:1.414）を高さ基準で計算
-          // HTMLの場合: 従来通り横幅ベース
-          ...(isPdf ? {
-            // 高さを基準にA4比率で幅を算出（ヘッダー+フッター分を含む）
-            height: "calc(100dvh - 24px)",
-            maxHeight: "calc(100dvh - 24px)",
-            // A4比率: 幅 = 高さ / 1.414 だが、ヘッダー+フッター約100pxを考慮
-            // PCでは最大幅を制限して大きすぎないようにする
-            width: "min(calc((100dvh - 124px) / 1.414 + 0px), calc(100% - 0px), 560px)",
-            maxWidth: "560px",
-          } : {
-            width: "100%",
-            maxWidth: "760px",
-            maxHeight: "calc(100dvh - 24px)",
-          }),
+          width: isPdf ? "min(600px, calc(100% - 0px))" : "min(760px, 100%)",
+          maxWidth: isPdf ? "600px" : "760px",
+          height: isPdf ? "min(70vh, 680px)" : undefined,
+          maxHeight: "calc(100dvh - 24px)",
           backgroundColor: "var(--color-bg-primary)",
           border: "1px solid var(--color-border)",
           borderRadius: "12px",
@@ -187,21 +187,23 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
 
         {/* コンテンツ */}
         {isPdf ? (
-          /* PDF表示: A4比率のiframe */
+          /* PDF: Google Docs Viewerで全ページ表示 */
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <iframe
-              src={pdfUrl!}
+              src={viewerUrl!}
               style={{
                 flex: 1,
                 width: "100%",
                 border: "none",
+                backgroundColor: "#f0f0f0",
               }}
               title={label}
+              allow="autoplay"
             />
-            {/* スマホでPDFがiframe表示できない場合のフォールバック */}
+            {/* フォールバック: 別タブで直接開く */}
             <div
               style={{
-                padding: "8px 16px",
+                padding: "6px 16px",
                 borderTop: "1px solid var(--color-border)",
                 textAlign: "center",
                 flexShrink: 0,
@@ -213,7 +215,7 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
                 rel="noopener noreferrer"
                 className="text-[11px] text-gold hover:underline"
               >
-                PDFが表示されない場合はこちら →
+                PDFを別タブで開く →
               </a>
             </div>
           </div>

@@ -77,14 +77,14 @@ export default async function MyPage() {
 
   // 書類署名日マッピング
   const docSignedMap: Record<string, string | null> = {};
-  // 書類PDF URLマッピング（署名済みPDFがある場合）
+  // 書類PDF URLマッピング（S3直URLを保持）
   const docFileUrlMap: Record<string, string | null> = {};
   for (const doc of documents) {
     if (doc.status === "SIGNED" && doc.signedAt) {
       docSignedMap[doc.type] = doc.signedAt.toISOString();
     }
     if (doc.fileUrl) {
-      docFileUrlMap[doc.type] = `/api/member/documents/${doc.id}`;
+      docFileUrlMap[doc.type] = doc.fileUrl;
     }
   }
 
