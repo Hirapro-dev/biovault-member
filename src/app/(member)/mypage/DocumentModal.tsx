@@ -12,8 +12,8 @@ type DocumentModalProps = {
 
 /**
  * 書類モーダルコンポーネント
- * - PDFがある場合 → 新しいタブでPDFを開く
- * - PDFがない場合 → fetchで書類本文のみ取得し、ページ内モーダルで表示
+ * - PDFがある場合 → モーダル内でPDFをiframe表示（＋新しいタブで開くボタン）
+ * - PDFがない場合 → fetchで書類本文のみ取得し、モーダルで表示
  * - createPortalでbody直下にレンダリングし、確実にビューポート中央に表示
  */
 export default function DocumentModal({ label, pdfUrl, pageUrl, done }: DocumentModalProps) {
@@ -23,12 +23,10 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
   const [mounted, setMounted] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // クライアントサイドでのみportalを有効にする
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ESCキーでモーダルを閉じる
   const handleEsc = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") setIsOpen(false);
   }, []);
@@ -46,7 +44,6 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
     };
   }, [isOpen, handleEsc]);
 
-  // モーダルを開いたらコンテンツをスクロール位置リセット
   useEffect(() => {
     if (isOpen && contentRef.current) {
       contentRef.current.scrollTop = 0;
@@ -54,11 +51,10 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
   }, [isOpen, content]);
 
   const handleClick = async () => {
-    if (pdfUrl) {
-      window.open(pdfUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
     setIsOpen(true);
+
+    // PDFの場合はfetch不要
+    if (pdfUrl) return;
 
     // 既にコンテンツ取得済みなら再取得しない
     if (content) return;
@@ -85,7 +81,8 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
 
   if (!done) return <span className="text-[13px] sm:text-sm text-text-muted">{label}</span>;
 
-  // モーダルの中身（createPortalでbody直下に描画）
+  const isPdf = !!pdfUrl;
+
   const modalContent = isOpen && mounted ? createPortal(
     <div
       style={{
@@ -180,23 +177,57 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
           </button>
         </div>
 
-        {/* 本文コンテンツ */}
-        <div
-          ref={contentRef}
-          className="flex-1 overflow-y-auto p-4 sm:p-6"
-          style={{ minHeight: 0 }}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="text-text-muted text-sm">読み込み中...</div>
-            </div>
-          ) : content ? (
-            <article
-              className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-text-primary [&_h2]:font-medium [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-text-primary [&_h3]:font-medium [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-text-primary [&_h4]:font-medium [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
-              dangerouslySetInnerHTML={{ __html: content }}
+        {/* コンテンツ */}
+        {isPdf ? (
+          /* PDF表示: iframe埋め込み */
+          <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <iframe
+              src={pdfUrl!}
+              style={{
+                flex: 1,
+                width: "100%",
+                border: "none",
+                minHeight: "300px",
+              }}
+              title={label}
             />
-          ) : null}
-        </div>
+            {/* スマホでiframeがPDFを表示できない場合のフォールバック */}
+            <div
+              style={{
+                padding: "12px 16px",
+                borderTop: "1px solid var(--color-border)",
+                textAlign: "center",
+              }}
+            >
+              <a
+                href={pdfUrl!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gold hover:underline"
+              >
+                PDFが表示されない場合はこちらから開く →
+              </a>
+            </div>
+          </div>
+        ) : (
+          /* HTML書類の本文表示 */
+          <div
+            ref={contentRef}
+            className="flex-1 overflow-y-auto p-4 sm:p-6"
+            style={{ minHeight: 0 }}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-text-muted text-sm">読み込み中...</div>
+              </div>
+            ) : content ? (
+              <article
+                className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-text-primary [&_h2]:font-medium [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-text-primary [&_h3]:font-medium [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-text-primary [&_h4]:font-medium [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            ) : null}
+          </div>
+        )}
 
         {/* フッター */}
         <div
@@ -225,7 +256,7 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
         className="text-[13px] sm:text-sm text-gold hover:underline underline-offset-2 text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal"
       >
         {label}
-        <span className="text-[10px] ml-1 opacity-60">{pdfUrl ? "📎" : "📄"}</span>
+        <span className="text-[10px] ml-1 opacity-60">{isPdf ? "📎" : "📄"}</span>
       </button>
       {modalContent}
     </>
