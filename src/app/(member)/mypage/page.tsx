@@ -8,7 +8,8 @@ import DocumentModal from "./DocumentModal";
 const TIMELINE_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
   { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑" },
-  { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
+  { key: "DOC_IMPORTANT_NOTICE", label: "重要事項説明書兼確認書", icon: "📜" },
+  { key: "DOC_PRIVACY_CONSENT", label: "個人情報・個人遺伝情報等の取扱いに関する同意", icon: "🔒" },
   { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️" },
   { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝" },
   { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰" },
@@ -93,7 +94,8 @@ export default async function MyPage() {
 
   function isStepDone(key: string): boolean {
     if (key === "REGISTERED") return !!fullUser?.isIdIssued;
-    if (key === "DOC_PRIVACY") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
+    if (key === "DOC_IMPORTANT_NOTICE") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
+    if (key === "DOC_PRIVACY_CONSENT") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
     if (key === "CONTRACT_SIGNING") return !!membership?.contractSignedAt;
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
     if (key === "CLINIC_CONFIRMED") return !!membership?.clinicDate;
@@ -105,7 +107,8 @@ export default async function MyPage() {
   }
 
   function getStepDate(key: string): string | null {
-    if (key === "DOC_PRIVACY") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
+    if (key === "DOC_IMPORTANT_NOTICE") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
+    if (key === "DOC_PRIVACY_CONSENT") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
     if (key === "CONTRACT_SIGNING") return membership?.contractSignedAt ? membership.contractSignedAt.toISOString() : null;
     if (key === "DOC_CELL_CONSENT") return docSignedMap["CELL_STORAGE_CONSENT"] || null;
     if (key === "CLINIC_CONFIRMED") return membership?.clinicDate ? membership.clinicDate.toISOString() : null;
@@ -479,7 +482,8 @@ export default async function MyPage() {
                   {(() => {
                     // 書類があるステップのページURL・PDFマッピング
                     const stepDocPages: Record<string, string> = {
-                      DOC_PRIVACY: "/important-notice",
+                      DOC_IMPORTANT_NOTICE: "/documents/important-notice",
+                      DOC_PRIVACY_CONSENT: "/documents/privacy-consent",
                       SERVICE_APPLIED: "/documents/service-terms",
                       CONTRACT_SIGNING: "/documents/contract",
                       DOC_CELL_CONSENT: "/documents/cell-consent",

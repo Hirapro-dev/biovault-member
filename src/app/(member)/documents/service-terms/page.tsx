@@ -17,9 +17,9 @@ export default async function ServiceTermsPage() {
       </h1>
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8">
-        <div className="space-y-6 text-xs text-text-secondary leading-relaxed">
+        <article className="space-y-6 text-xs text-text-secondary leading-relaxed">
           <ServiceTermsContent />
-        </div>
+        </article>
       </div>
     </div>
   );
