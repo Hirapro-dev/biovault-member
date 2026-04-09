@@ -1,9 +1,9 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
-import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_ORDER } from "@/types";
 import type { DocumentType } from "@/types";
+import DocumentModal from "../mypage/DocumentModal";
 
 // 署名済み書類の内容確認リンク先
 const DOC_VIEW_LINKS: Record<string, string> = {
@@ -58,6 +58,10 @@ export default async function DocumentsPage() {
           const st = statusConfig[doc.status];
           const docNum = docNumberMap[doc.type] || "";
           const viewLink = DOC_VIEW_LINKS[doc.type];
+          const label = DOCUMENT_TYPE_LABELS[doc.type] || doc.title;
+          const isSigned = doc.status === "SIGNED";
+          // モーダルで開ける条件: 署名済み かつ (PDFあり または 内容確認ページあり)
+          const canOpenModal = isSigned && (!!doc.fileUrl || !!viewLink);
 
           return (
             <div
@@ -70,7 +74,7 @@ export default async function DocumentsPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-sm sm:text-base text-text-primary leading-snug">
-                    {DOCUMENT_TYPE_LABELS[doc.type] || doc.title}
+                    {label}
                   </div>
                   {doc.signedAt && (
                     <div className="text-xs text-text-secondary mt-0.5">
@@ -81,25 +85,15 @@ export default async function DocumentsPage() {
               </div>
               <div className="flex items-center gap-3 pl-11 sm:pl-0">
                 <Badge variant={st.variant}>{st.label}</Badge>
-                {/* PDF がある場合はPDFリンク */}
-                {doc.fileUrl && (
-                  <a
-                    href={`/api/member/documents/${doc.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
-                  >
-                    PDF を見る
-                  </a>
-                )}
-                {/* PDF がなく、署名済みで内容確認リンクがある場合 */}
-                {!doc.fileUrl && doc.status === "SIGNED" && viewLink && (
-                  <Link
-                    href={viewLink}
-                    className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300"
-                  >
-                    内容を確認
-                  </Link>
+                {canOpenModal && (
+                  <DocumentModal
+                    label={label}
+                    pdfUrl={doc.fileUrl}
+                    pageUrl={viewLink || ""}
+                    done={isSigned}
+                    triggerLabel={doc.fileUrl ? "PDF を見る" : "内容を確認"}
+                    variant="button"
+                  />
                 )}
               </div>
             </div>

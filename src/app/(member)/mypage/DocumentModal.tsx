@@ -8,6 +8,10 @@ type DocumentModalProps = {
   pdfUrl?: string | null;
   pageUrl: string;
   done: boolean;
+  /** トリガーボタンに表示するテキスト（省略時は label） */
+  triggerLabel?: string;
+  /** トリガーの見た目 "link"（デフォルト・ゴールド下線） or "button"（枠付き） */
+  variant?: "link" | "button";
 };
 
 /**
@@ -22,7 +26,14 @@ type DocumentModalProps = {
  *   PC HTML: 幅760px × 高さ自動（最大80dvh）
  *   SP HTML: 画面幅-24px × 高さ自動（最大85dvh）
  */
-export default function DocumentModal({ label, pdfUrl, pageUrl, done }: DocumentModalProps) {
+export default function DocumentModal({
+  label,
+  pdfUrl,
+  pageUrl,
+  done,
+  triggerLabel,
+  variant = "link",
+}: DocumentModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -259,15 +270,26 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
     document.body
   ) : null;
 
+  const buttonText = triggerLabel ?? label;
+
   return (
     <>
-      <button
-        onClick={handleClick}
-        className="text-[13px] sm:text-sm text-gold hover:underline underline-offset-2 text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal"
-      >
-        {label}
-        <span className="text-[10px] ml-1 opacity-60">{isPdf ? "📎" : "📄"}</span>
-      </button>
+      {variant === "button" ? (
+        <button
+          onClick={handleClick}
+          className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300 cursor-pointer"
+        >
+          {buttonText}
+        </button>
+      ) : (
+        <button
+          onClick={handleClick}
+          className="text-[13px] sm:text-sm text-gold hover:underline underline-offset-2 text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal"
+        >
+          {buttonText}
+          <span className="text-[10px] ml-1 opacity-60">{isPdf ? "📎" : "📄"}</span>
+        </button>
+      )}
       {modalContent}
     </>
   );
