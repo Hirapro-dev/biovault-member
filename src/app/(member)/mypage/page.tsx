@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import ScheduleRequestButton from "./ScheduleRequestButton";
+import DocumentModal from "./DocumentModal";
 
 // 表示用ステップの定義
 const TIMELINE_STEPS = [
@@ -76,9 +77,14 @@ export default async function MyPage() {
 
   // 書類署名日マッピング
   const docSignedMap: Record<string, string | null> = {};
+  // 書類PDF URLマッピング（署名済みPDFがある場合）
+  const docFileUrlMap: Record<string, string | null> = {};
   for (const doc of documents) {
     if (doc.status === "SIGNED" && doc.signedAt) {
       docSignedMap[doc.type] = doc.signedAt.toISOString();
+    }
+    if (doc.fileUrl) {
+      docFileUrlMap[doc.type] = `/api/member/documents/${doc.id}`;
     }
   }
 
@@ -471,23 +477,31 @@ export default async function MyPage() {
                 {/* コンテンツ */}
                 <div className="pt-1 min-w-0 flex-1">
                   {(() => {
-                    // 書類があるステップのリンク先マッピング
-                    const stepDocLinks: Record<string, string> = {
+                    // 書類があるステップのページURL・PDFマッピング
+                    const stepDocPages: Record<string, string> = {
                       DOC_PRIVACY: "/important-notice",
                       SERVICE_APPLIED: "/documents/service-terms",
                       CONTRACT_SIGNING: "/documents/contract",
                       DOC_CELL_CONSENT: "/documents/cell-consent",
                       DOC_INFORMED: "/mypage/informed-consent",
                     };
-                    const docLink = stepDocLinks[step.key];
+                    // CONTRACT_SIGNINGはPDF（CONSENT_CELL_STORAGE）があればPDFリンクを使用
+                    const stepPdfMap: Record<string, string | null> = {
+                      CONTRACT_SIGNING: docFileUrlMap["CONSENT_CELL_STORAGE"] || null,
+                    };
+                    const pageUrl = stepDocPages[step.key];
+                    const pdfUrl = stepPdfMap[step.key] || null;
                     const labelClass = `text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`;
 
-                    if (docLink && done) {
+                    if (pageUrl && done) {
+                      // モーダルまたはPDFで表示（ページ遷移しない）
                       return (
-                        <Link href={docLink} className={`${labelClass} hover:underline underline-offset-2`}>
-                          {step.label}
-                          <span className="text-[10px] ml-1 opacity-60">📄</span>
-                        </Link>
+                        <DocumentModal
+                          label={step.label}
+                          pdfUrl={pdfUrl}
+                          pageUrl={pageUrl}
+                          done={done}
+                        />
                       );
                     }
                     return <div className={labelClass}>{step.label}</div>;
