@@ -12,7 +12,7 @@ type DocumentModalProps = {
 
 /**
  * 書類モーダルコンポーネント
- * - PDFがある場合 → モーダル内でPDFをiframe表示（＋新しいタブで開くボタン）
+ * - PDFがある場合 → A4アスペクト比のモーダル内でPDFをiframe表示
  * - PDFがない場合 → fetchで書類本文のみ取得し、モーダルで表示
  * - createPortalでbody直下にレンダリングし、確実にビューポート中央に表示
  */
@@ -52,11 +52,7 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
 
   const handleClick = async () => {
     setIsOpen(true);
-
-    // PDFの場合はfetch不要
     if (pdfUrl) return;
-
-    // 既にコンテンツ取得済みなら再取得しない
     if (content) return;
 
     setLoading(true);
@@ -112,20 +108,32 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
         }}
       />
 
-      {/* モーダル本体 */}
+      {/* モーダル本体 — PDF時はA4比率、HTML時は従来通り */}
       <div
         style={{
           position: "relative",
           zIndex: 1,
-          width: "100%",
-          maxWidth: "760px",
-          maxHeight: "calc(100dvh - 24px)",
+          // PDFの場合: A4比率（幅:高さ = 1:1.414）を高さ基準で計算
+          // HTMLの場合: 従来通り横幅ベース
+          ...(isPdf ? {
+            // 高さを基準にA4比率で幅を算出（ヘッダー+フッター分を含む）
+            height: "calc(100dvh - 24px)",
+            maxHeight: "calc(100dvh - 24px)",
+            // A4比率: 幅 = 高さ / 1.414 だが、ヘッダー+フッター約100pxを考慮
+            // PCでは最大幅を制限して大きすぎないようにする
+            width: "min(calc((100dvh - 124px) / 1.414 + 0px), calc(100% - 0px), 560px)",
+            maxWidth: "560px",
+          } : {
+            width: "100%",
+            maxWidth: "760px",
+            maxHeight: "calc(100dvh - 24px)",
+          }),
           backgroundColor: "var(--color-bg-primary)",
           border: "1px solid var(--color-border)",
           borderRadius: "12px",
           overflow: "hidden",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "column" as const,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -135,7 +143,7 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "12px 16px",
+            padding: "10px 16px",
             borderBottom: "1px solid var(--color-border)",
             flexShrink: 0,
           }}
@@ -179,7 +187,7 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
 
         {/* コンテンツ */}
         {isPdf ? (
-          /* PDF表示: iframe埋め込み */
+          /* PDF表示: A4比率のiframe */
           <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             <iframe
               src={pdfUrl!}
@@ -187,25 +195,25 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
                 flex: 1,
                 width: "100%",
                 border: "none",
-                minHeight: "300px",
               }}
               title={label}
             />
-            {/* スマホでiframeがPDFを表示できない場合のフォールバック */}
+            {/* スマホでPDFがiframe表示できない場合のフォールバック */}
             <div
               style={{
-                padding: "12px 16px",
+                padding: "8px 16px",
                 borderTop: "1px solid var(--color-border)",
                 textAlign: "center",
+                flexShrink: 0,
               }}
             >
               <a
                 href={pdfUrl!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gold hover:underline"
+                className="text-[11px] text-gold hover:underline"
               >
-                PDFが表示されない場合はこちらから開く →
+                PDFが表示されない場合はこちら →
               </a>
             </div>
           </div>
@@ -232,14 +240,14 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
         {/* フッター */}
         <div
           style={{
-            padding: "12px 16px",
+            padding: "10px 16px",
             borderTop: "1px solid var(--color-border)",
             flexShrink: 0,
           }}
         >
           <button
             onClick={() => setIsOpen(false)}
-            className="w-full py-2.5 bg-bg-elevated border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
+            className="w-full py-2 bg-bg-elevated border border-border text-text-secondary rounded text-sm hover:border-border-gold hover:text-gold transition-all cursor-pointer"
           >
             閉じる
           </button>
