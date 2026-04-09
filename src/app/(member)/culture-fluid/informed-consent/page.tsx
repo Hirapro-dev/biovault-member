@@ -25,15 +25,33 @@ export default function CultureFluidInformedConsentPage() {
   }, [status, router]);
 
   // スクロール検知
+  // - 初期マウント時・リサイズ時・スクロール時のいずれでも判定
+  // - コンテンツがもともとスクロール不要（clientHeight >= scrollHeight）の場合も true にする
+  // - ブラウザの小数点誤差対策として許容値は 4px
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const handler = () => {
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20)
+
+    const check = () => {
+      // スクロール不要な場合も即 true
+      if (el.scrollHeight - el.clientHeight <= 4) {
         setScrolledToBottom(true);
+        return;
+      }
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) {
+        setScrolledToBottom(true);
+      }
     };
-    el.addEventListener("scroll", handler);
-    return () => el.removeEventListener("scroll", handler);
+
+    // 初期チェック（コンテンツがすでに全て見えている場合に備える）
+    check();
+
+    el.addEventListener("scroll", check);
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   // 同意送信
