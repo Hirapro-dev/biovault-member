@@ -225,53 +225,53 @@ export default async function CultureFluidPage() {
         </div>
       )}
 
-      {/* ── 4. ステータスタイムライン ── */}
-      {activeOrder && (
-        <>
-          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
-            ステータス
-          </h3>
-          <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6">
-            <div className="relative">
-              {CF_STEPS.map((step, i) => {
-                const done = isStepDone(step.key);
-                const isActive = !done && (i === 0 || isStepDone(CF_STEPS[i - 1]?.key));
-                const isLast = i === CF_STEPS.length - 1;
-                const nextDone = !isLast && isStepDone(CF_STEPS[i + 1].key);
+      {/* ── 4. ステータスタイムライン ──
+          注文がなくても常に表示し、注文前は第1ステップ「申込み」がアクティブ点滅 */}
+      <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+        ステータス
+      </h3>
+      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6">
+        <div className="relative">
+          {CF_STEPS.map((step, i) => {
+            const done = isStepDone(step.key);
+            // 注文がない場合は第1ステップ「APPLIED」が常にアクティブ点滅
+            const isActive = !activeOrder
+              ? i === 0
+              : !done && (i === 0 || isStepDone(CF_STEPS[i - 1]?.key));
+            const isLast = i === CF_STEPS.length - 1;
+            const nextDone = !isLast && isStepDone(CF_STEPS[i + 1].key);
 
-                return (
-                  <div key={step.key} className={`flex items-start gap-4 relative ${isLast ? "" : "pb-6"}`}>
-                    {!isLast && (
-                      <div className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
-                           style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }} />
-                    )}
-                    <div className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
-                      done ? "text-bg-primary font-bold" : isActive ? "border-2 border-gold text-gold animate-pulse-gold" : "border border-border text-text-muted"
-                    }`} style={{
-                      background: done ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
-                    }}>
-                      {done ? "✓" : step.icon}
-                    </div>
-                    <div className="pt-1 min-w-0 flex-1">
-                      <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
-                        {step.label}
-                      </div>
-                      {step.key === "PRODUCING" && activeOrder.producedAt && (
-                        <div className="text-[10px] text-text-muted font-mono mt-0.5">
-                          精製完了：{formatDate(activeOrder.producedAt)}{activeOrder.expiresAt && ` ／ 期限：${formatDate(activeOrder.expiresAt)}`}
-                        </div>
-                      )}
-                      {step.key === "RESERVATION_CONFIRMED" && activeOrder.clinicDate && done && (
-                        <div className="text-[10px] text-text-muted font-mono mt-0.5">{formatDate(activeOrder.clinicDate)}</div>
-                      )}
-                    </div>
+            return (
+              <div key={step.key} className={`flex items-start gap-4 relative ${isLast ? "" : "pb-6"}`}>
+                {!isLast && (
+                  <div className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
+                       style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }} />
+                )}
+                <div className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
+                  done ? "text-bg-primary font-bold" : isActive ? "border-2 border-gold text-gold animate-pulse-gold" : "border border-border text-text-muted"
+                }`} style={{
+                  background: done ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
+                }}>
+                  {done ? "✓" : step.icon}
+                </div>
+                <div className="pt-1 min-w-0 flex-1">
+                  <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                    {step.label}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
+                  {step.key === "PRODUCING" && activeOrder?.producedAt && (
+                    <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                      精製完了：{formatDate(activeOrder.producedAt)}{activeOrder.expiresAt && ` ／ 期限：${formatDate(activeOrder.expiresAt)}`}
+                    </div>
+                  )}
+                  {step.key === "RESERVATION_CONFIRMED" && activeOrder?.clinicDate && done && (
+                    <div className="text-[10px] text-text-muted font-mono mt-0.5">{formatDate(activeOrder.clinicDate)}</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ── 5. 注文がない場合 ── */}
       {!activeOrder && orders.length === 0 && (

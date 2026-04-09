@@ -3,6 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
+// 培養上清液の申込を受け付け可能な iPS ステータス
+// SERVICE_APPLIED 以降（iPSサービス申込済みの会員）であれば、
+// iPS 作製が未完了でも「予約申込」として受け付ける
+const ELIGIBLE_IPS_STATUSES = [
+  "SERVICE_APPLIED",
+  "SCHEDULE_ARRANGED",
+  "BLOOD_COLLECTED",
+  "IPS_CREATING",
+  "STORAGE_ACTIVE",
+] as const;
+
 // 培養上清液追加購入申込
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -10,13 +21,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
   }
 
-  const userId = (session.user as any).id;
+  const userId = (session.user as { id: string }).id;
   const body = await req.json();
 
-  // iPS保管中であることを確認
+  // iPSサービス申込済み以降であることを確認（予約申込を許可するため制約を緩和）
   const membership = await prisma.membership.findUnique({ where: { userId } });
-  if (!membership || membership.ipsStatus !== "STORAGE_ACTIVE") {
-    return NextResponse.json({ error: "iPS細胞保管中のメンバーのみ申込可能です" }, { status: 400 });
+  if (!membership || !ELIGIBLE_IPS_STATUSES.includes(membership.ipsStatus as typeof ELIGIBLE_IPS_STATUSES[number])) {
+    return NextResponse.json(
+      { error: "iPSサービスへのお申込みが完了してからご利用いただけます" },
+      { status: 400 }
+    );
   }
 
   const plans: Record<string, { label: string; amount: number }> = {
