@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { getTotalSessions, getRemainingSessions, isAllSessionsCompleted } from "@/lib/culture-fluid-plans";
+import DocumentModal from "../mypage/DocumentModal";
 
 // フェーズ1：保管まで（4ステップ）
 const PHASE1_STEPS = [
@@ -126,9 +127,9 @@ export default async function CultureFluidPage() {
       </div>
 
       {/* ── 2. 追加申込ボタン ── */}
-      <div className="mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <Link href="/culture-fluid/apply" className="block group">
-          <div className="rounded-xl border border-border-gold overflow-hidden hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all"
+          <div className="rounded-xl border border-border-gold overflow-hidden hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all h-full"
                style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.10) 0%, rgba(191,160,75,0.02) 100%)" }}>
             <div className="flex items-center gap-4 px-5 py-5">
               <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0"
@@ -136,10 +137,24 @@ export default async function CultureFluidPage() {
                 🧪
               </div>
               <div className="flex-1">
-                <div className="text-sm text-gold font-semibold tracking-wide">iPS培養上清液の追加購入申込</div>
+                <div className="text-sm text-gold font-semibold tracking-wide">追加購入申込</div>
                 <div className="text-[11px] text-text-muted mt-0.5">点滴・注射プランを選択して申込</div>
               </div>
               <span className="text-gold text-xs group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </div>
+        </Link>
+        <Link href="/culture-fluid/documents" className="block group">
+          <div className="rounded-xl border border-border overflow-hidden hover:border-border-gold hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all h-full bg-bg-secondary">
+            <div className="flex items-center gap-4 px-5 py-5">
+              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0 bg-bg-elevated border border-border">
+                📋
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-text-primary font-semibold tracking-wide">契約書類一覧</div>
+                <div className="text-[11px] text-text-muted mt-0.5">留意事項・同意書・購入記録を確認</div>
+              </div>
+              <span className="text-text-muted text-xs group-hover:translate-x-1 group-hover:text-gold transition-all">→</span>
             </div>
           </div>
         </Link>
@@ -323,9 +338,18 @@ export default async function CultureFluidPage() {
                   {done ? "✓" : step.icon}
                 </div>
                 <div className="pt-1 min-w-0 flex-1">
-                  <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
-                    {step.label}
-                  </div>
+                  {/* APPLIED ステップ: 同意済みなら留意事項モーダルを開けるリンクで表示 */}
+                  {step.key === "APPLIED" && done && activeOrder?.cautionAgreedAt ? (
+                    <DocumentModal
+                      label={step.label}
+                      pageUrl="/culture-fluid/caution"
+                      done={true}
+                    />
+                  ) : (
+                    <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                      {step.label}
+                    </div>
+                  )}
                   {step.key === "PRODUCING" && activeOrder?.producedAt && (
                     <div className="text-[10px] text-text-muted font-mono mt-0.5">
                       精製完了：{formatDate(activeOrder.producedAt)}
@@ -380,9 +404,18 @@ export default async function CultureFluidPage() {
                         {done ? "✓" : step.icon}
                       </div>
                       <div className="pt-1 min-w-0 flex-1">
-                        <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
-                          {step.label}
-                        </div>
+                        {/* INFORMED_AGREED ステップ: 同意済みなら事前説明同意書モーダルを開けるリンクで表示 */}
+                        {step.key === "INFORMED_AGREED" && done && activeOrder.informedAgreedAt ? (
+                          <DocumentModal
+                            label={step.label}
+                            pageUrl="/culture-fluid/documents/informed-consent"
+                            done={true}
+                          />
+                        ) : (
+                          <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                            {step.label}
+                          </div>
+                        )}
                         {step.key === "RESERVATION_CONFIRMED" && activeOrder.clinicDate && done && (
                           <div className="text-[10px] text-text-muted font-mono mt-0.5">{formatDate(activeOrder.clinicDate)}</div>
                         )}
