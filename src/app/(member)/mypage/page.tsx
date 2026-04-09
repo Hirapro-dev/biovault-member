@@ -94,7 +94,7 @@ export default async function MyPage() {
 
   function isStepDone(key: string): boolean {
     if (key === "REGISTERED") return !!fullUser?.isIdIssued;
-    if (key === "DOC_IMPORTANT_NOTICE") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
+    if (key === "DOC_IMPORTANT_NOTICE") return !!docSignedMap["CONTRACT"] || !!fullUser?.hasAgreedTerms;
     if (key === "DOC_PRIVACY_CONSENT") return !!docSignedMap["PRIVACY_POLICY"] || !!fullUser?.hasAgreedTerms;
     if (key === "CONTRACT_SIGNING") return !!membership?.contractSignedAt;
     if (key === "DOC_CELL_CONSENT") return !!docSignedMap["CELL_STORAGE_CONSENT"];
@@ -107,7 +107,7 @@ export default async function MyPage() {
   }
 
   function getStepDate(key: string): string | null {
-    if (key === "DOC_IMPORTANT_NOTICE") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
+    if (key === "DOC_IMPORTANT_NOTICE") return docSignedMap["CONTRACT"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
     if (key === "DOC_PRIVACY_CONSENT") return docSignedMap["PRIVACY_POLICY"] || (fullUser?.hasAgreedTerms ? statusDates["TERMS_AGREED"] || null : null);
     if (key === "CONTRACT_SIGNING") return membership?.contractSignedAt ? membership.contractSignedAt.toISOString() : null;
     if (key === "DOC_CELL_CONSENT") return docSignedMap["CELL_STORAGE_CONSENT"] || null;
