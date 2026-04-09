@@ -689,6 +689,9 @@ model CultureFluidOrder {
   cautionAgreedAt  DateTime?                      // 留意事項同意日
   informedAgreedAt DateTime?                      // 事前説明同意日
 
+  // 施術完了日
+  completedAt     DateTime?                       // 施術完了日（管理者入力）
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

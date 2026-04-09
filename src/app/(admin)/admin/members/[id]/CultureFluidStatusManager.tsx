@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+
+type Clinic = {
+  id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  isActive: boolean;
+};
 
 // 培養上清液の注文ステータスステップ
 const CF_STEPS = [
   { key: "APPLIED", label: "追加購入申込み", adminToggle: false },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", adminToggle: true },
-  { key: "PRODUCING", label: "精製・管理保管", adminToggle: true },
+  { key: "PRODUCING", label: "精製完了・管理保管", adminToggle: true },
   { key: "CLINIC_BOOKING", label: "クリニック予約手配", adminToggle: true },
   { key: "INFORMED_AGREED", label: "事前説明・同意", adminToggle: false },
   { key: "RESERVATION_CONFIRMED", label: "予約確定", adminToggle: true },
@@ -38,12 +46,16 @@ interface Props {
     totalAmount: number;
     status: string;
     paymentStatus: string;
+    paidAt: string | null;
     producedAt: string | null;
     expiresAt: string | null;
     clinicDate: string | null;
     clinicName: string | null;
+    clinicAddress: string | null;
+    clinicPhone: string | null;
     cautionAgreedAt: string | null;
     informedAgreedAt: string | null;
+    completedAt: string | null;
     createdAt: string;
   }[];
 }
@@ -51,6 +63,11 @@ interface Props {
 export default function CultureFluidStatusManager({ userId, orders }: Props) {
   const router = useRouter();
   const [loadingOrder, setLoadingOrder] = useState<string | null>(null);
+
+  // 入金確認ポップアップ
+  const [showPaymentPopup, setShowPaymentPopup] = useState<string | null>(null);
+  const [inputPaidDate, setInputPaidDate] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   // 精製日付入力ポップアップ
   const [showProducedPopup, setShowProducedPopup] = useState<string | null>(null);
@@ -64,6 +81,25 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
   const [inputClinicAddress, setInputClinicAddress] = useState("");
   const [inputClinicPhone, setInputClinicPhone] = useState("");
   const [clinicLoading, setClinicLoading] = useState(false);
+  const [clinicList, setClinicList] = useState<Clinic[]>([]);
+  const [selectedClinicId, setSelectedClinicId] = useState("");
+
+  // 施術完了ポップアップ
+  const [showCompletedPopup, setShowCompletedPopup] = useState<string | null>(null);
+  const [inputCompletedDate, setInputCompletedDate] = useState("");
+  const [completedLoading, setCompletedLoading] = useState(false);
+
+  // クリニック予約ポップアップが開いた時にクリニック一覧を取得
+  useEffect(() => {
+    if (showClinicPopup) {
+      fetch("/api/admin/clinics")
+        .then((r) => r.json())
+        .then((data) => {
+          setClinicList(Array.isArray(data) ? data.filter((c: Clinic) => c.isActive) : []);
+        })
+        .catch(() => setClinicList([]));
+    }
+  }, [showClinicPopup]);
 
   // 注文が無い場合
   if (!orders || orders.length === 0) {
@@ -121,15 +157,8 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
 
     switch (stepKey) {
       case "PAYMENT_CONFIRMED": {
-        setLoadingOrder(order.id);
-        try {
-          await patchOrder(order.id, { paymentStatus: "COMPLETED" });
-          router.refresh();
-        } catch {
-          // エラーは静かに処理
-        } finally {
-          setLoadingOrder(null);
-        }
+        setInputPaidDate(new Date().toISOString().split("T")[0]);
+        setShowPaymentPopup(order.id);
         break;
       }
       case "PRODUCING": {
@@ -142,6 +171,7 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
         setInputClinicName("");
         setInputClinicAddress("");
         setInputClinicPhone("");
+        setSelectedClinicId("");
         setShowClinicPopup(order.id);
         break;
       }
@@ -158,15 +188,8 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
         break;
       }
       case "COMPLETED": {
-        setLoadingOrder(order.id);
-        try {
-          await patchOrder(order.id, { status: "COMPLETED" });
-          router.refresh();
-        } catch {
-          // エラーは静かに処理
-        } finally {
-          setLoadingOrder(null);
-        }
+        setInputCompletedDate(new Date().toISOString().split("T")[0]);
+        setShowCompletedPopup(order.id);
         break;
       }
     }
@@ -241,6 +264,13 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                         <span className="text-[10px] text-text-muted ml-auto">会員本人が操作</span>
                       )}
 
+                      {/* 入金日の表示 */}
+                      {step.key === "PAYMENT_CONFIRMED" && order.paidAt && (
+                        <span className="text-[10px] text-text-muted ml-auto font-mono">
+                          入金: {formatDate(order.paidAt)}
+                        </span>
+                      )}
+
                       {/* 精製日・有効期限の表示 */}
                       {step.key === "PRODUCING" && order.producedAt && (
                         <span className="text-[10px] text-text-muted ml-auto font-mono">
@@ -253,6 +283,13 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                       {step.key === "CLINIC_BOOKING" && order.clinicDate && (
                         <span className="text-[10px] text-text-muted ml-auto font-mono">
                           {formatDate(order.clinicDate)} {order.clinicName || ""}
+                        </span>
+                      )}
+
+                      {/* 施術完了日の表示 */}
+                      {step.key === "COMPLETED" && order.completedAt && (
+                        <span className="text-[10px] text-text-muted ml-auto font-mono">
+                          完了: {formatDate(order.completedAt)}
                         </span>
                       )}
                     </div>
@@ -274,7 +311,7 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-text-secondary mb-1">精製日</label>
+                <label className="block text-xs text-text-secondary mb-1">精製完了日</label>
                 <input
                   type="date"
                   value={inputProducedDate}
@@ -323,7 +360,7 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">クリニック予約手配</h3>
-            <p className="text-xs text-text-muted mb-5">施術日とクリニック情報を入力してください。</p>
+            <p className="text-xs text-text-muted mb-5">施術日とクリニックを選択してください。</p>
 
             <div className="space-y-4">
               <div>
@@ -336,35 +373,38 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-xs text-text-secondary mb-1">クリニック名</label>
-                <input
-                  type="text"
-                  value={inputClinicName}
-                  onChange={(e) => setInputClinicName(e.target.value)}
-                  placeholder="クリニック名を入力"
-                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
-                />
+                <label className="block text-xs text-text-secondary mb-1">提携クリニック</label>
+                <select
+                  value={selectedClinicId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedClinicId(id);
+                    const clinic = clinicList.find((c) => c.id === id);
+                    if (clinic) {
+                      setInputClinicName(clinic.name);
+                      setInputClinicAddress(clinic.address || "");
+                      setInputClinicPhone(clinic.phone || "");
+                    } else {
+                      setInputClinicName("");
+                      setInputClinicAddress("");
+                      setInputClinicPhone("");
+                    }
+                  }}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer"
+                >
+                  <option value="">クリニックを選択</option>
+                  {clinicList.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label className="block text-xs text-text-secondary mb-1">住所</label>
-                <input
-                  type="text"
-                  value={inputClinicAddress}
-                  onChange={(e) => setInputClinicAddress(e.target.value)}
-                  placeholder="住所を入力"
-                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-text-secondary mb-1">電話番号</label>
-                <input
-                  type="tel"
-                  value={inputClinicPhone}
-                  onChange={(e) => setInputClinicPhone(e.target.value)}
-                  placeholder="電話番号を入力"
-                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
-                />
-              </div>
+              {selectedClinicId && (
+                <div className="bg-bg-elevated border border-border rounded-md p-3 space-y-1.5">
+                  <div className="text-sm text-text-primary font-medium">{inputClinicName}</div>
+                  {inputClinicAddress && <div className="text-xs text-text-muted">{inputClinicAddress}</div>}
+                  {inputClinicPhone && <div className="text-xs text-text-muted">TEL: {inputClinicPhone}</div>}
+                </div>
+              )}
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => setShowClinicPopup(null)}
@@ -396,6 +436,113 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                   className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
                 >
                   {clinicLoading ? "保存中..." : "確定する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 入金確認ポップアップ */}
+      {showPaymentPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowPaymentPopup(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">入金確認</h3>
+            <p className="text-xs text-text-muted mb-5">入金を確認した日付を入力してください。</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">入金日</label>
+                <input
+                  type="date"
+                  value={inputPaidDate}
+                  onChange={(e) => setInputPaidDate(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setShowPaymentPopup(null)}
+                  className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!inputPaidDate || !showPaymentPopup) return;
+                    setPaymentLoading(true);
+                    try {
+                      await patchOrder(showPaymentPopup, {
+                        paymentStatus: "COMPLETED",
+                        paidAt: new Date(inputPaidDate).toISOString(),
+                      });
+                      setShowPaymentPopup(null);
+                      router.refresh();
+                    } catch {
+                      // エラーは静かに処理
+                    } finally {
+                      setPaymentLoading(false);
+                    }
+                  }}
+                  disabled={paymentLoading || !inputPaidDate}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {paymentLoading ? "更新中..." : "確定する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 施術完了ポップアップ */}
+      {showCompletedPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowCompletedPopup(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">施術完了</h3>
+            <p className="text-xs text-text-muted mb-5">施術が完了した日付を入力してください。</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">完了日</label>
+                <input
+                  type="date"
+                  value={inputCompletedDate}
+                  onChange={(e) => setInputCompletedDate(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setShowCompletedPopup(null)}
+                  className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!inputCompletedDate || !showCompletedPopup) return;
+                    setCompletedLoading(true);
+                    try {
+                      await patchOrder(showCompletedPopup, {
+                        completedAt: new Date(inputCompletedDate).toISOString(),
+                      });
+                      setShowCompletedPopup(null);
+                      router.refresh();
+                    } catch {
+                      // エラーは静かに処理
+                    } finally {
+                      setCompletedLoading(false);
+                    }
+                  }}
+                  disabled={completedLoading || !inputCompletedDate}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {completedLoading ? "更新中..." : "確定する"}
                 </button>
               </div>
             </div>

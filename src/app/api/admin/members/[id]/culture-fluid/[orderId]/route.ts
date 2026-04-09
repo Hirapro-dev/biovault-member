@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as { role: string }).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 
@@ -30,7 +30,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.paymentStatus) {
     updateData.paymentStatus = body.paymentStatus;
     if (body.paymentStatus === "COMPLETED") {
-      updateData.paidAt = new Date();
+      // 管理者が入金日を指定した場合はそれを使い、指定がなければ現在日時
+      updateData.paidAt = body.paidAt ? new Date(body.paidAt) : new Date();
       updateData.status = "PAYMENT_CONFIRMED";
     }
   }
@@ -50,6 +51,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.clinicName !== undefined) updateData.clinicName = body.clinicName;
   if (body.clinicAddress !== undefined) updateData.clinicAddress = body.clinicAddress;
   if (body.clinicPhone !== undefined) updateData.clinicPhone = body.clinicPhone;
+
+  // 施術完了日 → 指定された日付を completedAt に保存、ステータスも COMPLETED に遷移
+  if (body.completedAt) {
+    updateData.completedAt = new Date(body.completedAt);
+    updateData.status = "COMPLETED";
+  }
 
   const updated = await prisma.cultureFluidOrder.update({
     where: { id: orderId },

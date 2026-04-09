@@ -169,12 +169,16 @@ export default async function MemberKartePage({
               totalAmount: o.totalAmount,
               status: o.status,
               paymentStatus: o.paymentStatus,
+              paidAt: o.paidAt ? o.paidAt.toISOString() : null,
               producedAt: o.producedAt ? o.producedAt.toISOString() : null,
               expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
               clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
               clinicName: o.clinicName,
+              clinicAddress: o.clinicAddress,
+              clinicPhone: o.clinicPhone,
               cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null,
               informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
+              completedAt: o.completedAt ? o.completedAt.toISOString() : null,
               createdAt: o.createdAt.toISOString(),
             }))}
           />
