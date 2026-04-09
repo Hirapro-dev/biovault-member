@@ -124,9 +124,9 @@ export default function DocumentModal({ label, pdfUrl, pageUrl, done }: Document
         style={{
           position: "relative",
           zIndex: 1,
-          width: isPdf ? "min(600px, calc(100% - 0px))" : "min(760px, 100%)",
-          maxWidth: isPdf ? "600px" : "760px",
-          height: isPdf ? "min(70vh, 680px)" : undefined,
+          width: isPdf ? "min(760px, calc(100% - 0px))" : "min(760px, 100%)",
+          maxWidth: "760px",
+          height: isPdf ? "min(85vh, 840px)" : undefined,
           maxHeight: "calc(100dvh - 24px)",
           backgroundColor: "var(--color-bg-primary)",
           border: "1px solid var(--color-border)",
