@@ -85,6 +85,13 @@ export async function POST(req: Request) {
       }),
     ]);
 
+    // iPSサービス利用規約（SERVICE_TERMS）を同意済みに更新
+    // 申込フロー内で利用規約に同意しているため
+    await prisma.document.updateMany({
+      where: { userId, type: "SERVICE_TERMS", status: "PENDING" },
+      data: { status: "SIGNED", signedAt: now },
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("サービス申込エラー:", error);

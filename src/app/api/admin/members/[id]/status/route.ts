@@ -99,5 +99,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   await prisma.$transaction(transactionOps);
 
+  // SERVICE_APPLIED以降のステータスになった場合、iPSサービス利用規約を同意済みに更新
+  const appliedStatuses = ["SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
+  const finalStatus = newStatus === "BLOOD_COLLECTED" ? "IPS_CREATING" : newStatus;
+  if (appliedStatuses.includes(finalStatus)) {
+    await prisma.document.updateMany({
+      where: { userId: id, type: "SERVICE_TERMS", status: "PENDING" },
+      data: { status: "SIGNED", signedAt: new Date() },
+    });
+  }
+
   return NextResponse.json({ success: true });
 }
