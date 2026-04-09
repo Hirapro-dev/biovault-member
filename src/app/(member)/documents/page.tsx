@@ -7,8 +7,8 @@ import type { DocumentType } from "@/types";
 
 // 署名済み書類の内容確認リンク先
 const DOC_VIEW_LINKS: Record<string, string> = {
-  CONTRACT: "/important-notice",
-  PRIVACY_POLICY: "/important-notice",
+  CONTRACT: "/documents/important-notice",
+  PRIVACY_POLICY: "/documents/privacy-consent",
   SERVICE_TERMS: "/documents/service-terms",
   CONSENT_CELL_STORAGE: "/documents/contract",
   CELL_STORAGE_CONSENT: "/documents/cell-consent",
