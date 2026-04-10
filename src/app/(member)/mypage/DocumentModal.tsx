@@ -95,16 +95,9 @@ export default function DocumentModal({
 
     setLoading(true);
     try {
-      // 書類本文 API（ロール不問・layout を含まない pure な <article> HTML を返す）を優先利用
-      // pageUrl が "/documents/important-notice" 等であればタイプに変換して API へ
-      const documentType = PATH_TO_TYPE[pageUrl];
-      const fetchUrl = documentType ? `/api/document-body/${documentType}` : pageUrl;
-
-      const res = await fetch(fetchUrl);
-      if (!res.ok) {
-        setContent('<p class="text-text-muted text-center py-8">内容を読み込めませんでした。</p>');
-        return;
-      }
+      // まず pageUrl を直接 fetch して <article> を抽出
+      // PATH_TO_TYPE は将来 /api/document-body/[type] API 実装時に有効化する（現時点では未使用）
+      const res = await fetch(pageUrl);
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
