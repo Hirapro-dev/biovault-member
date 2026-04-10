@@ -269,7 +269,7 @@ export default async function CultureFluidPage() {
             (activeOrder.status === "INFORMED_AGREED" ||
               (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
               <div className="rounded-xl border border-border overflow-hidden bg-bg-secondary">
-                <div className="p-5 sm:p-6 text-center">
+                <div className="p-5 sm:p-6 text-left">
                   <div className="text-3xl mb-3">📅</div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
                     現在施術日程を調整中です。
