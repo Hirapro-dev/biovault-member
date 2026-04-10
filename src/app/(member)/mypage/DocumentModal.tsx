@@ -339,7 +339,7 @@ export default function DocumentModal({
       ) : (
         <button
           onClick={handleClick}
-          className="text-[13px] sm:text-sm text-gold hover:underline underline-offset-2 text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal"
+          className="text-[13px] sm:text-sm text-gold underline underline-offset-2 decoration-gold/40 hover:decoration-gold text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal transition-all"
         >
           {buttonText}
           <span className="text-[10px] ml-1 opacity-60">{isPdf ? "📎" : "📄"}</span>
