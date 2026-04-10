@@ -67,8 +67,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       // 全回数完了 → COMPLETED で固定
       updateData.status = "COMPLETED";
     } else {
-      // 残り回数あり → 次の施術サイクル開始のためフェーズ2をリセット
-      updateData.status = "CLINIC_BOOKING";
+      // 残り回数あり → PRODUCING に戻して「クリニックの施術予約」から再スタート
+      // 会員が ClinicBookingButton を押すと CLINIC_BOOKING に遷移する
+      updateData.status = "PRODUCING";
       updateData.clinicDate = null;
       updateData.clinicName = null;
       updateData.clinicAddress = null;
@@ -77,12 +78,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  // 「次の予約をする」アクション（残回数ありの状態で COMPLETED → CLINIC_BOOKING に明示戻し）
+  // 「次の予約をする」アクション（管理者が明示的に次の施術サイクルを開始）
   if (body.action === "next_session") {
     if (order.completedSessions >= getTotalSessions(order.planType)) {
       return NextResponse.json({ error: "残り施術回数がありません" }, { status: 400 });
     }
-    updateData.status = "CLINIC_BOOKING";
+    updateData.status = "PRODUCING";
     updateData.clinicDate = null;
     updateData.clinicName = null;
     updateData.clinicAddress = null;

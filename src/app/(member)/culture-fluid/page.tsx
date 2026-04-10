@@ -216,16 +216,32 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* クリニック予約 */}
+          {/* クリニック予約（PRODUCING 状態: 1回目も2回目以降も同じカード） */}
           {activeOrder.status === "PRODUCING" && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">📅</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                  {completedSessions >= 1 && (
+                    <>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">
+                        {completedSessions}回目完了
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
+                        {currentSession}回目 / 全{totalSessions}回
+                      </span>
+                    </>
+                  )}
                 </div>
                 <div className="text-base sm:text-lg text-text-primary font-medium mb-2">クリニックの施術予約</div>
-                <div className="text-xs text-text-muted leading-relaxed mb-4">精製が完了しました。担当者経由でクリニックの予約を手配いたします。</div>
+                <div className="text-xs text-text-muted leading-relaxed mb-4">
+                  {completedSessions >= 1 ? (
+                    <>{completedSessions}回目の施術が完了しました。{currentSession}回目の施術予約に進みましょう。</>
+                  ) : (
+                    <>精製が完了しました。担当者経由でクリニックの予約を手配いたします。</>
+                  )}
+                </div>
                 {activeOrder.expiresAt && (
                   <div className="bg-bg-elevated border border-border rounded-md p-3">
                     <div className="text-[11px] text-text-muted mb-1">管理期限</div>
@@ -237,42 +253,6 @@ export default async function CultureFluidPage() {
               </div>
             </div>
           )}
-
-          {/* 次の施術予約（施術完了後リセットで CLINIC_BOOKING に戻った時、2回目以降）
-              1回目と同じ「クリニックの施術予約」から再スタートする見た目にする */}
-          {activeOrder.status === "CLINIC_BOOKING" &&
-            completedSessions >= 1 &&
-            !activeOrder.informedAgreedAt &&
-            !activeOrder.clinicDate && (
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">📅</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">
-                      {completedSessions}回目完了
-                    </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
-                      {currentSession}回目 / 全{totalSessions}回
-                    </span>
-                  </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">
-                    クリニックの施術予約
-                  </div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">
-                    {completedSessions}回目の施術が完了しました。{currentSession}回目の施術に進みましょう。<br />
-                    まず事前説明・同意書の確認をお願いします。
-                  </div>
-                  {activeOrder.expiresAt && (
-                    <div className="bg-bg-elevated border border-border rounded-md p-3 mb-4">
-                      <div className="text-[11px] text-text-muted mb-1">管理期限</div>
-                      <div className="font-mono text-sm text-gold">{formatDate(activeOrder.expiresAt)}</div>
-                      <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
           {/* 事前説明・同意（未同意時） */}
           {activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
