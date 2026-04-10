@@ -21,9 +21,31 @@ export async function POST(req: Request) {
   }
 
   // 1) 既存の User と一致するメール → 重複
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  //    role に応じてメッセージを具体化（会員 / 代理店 / 従業員 / 管理者）
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: { role: true },
+  });
   if (existingUser) {
-    return NextResponse.json({ available: false, error: "このメールアドレスは既に登録されています" });
+    let error: string;
+    switch (existingUser.role) {
+      case "MEMBER":
+        error = "このメールアドレスは既に会員として登録されています";
+        break;
+      case "AGENCY":
+        error = "このメールアドレスは既に代理店として登録されています";
+        break;
+      case "STAFF":
+        error = "このメールアドレスは既に従業員として登録されています";
+        break;
+      case "ADMIN":
+      case "SUPER_ADMIN":
+        error = "このメールアドレスは既に管理者として登録されています";
+        break;
+      default:
+        error = "このメールアドレスは既に登録されています";
+    }
+    return NextResponse.json({ available: false, error });
   }
 
   // 2) 進行中の申込と一致するメール → 重複（二重送信防止）
