@@ -238,6 +238,30 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
+          {/* 次の予約をする（施術完了後リセットで CLINIC_BOOKING に戻った時、2回目以降） */}
+          {activeOrder.status === "CLINIC_BOOKING" &&
+            completedSessions >= 1 &&
+            !activeOrder.informedAgreedAt &&
+            !activeOrder.clinicDate && (
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">✓</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">完了</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
+                      {completedSessions}回目完了 / 全{totalSessions}回
+                    </span>
+                  </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">
+                    {completedSessions}回目の施術が完了しました
+                  </div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">
+                    次の施術の予約に進みましょう。下の「事前説明・同意」を確認してください。
+                  </div>
+                </div>
+              </div>
+            )}
+
           {/* 事前説明・同意（未同意時） */}
           {activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
             <Link href={`/culture-fluid/informed-consent?orderId=${activeOrder.id}`} className="block group">
