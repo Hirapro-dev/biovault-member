@@ -216,8 +216,9 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* クリニック予約（PRODUCING 状態: 1回目も2回目以降も同じカード） */}
-          {activeOrder.status === "PRODUCING" && (
+          {/* クリニック予約（PRODUCING: 1回目 / CLINIC_BOOKING + 2回目以降: 施術フェーズから再スタート） */}
+          {(activeOrder.status === "PRODUCING" ||
+            (activeOrder.status === "CLINIC_BOOKING" && completedSessions >= 1 && !activeOrder.informedAgreedAt && !activeOrder.clinicDate)) && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -371,11 +372,11 @@ export default async function CultureFluidPage() {
         </div>
       )}
 
-      {/* ── 4-A. フェーズ1：保管までのステータス ──
+      {/* ── 4-A. フェーズ1：精製ステータス ──
           注文がなくても常に表示し、注文前は第1ステップ「申込み」がアクティブ点滅 */}
       <div className="flex items-center gap-2 mb-4 mt-2 pb-3 border-b border-border">
         <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider">
-          フェーズ1：保管までのステータス
+          フェーズ1：精製ステータス
         </h3>
       </div>
       <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6">
@@ -432,13 +433,13 @@ export default async function CultureFluidPage() {
         </div>
       </div>
 
-      {/* ── 4-B. フェーズ2：施術までのステータス ──
+      {/* ── 4-B. フェーズ2：施術ステータス ──
           フェーズ1完了後に表示。複数回施術プランの場合は毎施術サイクルで使い回す */}
       {activeOrder && (
         <>
           <div className="flex items-center gap-2 mb-4 mt-2 pb-3 border-b border-border">
             <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider">
-              フェーズ2：施術までのステータス
+              フェーズ2：施術ステータス
             </h3>
             {totalSessions > 1 && isPhase1Complete && activeOrder.status !== "COMPLETED" && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20 ml-auto">

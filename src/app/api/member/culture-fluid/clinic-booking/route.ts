@@ -33,19 +33,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "注文が見つかりません" }, { status: 404 });
   }
 
-  // PRODUCING ステータスのみ受付（精製完了後にクリニック予約を申し込む）
-  if (order.status !== "PRODUCING") {
+  // PRODUCING または CLINIC_BOOKING（2回目以降のリセット後）のみ受付
+  if (order.status !== "PRODUCING" && order.status !== "CLINIC_BOOKING") {
     return NextResponse.json(
       { error: "現在のステータスではクリニック予約を申し込めません" },
       { status: 400 }
     );
   }
 
-  // ステータスを CLINIC_BOOKING に遷移
-  await prisma.cultureFluidOrder.update({
-    where: { id: orderId },
-    data: { status: "CLINIC_BOOKING" },
-  });
+  // PRODUCING の場合は CLINIC_BOOKING に遷移、既に CLINIC_BOOKING の場合はステータス維持
+  if (order.status === "PRODUCING") {
+    await prisma.cultureFluidOrder.update({
+      where: { id: orderId },
+      data: { status: "CLINIC_BOOKING" },
+    });
+  }
 
   return NextResponse.json({ success: true });
 }
