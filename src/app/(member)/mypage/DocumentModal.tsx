@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 
+// 会員ページのパス → 書類タイプ への変換マップ
+// DocumentModal は元々 pageUrl を fetch する実装だったが、ロール別レイアウト
+// （StaffLayout / AgencyLayout）の影響でレイアウト要素が混入する問題があったため、
+// Route Handler /api/document-body/[type] 経由で純粋な <article> HTML を取得する。
+const PATH_TO_TYPE: Record<string, string> = {
+  "/documents/important-notice": "CONTRACT",
+  "/documents/privacy-consent": "PRIVACY_POLICY",
+  "/documents/service-terms": "SERVICE_TERMS",
+  "/documents/contract": "CONSENT_CELL_STORAGE",
+  "/documents/cell-consent": "CELL_STORAGE_CONSENT",
+  "/mypage/informed-consent": "INFORMED_CONSENT",
+};
+
 type DocumentModalProps = {
   label: string;
   pdfUrl?: string | null;
@@ -82,7 +95,16 @@ export default function DocumentModal({
 
     setLoading(true);
     try {
-      const res = await fetch(pageUrl);
+      // 書類本文 API（ロール不問・layout を含まない pure な <article> HTML を返す）を優先利用
+      // pageUrl が "/documents/important-notice" 等であればタイプに変換して API へ
+      const documentType = PATH_TO_TYPE[pageUrl];
+      const fetchUrl = documentType ? `/api/document-body/${documentType}` : pageUrl;
+
+      const res = await fetch(fetchUrl);
+      if (!res.ok) {
+        setContent('<p class="text-text-muted text-center py-8">内容を読み込めませんでした。</p>');
+        return;
+      }
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
@@ -90,11 +112,12 @@ export default function DocumentModal({
       if (article) {
         setContent(article.innerHTML);
       } else {
-        const section = doc.querySelector(".bg-bg-secondary");
-        setContent(section?.innerHTML || "<p>内容を読み込めませんでした。</p>");
+        // フォールバックで .bg-bg-secondary を拾うと Sidebar 等を誤取得する問題があったため、
+        // 明示的なエラーメッセージのみを表示する
+        setContent('<p class="text-text-muted text-center py-8">内容を読み込めませんでした。</p>');
       }
     } catch {
-      setContent("<p>内容を読み込めませんでした。</p>");
+      setContent('<p class="text-text-muted text-center py-8">内容を読み込めませんでした。</p>');
     } finally {
       setLoading(false);
     }

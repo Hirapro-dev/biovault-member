@@ -26,9 +26,12 @@ const DOC_NUMBER_MAP: Record<string, string> = {
 export default function DocumentManager({
   userId,
   documents,
+  readOnly = false,
 }: {
   userId: string;
   documents: Doc[];
+  /** 閲覧専用モード（従業員・代理店ページから利用される） */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [uploading, setUploading] = useState<string | null>(null);
@@ -171,13 +174,15 @@ export default function DocumentManager({
                 </a>
               )}
 
-              <button
-                onClick={() => handleUploadClick(doc.id)}
-                disabled={uploading === doc.id}
-                className="px-3 py-1.5 bg-transparent border border-border text-text-muted rounded-sm text-[11px] hover:border-gold hover:text-gold transition-all cursor-pointer disabled:opacity-50"
-              >
-                {uploading === doc.id ? "..." : doc.fileUrl ? "再UP" : "UP"}
-              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => handleUploadClick(doc.id)}
+                  disabled={uploading === doc.id}
+                  className="px-3 py-1.5 bg-transparent border border-border text-text-muted rounded-sm text-[11px] hover:border-gold hover:text-gold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {uploading === doc.id ? "..." : doc.fileUrl ? "再UP" : "UP"}
+                </button>
+              )}
             </div>
           </div>
         );

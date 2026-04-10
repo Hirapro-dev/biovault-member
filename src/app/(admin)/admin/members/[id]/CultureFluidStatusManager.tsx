@@ -65,9 +65,11 @@ interface Props {
     completedSessions: number;
     createdAt: string;
   }[];
+  /** 閲覧専用モード（従業員・代理店ページから利用される） */
+  readOnly?: boolean;
 }
 
-export default function CultureFluidStatusManager({ userId, orders }: Props) {
+export default function CultureFluidStatusManager({ userId, orders, readOnly = false }: Props) {
   const router = useRouter();
   const [loadingOrder, setLoadingOrder] = useState<string | null>(null);
 
@@ -237,7 +239,7 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
     isLoading: boolean
   ) => {
     const done = phase === 1 ? isPhase1StepDone(order, step.key) : isPhase2StepDone(order, step.key);
-    const canToggle = step.adminToggle && !done && !isLoading;
+    const canToggle = step.adminToggle && !done && !isLoading && !readOnly;
 
     return (
       <div
@@ -373,7 +375,7 @@ export default function CultureFluidStatusManager({ userId, orders }: Props) {
                   <>
                     {PHASE2_STEPS.map((step) => renderStep(order, step, 2, isLoading))}
                     {/* 「次の予約をする」ボタン（2回目以降かつ未着手時） */}
-                    {showNextSessionButton && (
+                    {showNextSessionButton && !readOnly && (
                       <div className="pt-3 mt-2 border-t border-border">
                         <button
                           onClick={() => handleNextSession(order.id)}

@@ -38,9 +38,11 @@ interface Props {
   clinicName: string | null;
   clinicAddress: string | null;
   contractSignedAt: string | null;
+  /** 閲覧専用モード（従業員・代理店ページから利用される） */
+  readOnly?: boolean;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt, readOnly = false }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
@@ -177,7 +179,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
             const done = isChecked(step.key);
             const originalDone = isOriginallyDone(step.key);
             const adminToggleKeys = ["TERMS_AGREED", "CONTRACT_SIGNING", "PAYMENT_CONFIRMED", "SCHEDULE_ARRANGED", "CLINIC_CONFIRMED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
-            const canToggle = adminToggleKeys.includes(step.key) && !loading;
+            const canToggle = adminToggleKeys.includes(step.key) && !loading && !readOnly;
             const isMemberOnly = !adminToggleKeys.includes(step.key);
             const isPending = pendingChanges.has(step.key);
 
@@ -223,7 +225,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
           })}
         </div>
 
-        {hasPending && (
+        {hasPending && !readOnly && (
           <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
             <button onClick={() => setPendingChanges(new Set())} className="px-4 py-2 bg-transparent border border-border text-text-secondary rounded-sm text-xs cursor-pointer hover:border-border-gold transition-all">キャンセル</button>
             <button onClick={handleUpdate} disabled={loading} className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer hover:opacity-90 transition-all disabled:opacity-50">
