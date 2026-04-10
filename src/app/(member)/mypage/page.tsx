@@ -464,7 +464,7 @@ export default async function MyPage() {
                       ? "text-bg-primary font-bold"
                       : active
                       ? "border-2 border-gold text-gold"
-                      : "border border-border text-text-muted"
+                      : "border border-border text-text-secondary"
                   } ${active ? "animate-pulse-gold" : ""}`}
                   style={{
                     background: done
@@ -495,7 +495,7 @@ export default async function MyPage() {
                     };
                     const pageUrl = stepDocPages[step.key];
                     const pdfUrl = stepPdfMap[step.key] || null;
-                    const labelClass = `text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-muted"}`;
+                    const labelClass = `text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-secondary"}`;
 
                     if (pageUrl && done) {
                       // モーダルまたはPDFで表示（ページ遷移しない）
@@ -524,7 +524,7 @@ export default async function MyPage() {
                     };
                     const label = dateLabels[step.key];
                     return (
-                      <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                      <div className="text-[10px] text-text-secondary font-mono mt-0.5">
                         {label ? `${label}：${dateStr}` : dateStr}
                       </div>
                     );
