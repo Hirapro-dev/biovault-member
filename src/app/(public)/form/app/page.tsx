@@ -276,7 +276,11 @@ function ApplyPage() {
             </p>
           </div>
           <Checkbox checked={form.confirmNotMedical} onChange={(v) => update("confirmNotMedical", v)} label="上記の内容を理解し、承諾します" />
-          <StepNav onBack={() => setStep(2)} onNext={() => setStep(4)} />
+          <StepNav
+            onBack={() => setStep(2)}
+            onNext={() => setStep(4)}
+            nextDisabled={!form.confirmNotMedical}
+          />
         </FormSection>
       )}
 
@@ -379,14 +383,32 @@ function Checkbox({ checked, onChange, label }: { checked: boolean; onChange: (v
   );
 }
 
-function StepNav({ onBack, onNext }: { onBack?: () => void; onNext?: () => void }) {
+function StepNav({
+  onBack,
+  onNext,
+  nextDisabled = false,
+}: {
+  onBack?: () => void;
+  onNext?: () => void;
+  nextDisabled?: boolean;
+}) {
   return (
     <div className="flex gap-3 mt-6">
       {onBack && (
         <button onClick={onBack} className="flex-1 py-3 bg-transparent border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all">戻る</button>
       )}
       {onNext && (
-        <button onClick={onNext} className="flex-1 py-3 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90">次へ</button>
+        <button
+          onClick={onNext}
+          disabled={nextDisabled}
+          className={`flex-1 py-3 rounded-sm text-sm font-semibold tracking-wider transition-all ${
+            nextDisabled
+              ? "bg-bg-elevated border border-border text-text-muted opacity-40 cursor-not-allowed"
+              : "bg-gold-gradient border-none text-bg-primary cursor-pointer hover:opacity-90"
+          }`}
+        >
+          次へ
+        </button>
       )}
     </div>
   );
