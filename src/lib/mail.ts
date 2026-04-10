@@ -58,15 +58,25 @@ export async function sendEmail({
 // ── メールテンプレート ──
 
 export function applicationReceivedEmail(name: string) {
-  const subject = "【BioVault】お申込みを受け付けました";
+  const subject = "【BioVault】iPS細胞作製の適合確認申込を受け付けました";
   const bodyText = `${name} 様
 
-BioVault iPSサービスへのお申込みをいただき、誠にありがとうございます。
+iPS細胞作製の適合確認申込をいただき、
+誠にありがとうございます。
 
-お申込み内容を確認のうえ、担当者より改めてご連絡させていただきます。
-通常、1〜3営業日以内にご連絡いたします。
+お申込みいただいた内容をもとに、
+iPS細胞作製の適合確認を行います。
 
-ご不明な点がございましたら、下記までお気軽にお問い合わせください。
+3営業日以内に担当スタッフより
+改めてご連絡させていただきます。
+
+ご不明な点がございましたら、
+下記までお気軽にお問い合わせください。
+
+iPS作製適合確認を行わせていただく上で、
+適格でない場合がございます。
+その際はあらかじめご了承ください。
+
 
 ──────────────────
 BioVault（株式会社SCPP）
@@ -85,20 +95,24 @@ MAIL: info@biovault.jp
 <body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-size:24px;font-weight:300;letter-spacing:4px;color:#BFA04B;">BioVault</div>
+      <img src="https://biovault-member.vercel.app/logo_white.png" alt="BioVault" style="height:40px;width:auto;" />
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
       <p style="font-size:16px;color:#ffffff;margin:0 0 24px;">${name} 様</p>
       <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
-        BioVault iPSサービスへのお申込みをいただき、誠にありがとうございます。
+        iPS細胞作製の適合確認申込をいただき、誠にありがとうございます。
       </p>
       <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
-        お申込み内容を確認のうえ、担当者より改めてご連絡させていただきます。<br>
-        通常、1〜3営業日以内にご連絡いたします。
+        お申込みいただいた内容をもとに、iPS細胞作製の適合確認を行います。 </p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0;">
+        3営業日以内に担当スタッフより改めてご連絡させていただきます。
       </p>
       <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0;">
-        ご不明な点がございましたら、お気軽にお問い合わせください。
+      ご不明な点がございましたら、下記までお気軽にお問い合わせください。
+      </p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0;">
+        iPS作製適合確認を行わせていただく上で、適格でない場合がございます。その際はあらかじめご了承ください。
       </p>
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
@@ -119,10 +133,10 @@ MAIL: info@biovault.jp
 }
 
 export function accountCreatedEmail(name: string, loginId: string, password: string) {
-  const subject = "【BioVault】会員アカウントが発行されました";
+  const subject = "【BioVault】メンバーシップアカウントが発行されました";
   const bodyText = `${name} 様
 
-BioVault メンバーシップへようこそ。
+BioVault メンバーシップサイトへようこそ。
 会員アカウントが発行されましたので、以下の情報でログインしてください。
 
 ────────────
@@ -150,7 +164,7 @@ MAIL: info@biovault.jp
 <body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-size:24px;font-weight:300;letter-spacing:4px;color:#BFA04B;">BioVault</div>
+      <img src="https://biovault-member.vercel.app/logo_white.png" alt="BioVault" style="height:40px;width:auto;" />
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
