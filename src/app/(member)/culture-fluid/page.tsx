@@ -262,6 +262,25 @@ export default async function CultureFluidPage() {
             </Link>
           )}
 
+          {/* 日程調整中カード ──
+              事前説明同意済みだがまだ clinicDate が未設定の場合に表示。
+              管理者が予約日を設定するまでの待ち状態。 */}
+          {!activeOrder.clinicDate &&
+            (activeOrder.status === "INFORMED_AGREED" ||
+              (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
+              <div className="rounded-xl border border-border overflow-hidden bg-bg-secondary">
+                <div className="p-5 sm:p-6 text-center">
+                  <div className="text-3xl mb-3">📅</div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
+                    現在施術日程を調整中です。
+                  </div>
+                  <div className="text-xs text-text-muted leading-relaxed">
+                    担当スタッフからのご連絡をお待ちください。
+                  </div>
+                </div>
+              </div>
+            )}
+
           {/* 予約情報カード ──
               clinicDate が設定済みなら status に関わらず常に表示する。
               status によってバッジとメッセージを切り替え:
