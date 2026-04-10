@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
 import CautionContent from "@/components/culture-fluid/CautionContent";
 
-// プラン定義
+// プラン定義（点滴のみ）
 const PLANS = [
   {
     id: "iv_drip_1",
@@ -19,18 +19,6 @@ const PLANS = [
     label: "点滴5回分（50ml）＋1回分（10ml）",
     price: 4400000,
     priceLabel: "¥4,400,000",
-  },
-  {
-    id: "injection_1",
-    label: "注射1回分（3ml）",
-    price: 440000,
-    priceLabel: "¥440,000",
-  },
-  {
-    id: "injection_5",
-    label: "注射5回分（15ml）＋1回分（3ml）",
-    price: 2200000,
-    priceLabel: "¥2,200,000",
   },
 ] as const;
 

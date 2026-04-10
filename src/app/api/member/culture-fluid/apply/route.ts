@@ -36,8 +36,6 @@ export async function POST(req: Request) {
   const plans: Record<string, { label: string; amount: number }> = {
     iv_drip_1: { label: "点滴1回分（10ml）", amount: 880000 },
     iv_drip_5: { label: "点滴5回分（50ml）＋1回分（10ml）", amount: 4400000 },
-    injection_1: { label: "注射1回分（3ml）", amount: 440000 },
-    injection_5: { label: "注射5回分（15ml）＋1回分（3ml）", amount: 2200000 },
   };
 
   const plan = plans[body.planType];
