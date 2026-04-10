@@ -239,6 +239,7 @@ export default function CultureFluidApplyPage() {
                 onChange={(e) => setPaymentDate(e.target.value)}
                 className="w-full bg-bg-tertiary border border-border rounded px-3 py-2.5 text-sm text-text-primary outline-none focus:border-border-gold"
               />
+            </div>
           </div>
 
           <button
