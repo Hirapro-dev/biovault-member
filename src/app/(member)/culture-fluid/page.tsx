@@ -238,7 +238,8 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* 次の予約をする（施術完了後リセットで CLINIC_BOOKING に戻った時、2回目以降） */}
+          {/* 次の施術予約（施術完了後リセットで CLINIC_BOOKING に戻った時、2回目以降）
+              1回目と同じ「クリニックの施術予約」から再スタートする見た目にする */}
           {activeOrder.status === "CLINIC_BOOKING" &&
             completedSessions >= 1 &&
             !activeOrder.informedAgreedAt &&
@@ -246,18 +247,29 @@ export default async function CultureFluidPage() {
               <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">✓</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">完了</span>
+                    <span className="text-2xl">📅</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">
+                      {completedSessions}回目完了
+                    </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
-                      {completedSessions}回目完了 / 全{totalSessions}回
+                      {currentSession}回目 / 全{totalSessions}回
                     </span>
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">
-                    {completedSessions}回目の施術が完了しました
+                    クリニックの施術予約
                   </div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">
-                    次の施術の予約に進みましょう。下の「事前説明・同意」を確認してください。
+                    {completedSessions}回目の施術が完了しました。{currentSession}回目の施術に進みましょう。<br />
+                    まず事前説明・同意書の確認をお願いします。
                   </div>
+                  {activeOrder.expiresAt && (
+                    <div className="bg-bg-elevated border border-border rounded-md p-3 mb-4">
+                      <div className="text-[11px] text-text-muted mb-1">管理期限</div>
+                      <div className="font-mono text-sm text-gold">{formatDate(activeOrder.expiresAt)}</div>
+                      <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -521,7 +533,7 @@ export default async function CultureFluidPage() {
       )}
 
       {/* ── 6. 注文履歴 ── */}
-      {orders.length > 1 && (
+      {orders.length >= 1 && (
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">注文履歴</h3>
           <div className="divide-y divide-border">
