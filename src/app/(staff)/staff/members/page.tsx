@@ -8,7 +8,10 @@ export default async function StaffMembersPage() {
 
   const customers = await prisma.user.findMany({
     where: { referredByStaff: staffCode, role: "MEMBER" },
-    include: { membership: true },
+    include: {
+      membership: true,
+      cultureFluidOrders: { where: { paymentStatus: "COMPLETED" }, select: { totalAmount: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -68,7 +71,7 @@ export default async function StaffMembersPage() {
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-[13px] text-text-secondary">
                     <Link href={`/staff/members/${c.id}`} className="block">
-                      ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+                      ¥{((c.membership?.paidAmount || 0) + c.cultureFluidOrders.reduce((s, o) => s + o.totalAmount, 0)).toLocaleString()}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-[11px] text-text-muted">
@@ -112,7 +115,7 @@ export default async function StaffMembersPage() {
               </div>
               <div className="flex items-center justify-between mt-1">
                 <div className="text-[11px] text-text-muted">
-                  {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・ ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+                  {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・ ¥{((c.membership?.paidAmount || 0) + c.cultureFluidOrders.reduce((s, o) => s + o.totalAmount, 0)).toLocaleString()}
                 </div>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm text-[10px] tracking-wider border border-border-gold text-gold">
                   📋 カルテ
