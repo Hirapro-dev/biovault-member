@@ -415,7 +415,7 @@ export default async function MyPage() {
 
           {/* 培養上清液サービスへ申込カード（保管中の場合に表示） */}
           {membership.ipsStatus === "STORAGE_ACTIVE" && (
-            <div className="mt-4 rounded-xl border border-border-gold overflow-hidden group cursor-pointer" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <Link href="/culture-fluid" className="block mt-4 rounded-xl border border-border-gold overflow-hidden group" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🧪</span>
@@ -427,7 +427,7 @@ export default async function MyPage() {
                   申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
-            </div>
+            </Link>
           )}
         </div>
       )}
