@@ -41,9 +41,14 @@ export default async function CustomersPage() {
                   <span className="text-[11px] text-text-muted">
                     {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
                   </span>
-                  <span className="text-[11px] text-text-muted font-mono">
-                    {new Date(c.createdAt).toLocaleDateString("ja-JP")}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] text-text-muted font-mono">
+                      {new Date(c.createdAt).toLocaleDateString("ja-JP")}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm text-[10px] tracking-wider border border-border-gold text-gold">
+                      📋 カルテ
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

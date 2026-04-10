@@ -22,6 +22,7 @@ import {
   type TreatmentType,
   type DocumentStatus,
 } from "@/types";
+import DocumentModal from "@/app/(member)/mypage/DocumentModal";
 
 // CultureFluidOrder のステータス → 表示ラベル
 const CF_STATUS_LABELS: Record<string, string> = {
@@ -34,16 +35,54 @@ const CF_STATUS_LABELS: Record<string, string> = {
   COMPLETED: "施術完了",
 };
 
-// iPS タイムラインの順序（表示用）
-const IPS_TIMELINE_STEPS: { key: IpsStatus; label: string; icon: string }[] = [
-  { key: "REGISTERED", label: "メンバー登録", icon: "🔑" },
-  { key: "TERMS_AGREED", label: "重要事項確認済", icon: "📋" },
-  { key: "SERVICE_APPLIED", label: "サービス申込済", icon: "📝" },
-  { key: "SCHEDULE_ARRANGED", label: "日程調整", icon: "📅" },
-  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
-  { key: "IPS_CREATING", label: "iPS作製中", icon: "🧬" },
-  { key: "STORAGE_ACTIVE", label: "iPS保管", icon: "🏛️" },
+// 管理者ページと同じ13ステップのタイムライン定義
+// docType / dbStatus / dateField を持たせて表示判定に利用
+type TimelineStep = {
+  key: string;
+  label: string;
+  icon: string;
+  // 完了判定に使う Document タイプ（書類同意系のみ）
+  docType?: DocumentType;
+  // 完了判定に使う IpsStatus（DBステータス系のみ）
+  dbStatus?: IpsStatus;
+};
+
+const TIMELINE_STEPS: TimelineStep[] = [
+  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋", dbStatus: "TERMS_AGREED" },
+  { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑" }, // isIdIssued で判定
+  { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意", icon: "📜", docType: "PRIVACY_POLICY" },
+  { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️", dbStatus: "SERVICE_APPLIED" },
+  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝" }, // contractSignedAt で判定
+  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰" }, // paymentStatus で判定
+  { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅", dbStatus: "SCHEDULE_ARRANGED" },
+  { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", docType: "CELL_STORAGE_CONSENT" },
+  { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥" }, // clinicDate で判定
+  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄", docType: "INFORMED_CONSENT" },
+  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", dbStatus: "BLOOD_COLLECTED" },
+  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", dbStatus: "IPS_CREATING" },
+  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", dbStatus: "STORAGE_ACTIVE" },
 ];
+
+// IpsStatus の進行順（インデックスで前後比較する）
+const IPS_STATUS_ORDER: IpsStatus[] = [
+  "REGISTERED",
+  "TERMS_AGREED",
+  "SERVICE_APPLIED",
+  "SCHEDULE_ARRANGED",
+  "BLOOD_COLLECTED",
+  "IPS_CREATING",
+  "STORAGE_ACTIVE",
+];
+
+// 書類型 → 閲覧ページパス（DocumentModal の pageUrl に渡す）
+const DOC_VIEW_LINKS: Record<string, string> = {
+  CONTRACT: "/documents/important-notice",
+  PRIVACY_POLICY: "/documents/privacy-consent",
+  SERVICE_TERMS: "/documents/service-terms",
+  CONSENT_CELL_STORAGE: "/documents/contract",
+  CELL_STORAGE_CONSENT: "/documents/cell-consent",
+  INFORMED_CONSENT: "/mypage/informed-consent",
+};
 
 // 必要最小限の型定義（呼び出し側はこの型に合わせて user を整形する）
 type DocumentLite = {
@@ -75,6 +114,9 @@ type MembershipLite = {
   clinicDate: Date | null;
   clinicName: string | null;
   clinicAddress: string | null;
+  ipsCompletedAt: Date | null;
+  storageStartAt: Date | null;
+  deathWish: string | null;
   referrerName: string | null;
   treatments: TreatmentLite[];
 };
@@ -127,6 +169,7 @@ export type ReadOnlyKarteUser = {
   paymentDate: Date | null;
   hasAgreedTerms: boolean;
   agreedTermsAt: Date | null;
+  isIdIssued: boolean;
   salesRepName: string | null;
   referredByStaff: string | null;
   // 健康状態
@@ -182,10 +225,76 @@ export default function ReadOnlyMemberKarte({
       .filter(Boolean)
       .join(" ／ ") || "---";
 
-  // iPS タイムラインの現在位置
-  const currentIpsIdx = membership
-    ? IPS_TIMELINE_STEPS.findIndex((s) => s.key === membership.ipsStatus)
-    : -1;
+  // 署名済み書類タイプの集合
+  const signedDocTypes = new Set(
+    user.documents.filter((d) => d.status === "SIGNED").map((d) => d.type)
+  );
+
+  // 死亡時意思表示（CELL_STORAGE_CONSENT モーダルに渡す）
+  const deathWish = (membership?.deathWish ?? null) as "donate" | "dispose" | null;
+
+  // 各タイムラインステップの完了判定と日付取得
+  const currentIpsIdx = membership ? IPS_STATUS_ORDER.indexOf(membership.ipsStatus) : -1;
+
+  const isStepDone = (step: TimelineStep): boolean => {
+    if (step.key === "REGISTERED") return user.isIdIssued;
+    if (step.key === "DOC_PRIVACY")
+      return signedDocTypes.has("PRIVACY_POLICY") || user.hasAgreedTerms;
+    if (step.key === "CONTRACT_SIGNING") return !!membership?.contractSignedAt;
+    if (step.key === "PAYMENT_CONFIRMED") return membership?.paymentStatus === "COMPLETED";
+    if (step.key === "DOC_CELL_CONSENT") return signedDocTypes.has("CELL_STORAGE_CONSENT");
+    if (step.key === "CLINIC_CONFIRMED") return !!membership?.clinicDate;
+    if (step.key === "DOC_INFORMED") return signedDocTypes.has("INFORMED_CONSENT");
+    if (step.dbStatus) {
+      const idx = IPS_STATUS_ORDER.indexOf(step.dbStatus);
+      return idx !== -1 && currentIpsIdx >= idx;
+    }
+    return false;
+  };
+
+  // dbStatus 系のステップの日付を StatusHistory から探すヘルパー
+  const findHistoryDate = (toStatus: IpsStatus): Date | null => {
+    const history = user.statusHistory
+      .filter((h) => h.toStatus === toStatus)
+      .sort((a, b) => b.changedAt.getTime() - a.changedAt.getTime())[0];
+    return history?.changedAt ?? null;
+  };
+
+  const getStepDate = (step: TimelineStep): Date | null => {
+    // 書類同意系: 該当 Document の signedAt
+    if (step.docType) {
+      const doc = user.documents.find(
+        (d) => d.type === step.docType && d.status === "SIGNED"
+      );
+      return doc?.signedAt ?? null;
+    }
+    // 個別フィールドベースの判定
+    if (step.key === "REGISTERED") {
+      // ID発行日は記録されていないので membership.contractDate でフォールバック
+      return membership?.contractDate ?? null;
+    }
+    if (step.key === "TERMS_AGREED") {
+      return user.agreedTermsAt ?? findHistoryDate("TERMS_AGREED");
+    }
+    if (step.key === "CONTRACT_SIGNING") return membership?.contractSignedAt ?? null;
+    if (step.key === "PAYMENT_CONFIRMED") {
+      // 入金日の正確なフィールドが無いため契約署名日でフォールバック
+      return membership?.paymentStatus === "COMPLETED"
+        ? membership?.contractSignedAt ?? null
+        : null;
+    }
+    if (step.key === "CLINIC_CONFIRMED") return membership?.clinicDate ?? null;
+    if (step.key === "STORAGE_ACTIVE") {
+      return membership?.storageStartAt ?? findHistoryDate("STORAGE_ACTIVE");
+    }
+    if (step.key === "IPS_CREATING") {
+      return membership?.ipsCompletedAt ?? findHistoryDate("IPS_CREATING");
+    }
+    if (step.key === "BLOOD_COLLECTED") return findHistoryDate("BLOOD_COLLECTED");
+    // その他のステータス遷移系: StatusHistory から該当 toStatus の最新を探す
+    if (step.dbStatus) return findHistoryDate(step.dbStatus);
+    return null;
+  };
 
   return (
     <div>
@@ -224,7 +333,7 @@ export default function ReadOnlyMemberKarte({
             契約情報
           </h3>
           <InfoRow label="会員番号" value={membership?.memberNumber || "---"} mono />
-          <InfoRow label="プラン" value="基本パッケージ（880万円）" />
+          <InfoRow label="プラン" value="基本パッケージ(880万円)" />
           <InfoRow label="契約日" value={membership ? formatDate(membership.contractDate) : "---"} />
           <InfoRow
             label="入金状況"
@@ -260,64 +369,99 @@ export default function ReadOnlyMemberKarte({
         </div>
       </div>
 
-      {/* iPS作製・保管 ステータスタイムライン（読み取り専用） */}
-      {membership && (
-        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-5 sm:mb-6">
-          <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
-            iPS作製・保管 ステータス
-          </h3>
-          <div className="space-y-2">
-            {IPS_TIMELINE_STEPS.map((step, i) => {
-              const done = currentIpsIdx >= i && currentIpsIdx !== -1;
-              const isCurrent = currentIpsIdx === i;
-              return (
-                <div
-                  key={step.key}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded ${
-                    isCurrent ? "bg-gold/5 border border-gold/30" : ""
-                  }`}
-                >
+      {/* iPS作製・保管 ステータスタイムライン（線で繋ぐ・日付・書類リンク付き） */}
+      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-5 sm:mb-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          iPS作製・保管 ステータス
+        </h3>
+        <div className="relative">
+          {TIMELINE_STEPS.map((step, i) => {
+            const done = isStepDone(step);
+            const isLast = i === TIMELINE_STEPS.length - 1;
+            const nextDone = !isLast && isStepDone(TIMELINE_STEPS[i + 1]);
+            const stepDate = getStepDate(step);
+            const docLink = step.docType ? DOC_VIEW_LINKS[step.docType] : null;
+            const linkedDoc = step.docType
+              ? user.documents.find((d) => d.type === step.docType && d.status === "SIGNED")
+              : null;
+
+            return (
+              <div
+                key={step.key}
+                className={`flex items-start gap-4 relative ${isLast ? "" : "pb-5"}`}
+              >
+                {/* 縦線（次のステップとの接続） */}
+                {!isLast && (
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                      done
-                        ? "bg-gold text-bg-primary font-bold"
-                        : "border border-border text-text-muted"
-                    }`}
-                  >
-                    {done ? "✓" : step.icon}
+                    className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
+                    style={{
+                      background:
+                        done && nextDone
+                          ? "var(--color-gold-primary)"
+                          : done && !nextDone
+                          ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))"
+                          : "var(--color-border)",
+                    }}
+                  />
+                )}
+                {/* ステップノード（円形） */}
+                <div
+                  className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all ${
+                    done
+                      ? "text-bg-primary font-bold"
+                      : "border border-border text-text-muted"
+                  }`}
+                  style={{
+                    background: done
+                      ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
+                      : "var(--color-bg-elevated)",
+                  }}
+                >
+                  {done ? "✓" : step.icon}
+                </div>
+                {/* ラベル & 日付 & 書類リンク */}
+                <div className="pt-1 min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* 書類同意系で同意済みなら DocumentModal でリンク表示 */}
+                    {done && docLink && linkedDoc ? (
+                      <DocumentModal
+                        label={step.label}
+                        pdfUrl={linkedDoc.fileUrl}
+                        pageUrl={docLink}
+                        done={true}
+                        deathWish={
+                          step.docType === "CELL_STORAGE_CONSENT" ? deathWish : null
+                        }
+                      />
+                    ) : (
+                      <span
+                        className={`text-[13px] sm:text-sm ${
+                          done ? "text-gold" : "text-text-muted"
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+                    )}
                   </div>
-                  <span
-                    className={`text-[13px] ${
-                      isCurrent ? "text-gold font-medium" : done ? "text-gold" : "text-text-muted"
-                    }`}
-                  >
-                    {step.label}
-                  </span>
-                  {isCurrent && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20 ml-auto">
-                      現在
-                    </span>
+                  {/* 完了日表示 */}
+                  {done && stepDate && (
+                    <div className="text-[10px] text-text-muted font-mono mt-0.5">
+                      {formatDate(stepDate)}
+                    </div>
+                  )}
+                  {/* 日程確定ステップではクリニック情報も表示 */}
+                  {step.key === "CLINIC_CONFIRMED" && done && membership?.clinicName && (
+                    <div className="text-[10px] text-text-muted mt-0.5">
+                      {membership.clinicName}
+                      {membership.clinicAddress && ` ／ ${membership.clinicAddress}`}
+                    </div>
                   )}
                 </div>
-              );
-            })}
-          </div>
-          {(membership.clinicDate || membership.clinicName) && (
-            <div className="mt-4 pt-4 border-t border-border space-y-1">
-              <div className="text-[11px] text-text-muted">クリニック情報</div>
-              {membership.clinicDate && (
-                <div className="text-[13px] text-text-primary font-mono">{formatDate(membership.clinicDate)}</div>
-              )}
-              {membership.clinicName && (
-                <div className="text-[13px] text-text-primary">{membership.clinicName}</div>
-              )}
-              {membership.clinicAddress && (
-                <div className="text-[11px] text-text-muted">{membership.clinicAddress}</div>
-              )}
-            </div>
-          )}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* iPS培養上清液 注文一覧（読み取り専用） */}
       {user.cultureFluidOrders.length > 0 && (
@@ -393,39 +537,61 @@ export default function ReadOnlyMemberKarte({
         </div>
       )}
 
-      {/* 書類一覧（読み取り専用） */}
+      {/* 契約・同意書類一覧（同意済みのものはモーダルでリンク表示） */}
       {user.documents.length > 0 && (
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-5 sm:mb-6">
           <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
             契約・同意書類
           </h3>
           <div className="space-y-2">
-            {user.documents.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-center justify-between py-2.5 px-3 rounded bg-bg-elevated border border-border"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] text-text-primary">
-                    {DOCUMENT_TYPE_LABELS[doc.type] || doc.title}
-                  </div>
-                  {doc.signedAt && (
-                    <div className="text-[10px] text-text-muted mt-0.5">
-                      同意日: {formatDate(doc.signedAt)}
+            {user.documents
+              .filter((d) => d.type !== "SIMPLE_AGREEMENT")
+              .map((doc) => {
+                const label = DOCUMENT_TYPE_LABELS[doc.type] || doc.title;
+                const viewLink = DOC_VIEW_LINKS[doc.type];
+                const isSigned = doc.status === "SIGNED";
+                const canOpenModal = isSigned && (!!doc.fileUrl || !!viewLink);
+
+                return (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between gap-3 py-2.5 px-3 rounded bg-bg-elevated border border-border"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] text-text-primary">{label}</div>
+                      {doc.signedAt && (
+                        <div className="text-[10px] text-text-muted mt-0.5">
+                          同意日: {formatDate(doc.signedAt)}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    doc.status === "SIGNED"
-                      ? "bg-status-active/15 text-status-active border border-status-active/30"
-                      : "bg-bg-elevated text-text-muted border border-border"
-                  }`}
-                >
-                  {doc.status === "SIGNED" ? "同意済" : doc.status === "SENT" ? "送付済" : "未同意"}
-                </span>
-              </div>
-            ))}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          isSigned
+                            ? "bg-status-active/15 text-status-active border border-status-active/30"
+                            : doc.status === "SENT"
+                            ? "bg-status-warning/15 text-status-warning border border-status-warning/30"
+                            : "bg-bg-elevated text-text-muted border border-border"
+                        }`}
+                      >
+                        {isSigned ? "同意済" : doc.status === "SENT" ? "送付済" : "未同意"}
+                      </span>
+                      {canOpenModal && (
+                        <DocumentModal
+                          label={label}
+                          pdfUrl={doc.fileUrl}
+                          pageUrl={viewLink || ""}
+                          done={true}
+                          triggerLabel={doc.fileUrl ? "PDF を見る" : "内容を確認"}
+                          variant="button"
+                          deathWish={doc.type === "CELL_STORAGE_CONSENT" ? deathWish : null}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

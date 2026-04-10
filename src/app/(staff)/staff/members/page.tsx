@@ -31,6 +31,7 @@ export default async function StaffMembersPage() {
                 <th className="text-left px-4 py-3 font-normal">入金状況</th>
                 <th className="text-right px-4 py-3 font-normal">売上</th>
                 <th className="text-left px-4 py-3 font-normal">登録日</th>
+                <th className="text-right px-4 py-3 font-normal">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -75,6 +76,14 @@ export default async function StaffMembersPage() {
                       {new Date(c.createdAt).toLocaleDateString("ja-JP")}
                     </Link>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/staff/members/${c.id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] tracking-wider border border-border-gold text-gold hover:bg-gold/10 transition-all"
+                    >
+                      📋 カルテ
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -101,8 +110,13 @@ export default async function StaffMembersPage() {
                   {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
                 </span>
               </div>
-              <div className="text-[11px] text-text-muted">
-                {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・ ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+              <div className="flex items-center justify-between mt-1">
+                <div className="text-[11px] text-text-muted">
+                  {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・ ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+                </div>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm text-[10px] tracking-wider border border-border-gold text-gold">
+                  📋 カルテ
+                </span>
               </div>
             </Link>
           ))}
