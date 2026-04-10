@@ -45,18 +45,19 @@ export default function PendingActionRow({
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <span className={`text-[11px] ${actionColor}`}>{action}</span>
-          {/* 経過日数バッジ（放置検知用） */}
+          {/* 経過日数バッジ（対応待ち開始日 + N日前） */}
           <span
-            className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+            className={`inline-flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border ${
               days >= 14
-                ? "bg-status-danger/10 border-status-danger/30 text-status-danger"
+                ? "bg-status-danger/10 border-status-danger/30"
                 : days >= 7
-                ? "bg-status-warning/10 border-status-warning/30 text-status-warning"
-                : "bg-bg-elevated border-border text-text-muted"
+                ? "bg-status-warning/10 border-status-warning/30"
+                : "bg-bg-elevated border-border"
             }`}
-            title={`対応待ち開始日: ${sinceDate}`}
           >
-            <span aria-hidden>⏱</span>
+            <span aria-hidden className={sinceColor}>⏱</span>
+            <span className={sinceColor}>{sinceDate}</span>
+            <span className="text-text-muted">／</span>
             <span className={sinceColor}>{sinceLabel}</span>
           </span>
         </div>
