@@ -236,7 +236,7 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* 事前説明・同意 */}
+          {/* 事前説明・同意（未同意時） */}
           {activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
             <Link href={`/culture-fluid/informed-consent?orderId=${activeOrder.id}`} className="block group">
               <div className="rounded-xl border border-status-warning/30 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
@@ -260,32 +260,60 @@ export default async function CultureFluidPage() {
             </Link>
           )}
 
-          {/* 予約確定 */}
-          {activeOrder.status === "RESERVATION_CONFIRMED" && activeOrder.clinicDate && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">🏥</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">確定</span>
-                </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">施術予約が確定しました</div>
-                <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
-                  <div>
-                    <div className="text-[11px] text-text-muted mb-1">予定日</div>
-                    <div className="font-mono text-lg text-gold">{new Date(activeOrder.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}</div>
+          {/* 予約情報カード ──
+              clinicDate が設定済みなら status に関わらず常に表示する。
+              status によってバッジとメッセージを切り替え:
+              - CLINIC_BOOKING (同意済み): 「予約手配中」
+              - INFORMED_AGREED:           「予約手配中」
+              - RESERVATION_CONFIRMED:     「予約確定」
+              ※ 「事前説明・同意」カードと併存する場合があるが、
+                 同意前は予約日が決まっていない通常運用なので問題なし */}
+          {activeOrder.clinicDate &&
+            (activeOrder.status === "RESERVATION_CONFIRMED" ||
+              activeOrder.status === "INFORMED_AGREED" ||
+              (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">🏥</span>
+                    {activeOrder.status === "RESERVATION_CONFIRMED" ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">確定</span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">予約手配中</span>
+                    )}
+                    {completedSessions > 0 && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">
+                        {currentSession}回目 / 全{totalSessions}回
+                      </span>
+                    )}
                   </div>
-                  {activeOrder.clinicName && (
-                    <div>
-                      <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
-                      <div className="text-sm text-text-primary">{activeOrder.clinicName}</div>
-                      {activeOrder.clinicAddress && <div className="text-xs text-text-muted mt-1">{activeOrder.clinicAddress}</div>}
-                      {activeOrder.clinicPhone && <div className="text-xs text-text-muted mt-1">TEL: {activeOrder.clinicPhone}</div>}
-                    </div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
+                    {activeOrder.status === "RESERVATION_CONFIRMED"
+                      ? "施術予約が確定しました"
+                      : "施術予約の手配中です"}
+                  </div>
+                  {activeOrder.status !== "RESERVATION_CONFIRMED" && (
+                    <p className="text-xs text-text-muted leading-relaxed mb-4">
+                      下記の予定で施術予約を進めております。最終確定後、改めてご案内いたします。
+                    </p>
                   )}
+                  <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                    <div>
+                      <div className="text-[11px] text-text-muted mb-1">予定日</div>
+                      <div className="font-mono text-lg text-gold">{new Date(activeOrder.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}</div>
+                    </div>
+                    {activeOrder.clinicName && (
+                      <div>
+                        <div className="text-[11px] text-text-muted mb-1">提携クリニック</div>
+                        <div className="text-sm text-text-primary">{activeOrder.clinicName}</div>
+                        {activeOrder.clinicAddress && <div className="text-xs text-text-muted mt-1">{activeOrder.clinicAddress}</div>}
+                        {activeOrder.clinicPhone && <div className="text-xs text-text-muted mt-1">TEL: {activeOrder.clinicPhone}</div>}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* 施術完了（全回数完了時） */}
           {activeOrder.status === "COMPLETED" && (
