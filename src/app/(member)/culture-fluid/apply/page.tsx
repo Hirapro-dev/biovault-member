@@ -37,6 +37,7 @@ export default function CultureFluidApplyPage() {
   // ステップ1: プラン選択
   const [selectedPlan, setSelectedPlan] = useState<PlanId | "">("");
   const [paymentDate, setPaymentDate] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
 
   // ステップ2: 留意事項スクロール
   const cautionRef = useRef<HTMLDivElement>(null);
@@ -201,6 +202,35 @@ export default function CultureFluidApplyPage() {
             </p>
           </div>
 
+          {/* 支払方法 */}
+          <div className="bg-bg-secondary border border-border rounded-md p-6">
+            <h3 className="text-sm text-gold mb-3">お支払い方法</h3>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="bank_transfer"
+                  checked={paymentMethod === "bank_transfer"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="accent-gold"
+                />
+                <span className="text-sm text-text-secondary">銀行振込</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="credit_card"
+                  checked={paymentMethod === "credit_card"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="accent-gold"
+                />
+                <span className="text-sm text-text-secondary">クレジットカード</span>
+              </label>
+            </div>
+          </div>
+
           {/* 支払予定日 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
             <h3 className="text-sm text-gold mb-3">お支払い予定日</h3>
@@ -351,7 +381,9 @@ export default function CultureFluidApplyPage() {
                 <div className="text-xs text-text-muted mb-1">
                   お支払い方法
                 </div>
-                <div className="text-sm text-text-primary">銀行振込</div>
+                <div className="text-sm text-text-primary">
+                  {paymentMethod === "bank_transfer" ? "銀行振込" : "クレジットカード"}
+                </div>
               </div>
 
               <div>
