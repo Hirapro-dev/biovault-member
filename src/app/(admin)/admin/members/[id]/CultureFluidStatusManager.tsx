@@ -63,6 +63,7 @@ interface Props {
     informedAgreedAt: string | null;
     completedAt: string | null;
     completedSessions: number;
+    sessionDates: string | null;
     createdAt: string;
   }[];
   /** 閲覧専用モード（従業員・代理店ページから利用される） */
@@ -353,6 +354,32 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                 )}
                 {isLoading && <span className="text-[10px] text-gold animate-pulse ml-auto">更新中...</span>}
               </div>
+
+              {/* 施術履歴（sessionDates がある場合） */}
+              {order.sessionDates && (() => {
+                const dates: string[] = JSON.parse(order.sessionDates as string);
+                return dates.length > 0 ? (
+                  <div className="px-4 sm:px-6 py-3 border-b border-border bg-bg-elevated/50">
+                    <div className="text-[10px] text-text-muted mb-1.5">施術履歴</div>
+                    <div className="space-y-0.5">
+                      {dates.map((d, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-gold font-mono">{idx + 1}/{totalSessions}回目</span>
+                          <span className="text-text-muted">:</span>
+                          <span className="text-text-secondary font-mono">{d}</span>
+                        </div>
+                      ))}
+                      {Array.from({ length: totalSessions - dates.length }).map((_, idx) => (
+                        <div key={`p-${idx}`} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-text-muted font-mono">{dates.length + idx + 1}/{totalSessions}回目</span>
+                          <span className="text-text-muted">:</span>
+                          <span className="text-text-muted">---</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
               {/* フェーズ1：保管まで */}
               <div className="px-4 sm:px-6 pt-4 pb-1">

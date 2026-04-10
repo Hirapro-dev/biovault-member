@@ -59,9 +59,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.completedAt) {
     const newCompletedSessions = order.completedSessions + 1;
     const totalSessions = getTotalSessions(order.planType);
+    const completedDate = new Date(body.completedAt);
 
-    updateData.completedAt = new Date(body.completedAt);
+    updateData.completedAt = completedDate;
     updateData.completedSessions = newCompletedSessions;
+
+    // sessionDates に各回の施術完了日を追記（JSON配列）
+    const existingDates: string[] = order.sessionDates
+      ? JSON.parse(order.sessionDates as string)
+      : [];
+    existingDates.push(completedDate.toISOString().split("T")[0]);
+    updateData.sessionDates = JSON.stringify(existingDates);
 
     if (newCompletedSessions >= totalSessions) {
       // 全回数完了 → COMPLETED で固定

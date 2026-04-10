@@ -517,17 +517,47 @@ export default async function CultureFluidPage() {
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">注文履歴</h3>
           <div className="divide-y divide-border">
-            {orders.map((o) => (
-              <div key={o.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="text-sm text-text-primary">{o.planLabel}</div>
-                  <div className="text-[11px] text-text-muted mt-0.5">{formatDate(o.createdAt)} ・ ¥{o.totalAmount.toLocaleString()}</div>
+            {orders.map((o) => {
+              // sessionDates をパース（JSON配列）
+              const sessionDates: string[] = o.sessionDates
+                ? JSON.parse(o.sessionDates as string)
+                : [];
+              const total = getTotalSessions(o.planType);
+
+              return (
+                <div key={o.id} className="py-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <div className="text-sm text-text-primary">{o.planLabel}</div>
+                      <div className="text-[11px] text-text-muted mt-0.5">{formatDate(o.createdAt)} ・ ¥{o.totalAmount.toLocaleString()}</div>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${o.status === "COMPLETED" ? "bg-status-active/10 text-status-active border-status-active/20" : "bg-gold/10 text-gold border-gold/20"}`}>
+                      {o.status === "COMPLETED" ? "完了" : `${o.completedSessions ?? 0}/${total}回完了`}
+                    </span>
+                  </div>
+                  {/* 各回の施術完了日 */}
+                  {sessionDates.length > 0 && (
+                    <div className="pl-2 space-y-1">
+                      {sessionDates.map((date, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-gold font-mono">{idx + 1}/{total}回目</span>
+                          <span className="text-text-muted">:</span>
+                          <span className="text-text-secondary font-mono">{date}</span>
+                        </div>
+                      ))}
+                      {/* 未施術回を表示 */}
+                      {Array.from({ length: total - sessionDates.length }).map((_, idx) => (
+                        <div key={`pending-${idx}`} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-text-muted font-mono">{sessionDates.length + idx + 1}/{total}回目</span>
+                          <span className="text-text-muted">:</span>
+                          <span className="text-text-muted">---</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${o.status === "COMPLETED" ? "bg-status-active/10 text-status-active border-status-active/20" : "bg-gold/10 text-gold border-gold/20"}`}>
-                  {o.status === "COMPLETED" ? "完了" : "進行中"}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

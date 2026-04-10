@@ -159,6 +159,7 @@ export default async function StaffMemberKartePage({
               informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
               completedAt: o.completedAt ? o.completedAt.toISOString() : null,
               completedSessions: o.completedSessions ?? 0,
+              sessionDates: o.sessionDates ?? null,
               createdAt: o.createdAt.toISOString(),
             }))}
             readOnly={true}

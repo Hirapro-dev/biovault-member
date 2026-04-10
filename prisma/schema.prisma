@@ -694,6 +694,7 @@ model CultureFluidOrder {
 
   // 施術回数管理（複数回施術プラン対応）
   completedSessions Int @default(0)               // 完了済み施術回数（合計回数はプランタイプから算出）
+  sessionDates    String?                         // 各回の施術完了日（JSON配列: ["2026-05-28","2026-07-15",...]）
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
