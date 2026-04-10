@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 /**
- * 管理ダッシュボード「対応が必要な会員」一覧用のタブコンポーネント
+ * ダッシュボード用「対応が必要な会員」タブ切替コンポーネント
  *
+ * 管理者・従業員・代理店ダッシュボードの3箇所で共通利用される。
  * iPS作製・保管 と iPS培養上清液 の2つのリストをタブで切り替えて表示する。
- * 既存の StatusTabs.tsx と同じく、Server Component 側でリストの JSX を組み立てて
- * ReactNode として受け取るシンプルな構造。
+ *
+ * Server Component 側でリストの JSX を組み立てて ReactNode として渡す
+ * シンプルな構造（既存の StatusTabs.tsx と同じパターン）。
  */
 export default function PendingActionsTabs({
   ipsList,

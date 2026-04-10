@@ -1,8 +1,9 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { IPS_STATUS_LABELS, IPS_STATUS_ORDER, IPS_STATUS_ICONS } from "@/types";
-import Link from "next/link";
-import PendingActionsTabs from "./PendingActionsTabs";
+import PendingActionsTabs from "@/components/admin/PendingActionsTabs";
+import PendingActionRow from "@/components/admin/PendingActionRow";
+import { getPendingActions } from "@/lib/pending-actions";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
@@ -35,103 +36,9 @@ export default async function AdminDashboardPage() {
     where: { role: "MEMBER", createdAt: { gte: startOfMonth } },
   });
 
-  // ── 対応が必要な会員を取得（iPS作製・保管側） ──
-  const ipsPendingUsers = await prisma.user.findMany({
-    where: {
-      role: "MEMBER",
-      OR: [
-        // 適合確認待ち（登録済みでTERMS_AGREEDチェック前）
-        { membership: { ipsStatus: "REGISTERED" } },
-        // ID発行待ち（適合確認済みでID未発行）
-        { membership: { ipsStatus: "TERMS_AGREED" }, isIdIssued: false },
-        // 契約書署名待ち（サービス申込済みで契約書未署名）
-        { membership: { ipsStatus: "SERVICE_APPLIED", contractSignedAt: null } },
-        // 入金確認待ち（契約書署名済みで未入金）
-        { membership: { ipsStatus: "SERVICE_APPLIED", contractSignedAt: { not: null }, paymentStatus: { not: "COMPLETED" } } },
-        // 日程調整中（日程未確定）
-        { membership: { ipsStatus: "SCHEDULE_ARRANGED", clinicDate: null } },
-      ],
-    },
-    include: { membership: true },
-    orderBy: { createdAt: "desc" },
-    take: 30,
-  });
-
-  // ── 対応が必要な会員を取得（iPS培養上清液側） ──
-  // iPS側と重複しても良い（タブで分けて表示するため）
-  const cfPendingUsers = await prisma.user.findMany({
-    where: {
-      role: "MEMBER",
-      cultureFluidOrders: { some: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } } },
-    },
-    include: {
-      membership: true,
-      cultureFluidOrders: {
-        where: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 30,
-  });
-
-  // 対応タイプを判定
-  type IpsUser = typeof ipsPendingUsers[number];
-  type CfUser = typeof cfPendingUsers[number];
-  type IpsActionItem = { user: IpsUser; action: string; icon: string; color: string };
-  type CfActionItem = { user: CfUser; action: string; icon: string; color: string; orderId: string };
-
-  // ── iPS作製・保管 の対応アイテム構築 ──
-  const ipsActionItems: IpsActionItem[] = [];
-  for (const u of ipsPendingUsers) {
-    const s = u.membership?.ipsStatus;
-    if (s === "REGISTERED") {
-      ipsActionItems.push({ user: u, action: "適合確認待ち", icon: "📋", color: "text-status-warning" });
-    } else if (s === "TERMS_AGREED" && !u.isIdIssued) {
-      ipsActionItems.push({ user: u, action: "ID発行待ち", icon: "🔑", color: "text-status-warning" });
-    } else if (s === "SERVICE_APPLIED" && !u.membership?.contractSignedAt) {
-      ipsActionItems.push({ user: u, action: "契約書署名待ち", icon: "📝", color: "text-status-danger" });
-    } else if (s === "SERVICE_APPLIED") {
-      ipsActionItems.push({ user: u, action: "入金確認待ち", icon: "💰", color: "text-status-danger" });
-    } else if (s === "SCHEDULE_ARRANGED") {
-      ipsActionItems.push({ user: u, action: "日程調整リクエスト", icon: "📅", color: "text-gold" });
-    }
-  }
-
-  // ── iPS培養上清液 の対応アイテム構築 ──
-  // 1ユーザーが複数の未完了注文を持つ場合は、それぞれをアイテム化する
-  const cfActionItems: CfActionItem[] = [];
-  for (const u of cfPendingUsers) {
-    for (const cfOrder of u.cultureFluidOrders) {
-      if (cfOrder.status === "APPLIED") {
-        cfActionItems.push({
-          user: u,
-          action: "入金確認待ち",
-          icon: "💰",
-          color: "text-status-warning",
-          orderId: cfOrder.id,
-        });
-      } else if (cfOrder.status === "PRODUCING") {
-        cfActionItems.push({
-          user: u,
-          action: "精製・管理保管 手配中",
-          icon: "⚗️",
-          color: "text-gold",
-          orderId: cfOrder.id,
-        });
-      } else if (cfOrder.status === "CLINIC_BOOKING") {
-        cfActionItems.push({
-          user: u,
-          action: "クリニック予約手配",
-          icon: "📅",
-          color: "text-gold",
-          orderId: cfOrder.id,
-        });
-      }
-    }
-  }
-
-  const totalPendingCount = ipsActionItems.length + cfActionItems.length;
+  // ── 対応が必要な会員を共通ヘルパーで取得 ──
+  // 管理者は全会員が対象なのでスコープ条件なし
+  const { ipsActionItems, cfActionItems, totalPendingCount } = await getPendingActions();
 
   // サマリー統計（従来の4カード）
   const serviceApplied = (countMap["SERVICE_APPLIED"] || 0) +
@@ -177,42 +84,32 @@ export default async function AdminDashboardPage() {
             ipsList={
               <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
                 {ipsActionItems.map((item, i) => (
-                  <Link
-                    key={`${item.user.id}-${i}`}
-                    href={`/admin/members/${item.user.id}`}
-                    className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
-                  >
-                    <span className="text-lg shrink-0">{item.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
-                        <span className="text-sm text-text-primary">{item.user.name}</span>
-                      </div>
-                      <span className={`text-[11px] ${item.color}`}>{item.action}</span>
-                    </div>
-                    <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
-                  </Link>
+                  <PendingActionRow
+                    key={`${item.userId}-${i}`}
+                    href={`/admin/members/${item.userId}`}
+                    memberNumber={item.memberNumber}
+                    name={item.name}
+                    action={item.action}
+                    icon={item.icon}
+                    actionColor={item.color}
+                    since={item.since}
+                  />
                 ))}
               </div>
             }
             cfList={
               <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
                 {cfActionItems.map((item, i) => (
-                  <Link
+                  <PendingActionRow
                     key={`${item.orderId}-${i}`}
-                    href={`/admin/members/${item.user.id}`}
-                    className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
-                  >
-                    <span className="text-lg shrink-0">{item.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
-                        <span className="text-sm text-text-primary">{item.user.name}</span>
-                      </div>
-                      <span className={`text-[11px] ${item.color}`}>{item.action}</span>
-                    </div>
-                    <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
-                  </Link>
+                    href={`/admin/members/${item.userId}`}
+                    memberNumber={item.memberNumber}
+                    name={item.name}
+                    action={item.action}
+                    icon={item.icon}
+                    actionColor={item.color}
+                    since={item.since}
+                  />
                 ))}
               </div>
             }

@@ -1,5 +1,8 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import PendingActionsTabs from "@/components/admin/PendingActionsTabs";
+import PendingActionRow from "@/components/admin/PendingActionRow";
+import { getPendingActions } from "@/lib/pending-actions";
 
 export default async function AgencyDashboardPage() {
   const user = await requireAgency();
@@ -17,6 +20,11 @@ export default async function AgencyDashboardPage() {
   const pendingCommission = profile?.commissions.filter((c) => c.status === "PENDING").reduce((sum, c) => sum + c.commissionAmount, 0) || 0;
   const paidCommission = profile?.commissions.filter((c) => c.status === "PAID").reduce((sum, c) => sum + c.commissionAmount, 0) || 0;
 
+  // 対応が必要な顧客（共通ヘルパーで取得・自分が紹介した顧客のみにスコープ）
+  const { ipsActionItems, cfActionItems, totalPendingCount } = profile?.agencyCode
+    ? await getPendingActions({ referredByAgency: profile.agencyCode })
+    : { ipsActionItems: [], cfActionItems: [], totalPendingCount: 0 };
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
@@ -29,6 +37,51 @@ export default async function AgencyDashboardPage() {
         <StatCard label="未確定報酬" value={`¥${pendingCommission.toLocaleString()}`} sub="" />
         <StatCard label="支払済報酬" value={`¥${paidCommission.toLocaleString()}`} sub="" />
       </div>
+
+      {/* 対応が必要な顧客（管理者・従業員ダッシュボードと同等のタブUI） */}
+      {totalPendingCount > 0 && (
+        <div className="mb-6 sm:mb-8">
+          <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+            対応が必要な顧客 <span className="text-gold font-mono ml-2">{totalPendingCount}</span>
+          </h3>
+          <PendingActionsTabs
+            ipsCount={ipsActionItems.length}
+            cfCount={cfActionItems.length}
+            ipsList={
+              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+                {ipsActionItems.map((item, i) => (
+                  <PendingActionRow
+                    key={`${item.userId}-${i}`}
+                    href="/agency/customers"
+                    memberNumber={item.memberNumber}
+                    name={item.name}
+                    action={item.action}
+                    icon={item.icon}
+                    actionColor={item.color}
+                    since={item.since}
+                  />
+                ))}
+              </div>
+            }
+            cfList={
+              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+                {cfActionItems.map((item, i) => (
+                  <PendingActionRow
+                    key={`${item.orderId}-${i}`}
+                    href="/agency/customers"
+                    memberNumber={item.memberNumber}
+                    name={item.name}
+                    action={item.action}
+                    icon={item.icon}
+                    actionColor={item.color}
+                    since={item.since}
+                  />
+                ))}
+              </div>
+            }
+          />
+        </div>
+      )}
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 mb-5">
         <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">エージェント情報</h3>
