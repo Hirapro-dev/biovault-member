@@ -535,24 +535,19 @@ export default async function CultureFluidPage() {
                       {o.status === "COMPLETED" ? "完了" : `${o.completedSessions ?? 0}/${total}回完了`}
                     </span>
                   </div>
-                  {/* 各回の施術完了日 */}
-                  {sessionDates.length > 0 && (
-                    <div className="pl-2 space-y-1">
-                      {sessionDates.map((date, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-[11px]">
-                          <span className="text-gold font-mono">{idx + 1}/{total}回目</span>
-                          <span className="text-text-muted">:</span>
-                          <span className="text-text-secondary font-mono">{date}</span>
-                        </div>
-                      ))}
-                      {/* 未施術回を表示 */}
-                      {Array.from({ length: total - sessionDates.length }).map((_, idx) => (
-                        <div key={`pending-${idx}`} className="flex items-center gap-2 text-[11px]">
-                          <span className="text-text-muted font-mono">{sessionDates.length + idx + 1}/{total}回目</span>
-                          <span className="text-text-muted">:</span>
-                          <span className="text-text-muted">---</span>
-                        </div>
-                      ))}
+                  {/* 各回の施術完了日（複数回プラン or 施術実績がある場合に表示） */}
+                  {(total > 1 || sessionDates.length > 0) && (
+                    <div className="pl-2 space-y-1 mt-2">
+                      {Array.from({ length: total }).map((_, idx) => {
+                        const date = sessionDates[idx];
+                        return (
+                          <div key={idx} className="flex items-center gap-2 text-[11px]">
+                            <span className={`font-mono ${date ? "text-gold" : "text-text-muted"}`}>{idx + 1}/{total}回目</span>
+                            <span className="text-text-muted">:</span>
+                            <span className={`font-mono ${date ? "text-text-secondary" : "text-text-muted"}`}>{date || "---"}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
