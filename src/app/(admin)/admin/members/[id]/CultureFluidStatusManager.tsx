@@ -98,9 +98,13 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
   const [inputCompletedDate, setInputCompletedDate] = useState("");
   const [completedLoading, setCompletedLoading] = useState(false);
 
-  // クリニック予約ポップアップが開いた時にクリニック一覧を取得
+  // 予約確定ポップアップ（確定日＋クリニック選択）
+  const [showReservationPopup, setShowReservationPopup] = useState<string | null>(null);
+  const [reservationLoading, setReservationLoading] = useState(false);
+
+  // クリニック予約 or 予約確定ポップアップが開いた時にクリニック一覧を取得
   useEffect(() => {
-    if (showClinicPopup) {
+    if (showClinicPopup || showReservationPopup) {
       fetch("/api/admin/clinics")
         .then((r) => r.json())
         .then((data) => {
@@ -108,7 +112,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         })
         .catch(() => setClinicList([]));
     }
-  }, [showClinicPopup]);
+  }, [showClinicPopup, showReservationPopup]);
 
   // 注文が無い場合
   if (!orders || orders.length === 0) {
@@ -188,15 +192,14 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         break;
       }
       case "RESERVATION_CONFIRMED": {
-        setLoadingOrder(order.id);
-        try {
-          await patchOrder(order.id, { status: "RESERVATION_CONFIRMED" });
-          router.refresh();
-        } catch {
-          // エラーは静かに処理
-        } finally {
-          setLoadingOrder(null);
-        }
+        // 予約確定: 確定日＋クリニック選択ポップアップ（CLINIC_BOOKING と同じ UI を再利用）
+        // 既に clinicDate / clinicName が設定されていればデフォルト値として入れる
+        setInputClinicDate(order.clinicDate ? order.clinicDate.split("T")[0] : "");
+        setInputClinicName(order.clinicName || "");
+        setInputClinicAddress(order.clinicAddress || "");
+        setInputClinicPhone(order.clinicPhone || "");
+        setSelectedClinicId("");
+        setShowReservationPopup(order.id);
         break;
       }
       case "COMPLETED": {
@@ -643,6 +646,96 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                   className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
                 >
                   {completedLoading ? "更新中..." : "確定する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 予約確定ポップアップ（確定日＋クリニック選択） */}
+      {showReservationPopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowReservationPopup(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">予約確定</h3>
+            <p className="text-xs text-text-muted mb-5">施術の確定日とクリニックを選択してください。</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">確定日</label>
+                <input
+                  type="date"
+                  value={inputClinicDate}
+                  onChange={(e) => setInputClinicDate(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">提携クリニック</label>
+                <select
+                  value={selectedClinicId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedClinicId(id);
+                    const clinic = clinicList.find((c) => c.id === id);
+                    if (clinic) {
+                      setInputClinicName(clinic.name);
+                      setInputClinicAddress(clinic.address || "");
+                      setInputClinicPhone(clinic.phone || "");
+                    } else {
+                      setInputClinicName("");
+                      setInputClinicAddress("");
+                      setInputClinicPhone("");
+                    }
+                  }}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none cursor-pointer"
+                >
+                  <option value="">クリニックを選択</option>
+                  {clinicList.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedClinicId && (
+                <div className="bg-bg-elevated border border-border rounded-md p-3 space-y-1.5">
+                  <div className="text-sm text-text-primary font-medium">{inputClinicName}</div>
+                  {inputClinicAddress && <div className="text-xs text-text-muted">{inputClinicAddress}</div>}
+                  {inputClinicPhone && <div className="text-xs text-text-muted">TEL: {inputClinicPhone}</div>}
+                </div>
+              )}
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setShowReservationPopup(null)}
+                  className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!inputClinicDate || !inputClinicName || !showReservationPopup) return;
+                    setReservationLoading(true);
+                    try {
+                      await patchOrder(showReservationPopup, {
+                        clinicDate: new Date(inputClinicDate).toISOString(),
+                        clinicName: inputClinicName,
+                        clinicAddress: inputClinicAddress || null,
+                        clinicPhone: inputClinicPhone || null,
+                        status: "RESERVATION_CONFIRMED",
+                      });
+                      setShowReservationPopup(null);
+                      router.refresh();
+                    } catch {
+                      // エラーは静かに処理
+                    } finally {
+                      setReservationLoading(false);
+                    }
+                  }}
+                  disabled={reservationLoading || !inputClinicDate || !inputClinicName}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {reservationLoading ? "確定中..." : "予約を確定する"}
                 </button>
               </div>
             </div>
