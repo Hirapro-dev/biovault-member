@@ -21,8 +21,8 @@ const MEMBER_NAV_GROUPS: NavGroup[] = [
   {
     heading: "契約・同意書類",
     items: [
-      { href: "/documents", label: "iPS作製・保管 契約・同意書一覧", icon: "🧬" },
-      { href: "/culture-fluid/documents", label: "iPS培養上清液精製 契約・同意書一覧", icon: "🧪" },
+      { href: "/documents", label: "iPS作製・保管書類一覧", icon: "🧬" },
+      { href: "/culture-fluid/documents", label: "iPS培養上清液書類一覧", icon: "🧪" },
     ],
   },
   {
