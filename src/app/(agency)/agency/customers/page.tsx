@@ -1,5 +1,6 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 
 export default async function CustomersPage() {
@@ -24,14 +25,18 @@ export default async function CustomersPage() {
         ) : (
           <div className="divide-y divide-border">
             {customers.map((c) => (
-              <div key={c.id} className="px-5 py-4">
+              <Link
+                key={c.id}
+                href={`/agency/customers/${c.id}`}
+                className="block px-5 py-4 hover:bg-bg-elevated transition-colors group"
+              >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">
                     {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"}
                   </span>
                 </div>
-                <div className="text-sm text-text-primary">{c.name}</div>
+                <div className="text-sm text-text-primary group-hover:text-gold transition-colors">{c.name}</div>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-[11px] text-text-muted">
                     {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
@@ -40,7 +45,7 @@ export default async function CustomersPage() {
                     {new Date(c.createdAt).toLocaleDateString("ja-JP")}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

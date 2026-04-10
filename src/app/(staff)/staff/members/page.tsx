@@ -1,5 +1,6 @@
 import { requireStaff } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 
 export default async function StaffMembersPage() {
@@ -34,23 +35,46 @@ export default async function StaffMembersPage() {
             </thead>
             <tbody>
               {customers.map((c) => (
-                <tr key={c.id} className="border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors">
-                  <td className="px-4 py-3 font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</td>
-                  <td className="px-4 py-3 text-sm text-text-primary">{c.name}</td>
-                  <td className="px-4 py-3 text-[11px] text-text-secondary">{c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"}</td>
+                <tr
+                  key={c.id}
+                  className="border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors cursor-pointer group"
+                >
+                  <td className="px-4 py-3 font-mono text-[13px] text-gold">
+                    <Link href={`/staff/members/${c.id}`} className="block">
+                      {c.membership?.memberNumber || "---"}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-text-primary">
+                    <Link href={`/staff/members/${c.id}`} className="block group-hover:text-gold transition-colors">
+                      {c.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-[11px] text-text-secondary">
+                    <Link href={`/staff/members/${c.id}`} className="block">
+                      {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${
-                      c.membership?.paymentStatus === "COMPLETED" ? "bg-status-active/10 text-status-active border-status-active/20" :
-                      c.membership?.paymentStatus === "PARTIAL" ? "bg-status-warning/10 text-status-warning border-status-warning/20" :
-                      "bg-text-muted/10 text-text-muted border-text-muted/20"
-                    }`}>
-                      {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
-                    </span>
+                    <Link href={`/staff/members/${c.id}`} className="block">
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                        c.membership?.paymentStatus === "COMPLETED" ? "bg-status-active/10 text-status-active border-status-active/20" :
+                        c.membership?.paymentStatus === "PARTIAL" ? "bg-status-warning/10 text-status-warning border-status-warning/20" :
+                        "bg-text-muted/10 text-text-muted border-text-muted/20"
+                      }`}>
+                        {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
+                      </span>
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-[13px] text-text-secondary">
-                    ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+                    <Link href={`/staff/members/${c.id}`} className="block">
+                      ¥{(c.membership?.paidAmount || 0).toLocaleString()}
+                    </Link>
                   </td>
-                  <td className="px-4 py-3 text-[11px] text-text-muted">{new Date(c.createdAt).toLocaleDateString("ja-JP")}</td>
+                  <td className="px-4 py-3 text-[11px] text-text-muted">
+                    <Link href={`/staff/members/${c.id}`} className="block">
+                      {new Date(c.createdAt).toLocaleDateString("ja-JP")}
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -60,7 +84,11 @@ export default async function StaffMembersPage() {
         {/* モバイル版カード */}
         <div className="sm:hidden divide-y divide-border">
           {customers.map((c) => (
-            <div key={c.id} className="px-4 py-4">
+            <Link
+              key={c.id}
+              href={`/staff/members/${c.id}`}
+              className="block px-4 py-4 hover:bg-bg-elevated transition-colors"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</span>
@@ -76,7 +104,7 @@ export default async function StaffMembersPage() {
               <div className="text-[11px] text-text-muted">
                 {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・ ¥{(c.membership?.paidAmount || 0).toLocaleString()}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
