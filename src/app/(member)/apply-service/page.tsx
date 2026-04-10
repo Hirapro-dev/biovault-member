@@ -427,7 +427,7 @@ export default function ApplyServicePage() {
                 onChange={(v) => updateConfirm("confirmLabRole", v)}
               />
               <ConfirmItem
-                label="重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意書が一体として適用されることに同意しました"
+                label="重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いについて同意しました"
                 checked={confirmChecks.confirmDocumentsApply}
                 onChange={(v) => updateConfirm("confirmDocumentsApply", v)}
               />
