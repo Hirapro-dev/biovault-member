@@ -21,7 +21,15 @@ export default async function StaffDashboardPage() {
   });
 
   const totalCustomers = customers.length;
-  const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
+  // iPS作製・保管の入金額 + 培養上清液の入金済み注文金額
+  const ipsPaidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
+  const cfPaidAmount = customers.reduce((sum, c) =>
+    sum + c.cultureFluidOrders
+      .filter(o => o.paymentStatus === "COMPLETED")
+      .reduce((s, o) => s + o.totalAmount, 0),
+    0
+  );
+  const paidAmount = ipsPaidAmount + cfPaidAmount;
   const paymentCompleted = customers.filter(c => c.membership?.paymentStatus === "COMPLETED").length;
 
   // 今月の新規
