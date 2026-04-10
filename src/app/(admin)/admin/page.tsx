@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { IPS_STATUS_LABELS, IPS_STATUS_ORDER, IPS_STATUS_ICONS } from "@/types";
 import Link from "next/link";
+import PendingActionsTabs from "./PendingActionsTabs";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
@@ -34,8 +35,8 @@ export default async function AdminDashboardPage() {
     where: { role: "MEMBER", createdAt: { gte: startOfMonth } },
   });
 
-  // ── 対応が必要な会員を取得 ──
-  const pendingActions = await prisma.user.findMany({
+  // ── 対応が必要な会員を取得（iPS作製・保管側） ──
+  const ipsPendingUsers = await prisma.user.findMany({
     where: {
       role: "MEMBER",
       OR: [
@@ -51,64 +52,86 @@ export default async function AdminDashboardPage() {
         { membership: { ipsStatus: "SCHEDULE_ARRANGED", clinicDate: null } },
       ],
     },
-    include: { membership: true, cultureFluidOrders: { where: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } }, take: 1 } },
+    include: { membership: true },
     orderBy: { createdAt: "desc" },
     take: 30,
   });
 
-  // 培養上清液の入金待ち・予約手配が必要な会員も取得
+  // ── 対応が必要な会員を取得（iPS培養上清液側） ──
+  // iPS側と重複しても良い（タブで分けて表示するため）
   const cfPendingUsers = await prisma.user.findMany({
     where: {
       role: "MEMBER",
       cultureFluidOrders: { some: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } } },
-      // iPS側でpendingActionsに含まれていない会員のみ
-      NOT: { id: { in: pendingActions.map(u => u.id) } },
     },
-    include: { membership: true, cultureFluidOrders: { where: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } }, take: 1 } },
+    include: {
+      membership: true,
+      cultureFluidOrders: {
+        where: { status: { in: ["APPLIED", "PRODUCING", "CLINIC_BOOKING"] } },
+        orderBy: { createdAt: "desc" },
+      },
+    },
     orderBy: { createdAt: "desc" },
-    take: 10,
+    take: 30,
   });
 
   // 対応タイプを判定
-  type ActionItem = { user: typeof pendingActions[0]; action: string; icon: string; color: string };
-  const actionItems: ActionItem[] = [];
+  type IpsUser = typeof ipsPendingUsers[number];
+  type CfUser = typeof cfPendingUsers[number];
+  type IpsActionItem = { user: IpsUser; action: string; icon: string; color: string };
+  type CfActionItem = { user: CfUser; action: string; icon: string; color: string; orderId: string };
 
-  for (const u of pendingActions) {
+  // ── iPS作製・保管 の対応アイテム構築 ──
+  const ipsActionItems: IpsActionItem[] = [];
+  for (const u of ipsPendingUsers) {
     const s = u.membership?.ipsStatus;
-    const hasCfPending = u.cultureFluidOrders && u.cultureFluidOrders.length > 0;
-
     if (s === "REGISTERED") {
-      actionItems.push({ user: u, action: "適合確認待ち", icon: "📋", color: "text-status-warning" });
+      ipsActionItems.push({ user: u, action: "適合確認待ち", icon: "📋", color: "text-status-warning" });
     } else if (s === "TERMS_AGREED" && !u.isIdIssued) {
-      actionItems.push({ user: u, action: "ID発行待ち", icon: "🔑", color: "text-status-warning" });
+      ipsActionItems.push({ user: u, action: "ID発行待ち", icon: "🔑", color: "text-status-warning" });
     } else if (s === "SERVICE_APPLIED" && !u.membership?.contractSignedAt) {
-      actionItems.push({ user: u, action: "契約書署名待ち", icon: "📝", color: "text-status-danger" });
+      ipsActionItems.push({ user: u, action: "契約書署名待ち", icon: "📝", color: "text-status-danger" });
     } else if (s === "SERVICE_APPLIED") {
-      actionItems.push({ user: u, action: "入金確認待ち", icon: "💰", color: "text-status-danger" });
+      ipsActionItems.push({ user: u, action: "入金確認待ち", icon: "💰", color: "text-status-danger" });
     } else if (s === "SCHEDULE_ARRANGED") {
-      actionItems.push({ user: u, action: "日程調整リクエスト", icon: "📅", color: "text-gold" });
+      ipsActionItems.push({ user: u, action: "日程調整リクエスト", icon: "📅", color: "text-gold" });
     }
+  }
 
-    // 培養上清液の対応もある場合は追加
-    if (hasCfPending) {
-      const cfOrder = u.cultureFluidOrders[0];
+  // ── iPS培養上清液 の対応アイテム構築 ──
+  // 1ユーザーが複数の未完了注文を持つ場合は、それぞれをアイテム化する
+  const cfActionItems: CfActionItem[] = [];
+  for (const u of cfPendingUsers) {
+    for (const cfOrder of u.cultureFluidOrders) {
       if (cfOrder.status === "APPLIED") {
-        actionItems.push({ user: u, action: "培養上清液 入金確認待ち", icon: "🧪", color: "text-status-warning" });
-      } else if (cfOrder.status === "PRODUCING" || cfOrder.status === "CLINIC_BOOKING") {
-        actionItems.push({ user: u, action: "培養上清液 予約手配", icon: "🧪", color: "text-gold" });
+        cfActionItems.push({
+          user: u,
+          action: "入金確認待ち",
+          icon: "💰",
+          color: "text-status-warning",
+          orderId: cfOrder.id,
+        });
+      } else if (cfOrder.status === "PRODUCING") {
+        cfActionItems.push({
+          user: u,
+          action: "精製・管理保管 手配中",
+          icon: "⚗️",
+          color: "text-gold",
+          orderId: cfOrder.id,
+        });
+      } else if (cfOrder.status === "CLINIC_BOOKING") {
+        cfActionItems.push({
+          user: u,
+          action: "クリニック予約手配",
+          icon: "📅",
+          color: "text-gold",
+          orderId: cfOrder.id,
+        });
       }
     }
   }
 
-  // 培養上清液のみ対応が必要な会員を追加
-  for (const u of cfPendingUsers) {
-    const cfOrder = u.cultureFluidOrders[0];
-    if (cfOrder.status === "APPLIED") {
-      actionItems.push({ user: u, action: "培養上清液 入金確認待ち", icon: "🧪", color: "text-status-warning" });
-    } else if (cfOrder.status === "PRODUCING" || cfOrder.status === "CLINIC_BOOKING") {
-      actionItems.push({ user: u, action: "培養上清液 予約手配", icon: "🧪", color: "text-gold" });
-    }
-  }
+  const totalPendingCount = ipsActionItems.length + cfActionItems.length;
 
   // サマリー統計（従来の4カード）
   const serviceApplied = (countMap["SERVICE_APPLIED"] || 0) +
@@ -142,31 +165,58 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* 対応が必要な会員 */}
-      {actionItems.length > 0 && (
+      {/* 対応が必要な会員（iPS作製・保管／iPS培養上清液 タブ切替） */}
+      {totalPendingCount > 0 && (
         <div className="mb-6 sm:mb-8">
           <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
-            対応が必要な会員 <span className="text-gold font-mono ml-2">{actionItems.length}</span>
+            対応が必要な会員 <span className="text-gold font-mono ml-2">{totalPendingCount}</span>
           </h3>
-          <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
-            {actionItems.map((item) => (
-              <Link
-                key={item.user.id}
-                href={`/admin/members/${item.user.id}`}
-                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
-              >
-                <span className="text-lg shrink-0">{item.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
-                    <span className="text-sm text-text-primary">{item.user.name}</span>
-                  </div>
-                  <span className={`text-[11px] ${item.color}`}>{item.action}</span>
-                </div>
-                <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
-              </Link>
-            ))}
-          </div>
+          <PendingActionsTabs
+            ipsCount={ipsActionItems.length}
+            cfCount={cfActionItems.length}
+            ipsList={
+              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+                {ipsActionItems.map((item, i) => (
+                  <Link
+                    key={`${item.user.id}-${i}`}
+                    href={`/admin/members/${item.user.id}`}
+                    className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
+                  >
+                    <span className="text-lg shrink-0">{item.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
+                        <span className="text-sm text-text-primary">{item.user.name}</span>
+                      </div>
+                      <span className={`text-[11px] ${item.color}`}>{item.action}</span>
+                    </div>
+                    <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
+                  </Link>
+                ))}
+              </div>
+            }
+            cfList={
+              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+                {cfActionItems.map((item, i) => (
+                  <Link
+                    key={`${item.orderId}-${i}`}
+                    href={`/admin/members/${item.user.id}`}
+                    className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 border-b border-border last:border-b-0 hover:bg-bg-elevated transition-colors group"
+                  >
+                    <span className="text-lg shrink-0">{item.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-mono text-[13px] text-gold">{item.user.membership?.memberNumber || "---"}</span>
+                        <span className="text-sm text-text-primary">{item.user.name}</span>
+                      </div>
+                      <span className={`text-[11px] ${item.color}`}>{item.action}</span>
+                    </div>
+                    <span className="text-text-muted group-hover:text-gold transition-colors text-sm">→</span>
+                  </Link>
+                ))}
+              </div>
+            }
+          />
         </div>
       )}
 
