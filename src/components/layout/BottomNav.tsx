@@ -64,7 +64,7 @@ const navItems = [
   { href: "/mypage", label: "マイページ", Icon: UserIcon },
   { href: "/info", label: "①iPS作製・保管", Icon: ServiceIcon },
   { href: "/culture-fluid", label: "②培養上清液", Icon: FlaskIcon },
-  { href: "https://biovault.jp/files/pamphlet.pdf", label: "パンフレット", Icon: BookIcon, external: true },
+  { href: "https://biovault.biz/doc.pdf", label: "パンフレット", Icon: BookIcon, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaIcon },
 ];
 

@@ -63,7 +63,7 @@ const memberNav = [
   { href: "/mypage", label: "マイページ", Icon: UserSvg },
   { href: "/info", label: "①iPS作製・保管サービス詳細", Icon: ServiceSvg },
   { href: "/culture-fluid", label: "②培養上清液サービス詳細", Icon: FlaskSvg },
-  { href: "https://biovault.jp/files/pamphlet.pdf", label: "パンフレット", Icon: BookSvg, external: true },
+  { href: "https://biovault.biz/doc.pdf", label: "パンフレット", Icon: BookSvg, external: true },
   { href: "/dashboard", label: "iPSとは？", Icon: DnaSvg },
 ];
 
