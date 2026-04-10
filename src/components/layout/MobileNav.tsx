@@ -5,19 +5,41 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
-// 書類メニュー（同意済みのもののみ表示）
-const DOC_MENU_ITEMS = [
-  { docType: "CONTRACT", href: "/important-notice", label: "重要事項説明書兼確認書", icon: "📜" },
-  { docType: "PRIVACY_POLICY", href: "/important-notice", label: "個人情報同意書", icon: "📜" },
-  { docType: "CONSENT_CELL_STORAGE", href: "/documents/contract", label: "iPSサービス利用契約書", icon: "📋" },
-  { docType: "CELL_STORAGE_CONSENT", href: "/documents/cell-consent", label: "細胞提供・保管同意書", icon: "🧫" },
-  { docType: "INFORMED_CONSENT", href: "/mypage/informed-consent", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
-];
+type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+};
 
-// 設定メニュー（常に表示）
-const settingsNav = [
-  { href: "/settings/profile", label: "登録情報", icon: "👤" },
-  { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
+type NavGroup = {
+  heading?: string;
+  items: NavItem[];
+};
+
+// 会員メニューグループ定義
+const MEMBER_NAV_GROUPS: NavGroup[] = [
+  {
+    heading: "契約・同意書類",
+    items: [
+      { href: "/documents", label: "iPS作製・保管 契約・同意書一覧", icon: "🧬" },
+      { href: "/culture-fluid/documents", label: "iPS培養上清液精製 契約・同意書一覧", icon: "🧪" },
+    ],
+  },
+  {
+    heading: "その他規約等",
+    items: [
+      { href: "/settings/terms", label: "会員規約", icon: "📜" },
+      { href: "/settings/legal", label: "特定商取引法に基づく表記", icon: "⚖️" },
+      { href: "/settings/privacy", label: "プライバシーポリシー", icon: "🔒" },
+    ],
+  },
+  {
+    heading: "アカウント",
+    items: [
+      { href: "/settings/profile", label: "登録情報", icon: "👤" },
+      { href: "/settings/password", label: "パスワード変更", icon: "🔑" },
+    ],
+  },
 ];
 
 const adminNav = [
@@ -35,21 +57,19 @@ const adminNav = [
 export default function MobileNav({
   isAdmin,
   userName,
-  signedDocTypes = [],
+  // 後方互換のため受け取るが、新メニュー構造では使用しない
+  // （旧メニューでは同意済み書類のみ表示するために使われていた）
+  signedDocTypes: _signedDocTypes = [],
 }: {
   isAdmin: boolean;
   userName: string;
   signedDocTypes?: string[];
 }) {
+  // ESLint未使用警告を避けるため明示的に void
+  void _signedDocTypes;
+
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-
-  // 会員メニュー: 同意済み書類 + 設定
-  const memberNav = [
-    ...DOC_MENU_ITEMS.filter((item) => signedDocTypes.includes(item.docType)),
-    ...settingsNav,
-  ];
-  const nav = isAdmin ? adminNav : memberNav;
 
   return (
     <>
@@ -114,27 +134,65 @@ export default function MobileNav({
 
           {/* ナビゲーション */}
           <nav className="flex-1 p-3 overflow-y-auto">
-            {nav.map((item, idx) => {
-              const active =
-                pathname === item.href || pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={`${item.href}-${idx}`}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base ${
-                    active
-                      ? "bg-bg-tertiary border border-border-gold text-gold"
-                      : "border border-transparent text-text-secondary active:bg-bg-elevated"
-                  }`}
+            {isAdmin ? (
+              // 管理者: 従来通りフラットリスト
+              adminNav.map((item, idx) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={`${item.href}-${idx}`}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base ${
+                      active
+                        ? "bg-bg-tertiary border border-border-gold text-gold"
+                        : "border border-transparent text-text-secondary active:bg-bg-elevated"
+                    }`}
+                  >
+                    <span className={`text-base ${active ? "opacity-100" : "opacity-50"}`}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </Link>
+                );
+              })
+            ) : (
+              // 会員: グループ別表示
+              MEMBER_NAV_GROUPS.map((group, gIdx) => (
+                <div
+                  key={`group-${gIdx}`}
+                  className={gIdx === 0 ? "" : "mt-5 pt-4 border-t border-border"}
                 >
-                  <span className={`text-base ${active ? "opacity-100" : "opacity-50"}`}>
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </Link>
-              );
-            })}
+                  {group.heading && (
+                    <div className="text-[10px] text-text-muted tracking-[2px] px-4 mb-2 uppercase">
+                      {group.heading}
+                    </div>
+                  )}
+                  {group.items.map((item, idx) => {
+                    const active =
+                      pathname === item.href || pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={`${item.href}-${idx}`}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-3 w-full px-4 py-3.5 mb-0.5 rounded transition-all duration-200 text-[13px] leading-snug ${
+                          active
+                            ? "bg-bg-tertiary border border-border-gold text-gold"
+                            : "border border-transparent text-text-secondary active:bg-bg-elevated"
+                        }`}
+                      >
+                        <span className={`text-base shrink-0 ${active ? "opacity-100" : "opacity-50"}`}>
+                          {item.icon}
+                        </span>
+                        <span className="flex-1">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))
+            )}
           </nav>
 
           {/* ログアウト */}
