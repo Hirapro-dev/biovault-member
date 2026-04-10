@@ -81,6 +81,7 @@ export default function ApplyServicePage() {
     confirmScppRole: false,
     confirmClinicRole: false,
     confirmLabRole: false,
+    confirmDocumentsApply: false,
   });
 
   // セッションチェック
@@ -424,6 +425,11 @@ export default function ApplyServicePage() {
                 label="提携先施設の役割について理解しました"
                 checked={confirmChecks.confirmLabRole}
                 onChange={(v) => updateConfirm("confirmLabRole", v)}
+              />
+              <ConfirmItem
+                label="本申込に関連して、重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意書が一体として適用されること"
+                checked={confirmChecks.confirmDocumentsApply}
+                onChange={(v) => updateConfirm("confirmDocumentsApply", v)}
               />
             </div>
           </div>
