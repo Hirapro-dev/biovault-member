@@ -202,9 +202,9 @@ export default function CultureFluidApplyPage() {
             </p>
           </div>
 
-          {/* 支払方法 */}
+          {/* 支払方法・支払予定日 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-gold mb-3">お支払い方法</h3>
+            <h3 className="text-sm text-text-primary tracking-wider mb-4">お支払い方法</h3>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -221,25 +221,24 @@ export default function CultureFluidApplyPage() {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  value="credit_card"
-                  checked={paymentMethod === "credit_card"}
+                  value="other"
+                  checked={paymentMethod === "other"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="accent-gold"
                 />
-                <span className="text-sm text-text-secondary">クレジットカード</span>
+                <span className="text-sm text-text-secondary">その他</span>
               </label>
             </div>
-          </div>
 
-          {/* 支払予定日 */}
-          <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-gold mb-3">お支払い予定日</h3>
-            <input
-              type="date"
-              value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold transition-colors"
-            />
+            {/* 支払予定日 */}
+            <div className="mt-4">
+              <label className="text-xs text-text-muted mb-2 block">お支払い予定日</label>
+              <input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+                className="w-full bg-bg-tertiary border border-border rounded px-3 py-2.5 text-sm text-text-primary outline-none focus:border-border-gold"
+              />
           </div>
 
           <button
@@ -382,7 +381,7 @@ export default function CultureFluidApplyPage() {
                   お支払い方法
                 </div>
                 <div className="text-sm text-text-primary">
-                  {paymentMethod === "bank_transfer" ? "銀行振込" : "クレジットカード"}
+                  {paymentMethod === "bank_transfer" ? "銀行振込" : "その他"}
                 </div>
               </div>
 
