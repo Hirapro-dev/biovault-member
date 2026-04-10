@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { getTotalSessions, getRemainingSessions, isAllSessionsCompleted } from "@/lib/culture-fluid-plans";
 import DocumentModal from "../mypage/DocumentModal";
+import ClinicBookingButton from "./ClinicBookingButton";
 
 // フェーズ1：保管まで（4ステップ）
 const PHASE1_STEPS = [
@@ -232,6 +233,7 @@ export default async function CultureFluidPage() {
                     <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
                   </div>
                 )}
+                <ClinicBookingButton orderId={activeOrder.id} />
               </div>
             </div>
           )}
