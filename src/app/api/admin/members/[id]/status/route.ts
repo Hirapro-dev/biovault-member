@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import type { IpsStatus } from "@prisma/client";
+import type { IpsStatus, Prisma } from "@prisma/client";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -58,13 +58,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  // サービス申込済みの場合
-  if (newStatus === "SERVICE_APPLIED" && !membership.serviceAppliedAt) {
-    updateData.serviceAppliedAt = new Date();
+  // サービス申込済みの場合（880万円入金確認）
+  if (newStatus === "SERVICE_APPLIED") {
+    if (!membership.serviceAppliedAt) {
+      updateData.serviceAppliedAt = new Date();
+    }
   }
 
   // トランザクション: ステータス更新 + 履歴記録
-  const transactionOps = [
+  const transactionOps: Prisma.PrismaPromise<unknown>[] = [
     prisma.membership.update({
       where: { userId: id },
       data: updateData,
@@ -95,6 +97,56 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         },
       })
     );
+  }
+
+  // SERVICE_APPLIED: iPSサービス付属の培養上清液点滴1回分を自動作成
+  // （880万円に含まれるため金額0、入金済み状態で作成）
+  if (newStatus === "SERVICE_APPLIED") {
+    const existingIncludedOrder = await prisma.cultureFluidOrder.findFirst({
+      where: { userId: id, planType: "iv_drip_1_included" },
+    });
+
+    if (!existingIncludedOrder) {
+      transactionOps.push(
+        prisma.cultureFluidOrder.create({
+          data: {
+            userId: id,
+            planType: "iv_drip_1_included",
+            planLabel: "点滴1回分（10ml）※iPSサービス付属",
+            totalAmount: 0,
+            paymentStatus: "COMPLETED",
+            paidAt: specifiedDate,
+            status: "APPLIED",
+          },
+        })
+      );
+    }
+  }
+
+  // STORAGE_ACTIVE: 付属の培養上清液の精製を開始
+  // 保管開始日を起点に1ヶ月後を精製完了日、精製完了日+8ヶ月を管理期限として設定
+  if (newStatus === "STORAGE_ACTIVE") {
+    const includedOrder = await prisma.cultureFluidOrder.findFirst({
+      where: { userId: id, planType: "iv_drip_1_included" },
+    });
+
+    if (includedOrder && !includedOrder.producedAt) {
+      const producedAt = new Date(specifiedDate);
+      producedAt.setMonth(producedAt.getMonth() + 1);
+      const expiresAt = new Date(producedAt);
+      expiresAt.setMonth(expiresAt.getMonth() + 8);
+
+      transactionOps.push(
+        prisma.cultureFluidOrder.update({
+          where: { id: includedOrder.id },
+          data: {
+            status: "PAYMENT_CONFIRMED",
+            producedAt,
+            expiresAt,
+          },
+        })
+      );
+    }
   }
 
   await prisma.$transaction(transactionOps);

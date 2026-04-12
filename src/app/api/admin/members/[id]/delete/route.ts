@@ -46,6 +46,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     prisma.consentLog.deleteMany({ where: { userId: id } }),
     prisma.contentUpdateRead.deleteMany({ where: { userId: id } }),
     prisma.pushSubscription.deleteMany({ where: { userId: id } }),
+    prisma.cultureFluidOrder.deleteMany({ where: { userId: id } }),
     ...(user.membership
       ? [prisma.treatment.deleteMany({ where: { membershipId: user.membership.id } }),
          prisma.membership.delete({ where: { userId: id } })]

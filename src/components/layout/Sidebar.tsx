@@ -85,13 +85,13 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       {/* ロゴ */}
-      <div className="px-6 py-7 border-b border-border">
+      <Link href={isAdmin ? "/admin" : "/mypage"} className="block px-6 py-7 border-b border-border hover:opacity-80 transition-opacity">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
         <div className="text-[9px] tracking-[3px] text-text-muted mt-2">
           {isAdmin ? "ADMIN CONSOLE" : "MEMBER Site"}
         </div>
-      </div>
+      </Link>
 
       {/* ナビゲーション */}
       <nav className="flex-1 p-3 overflow-y-auto">

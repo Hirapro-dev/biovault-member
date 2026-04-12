@@ -96,12 +96,12 @@ export default async function CultureFluidPage() {
       {/* ── 1. 保有状況カード ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-bg-secondary border border-border rounded-md p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">施術完了回数</div>
+          <div className="text-[10px] text-text-muted tracking-wider mb-1">点滴施術完了回数</div>
           <div className="font-mono text-2xl text-gold">{completedCount}<span className="text-sm text-text-muted ml-1">回</span></div>
           <div className="text-[10px] text-text-muted mt-1">累計完了済み</div>
         </div>
         <div className="bg-bg-secondary border border-border rounded-md p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">残り施術回数</div>
+          <div className="text-[10px] text-text-muted tracking-wider mb-1">残り点滴施術回数</div>
           {activeOrder ? (
             <>
               <div className="font-mono text-2xl text-gold">
@@ -115,7 +115,7 @@ export default async function CultureFluidPage() {
           )}
         </div>
         <div className="bg-bg-secondary border border-border rounded-md p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">管理期限</div>
+          <div className="text-[10px] text-text-muted tracking-wider mb-1">培養上清液管理期限</div>
           {activeOrder?.expiresAt ? (
             <>
               <div className="font-mono text-lg text-gold">{formatDate(activeOrder.expiresAt)}</div>
@@ -250,7 +250,7 @@ export default async function CultureFluidPage() {
                     <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
                   </div>
                 )}
-                <ClinicBookingButton orderId={activeOrder.id} />
+                <ClinicBookingButton orderId={activeOrder.id} maxSessions={remainingSessions} />
               </div>
             </div>
           )}

@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import ScheduleRequestButton from "./ScheduleRequestButton";
 import DocumentModal from "./DocumentModal";
+import MemberCard from "./MemberCard";
+import { getTotalSessions, getRemainingSessions, isAllSessionsCompleted } from "@/lib/culture-fluid-plans";
 
 // 表示用ステップの定義
 const TIMELINE_STEPS = [
@@ -61,6 +63,13 @@ export default async function MyPage() {
       select: { toStatus: true, changedAt: true },
     }),
   ]);
+
+  // 培養上清液注文データ（カード裏面用）
+  const cultureFluidOrders = await prisma.cultureFluidOrder.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    select: { planType: true, completedSessions: true, expiresAt: true },
+  });
 
   // 振込先情報（デフォルト口座を取得）
   const defaultBank = await prisma.bankAccount.findFirst({ where: { isDefault: true, isActive: true } });
@@ -144,43 +153,39 @@ export default async function MyPage() {
 
   return (
     <div>
-      {/* ── 1. メンバーカード ── */}
-      <div className="mb-6 sm:mb-8" style={{ minWidth: 280, maxWidth: 540 }}>
-        <div
-          className="relative overflow-hidden rounded-2xl p-6 sm:p-8 w-full aspect-[1.586/1] flex flex-col justify-between border border-white/15"
-          style={{ background: "#0A0A0C", boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)" }}
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
-          {/* 斜めに流れるシルバーの光 */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
-          </div>
-          <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
-          <div className="relative z-10 flex items-center justify-between">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-70" />
-            <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">MEMBER</div>
-          </div>
-          <div className="relative z-10">
-            <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]">
-              {membership?.memberNumber || "----"}
-            </div>
-          </div>
-          <div className="relative z-10 flex items-end justify-between">
-            <div>
-              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">CARD HOLDER</div>
-              <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">{fullUser?.nameRomaji || user.name}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">MEMBER SINCE</div>
-              <div className="font-mono text-[14px] sm:text-xs tracking-wider text-white/80">
-                {membership ? new Date(membership.contractDate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" }) : "--/----"}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── 1. メンバーカード（クリックで裏面にフリップ） ── */}
+      {(() => {
+        // iPS細胞保管期限
+        const ipsStorageExpiry = storageEndDate ? formatDate(storageEndDate.toISOString()) : null;
+
+        // 培養上清液の管理期限（アクティブな注文の expiresAt）
+        const activeFluidOrder = cultureFluidOrders.find(
+          (o) => !isAllSessionsCompleted(o.planType, o.completedSessions)
+        );
+        const cultureFluidExpiry = activeFluidOrder?.expiresAt
+          ? formatDate(activeFluidOrder.expiresAt.toISOString())
+          : null;
+
+        // 残り点滴施術回数（アクティブな注文の残り）
+        const fluidRemaining = activeFluidOrder
+          ? getRemainingSessions(activeFluidOrder.planType, activeFluidOrder.completedSessions)
+          : null;
+
+        // 点滴施術累計完了回数（全注文合計）
+        const totalCompleted = cultureFluidOrders.reduce((sum, o) => sum + o.completedSessions, 0);
+
+        return (
+          <MemberCard
+            memberNumber={membership?.memberNumber || "----"}
+            holderName={fullUser?.nameRomaji || user.name}
+            memberSince={membership ? new Date(membership.contractDate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit" }) : "--/----"}
+            storageExpiry={ipsStorageExpiry}
+            cultureFluidExpiry={cultureFluidExpiry}
+            remainingSessions={fluidRemaining}
+            completedSessions={totalCompleted}
+          />
+        );
+      })()}
 
       {/* ── 2. 次のステップ（カードの下・ステータスの上） ── */}
       {membership && (

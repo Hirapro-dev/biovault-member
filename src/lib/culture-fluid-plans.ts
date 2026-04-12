@@ -15,6 +15,7 @@
  */
 const PLAN_TOTAL_SESSIONS: Record<string, number> = {
   iv_drip_1: 1,
+  iv_drip_1_included: 1, // iPSサービス（880万円）付属の点滴1回分
   iv_drip_5: 6,
   injection_1: 1,
   injection_5: 6,

@@ -685,6 +685,9 @@ model CultureFluidOrder {
   clinicAddress   String?
   clinicPhone     String?
 
+  // 1回の施術で使用する回数（会員がクリニック予約時に選択、最大3回分）
+  requestedSessionCount Int @default(1)           // 1回の施術で消費する回数（1〜3）
+
   // 書類同意
   cautionAgreedAt  DateTime?                      // 留意事項同意日
   informedAgreedAt DateTime?                      // 事前説明同意日

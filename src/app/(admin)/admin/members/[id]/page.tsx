@@ -180,6 +180,7 @@ export default async function MemberKartePage({
               informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
               completedAt: o.completedAt ? o.completedAt.toISOString() : null,
               completedSessions: o.completedSessions ?? 0,
+              requestedSessionCount: o.requestedSessionCount ?? 1,
               sessionDates: o.sessionDates ?? null,
               createdAt: o.createdAt.toISOString(),
             }))}

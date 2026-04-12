@@ -18,8 +18,10 @@ export default function StaffMobileNav({ userName }: { userName: string }) {
   return (
     <>
       <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-bg-secondary border-b border-border lg:hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-6 w-auto" />
+        <Link href="/staff" className="hover:opacity-80 transition-opacity">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="BioVault" className="h-6 w-auto" />
+        </Link>
         <button onClick={() => setOpen(!open)} className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text-secondary" aria-label="メニュー">
           <span className={`block w-5 h-[1.5px] bg-current transition-all duration-300 ${open ? "rotate-45 translate-y-[4.5px]" : ""}`} />
           <span className={`block w-5 h-[1.5px] bg-current transition-all duration-300 ${open ? "opacity-0" : ""}`} />

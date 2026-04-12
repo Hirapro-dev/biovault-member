@@ -63,6 +63,7 @@ interface Props {
     informedAgreedAt: string | null;
     completedAt: string | null;
     completedSessions: number;
+    requestedSessionCount: number;
     sessionDates: string | null;
     createdAt: string;
   }[];
@@ -302,9 +303,14 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         )}
 
         {/* クリニック情報の表示 */}
-        {step.key === "CLINIC_BOOKING" && order.clinicDate && (
+        {step.key === "CLINIC_BOOKING" && (
           <span className="text-[10px] text-text-muted ml-auto font-mono">
-            {formatDate(order.clinicDate)} {order.clinicName || ""}
+            {order.requestedSessionCount > 1 && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/20 mr-1.5 not-italic">
+                {order.requestedSessionCount}回分
+              </span>
+            )}
+            {order.clinicDate && <>{formatDate(order.clinicDate)} {order.clinicName || ""}</>}
           </span>
         )}
 
