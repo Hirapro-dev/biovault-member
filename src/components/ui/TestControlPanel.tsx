@@ -55,7 +55,8 @@ export default function TestControlPanel() {
       if (res.ok) {
         setMessage(`${nextStep.label} → 完了`);
         router.refresh();
-        fetchStatus();
+        // Server Componentのキャッシュ更新後にステータスを再取得
+        setTimeout(() => fetchStatus(), 500);
       } else {
         setMessage(data.error || "エラー");
       }
@@ -151,9 +152,17 @@ export default function TestControlPanel() {
                 {loading ? "処理中..." : `「${nextStep.label}」をスキップ →`}
               </button>
             ) : (
-              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded p-2.5">
-                <div className="text-[10px] text-emerald-400 font-medium mb-0.5">会員操作が必要です</div>
-                <div className="text-[10px] text-text-muted">ページ上で実際に操作してください</div>
+              <div className="space-y-2">
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded p-2.5">
+                  <div className="text-[10px] text-emerald-400 font-medium mb-0.5">会員操作が必要です</div>
+                  <div className="text-[10px] text-text-muted">ページ上で実際に操作してください</div>
+                </div>
+                <button
+                  onClick={() => { fetchStatus(); router.refresh(); setMessage("更新しました"); }}
+                  className="w-full py-2 border border-border text-text-muted text-[10px] rounded cursor-pointer hover:border-gold hover:text-gold transition-all"
+                >
+                  操作完了 → ステータスを更新
+                </button>
               </div>
             )}
           </>
