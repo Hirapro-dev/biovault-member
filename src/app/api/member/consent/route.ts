@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
+import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 /**
  * 同意ログAPI
@@ -95,6 +96,32 @@ export async function POST(req: Request) {
         where: { userId },
         data: { deathWish: body.deathWish },
       });
+    }
+
+    // 同意通知（細胞提供・保管同意 / iPS細胞作製事前説明・同意）
+    const notifyDocTypes: Record<string, string> = {
+      CELL_STORAGE_CONSENT: "DOC_CELL_CONSENT",
+      INFORMED_CONSENT: "DOC_INFORMED",
+    };
+    const notifyKey = notifyDocTypes[docType];
+    if (notifyKey) {
+      try {
+        const memberInfo = await prisma.membership.findUnique({
+          where: { userId },
+          select: { memberNumber: true },
+        });
+        await notifyIpsStatusChange({
+          userId,
+          memberName: user.name || "会員",
+          memberNumber: memberInfo?.memberNumber,
+          fromStatus: user.membership?.ipsStatus || "---",
+          toStatus: notifyKey,
+          changedBy: "会員本人",
+          note: `${docLabel}に同意`,
+        });
+      } catch (e) {
+        console.error("Consent notification error:", e);
+      }
     }
 
     return NextResponse.json({ success: true });
