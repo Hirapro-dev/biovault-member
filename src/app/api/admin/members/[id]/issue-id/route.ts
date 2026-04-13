@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, accountCreatedEmail } from "@/lib/mail";
+import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 // ID発行（ログインID確定 + パスワード設定 + isIdIssued=true）
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +60,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await sendEmail({ to: user.email, ...emailContent });
   } catch (e) {
     console.error("Account created email failed:", e);
+  }
+
+  // メンバーシップ会員ID発行の通知
+  try {
+    const membership = await prisma.membership.findUnique({
+      where: { userId: id },
+      select: { memberNumber: true },
+    });
+    await notifyIpsStatusChange({
+      userId: id,
+      memberName: user.name,
+      memberNumber: membership?.memberNumber,
+      fromStatus: "REGISTERED",
+      toStatus: "ID_ISSUED",
+      changedBy: session.user.name || "管理者",
+      note: `ログインID: ${loginId}`,
+    });
+  } catch (e) {
+    console.error("ID issue notification failed:", e);
   }
 
   return NextResponse.json({ success: true, loginId });

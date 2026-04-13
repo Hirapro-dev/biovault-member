@@ -13,8 +13,9 @@ import { sendEmail } from "@/lib/mail";
 
 // iPSステータスの日本語ラベル
 const IPS_STATUS_LABELS: Record<string, string> = {
-  REGISTERED: "メンバー登録済み",
-  TERMS_AGREED: "重要事項確認済み",
+  REGISTERED: "iPS細胞作製適合確認の新規申込",
+  ID_ISSUED: "メンバーシップ会員ID発行",
+  TERMS_AGREED: "iPS細胞作製適合確認完了",
   SERVICE_APPLIED: "iPSサービス申込済み",
   SCHEDULE_ARRANGED: "iPS作製日程調整",
   BLOOD_COLLECTED: "問診・採血",
@@ -153,6 +154,10 @@ function buildIpsHighlightCard(toStatus: string, details: Awaited<ReturnType<typ
 
   const rows: string[] = [];
   switch (toStatus) {
+    case "ID_ISSUED":
+      rows.push(highlightRow("ID発行", "メンバーシップ会員IDが発行されました"));
+      rows.push(detailRow("会員番号", m.memberNumber));
+      break;
     case "SERVICE_APPLIED":
       rows.push(highlightRow("申込完了", "iPSサービス利用申込が完了しました"));
       if (m.serviceAppliedAt) rows.push(highlightRow("申込日", fmtDate(m.serviceAppliedAt)));
