@@ -4,354 +4,258 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import type { IpsStatus } from "@prisma/client";
 
-/**
- * テスト操作API
- *
- * テスターアカウント（TESTER_EMAILS環境変数で指定）のみ利用可能。
- * ステータスを次に進める / 全リセットする操作を提供する。
- */
-
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
-function isTesterEmail(email: string): boolean {
-  return TESTER_EMAILS.includes(email.toLowerCase());
-}
-
-/** ユーザーIDからDBのメールを取得してテスターか判定 */
 async function checkIsTester(userId: string): Promise<boolean> {
   if (TESTER_EMAILS.length === 0) return false;
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { email: true },
-  });
-  return user ? isTesterEmail(user.email) : false;
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+  return user ? TESTER_EMAILS.includes(user.email.toLowerCase()) : false;
 }
 
-// iPSステータスの順序
 const IPS_STATUS_ORDER: IpsStatus[] = [
-  "REGISTERED",
-  "TERMS_AGREED",
-  "SERVICE_APPLIED",
-  "SCHEDULE_ARRANGED",
-  "BLOOD_COLLECTED",
-  "IPS_CREATING",
-  "STORAGE_ACTIVE",
+  "REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED", "SCHEDULE_ARRANGED",
+  "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE",
 ];
 
+// ── POST: アクション実行 ──
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
-  }
-
+  if (!session?.user) return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
   const userId = (session.user as { id: string }).id;
-
-  if (!(await checkIsTester(userId))) {
-    return NextResponse.json({ error: "テスト機能は利用できません" }, { status: 403 });
-  }
+  if (!(await checkIsTester(userId))) return NextResponse.json({ error: "テスト機能は利用できません" }, { status: 403 });
 
   const body = await req.json();
-  const { action } = body; // "next" | "reset"
+  const { action, flow, stepKey } = body;
 
-  const membership = await prisma.membership.findUnique({
-    where: { userId },
-  });
+  const membership = await prisma.membership.findUnique({ where: { userId } });
+  if (!membership) return NextResponse.json({ error: "会員権が見つかりません" }, { status: 404 });
 
-  if (!membership) {
-    return NextResponse.json({ error: "会員権が見つかりません" }, { status: 404 });
-  }
-
-  if (action === "next") {
-    // 次のステータスに進める
-    const currentIdx = IPS_STATUS_ORDER.indexOf(membership.ipsStatus);
-    if (currentIdx === -1 || currentIdx >= IPS_STATUS_ORDER.length - 1) {
-      return NextResponse.json({ error: "これ以上進められません" }, { status: 400 });
-    }
-
-    const nextStatus = IPS_STATUS_ORDER[currentIdx + 1];
-    const now = new Date();
-    const updateData: Record<string, unknown> = { ipsStatus: nextStatus };
-
-    // ステータスに応じた追加データ
-    if (nextStatus === "SERVICE_APPLIED" && !membership.serviceAppliedAt) {
-      updateData.serviceAppliedAt = now;
-      updateData.consentSignedAt = now;
-      updateData.contractSignedAt = now;
-      updateData.contractFormat = "electronic";
-    }
-    if (nextStatus === "SCHEDULE_ARRANGED") {
-      updateData.clinicDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 2週間後
-      updateData.clinicName = "テストクリニック";
-    }
-    if (nextStatus === "BLOOD_COLLECTED" || nextStatus === "IPS_CREATING") {
-      updateData.ipsCompletedAt = now;
-    }
-    if (nextStatus === "STORAGE_ACTIVE") {
-      updateData.storageStartAt = now;
-      if (!membership.ipsCompletedAt) updateData.ipsCompletedAt = now;
-    }
-
-    await prisma.$transaction([
-      prisma.membership.update({
-        where: { userId },
-        data: updateData,
-      }),
-      prisma.statusHistory.create({
-        data: {
-          userId,
-          fromStatus: membership.ipsStatus,
-          toStatus: nextStatus,
-          note: "テストモード: ステータスを次に進める",
-          changedBy: "テストモード",
-        },
-      }),
-    ]);
-
-    // SERVICE_APPLIED の場合、必要な書類と同意も自動設定
-    if (nextStatus === "SERVICE_APPLIED") {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { hasAgreedTerms: true, agreedTermsAt: now },
-      });
-      await prisma.document.updateMany({
-        where: { userId, status: "PENDING" },
-        data: { status: "SIGNED", signedAt: now },
-      });
-      // 培養上清液付属分の作成
-      const existing = await prisma.cultureFluidOrder.findFirst({
-        where: { userId, planType: "iv_drip_1_included" },
-      });
-      if (!existing) {
-        await prisma.cultureFluidOrder.create({
-          data: {
-            userId,
-            planType: "iv_drip_1_included",
-            planLabel: "点滴1回分（10ml）※iPSサービス付属",
-            totalAmount: 0,
-            paymentStatus: "COMPLETED",
-            paidAt: now,
-            status: "APPLIED",
-          },
-        });
-      }
-    }
-
-    // STORAGE_ACTIVE の場合、培養上清液の精製も開始
-    if (nextStatus === "STORAGE_ACTIVE") {
-      const includedOrder = await prisma.cultureFluidOrder.findFirst({
-        where: { userId, planType: "iv_drip_1_included" },
-      });
-      if (includedOrder && !includedOrder.producedAt) {
-        const producedAt = new Date(now);
-        producedAt.setMonth(producedAt.getMonth() + 1);
-        const expiresAt = new Date(producedAt);
-        expiresAt.setMonth(expiresAt.getMonth() + 8);
-        await prisma.cultureFluidOrder.update({
-          where: { id: includedOrder.id },
-          data: { status: "PAYMENT_CONFIRMED", producedAt, expiresAt },
-        });
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      from: membership.ipsStatus,
-      to: nextStatus,
-    });
-  }
-
+  // ── リセット ──
   if (action === "reset") {
-    // 全リセット
-    const now = new Date();
-
     await prisma.$transaction([
-      // ステータスをREGISTEREDに戻す
       prisma.membership.update({
         where: { userId },
         data: {
-          ipsStatus: "REGISTERED",
-          serviceAppliedAt: null,
-          consentSignedAt: null,
-          contractSignedAt: null,
-          contractFormat: null,
-          clinicDate: null,
-          clinicName: null,
-          clinicAddress: null,
-          clinicPhone: null,
-          ipsCompletedAt: null,
-          storageStartAt: null,
-          paymentStatus: "PENDING",
-          paidAmount: 0,
-          deathWish: null,
+          ipsStatus: "REGISTERED", serviceAppliedAt: null, consentSignedAt: null,
+          contractSignedAt: null, contractFormat: null, clinicDate: null,
+          clinicName: null, clinicAddress: null, clinicPhone: null,
+          ipsCompletedAt: null, storageStartAt: null, paymentStatus: "PENDING",
+          paidAmount: 0, deathWish: null,
         },
       }),
-      // 重要事項同意をリセット
-      prisma.user.update({
-        where: { id: userId },
-        data: {
-          hasAgreedTerms: false,
-          agreedTermsAt: null,
-        },
-      }),
-      // 書類をPENDINGに戻す
-      prisma.document.updateMany({
-        where: { userId },
-        data: { status: "PENDING", signedAt: null },
-      }),
-      // 培養上清液注文を全削除
-      prisma.cultureFluidOrder.deleteMany({
-        where: { userId },
-      }),
-      // ステータス履歴にリセットを記録
+      prisma.user.update({ where: { id: userId }, data: { hasAgreedTerms: false, agreedTermsAt: null } }),
+      prisma.document.updateMany({ where: { userId }, data: { status: "PENDING", signedAt: null } }),
+      prisma.cultureFluidOrder.deleteMany({ where: { userId } }),
       prisma.statusHistory.create({
-        data: {
-          userId,
-          fromStatus: membership.ipsStatus,
-          toStatus: "REGISTERED",
-          note: "テストモード: 全ステータスをリセット",
-          changedBy: "テストモード",
-        },
+        data: { userId, fromStatus: membership.ipsStatus, toStatus: "REGISTERED", note: "テストモード: 全リセット", changedBy: "テストモード" },
       }),
     ]);
-
-    return NextResponse.json({ success: true, action: "reset" });
+    return NextResponse.json({ success: true, message: "リセット完了" });
   }
 
-  if (action === "admin_skip") {
-    // 管理者工程をスキップ（ステップに応じた処理）
-    const { stepKey } = body;
+  // ── iPS admin_skip ──
+  if (action === "admin_skip" && flow === "ips") {
     const now = new Date();
-
     switch (stepKey) {
-      case "TERMS_AGREED": {
-        // iPS細胞作製適合確認 → TERMS_AGREED
+      case "TERMS_AGREED":
         if (membership.ipsStatus === "REGISTERED") {
           await prisma.$transaction([
             prisma.membership.update({ where: { userId }, data: { ipsStatus: "TERMS_AGREED" } }),
-            prisma.statusHistory.create({ data: { userId, fromStatus: "REGISTERED", toStatus: "TERMS_AGREED", note: "テストモード: 適合確認スキップ", changedBy: "テストモード" } }),
+            prisma.statusHistory.create({ data: { userId, fromStatus: "REGISTERED", toStatus: "TERMS_AGREED", note: "テスト: 適合確認スキップ", changedBy: "テストモード" } }),
           ]);
         }
-        return NextResponse.json({ success: true });
-      }
-      case "CONTRACT_SIGNING": {
-        // 契約書署名
+        return NextResponse.json({ success: true, message: "適合確認 → 完了" });
+      case "CONTRACT_SIGNING":
         await prisma.membership.update({ where: { userId }, data: { contractSignedAt: now } });
-        await prisma.document.updateMany({
-          where: { userId, type: "CONSENT_CELL_STORAGE", status: { not: "SIGNED" } },
-          data: { status: "SIGNED", signedAt: now },
-        });
-        return NextResponse.json({ success: true });
-      }
-      case "PAYMENT_CONFIRMED": {
-        // 入金確認
-        await prisma.membership.update({
-          where: { userId },
-          data: { paymentStatus: "COMPLETED", paidAmount: membership.totalAmount },
-        });
-        // 培養上清液付属分の作成
-        const existingIncluded = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
-        if (!existingIncluded) {
+        await prisma.document.updateMany({ where: { userId, type: "CONSENT_CELL_STORAGE", status: { not: "SIGNED" } }, data: { status: "SIGNED", signedAt: now } });
+        return NextResponse.json({ success: true, message: "契約書署名 → 完了" });
+      case "PAYMENT_CONFIRMED":
+        await prisma.membership.update({ where: { userId }, data: { paymentStatus: "COMPLETED", paidAmount: membership.totalAmount } });
+        const existing = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
+        if (!existing) {
           await prisma.cultureFluidOrder.create({
-            data: {
-              userId, planType: "iv_drip_1_included",
-              planLabel: "点滴1回分（10ml）※iPSサービス付属",
-              totalAmount: 0, paymentStatus: "COMPLETED", paidAt: now, status: "APPLIED",
-            },
+            data: { userId, planType: "iv_drip_1_included", planLabel: "点滴1回分（10ml）※iPSサービス付属", totalAmount: 0, paymentStatus: "COMPLETED", paidAt: now, status: "APPLIED" },
           });
         }
-        return NextResponse.json({ success: true });
-      }
+        return NextResponse.json({ success: true, message: "入金確認 → 完了" });
       case "CLINIC_CONFIRMED": {
-        // 日程確定（2週間後の日付を自動設定）
-        const clinicDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-        await prisma.membership.update({
-          where: { userId },
-          data: { clinicDate, clinicName: "テストクリニック", clinicAddress: "東京都港区テスト1-2-3", clinicPhone: "03-0000-0000" },
-        });
-        return NextResponse.json({ success: true });
+        const cd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+        await prisma.membership.update({ where: { userId }, data: { clinicDate: cd, clinicName: "テストクリニック", clinicAddress: "東京都港区テスト1-2-3", clinicPhone: "03-0000-0000" } });
+        return NextResponse.json({ success: true, message: "日程確定 → 完了" });
       }
       case "BLOOD_COLLECTED": {
-        // 問診・採血 → iPS作製中まで自動進行
-        const ipsStartDate = new Date(now);
-        ipsStartDate.setDate(ipsStartDate.getDate() + 7);
+        const start = new Date(now); start.setDate(start.getDate() + 7);
         await prisma.$transaction([
-          prisma.membership.update({
-            where: { userId },
-            data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: ipsStartDate, clinicDate: membership.clinicDate || now },
-          }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "BLOOD_COLLECTED", note: "テストモード: 問診・採血スキップ", changedBy: "テストモード" } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: "BLOOD_COLLECTED", toStatus: "IPS_CREATING", note: "テストモード: iPS作製開始", changedBy: "テストモード" } }),
+          prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: start, clinicDate: membership.clinicDate || now } }),
+          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "BLOOD_COLLECTED", note: "テスト: 問診・採血スキップ", changedBy: "テストモード" } }),
+          prisma.statusHistory.create({ data: { userId, fromStatus: "BLOOD_COLLECTED", toStatus: "IPS_CREATING", note: "テスト: iPS作製開始", changedBy: "テストモード" } }),
         ]);
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, message: "問診・採血 → iPS作製中" });
       }
-      case "IPS_CREATING": {
-        // iPS細胞作製中
+      case "IPS_CREATING":
         await prisma.$transaction([
           prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: now } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "IPS_CREATING", note: "テストモード: iPS作製中スキップ", changedBy: "テストモード" } }),
+          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "IPS_CREATING", note: "テスト: iPS作製中スキップ", changedBy: "テストモード" } }),
         ]);
-        return NextResponse.json({ success: true });
-      }
-      case "STORAGE_ACTIVE": {
-        // iPS細胞保管
+        return NextResponse.json({ success: true, message: "iPS作製中 → 完了" });
+      case "STORAGE_ACTIVE":
         await prisma.$transaction([
-          prisma.membership.update({
-            where: { userId },
-            data: { ipsStatus: "STORAGE_ACTIVE", storageStartAt: now, ipsCompletedAt: membership.ipsCompletedAt || now },
-          }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "STORAGE_ACTIVE", note: "テストモード: 保管開始", changedBy: "テストモード" } }),
+          prisma.membership.update({ where: { userId }, data: { ipsStatus: "STORAGE_ACTIVE", storageStartAt: now, ipsCompletedAt: membership.ipsCompletedAt || now } }),
+          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "STORAGE_ACTIVE", note: "テスト: 保管開始", changedBy: "テストモード" } }),
         ]);
-        // 培養上清液の精製も開始
-        const includedOrder = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
-        if (includedOrder && !includedOrder.producedAt) {
-          const producedAt = new Date(now); producedAt.setMonth(producedAt.getMonth() + 1);
-          const expiresAt = new Date(producedAt); expiresAt.setMonth(expiresAt.getMonth() + 8);
-          await prisma.cultureFluidOrder.update({
-            where: { id: includedOrder.id },
-            data: { status: "PAYMENT_CONFIRMED", producedAt, expiresAt },
-          });
+        const incl = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
+        if (incl && !incl.producedAt) {
+          const pa = new Date(now); pa.setMonth(pa.getMonth() + 1);
+          const ea = new Date(pa); ea.setMonth(ea.getMonth() + 8);
+          await prisma.cultureFluidOrder.update({ where: { id: incl.id }, data: { status: "PAYMENT_CONFIRMED", producedAt: pa, expiresAt: ea } });
         }
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, message: "iPS細胞保管 → 完了" });
+    }
+  }
+
+  // ── 培養上清液 admin_skip ──
+  if (action === "admin_skip" && flow === "cf") {
+    const order = await prisma.cultureFluidOrder.findFirst({ where: { userId }, orderBy: { createdAt: "desc" } });
+    if (!order) return NextResponse.json({ error: "培養上清液の注文がありません" }, { status: 400 });
+    const now = new Date();
+
+    switch (stepKey) {
+      case "CF_PAYMENT":
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { paymentStatus: "COMPLETED", paidAt: now, status: "PAYMENT_CONFIRMED" } });
+        return NextResponse.json({ success: true, message: "入金確認 → 完了" });
+      case "CF_PRODUCING": {
+        const pa = new Date(now); const ea = new Date(pa); ea.setMonth(ea.getMonth() + 8);
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { producedAt: pa, expiresAt: ea, status: "PRODUCING" } });
+        return NextResponse.json({ success: true, message: "精製完了" });
       }
-      default:
-        return NextResponse.json({ error: "不明なステップ" }, { status: 400 });
+      case "CF_CLINIC":
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { status: "CLINIC_BOOKING" } });
+        return NextResponse.json({ success: true, message: "クリニック予約 → 完了" });
+      case "CF_INFORMED":
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { informedAgreedAt: now, status: "INFORMED_AGREED" } });
+        return NextResponse.json({ success: true, message: "事前説明同意 → 完了" });
+      case "CF_RESERVATION": {
+        const cd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+        await prisma.cultureFluidOrder.update({
+          where: { id: order.id },
+          data: { clinicDate: cd, clinicName: "テストクリニック", clinicAddress: "東京都港区テスト1-2-3", clinicPhone: "03-0000-0000", status: "RESERVATION_CONFIRMED" },
+        });
+        return NextResponse.json({ success: true, message: "予約確定 → 完了" });
+      }
+      case "CF_COMPLETED": {
+        const total = order.planType.includes("5") ? 6 : 1;
+        const dates: string[] = order.sessionDates ? JSON.parse(order.sessionDates) : [];
+        dates.push(now.toISOString().split("T")[0]);
+        const newSessions = order.completedSessions + 1;
+        await prisma.cultureFluidOrder.update({
+          where: { id: order.id },
+          data: {
+            completedAt: now, completedSessions: newSessions,
+            sessionDates: JSON.stringify(dates),
+            status: newSessions >= total ? "COMPLETED" : "CLINIC_BOOKING",
+            ...(newSessions < total ? { clinicDate: null, clinicName: null, clinicAddress: null, clinicPhone: null, informedAgreedAt: null } : {}),
+          },
+        });
+        return NextResponse.json({ success: true, message: `施術完了（${newSessions}/${total}回）` });
+      }
+    }
+  }
+
+  // ── 1つ戻る ──
+  if (action === "back") {
+    const now = new Date();
+
+    if (flow === "ips") {
+      // iPSステップを1つ戻す
+      const { ipsSteps } = await buildSteps(userId);
+      const lastDoneIdx = ipsSteps.map((s, i) => s.done ? i : -1).filter(i => i >= 0).pop();
+      if (lastDoneIdx === undefined || lastDoneIdx < 0) return NextResponse.json({ error: "これ以上戻れません" }, { status: 400 });
+      const lastDone = ipsSteps[lastDoneIdx];
+
+      switch (lastDone.key) {
+        case "TERMS_AGREED":
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "REGISTERED" } });
+          break;
+        case "REGISTERED":
+          // ID発行は戻さない（ログインできなくなるため）
+          return NextResponse.json({ error: "ID発行は戻せません" }, { status: 400 });
+        case "DOC_IMPORTANT_NOTICE":
+        case "DOC_PRIVACY_CONSENT":
+          await prisma.user.update({ where: { id: userId }, data: { hasAgreedTerms: false, agreedTermsAt: null } });
+          await prisma.document.updateMany({ where: { userId, type: { in: ["CONTRACT", "PRIVACY_POLICY"] } }, data: { status: "PENDING", signedAt: null } });
+          break;
+        case "SERVICE_APPLIED":
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "TERMS_AGREED", serviceAppliedAt: null, consentSignedAt: null } });
+          await prisma.document.updateMany({ where: { userId, type: "SERVICE_TERMS" }, data: { status: "PENDING", signedAt: null } });
+          await prisma.cultureFluidOrder.deleteMany({ where: { userId, planType: "iv_drip_1_included" } });
+          break;
+        case "CONTRACT_SIGNING":
+          await prisma.membership.update({ where: { userId }, data: { contractSignedAt: null } });
+          await prisma.document.updateMany({ where: { userId, type: "CONSENT_CELL_STORAGE" }, data: { status: "PENDING", signedAt: null } });
+          break;
+        case "PAYMENT_CONFIRMED":
+          await prisma.membership.update({ where: { userId }, data: { paymentStatus: "PENDING", paidAmount: 0 } });
+          break;
+        case "SCHEDULE_ARRANGED":
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "SERVICE_APPLIED" } });
+          break;
+        case "DOC_CELL_CONSENT":
+          await prisma.document.updateMany({ where: { userId, type: "CELL_STORAGE_CONSENT" }, data: { status: "PENDING", signedAt: null } });
+          break;
+        case "CLINIC_CONFIRMED":
+          await prisma.membership.update({ where: { userId }, data: { clinicDate: null, clinicName: null, clinicAddress: null, clinicPhone: null } });
+          break;
+        case "DOC_INFORMED":
+          await prisma.document.updateMany({ where: { userId, type: "INFORMED_CONSENT" }, data: { status: "PENDING", signedAt: null } });
+          break;
+        case "BLOOD_COLLECTED":
+        case "IPS_CREATING":
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "SCHEDULE_ARRANGED", ipsCompletedAt: null } });
+          break;
+        case "STORAGE_ACTIVE":
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", storageStartAt: null } });
+          const inclOrder = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
+          if (inclOrder) await prisma.cultureFluidOrder.update({ where: { id: inclOrder.id }, data: { status: "APPLIED", producedAt: null, expiresAt: null } });
+          break;
+      }
+      await prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: membership.ipsStatus, note: `テスト: 「${lastDone.label}」を取消`, changedBy: "テストモード" } });
+      return NextResponse.json({ success: true, message: `「${lastDone.label}」を取消` });
+    }
+
+    if (flow === "cf") {
+      const order = await prisma.cultureFluidOrder.findFirst({ where: { userId }, orderBy: { createdAt: "desc" } });
+      if (!order) return NextResponse.json({ error: "注文がありません" }, { status: 400 });
+
+      // ステータスを1つ前に戻す
+      const cfStatusOrder = ["APPLIED", "PAYMENT_CONFIRMED", "PRODUCING", "CLINIC_BOOKING", "INFORMED_AGREED", "RESERVATION_CONFIRMED", "COMPLETED"];
+      const idx = cfStatusOrder.indexOf(order.status);
+      if (idx <= 0) return NextResponse.json({ error: "これ以上戻れません" }, { status: 400 });
+      const prevStatus = cfStatusOrder[idx - 1];
+      const rollback: Record<string, unknown> = { status: prevStatus };
+
+      if (prevStatus === "APPLIED") { rollback.paymentStatus = "PENDING"; rollback.paidAt = null; }
+      if (prevStatus === "PAYMENT_CONFIRMED") { rollback.producedAt = null; rollback.expiresAt = null; }
+      if (prevStatus === "PRODUCING") { /* CLINIC_BOOKING → PRODUCING */ }
+      if (prevStatus === "CLINIC_BOOKING") { rollback.informedAgreedAt = null; }
+      if (prevStatus === "INFORMED_AGREED") { rollback.clinicDate = null; rollback.clinicName = null; rollback.clinicAddress = null; rollback.clinicPhone = null; }
+
+      await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: rollback });
+      return NextResponse.json({ success: true, message: `ステータスを ${prevStatus} に戻しました` });
     }
   }
 
   return NextResponse.json({ error: "不正なアクション" }, { status: 400 });
 }
 
-// テスターかどうかの判定 + 現在ステータス情報
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ isTester: false });
-  }
-
-  const userId = (session.user as { id: string }).id;
-  const result = await checkIsTester(userId);
-  if (!result) {
-    return NextResponse.json({ isTester: false });
-  }
-
-  // 現在のステータス情報を取得
+// ── ステップ状態を構築するヘルパー ──
+async function buildSteps(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      hasAgreedTerms: true,
-      isIdIssued: true,
-      membership: {
-        select: {
-          ipsStatus: true,
-          paymentStatus: true,
-          contractSignedAt: true,
-          clinicDate: true,
-          clinicName: true,
-        },
-      },
-      documents: {
-        select: { type: true, status: true },
-      },
+      hasAgreedTerms: true, isIdIssued: true,
+      membership: { select: { ipsStatus: true, paymentStatus: true, contractSignedAt: true, clinicDate: true } },
+      documents: { select: { type: true, status: true } },
+      cultureFluidOrders: { orderBy: { createdAt: "desc" as const }, take: 1, select: { status: true, paymentStatus: true, producedAt: true, expiresAt: true, clinicDate: true, informedAgreedAt: true, completedSessions: true, planType: true } },
     },
   });
 
@@ -359,27 +263,45 @@ export async function GET() {
   const signedDocs = user?.documents?.filter(d => d.status === "SIGNED").map(d => d.type) || [];
   const statusIdx = m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) : -1;
 
-  // マイページのタイムラインと完全一致する14ステップ
-  const steps = [
+  const ipsSteps = [
     { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("TERMS_AGREED") },
     { key: "REGISTERED", label: "メンバーシップ会員ID発行", actor: "admin" as const, done: !!user?.isIdIssued },
     { key: "DOC_IMPORTANT_NOTICE", label: "重要事項説明書兼確認書", actor: "member" as const, done: signedDocs.includes("CONTRACT") || !!user?.hasAgreedTerms },
-    { key: "DOC_PRIVACY_CONSENT", label: "個人情報・個人遺伝情報等の取扱いに関する同意", actor: "member" as const, done: signedDocs.includes("PRIVACY_POLICY") || !!user?.hasAgreedTerms },
+    { key: "DOC_PRIVACY_CONSENT", label: "個人情報同意", actor: "member" as const, done: signedDocs.includes("PRIVACY_POLICY") || !!user?.hasAgreedTerms },
     { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", actor: "member" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("SERVICE_APPLIED") },
-    { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", actor: "admin" as const, done: !!m?.contractSignedAt },
-    { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", actor: "admin" as const, done: m?.paymentStatus === "COMPLETED" },
-    { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", actor: "member" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("SCHEDULE_ARRANGED") },
+    { key: "CONTRACT_SIGNING", label: "契約書署名", actor: "admin" as const, done: !!m?.contractSignedAt },
+    { key: "PAYMENT_CONFIRMED", label: "入金確認", actor: "admin" as const, done: m?.paymentStatus === "COMPLETED" },
+    { key: "SCHEDULE_ARRANGED", label: "日程調整リクエスト", actor: "member" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("SCHEDULE_ARRANGED") },
     { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", actor: "member" as const, done: signedDocs.includes("CELL_STORAGE_CONSENT") },
     { key: "CLINIC_CONFIRMED", label: "日程確定", actor: "admin" as const, done: !!m?.clinicDate },
-    { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", actor: "member" as const, done: signedDocs.includes("INFORMED_CONSENT") },
+    { key: "DOC_INFORMED", label: "事前説明・同意", actor: "member" as const, done: signedDocs.includes("INFORMED_CONSENT") },
     { key: "BLOOD_COLLECTED", label: "問診・採血", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("BLOOD_COLLECTED") },
     { key: "IPS_CREATING", label: "iPS細胞作製中", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("IPS_CREATING") },
     { key: "STORAGE_ACTIVE", label: "iPS細胞保管", actor: "admin" as const, done: m?.ipsStatus === "STORAGE_ACTIVE" },
   ];
 
-  return NextResponse.json({
-    isTester: true,
-    ipsStatus: m?.ipsStatus || "REGISTERED",
-    steps,
-  });
+  const order = user?.cultureFluidOrders?.[0];
+  const cfSteps = order ? [
+    { key: "CF_APPLIED", label: "追加購入申込", actor: "member" as const, done: true },
+    { key: "CF_PAYMENT", label: "入金確認", actor: "admin" as const, done: order.paymentStatus === "COMPLETED" },
+    { key: "CF_PRODUCING", label: "精製完了", actor: "admin" as const, done: !!order.producedAt },
+    { key: "CF_CLINIC", label: "クリニック予約", actor: "member" as const, done: ["CLINIC_BOOKING", "INFORMED_AGREED", "RESERVATION_CONFIRMED", "COMPLETED"].includes(order.status) },
+    { key: "CF_INFORMED", label: "事前説明・同意", actor: "member" as const, done: !!order.informedAgreedAt },
+    { key: "CF_RESERVATION", label: "予約確定", actor: "admin" as const, done: ["RESERVATION_CONFIRMED", "COMPLETED"].includes(order.status) },
+    { key: "CF_COMPLETED", label: "施術完了", actor: "admin" as const, done: order.status === "COMPLETED" },
+  ] : [];
+
+  return { ipsSteps, cfSteps };
+}
+
+// ── GET: ステータス取得 ──
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ isTester: false });
+  const userId = (session.user as { id: string }).id;
+  if (!(await checkIsTester(userId))) return NextResponse.json({ isTester: false });
+
+  const { ipsSteps, cfSteps } = await buildSteps(userId);
+
+  return NextResponse.json({ isTester: true, ipsSteps, cfSteps });
 }

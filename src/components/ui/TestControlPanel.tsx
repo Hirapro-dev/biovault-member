@@ -11,77 +11,59 @@ type Step = {
   done: boolean;
 };
 
+type StatusData = {
+  isTester: boolean;
+  ipsSteps?: Step[];
+  cfSteps?: Step[];
+  currentStepIndex?: number;
+  cfCurrentStepIndex?: number;
+};
+
 export default function TestControlPanel() {
   const router = useRouter();
-  const [isTester, setIsTester] = useState(false);
-  const [steps, setSteps] = useState<Step[]>([]);
-  const [ipsStatus, setIpsStatus] = useState("");
+  const [data, setData] = useState<StatusData>({ isTester: false });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"ips" | "cf">("ips");
 
   const fetchStatus = useCallback(() => {
     fetch("/api/member/test-control")
       .then((r) => r.json())
-      .then((data) => {
-        setIsTester(data.isTester);
-        if (data.steps) setSteps(data.steps);
-        if (data.ipsStatus) setIpsStatus(data.ipsStatus);
-      })
+      .then((d) => setData(d))
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
-  if (!isTester) return null;
+  if (!data.isTester) return null;
 
-  // 次の未完了ステップ
+  const steps = tab === "ips" ? (data.ipsSteps || []) : (data.cfSteps || []);
   const nextStep = steps.find((s) => !s.done);
+  const lastDoneIndex = steps.map((s, i) => s.done ? i : -1).filter(i => i >= 0).pop() ?? -1;
   const allDone = steps.length > 0 && steps.every((s) => s.done);
 
-  const handleAdminSkip = async () => {
-    if (!nextStep) return;
+  const handleAction = async (action: string, extra?: Record<string, string>) => {
     setLoading(true);
     setMessage("");
     try {
       const res = await fetch("/api/member/test-control", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "admin_skip", stepKey: nextStep.key }),
+        body: JSON.stringify({ action, flow: tab, ...extra }),
       });
-      const data = await res.json();
+      const d = await res.json();
       if (res.ok) {
-        setMessage(`${nextStep.label} → 完了`);
+        if (action === "reset") {
+          setMessage("リセット完了。ログアウトします...");
+          setTimeout(() => signOut({ callbackUrl: "/login" }), 1000);
+          return;
+        }
+        setMessage(d.message || "完了");
         router.refresh();
-        // Server Componentのキャッシュ更新後にステータスを再取得
         setTimeout(() => fetchStatus(), 500);
       } else {
-        setMessage(data.error || "エラー");
-      }
-    } catch {
-      setMessage("エラーが発生しました");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReset = async () => {
-    if (!confirm("全ステータスをリセットしますか？\n（最初からやり直せます）")) return;
-    setLoading(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/member/test-control", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "reset" }),
-      });
-      if (res.ok) {
-        setMessage("リセット完了。ログアウトします...");
-        setTimeout(() => {
-          signOut({ callbackUrl: "/login" });
-        }, 1000);
+        setMessage(d.error || "エラー");
       }
     } catch {
       setMessage("エラーが発生しました");
@@ -103,81 +85,94 @@ export default function TestControlPanel() {
 
   return (
     <>
-    {/* オーバーレイ: パネル外タップで閉じる */}
     <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
-    <div className="fixed top-[60px] right-3 z-[9999] w-72 bg-bg-secondary border border-status-danger/30 rounded-xl shadow-2xl overflow-hidden lg:top-4 lg:right-4 max-h-[80vh] overflow-y-auto">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-status-danger/10 border-b border-status-danger/20">
-        <span className="text-xs font-bold text-status-danger tracking-wider">TEST MODE</span>
+    <div className="fixed top-[60px] right-3 z-[9999] w-72 bg-bg-secondary border border-status-danger/30 rounded-xl shadow-2xl overflow-hidden lg:top-4 lg:right-4">
+      {/* ヘッダー */}
+      <div className="flex items-center justify-between px-4 py-2 bg-status-danger/10 border-b border-status-danger/20">
+        <span className="text-[10px] font-bold text-status-danger tracking-wider">TEST MODE</span>
         <button onClick={() => setOpen(false)} className="text-text-muted hover:text-white text-sm cursor-pointer">×</button>
       </div>
 
-      {/* 工程リスト */}
-      <div className="p-3 space-y-1">
-        {steps.map((step, i) => {
-          const isNext = nextStep?.key === step.key;
-          return (
-            <div key={step.key} className={`flex items-center gap-2 py-1.5 px-2 rounded text-[11px] ${isNext ? "bg-gold/10 border border-gold/20" : ""}`}>
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] shrink-0 ${
-                step.done ? "bg-gold text-bg-primary font-bold" : isNext ? "border-2 border-gold text-gold" : "border border-border text-text-muted"
-              }`}>
-                {step.done ? "✓" : i + 1}
-              </span>
-              <span className={`flex-1 ${step.done ? "text-gold" : isNext ? "text-text-primary font-medium" : "text-text-muted"}`}>
-                {step.label}
-              </span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                step.actor === "admin"
-                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                  : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              }`}>
-                {step.actor === "admin" ? "管理者" : "会員"}
-              </span>
-            </div>
-          );
-        })}
+      {/* タブ */}
+      <div className="flex border-b border-border">
+        <button
+          onClick={() => setTab("ips")}
+          className={`flex-1 py-2 text-[10px] font-medium tracking-wider cursor-pointer transition-colors ${tab === "ips" ? "text-gold border-b-2 border-gold" : "text-text-muted hover:text-text-primary"}`}
+        >
+          iPS作製・保管
+        </button>
+        <button
+          onClick={() => setTab("cf")}
+          className={`flex-1 py-2 text-[10px] font-medium tracking-wider cursor-pointer transition-colors ${tab === "cf" ? "text-gold border-b-2 border-gold" : "text-text-muted hover:text-text-primary"}`}
+        >
+          培養上清液
+        </button>
       </div>
 
-      {/* 次のアクション */}
-      <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
+      {/* 次のステップ */}
+      <div className="p-3 space-y-2">
         {allDone ? (
-          <div className="text-center text-xs text-gold py-2">全工程完了</div>
+          <div className="text-center text-xs text-gold py-3">全工程完了</div>
         ) : nextStep ? (
           <>
-            <div className="text-[10px] text-text-muted mb-1">
-              次: <span className="text-text-primary font-medium">{nextStep.label}</span>
+            <div className="text-[10px] text-text-muted">
+              Step {steps.indexOf(nextStep) + 1} / {steps.length}
             </div>
+            <div className="text-sm text-text-primary font-medium">{nextStep.label}</div>
+            <div className={`text-[10px] px-2 py-0.5 rounded-full inline-block ${
+              nextStep.actor === "admin"
+                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+            }`}>
+              {nextStep.actor === "admin" ? "管理者操作" : "会員操作"}
+            </div>
+
             {nextStep.actor === "admin" ? (
               <button
-                onClick={handleAdminSkip}
+                onClick={() => handleAction("admin_skip", { stepKey: nextStep.key })}
                 disabled={loading}
-                className="w-full py-2.5 bg-gold-gradient text-bg-primary text-xs font-bold rounded tracking-wider cursor-pointer hover:opacity-90 disabled:opacity-40 transition-all"
+                className="w-full py-3 bg-gold-gradient text-bg-primary text-xs font-bold rounded tracking-wider cursor-pointer hover:opacity-90 disabled:opacity-40 transition-all"
               >
-                {loading ? "処理中..." : `「${nextStep.label}」をスキップ →`}
+                {loading ? "処理中..." : "スキップして次へ →"}
               </button>
             ) : (
               <div className="space-y-2">
                 <div className="bg-emerald-500/5 border border-emerald-500/20 rounded p-2.5">
-                  <div className="text-[10px] text-emerald-400 font-medium mb-0.5">会員操作が必要です</div>
-                  <div className="text-[10px] text-text-muted">ページ上で実際に操作してください</div>
+                  <div className="text-[10px] text-emerald-400 font-medium">ページ上で実際に操作してください</div>
                 </div>
                 <button
                   onClick={() => { fetchStatus(); router.refresh(); setMessage("更新しました"); }}
                   className="w-full py-2 border border-border text-text-muted text-[10px] rounded cursor-pointer hover:border-gold hover:text-gold transition-all"
                 >
-                  操作完了 → ステータスを更新
+                  操作完了 → 更新
                 </button>
               </div>
             )}
           </>
         ) : null}
 
+        {/* 1つ戻る */}
+        {lastDoneIndex >= 0 && (
+          <button
+            onClick={() => handleAction("back")}
+            disabled={loading}
+            className="w-full py-2 border border-border text-text-muted text-[10px] rounded cursor-pointer hover:border-gold hover:text-gold disabled:opacity-40 transition-all"
+          >
+            ← 1つ前のステップに戻す
+          </button>
+        )}
+
+        {/* リセット */}
         <button
-          onClick={handleReset}
+          onClick={() => {
+            if (confirm("全ステータスをリセットしますか？")) handleAction("reset");
+          }}
           disabled={loading}
-          className="w-full py-2 border border-status-danger/30 text-status-danger text-xs rounded cursor-pointer hover:bg-status-danger/10 disabled:opacity-40 transition-all"
+          className="w-full py-2 border border-status-danger/30 text-status-danger text-[10px] rounded cursor-pointer hover:bg-status-danger/10 disabled:opacity-40 transition-all"
         >
           工程をリセット
         </button>
+
         {message && (
           <div className="text-[10px] text-text-muted text-center py-1">{message}</div>
         )}
