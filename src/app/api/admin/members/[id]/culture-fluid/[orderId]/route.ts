@@ -115,20 +115,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   // ステータスが変更された場合に通知
   if (updated.status !== order.status) {
-    const member = await prisma.user.findUnique({
-      where: { id },
-      select: { name: true, membership: { select: { memberNumber: true } } },
-    });
-    if (member) {
-      notifyCultureFluidStatusChange({
-        userId: id,
-        memberName: member.name,
-        memberNumber: member.membership?.memberNumber,
-        planLabel: order.planLabel,
-        fromStatus: order.status,
-        toStatus: updated.status,
-        changedBy: session.user.name || "管理者",
-      }).catch(() => {});
+    try {
+      const member = await prisma.user.findUnique({
+        where: { id },
+        select: { name: true, membership: { select: { memberNumber: true } } },
+      });
+      if (member) {
+        await notifyCultureFluidStatusChange({
+          userId: id,
+          memberName: member.name,
+          memberNumber: member.membership?.memberNumber,
+          planLabel: order.planLabel,
+          fromStatus: order.status,
+          toStatus: updated.status,
+          changedBy: session.user.name || "管理者",
+        });
+      }
+    } catch (e) {
+      console.error("Culture fluid notification error:", e);
     }
   }
 

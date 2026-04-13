@@ -38,17 +38,21 @@ export async function POST(req: Request) {
   // 通知送信
   const newStatus = order.status === "CLINIC_BOOKING" ? "INFORMED_AGREED" : order.status;
   if (newStatus !== order.status) {
-    const member = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, membership: { select: { memberNumber: true } } } });
-    if (member) {
-      notifyCultureFluidStatusChange({
-        userId,
-        memberName: member.name,
-        memberNumber: member.membership?.memberNumber,
-        planLabel: order.planLabel,
-        fromStatus: order.status,
-        toStatus: newStatus,
-        changedBy: "会員本人",
-      }).catch(() => {});
+    try {
+      const member = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, membership: { select: { memberNumber: true } } } });
+      if (member) {
+        await notifyCultureFluidStatusChange({
+          userId,
+          memberName: member.name,
+          memberNumber: member.membership?.memberNumber,
+          planLabel: order.planLabel,
+          fromStatus: order.status,
+          toStatus: newStatus,
+          changedBy: "会員本人",
+        });
+      }
+    } catch (e) {
+      console.error("Consent notification error:", e);
     }
   }
 

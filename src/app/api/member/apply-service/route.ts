@@ -121,20 +121,24 @@ export async function POST(req: Request) {
     });
 
     // ステータス変更通知
-    const memberInfo = await prisma.membership.findUnique({
-      where: { userId },
-      select: { memberNumber: true, user: { select: { name: true } } },
-    });
-    if (memberInfo) {
-      notifyIpsStatusChange({
-        userId,
-        memberName: memberInfo.user.name,
-        memberNumber: memberInfo.memberNumber,
-        fromStatus: "TERMS_AGREED",
-        toStatus: "SERVICE_APPLIED",
-        changedBy: "会員本人",
-        note: "会員本人によるiPSサービス利用申込",
-      }).catch(() => {});
+    try {
+      const memberInfo = await prisma.membership.findUnique({
+        where: { userId },
+        select: { memberNumber: true, user: { select: { name: true } } },
+      });
+      if (memberInfo) {
+        await notifyIpsStatusChange({
+          userId,
+          memberName: memberInfo.user.name,
+          memberNumber: memberInfo.memberNumber,
+          fromStatus: "TERMS_AGREED",
+          toStatus: "SERVICE_APPLIED",
+          changedBy: "会員本人",
+          note: "会員本人によるiPSサービス利用申込",
+        });
+      }
+    } catch (e) {
+      console.error("Apply service notification error:", e);
     }
 
     return NextResponse.json({ success: true });

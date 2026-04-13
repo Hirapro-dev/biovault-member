@@ -56,20 +56,24 @@ export async function POST(req: Request) {
   });
 
   // 通知送信
-  const member = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { name: true, membership: { select: { memberNumber: true } } },
-  });
-  if (member) {
-    notifyCultureFluidStatusChange({
-      userId,
-      memberName: member.name,
-      memberNumber: member.membership?.memberNumber,
-      planLabel: plan.label,
-      fromStatus: "---",
-      toStatus: "APPLIED",
-      changedBy: "会員本人",
-    }).catch(() => {});
+  try {
+    const member = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, membership: { select: { memberNumber: true } } },
+    });
+    if (member) {
+      await notifyCultureFluidStatusChange({
+        userId,
+        memberName: member.name,
+        memberNumber: member.membership?.memberNumber,
+        planLabel: plan.label,
+        fromStatus: "---",
+        toStatus: "APPLIED",
+        changedBy: "会員本人",
+      });
+    }
+  } catch (e) {
+    console.error("Culture fluid apply notification error:", e);
   }
 
   return NextResponse.json({ success: true, orderId: order.id });

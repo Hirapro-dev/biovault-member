@@ -163,16 +163,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     });
   }
 
-  // ステータス変更通知を送信（レスポンスをブロックしない）
-  notifyIpsStatusChange({
-    userId: id,
-    memberName: membership.user.name,
-    memberNumber: membership.memberNumber,
-    fromStatus,
-    toStatus: finalStatus,
-    changedBy: session.user.name || "管理者",
-    note,
-  }).catch(() => {});
+  // ステータス変更通知を送信
+  try {
+    await notifyIpsStatusChange({
+      userId: id,
+      memberName: membership.user.name,
+      memberNumber: membership.memberNumber,
+      fromStatus,
+      toStatus: finalStatus,
+      changedBy: session.user.name || "管理者",
+      note,
+    });
+  } catch (e) {
+    console.error("iPS status notification error:", e);
+  }
 
   return NextResponse.json({ success: true });
 }
