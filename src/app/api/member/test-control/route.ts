@@ -46,9 +46,7 @@ export async function POST(req: Request) {
       prisma.user.update({ where: { id: userId }, data: { hasAgreedTerms: false, agreedTermsAt: null } }),
       prisma.document.updateMany({ where: { userId }, data: { status: "PENDING", signedAt: null } }),
       prisma.cultureFluidOrder.deleteMany({ where: { userId } }),
-      prisma.statusHistory.create({
-        data: { userId, fromStatus: membership.ipsStatus, toStatus: "REGISTERED", note: "テストモード: 全リセット", changedBy: "テストモード" },
-      }),
+      prisma.statusHistory.deleteMany({ where: { userId } }),
     ]);
     return NextResponse.json({ success: true, message: "リセット完了" });
   }
@@ -83,10 +81,7 @@ export async function POST(req: Request) {
     switch (stepKey) {
       case "TERMS_AGREED":
         if (membership.ipsStatus === "REGISTERED") {
-          await prisma.$transaction([
-            prisma.membership.update({ where: { userId }, data: { ipsStatus: "TERMS_AGREED" } }),
-            prisma.statusHistory.create({ data: { userId, fromStatus: "REGISTERED", toStatus: "TERMS_AGREED", note: "テスト: 適合確認スキップ", changedBy: "テストモード" } }),
-          ]);
+          await prisma.membership.update({ where: { userId }, data: { ipsStatus: "TERMS_AGREED" } });
         }
         return NextResponse.json({ success: true, message: "適合確認 → 完了" });
       case "CONTRACT_SIGNING":
@@ -109,24 +104,14 @@ export async function POST(req: Request) {
       }
       case "BLOOD_COLLECTED": {
         const start = new Date(now); start.setDate(start.getDate() + 7);
-        await prisma.$transaction([
-          prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: start, clinicDate: membership.clinicDate || now } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "BLOOD_COLLECTED", note: "テスト: 問診・採血スキップ", changedBy: "テストモード" } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: "BLOOD_COLLECTED", toStatus: "IPS_CREATING", note: "テスト: iPS作製開始", changedBy: "テストモード" } }),
-        ]);
+        await prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: start, clinicDate: membership.clinicDate || now } });
         return NextResponse.json({ success: true, message: "問診・採血 → iPS作製中" });
       }
       case "IPS_CREATING":
-        await prisma.$transaction([
-          prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: now } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "IPS_CREATING", note: "テスト: iPS作製中スキップ", changedBy: "テストモード" } }),
-        ]);
+        await prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", ipsCompletedAt: now } });
         return NextResponse.json({ success: true, message: "iPS作製中 → 完了" });
       case "STORAGE_ACTIVE":
-        await prisma.$transaction([
-          prisma.membership.update({ where: { userId }, data: { ipsStatus: "STORAGE_ACTIVE", storageStartAt: now, ipsCompletedAt: membership.ipsCompletedAt || now } }),
-          prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: "STORAGE_ACTIVE", note: "テスト: 保管開始", changedBy: "テストモード" } }),
-        ]);
+        await prisma.membership.update({ where: { userId }, data: { ipsStatus: "STORAGE_ACTIVE", storageStartAt: now, ipsCompletedAt: membership.ipsCompletedAt || now } });
         const incl = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
         if (incl && !incl.producedAt) {
           const pa = new Date(now); pa.setMonth(pa.getMonth() + 1);
@@ -242,7 +227,6 @@ export async function POST(req: Request) {
           if (inclOrder) await prisma.cultureFluidOrder.update({ where: { id: inclOrder.id }, data: { status: "APPLIED", producedAt: null, expiresAt: null } });
           break;
       }
-      await prisma.statusHistory.create({ data: { userId, fromStatus: membership.ipsStatus, toStatus: membership.ipsStatus, note: `テスト: 「${lastDone.label}」を取消`, changedBy: "テストモード" } });
       return NextResponse.json({ success: true, message: `「${lastDone.label}」を取消` });
     }
 
