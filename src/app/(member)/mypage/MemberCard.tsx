@@ -6,7 +6,6 @@ interface MemberCardProps {
   memberNumber: string;
   holderName: string;
   memberSince: string;
-  // 裏面データ
   storageExpiry: string | null;
   cultureFluidExpiry: string | null;
   remainingSessions: number | null;
@@ -27,23 +26,18 @@ export default function MemberCard({
   return (
     <div
       className="mb-6 sm:mb-8 cursor-pointer"
-      style={{ minWidth: 280, maxWidth: 540, perspective: "1000px" }}
+      style={{ minWidth: 280, maxWidth: 540 }}
       onClick={() => setFlipped((prev) => !prev)}
     >
-      <div
-        className="relative w-full aspect-[1.586/1] transition-transform duration-700"
-        style={{
-          transformStyle: "preserve-3d",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-        }}
-      >
+      <div className="relative w-full aspect-[1.586/1]">
         {/* ── 表面 ── */}
         <div
-          className="card-face absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+          className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15 transition-opacity duration-500"
           style={{
             background: "#0A0A0C",
             boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
-            transform: "rotateY(0deg)",
+            opacity: flipped ? 0 : 1,
+            pointerEvents: flipped ? "none" : "auto",
           }}
         >
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
@@ -78,11 +72,12 @@ export default function MemberCard({
 
         {/* ── 裏面 ── */}
         <div
-          className="card-face absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+          className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15 transition-opacity duration-500"
           style={{
             background: "linear-gradient(145deg, #0E0E12 0%, #0A0A0C 40%, #0C0C10 100%)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
-            transform: "rotateY(180deg)",
+            opacity: flipped ? 1 : 0,
+            pointerEvents: flipped ? "auto" : "none",
           }}
         >
           {/* 微かな装飾ライン */}
