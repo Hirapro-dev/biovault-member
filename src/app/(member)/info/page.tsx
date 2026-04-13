@@ -9,6 +9,12 @@ const menuItems = [
     description: "iPSサービスへのお申込み",
   },
   {
+    href: "/dashboard",
+    icon: "🧬",
+    label: "iPSとは？",
+    description: "iPS細胞に関する情報",
+  },
+  {
     href: "/settings/terms",
     icon: "📜",
     label: "会員規約",
