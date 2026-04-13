@@ -126,9 +126,16 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
         const willBeChecked = !isOriginallyDone(key);
 
         if (step.dbStatus && willBeChecked) {
+          // dbStatusがあるステップ → status APIを呼ぶ（通知はAPI内で送信される）
           await fetch(`/api/admin/members/${userId}/status`, {
             method: "PATCH", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ newStatus: step.dbStatus, note: `管理者がステータスを「${step.label}」に変更` }),
+          });
+        } else if (!step.dbStatus && willBeChecked) {
+          // dbStatusがないステップ → notify APIで通知のみ送信
+          await fetch(`/api/admin/members/${userId}/notify`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stepLabel: step.label, stepKey: key }),
           });
         }
         if (key === "PAYMENT_CONFIRMED" && willBeChecked) {

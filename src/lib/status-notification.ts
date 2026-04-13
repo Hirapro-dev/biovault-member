@@ -16,8 +16,14 @@ const IPS_STATUS_LABELS: Record<string, string> = {
   REGISTERED: "iPS細胞作製適合確認の新規申込",
   ID_ISSUED: "メンバーシップ会員ID発行",
   TERMS_AGREED: "iPS細胞作製適合確認完了",
+  DOC_PRIVACY: "重要事項確認／個人情報取扱同意確認",
   SERVICE_APPLIED: "iPSサービス申込済み",
+  CONTRACT_SIGNING: "iPSサービス利用契約書署名",
+  PAYMENT_CONFIRMED: "iPSサービス利用契約締結・入金確認",
   SCHEDULE_ARRANGED: "iPS作製日程調整",
+  DOC_CELL_CONSENT: "細胞提供・保管同意",
+  CLINIC_CONFIRMED: "日程確定",
+  DOC_INFORMED: "iPS細胞作製における事前説明・同意",
   BLOOD_COLLECTED: "問診・採血",
   IPS_CREATING: "iPS細胞作製中",
   STORAGE_ACTIVE: "iPS細胞保管中",
@@ -163,6 +169,27 @@ function buildIpsHighlightCard(toStatus: string, details: Awaited<ReturnType<typ
       if (m.serviceAppliedAt) rows.push(highlightRow("申込日", fmtDate(m.serviceAppliedAt)));
       rows.push(detailRow("入金状況", PAYMENT_LABELS[m.paymentStatus] || "---"));
       rows.push(detailRow("契約金額", `¥${m.totalAmount.toLocaleString()}`));
+      break;
+    case "CONTRACT_SIGNING":
+      rows.push(highlightRow("契約書署名", "iPSサービス利用契約書の署名が完了しました"));
+      if (m.contractSignedAt) rows.push(highlightRow("署名日", fmtDate(m.contractSignedAt)));
+      break;
+    case "PAYMENT_CONFIRMED":
+      rows.push(highlightRow("入金確認", "入金確認が完了しました"));
+      rows.push(highlightRow("入金額", `¥${m.paidAmount.toLocaleString()} / ¥${m.totalAmount.toLocaleString()}`));
+      break;
+    case "DOC_CELL_CONSENT":
+      rows.push(highlightRow("同意完了", "細胞提供・保管同意書への同意が完了しました"));
+      break;
+    case "CLINIC_CONFIRMED":
+      rows.push(highlightRow("日程確定", "クリニックの日程が確定しました"));
+      if (m.clinicDate) rows.push(highlightRow("確定日", fmtDate(m.clinicDate)));
+      if (m.clinicName) rows.push(highlightRow("クリニック", m.clinicName));
+      if (m.clinicAddress) rows.push(detailRow("住所", m.clinicAddress));
+      if (m.clinicPhone) rows.push(detailRow("TEL", m.clinicPhone));
+      break;
+    case "DOC_INFORMED":
+      rows.push(highlightRow("同意完了", "iPS細胞作製における事前説明・同意が完了しました"));
       break;
     case "SCHEDULE_ARRANGED":
       rows.push(highlightRow("日程調整", "クリニックの日程調整に進みます"));
