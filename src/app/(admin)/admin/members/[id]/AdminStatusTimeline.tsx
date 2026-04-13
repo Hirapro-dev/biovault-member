@@ -339,6 +339,11 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                         method: "PATCH", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ membership: { clinicDate: new Date(inputClinicDate).toISOString(), clinicName: inputClinicName || null, clinicAddress: inputClinicAddress || null, clinicPhone: inputClinicPhone || null } }),
                       });
+                      // 通知送信
+                      await fetch(`/api/admin/members/${userId}/notify`, {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ stepLabel: "日程確定", stepKey: "CLINIC_CONFIRMED" }),
+                      });
                       setShowClinicPopup(false);
                       router.refresh();
                     } finally { setClinicLoading(false); }
@@ -455,6 +460,11 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
                   });
                   if (res.ok) {
                     setContractMessage("契約書PDFをアップロードしました");
+                    // 通知送信
+                    await fetch(`/api/admin/members/${userId}/notify`, {
+                      method: "POST", headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ stepLabel: "iPSサービス利用契約書署名", stepKey: "CONTRACT_SIGNING" }),
+                    });
                     setTimeout(() => { setShowContractPopup(false); router.refresh(); }, 1500);
                   } else {
                     const data = await res.json();

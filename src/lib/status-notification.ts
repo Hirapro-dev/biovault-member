@@ -20,7 +20,7 @@ const IPS_STATUS_LABELS: Record<string, string> = {
   SERVICE_APPLIED: "iPSサービス申込済み",
   CONTRACT_SIGNING: "iPSサービス利用契約書署名",
   PAYMENT_CONFIRMED: "iPSサービス利用契約締結・入金確認",
-  SCHEDULE_ARRANGED: "iPS作製日程調整",
+  SCHEDULE_ARRANGED: "iPS細胞作製におけるクリニックの日程調整",
   DOC_CELL_CONSENT: "細胞提供・保管同意",
   CLINIC_CONFIRMED: "日程確定",
   DOC_INFORMED: "iPS細胞作製における事前説明・同意",
