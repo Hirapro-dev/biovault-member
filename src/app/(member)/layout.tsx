@@ -7,6 +7,7 @@ import BottomNav from "@/components/layout/BottomNav";
 import AccessLogger from "@/components/analytics/AccessLogger";
 import PushRegistrar from "@/components/analytics/PushRegistrar";
 import InstallGuide from "@/components/ui/InstallGuide";
+import TestControlPanel from "@/components/ui/TestControlPanel";
 
 export default async function MemberLayout({
   children,
@@ -68,6 +69,9 @@ export default async function MemberLayout({
 
         {/* ホーム画面追加ガイド */}
         <InstallGuide />
+
+        {/* テスト操作パネル（テスターアカウントのみ表示） */}
+        <TestControlPanel />
       </div>
     </div>
   );
