@@ -19,6 +19,7 @@ type Step = {
   key: string;
   label: string;
   icon: string;
+  actor?: "admin" | "member";
   members: Member[];
 };
 
@@ -73,10 +74,21 @@ export default function TimelineView({ steps, hrefPrefix }: Props) {
                 )}
               </div>
 
-              {/* ラベル */}
+              {/* ラベル + actor バッジ */}
               <div className="flex-1 min-w-0">
-                <div className={`text-[13px] ${hasMembers ? "text-text-primary" : "text-text-muted"}`}>
-                  {step.label}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[13px] ${hasMembers ? "text-text-primary" : "text-text-muted"}`}>
+                    {step.label}
+                  </span>
+                  {step.actor && (
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                      step.actor === "admin"
+                        ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    }`}>
+                      {step.actor === "admin" ? "管理者対応" : "会員操作待ち"}
+                    </span>
+                  )}
                 </div>
               </div>
 

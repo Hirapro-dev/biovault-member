@@ -7,32 +7,33 @@
 
 import prisma from "@/lib/prisma";
 
-// ── iPS 14ステップ定義 ──
+// ── iPS 13ステップ定義 ──
+// actor: "admin" = 管理者対応, "member" = 会員操作待ち
 const IPS_STEPS = [
-  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋" },
-  { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑" },
-  { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜" },
-  { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️" },
-  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝" },
-  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰" },
-  { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅" },
-  { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫" },
-  { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥" },
-  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄" },
-  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉" },
-  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬" },
-  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️" },
+  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", icon: "📋", actor: "admin" as const },
+  { key: "REGISTERED", label: "メンバーシップ会員ID発行", icon: "🔑", actor: "admin" as const },
+  { key: "DOC_PRIVACY", label: "重要事項確認／個人情報取扱同意確認", icon: "📜", actor: "member" as const },
+  { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", icon: "✍️", actor: "member" as const },
+  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝", actor: "admin" as const },
+  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰", actor: "admin" as const },
+  { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", icon: "📅", actor: "member" as const },
+  { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", icon: "🧫", actor: "member" as const },
+  { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥", actor: "admin" as const },
+  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄", actor: "member" as const },
+  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const },
+  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const },
+  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", actor: "admin" as const },
 ] as const;
 
 // 培養上清液ステップ定義
 const CF_STEPS = [
-  { key: "APPLIED", label: "追加購入申込", icon: "🧪" },
-  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰" },
-  { key: "PRODUCING", label: "iPS培養上清液の精製", icon: "⚗️" },
-  { key: "CLINIC_BOOKING", label: "クリニック予約", icon: "📅" },
-  { key: "INFORMED_AGREED", label: "事前説明・同意", icon: "📄" },
-  { key: "RESERVATION_CONFIRMED", label: "予約確定", icon: "🏥" },
-  { key: "COMPLETED", label: "施術完了", icon: "✓" },
+  { key: "APPLIED", label: "追加購入申込", icon: "🧪", actor: "member" as const },
+  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", actor: "admin" as const },
+  { key: "PRODUCING", label: "iPS培養上清液の精製", icon: "⚗️", actor: "admin" as const },
+  { key: "CLINIC_BOOKING", label: "クリニック予約", icon: "📅", actor: "member" as const },
+  { key: "INFORMED_AGREED", label: "事前説明・同意", icon: "📄", actor: "member" as const },
+  { key: "RESERVATION_CONFIRMED", label: "予約確定", icon: "🏥", actor: "admin" as const },
+  { key: "COMPLETED", label: "施術完了", icon: "✓", actor: "admin" as const },
 ] as const;
 
 const DB_ORDER = ["REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
@@ -52,6 +53,7 @@ export type TimelineStep = {
   key: string;
   label: string;
   icon: string;
+  actor: "admin" | "member";
   members: TimelineMember[];
 };
 
@@ -71,6 +73,7 @@ export type CfTimelineStep = {
   key: string;
   label: string;
   icon: string;
+  actor: "admin" | "member";
   members: CfTimelineMember[];
 };
 
@@ -183,6 +186,7 @@ export async function getIpsTimeline(
     key: step.key,
     label: step.label,
     icon: step.icon,
+    actor: step.actor,
     members: stepMap[step.key],
   }));
 }
@@ -232,6 +236,7 @@ export async function getCfTimeline(
     key: step.key,
     label: step.label,
     icon: step.icon,
+    actor: step.actor,
     members: stepMap[step.key],
   }));
 }
