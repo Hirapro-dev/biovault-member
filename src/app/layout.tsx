@@ -39,6 +39,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "BioVault | Member's Site",
   description: "BioVault メンバーサイト",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({
