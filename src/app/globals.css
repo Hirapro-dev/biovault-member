@@ -12,10 +12,10 @@
   --color-gold-light: #D4BC6A;
   --color-gold-dark: #8C6E2A;
 
-  /* Text — 高コントラスト（シニア対応） */
+  /* Text — 高コントラスト（シニア対応・視認性向上） */
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #D5D5DE;
-  --color-text-muted: #A0A0B0;
+  --color-text-secondary: #DDDDE6;
+  --color-text-muted: #B0B0C0;
 
   /* Border — やや明るくして視認性向上 */
   --color-border: #2A2A38;
@@ -58,6 +58,13 @@ body {
   font-size: 16px;
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
+}
+
+/* 視認性向上: 極端に小さいフォントサイズを底上げ（カード裏面は除外） */
+@media (max-width: 640px) {
+  .text-\[9px\] { font-size: 10px !important; }
+  .text-\[10px\] { font-size: 11px !important; }
+  .text-\[11px\] { font-size: 12px !important; }
 }
 
 /* ゴールドパルスアニメーション */
