@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 export async function POST() {
   const session = await getServerSession(authOptions);
@@ -56,6 +57,27 @@ export async function POST() {
         },
       }),
     ]);
+  }
+
+  // 重要事項確認／個人情報取扱同意確認の通知
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, membership: { select: { memberNumber: true } } },
+    });
+    if (user) {
+      await notifyIpsStatusChange({
+        userId,
+        memberName: user.name,
+        memberNumber: user.membership?.memberNumber,
+        fromStatus: "REGISTERED",
+        toStatus: "DOC_PRIVACY",
+        changedBy: "会員本人",
+        note: "重要事項説明書兼確認書・個人情報取扱同意書に同意",
+      });
+    }
+  } catch (e) {
+    console.error("Agree terms notification error:", e);
   }
 
   return NextResponse.json({ success: true });
