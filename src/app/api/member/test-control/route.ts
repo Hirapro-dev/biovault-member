@@ -339,6 +339,7 @@ export async function GET() {
     where: { id: userId },
     select: {
       hasAgreedTerms: true,
+      isIdIssued: true,
       membership: {
         select: {
           ipsStatus: true,
@@ -356,20 +357,23 @@ export async function GET() {
 
   const m = user?.membership;
   const signedDocs = user?.documents?.filter(d => d.status === "SIGNED").map(d => d.type) || [];
+  const statusIdx = m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) : -1;
 
-  // 全ステップの状態を算出
+  // マイページのタイムラインと完全一致する14ステップ
   const steps = [
-    { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", actor: "admin" as const, done: m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) >= IPS_STATUS_ORDER.indexOf("TERMS_AGREED") : false },
-    { key: "DOC_PRIVACY", label: "重要事項確認／個人情報同意", actor: "member" as const, done: !!user?.hasAgreedTerms },
-    { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", actor: "member" as const, done: m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) >= IPS_STATUS_ORDER.indexOf("SERVICE_APPLIED") : false },
-    { key: "CONTRACT_SIGNING", label: "契約書署名", actor: "admin" as const, done: !!m?.contractSignedAt },
-    { key: "PAYMENT_CONFIRMED", label: "入金確認", actor: "admin" as const, done: m?.paymentStatus === "COMPLETED" },
-    { key: "SCHEDULE_ARRANGED", label: "日程調整リクエスト", actor: "member" as const, done: m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) >= IPS_STATUS_ORDER.indexOf("SCHEDULE_ARRANGED") : false },
+    { key: "TERMS_AGREED", label: "iPS細胞作製適合確認", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("TERMS_AGREED") },
+    { key: "REGISTERED", label: "メンバーシップ会員ID発行", actor: "admin" as const, done: !!user?.isIdIssued },
+    { key: "DOC_IMPORTANT_NOTICE", label: "重要事項説明書兼確認書", actor: "member" as const, done: signedDocs.includes("CONTRACT") || !!user?.hasAgreedTerms },
+    { key: "DOC_PRIVACY_CONSENT", label: "個人情報・個人遺伝情報等の取扱いに関する同意", actor: "member" as const, done: signedDocs.includes("PRIVACY_POLICY") || !!user?.hasAgreedTerms },
+    { key: "SERVICE_APPLIED", label: "iPSサービス利用申込", actor: "member" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("SERVICE_APPLIED") },
+    { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", actor: "admin" as const, done: !!m?.contractSignedAt },
+    { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", actor: "admin" as const, done: m?.paymentStatus === "COMPLETED" },
+    { key: "SCHEDULE_ARRANGED", label: "iPS細胞作製におけるクリニックの日程調整", actor: "member" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("SCHEDULE_ARRANGED") },
     { key: "DOC_CELL_CONSENT", label: "細胞提供・保管同意", actor: "member" as const, done: signedDocs.includes("CELL_STORAGE_CONSENT") },
     { key: "CLINIC_CONFIRMED", label: "日程確定", actor: "admin" as const, done: !!m?.clinicDate },
-    { key: "DOC_INFORMED", label: "事前説明・同意", actor: "member" as const, done: signedDocs.includes("INFORMED_CONSENT") },
-    { key: "BLOOD_COLLECTED", label: "問診・採血", actor: "admin" as const, done: m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) >= IPS_STATUS_ORDER.indexOf("BLOOD_COLLECTED") : false },
-    { key: "IPS_CREATING", label: "iPS細胞作製中", actor: "admin" as const, done: m ? IPS_STATUS_ORDER.indexOf(m.ipsStatus) >= IPS_STATUS_ORDER.indexOf("IPS_CREATING") : false },
+    { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", actor: "member" as const, done: signedDocs.includes("INFORMED_CONSENT") },
+    { key: "BLOOD_COLLECTED", label: "問診・採血", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("BLOOD_COLLECTED") },
+    { key: "IPS_CREATING", label: "iPS細胞作製中", actor: "admin" as const, done: statusIdx >= IPS_STATUS_ORDER.indexOf("IPS_CREATING") },
     { key: "STORAGE_ACTIVE", label: "iPS細胞保管", actor: "admin" as const, done: m?.ipsStatus === "STORAGE_ACTIVE" },
   ];
 
