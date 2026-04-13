@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type Step = {
   key: string;
@@ -76,9 +77,10 @@ export default function TestControlPanel() {
         body: JSON.stringify({ action: "reset" }),
       });
       if (res.ok) {
-        setMessage("リセット完了");
-        router.refresh();
-        fetchStatus();
+        setMessage("リセット完了。ログアウトします...");
+        setTimeout(() => {
+          signOut({ callbackUrl: "/login" });
+        }, 1000);
       }
     } catch {
       setMessage("エラーが発生しました");
