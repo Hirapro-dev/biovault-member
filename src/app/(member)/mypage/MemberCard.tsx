@@ -39,12 +39,11 @@ export default function MemberCard({
       >
         {/* ── 表面 ── */}
         <div
-          className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+          className="card-face absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
           style={{
             background: "#0A0A0C",
             boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(0deg)",
           }}
         >
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
@@ -79,12 +78,10 @@ export default function MemberCard({
 
         {/* ── 裏面 ── */}
         <div
-          className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+          className="card-face absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
           style={{
             background: "linear-gradient(145deg, #0E0E12 0%, #0A0A0C 40%, #0C0C10 100%)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
           }}
         >

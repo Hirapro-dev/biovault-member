@@ -131,6 +131,13 @@ select {
   box-sizing: border-box;
 }
 
+/* カードフリップのbackface-visibility対策（iOS Safari） */
+.card-face {
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+  -webkit-transform-style: flat;
+}
+
 /* date inputのカレンダーアイコンを白色に */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
