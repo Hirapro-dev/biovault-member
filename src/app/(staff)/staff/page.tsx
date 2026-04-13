@@ -3,14 +3,14 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
 import StaffFormUrl from "./StaffFormUrl";
-import PendingActionsTabs from "@/components/admin/PendingActionsTabs";
-import PendingActionRow from "@/components/admin/PendingActionRow";
-import { getPendingActions } from "@/lib/pending-actions";
+import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
+import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
+import TimelineView from "@/components/dashboard/TimelineView";
 
 export default async function StaffDashboardPage() {
   const { staffCode, name } = await requireStaff();
 
-  // 担当顧客一覧（統計・最近の担当顧客表示用）
+  // 担当顧客一覧（統計用）
   const customers = await prisma.user.findMany({
     where: { referredByStaff: staffCode, role: "MEMBER" },
     include: {
@@ -21,7 +21,6 @@ export default async function StaffDashboardPage() {
   });
 
   const totalCustomers = customers.length;
-  // iPS作製・保管の入金額 + 培養上清液の入金済み注文金額
   const ipsPaidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
   const cfPaidAmount = customers.reduce((sum, c) =>
     sum + c.cultureFluidOrders
@@ -32,22 +31,19 @@ export default async function StaffDashboardPage() {
   const paidAmount = ipsPaidAmount + cfPaidAmount;
   const paymentCompleted = customers.filter(c => c.membership?.paymentStatus === "COMPLETED").length;
 
-  // 今月の新規
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const thisMonthNew = customers.filter(c => new Date(c.createdAt) >= monthStart).length;
 
-  // 対応が必要な顧客（共通ヘルパーで取得・自分の担当顧客のみにスコープ）
-  const { ipsActionItems, cfActionItems, totalPendingCount } = await getPendingActions({
-    referredByStaff: staffCode,
-  });
+  // タイムラインデータ（自分の担当顧客のみ）
+  const extraWhere = { referredByStaff: staffCode };
+  const [ipsTimeline, cfTimeline] = await Promise.all([
+    getIpsTimeline(extraWhere),
+    getCfTimeline(extraWhere),
+  ]);
 
-  // ステータス別集計
-  const statusCounts: Record<string, number> = {};
-  for (const c of customers) {
-    const st = c.membership?.ipsStatus || "REGISTERED";
-    statusCounts[st] = (statusCounts[st] || 0) + 1;
-  }
+  const ipsTotal = ipsTimeline.reduce((sum, s) => sum + s.members.length, 0);
+  const cfTotal = cfTimeline.reduce((sum, s) => sum + s.members.length, 0);
 
   return (
     <div>
@@ -67,69 +63,17 @@ export default async function StaffDashboardPage() {
         <StatCard label="今月新規" value={String(thisMonthNew)} unit="名" color="text-gold" />
       </div>
 
-      {/* 対応が必要な顧客（管理者ダッシュボードと同等のタブUI） */}
-      {totalPendingCount > 0 && (
-        <div className="mb-6 sm:mb-8">
-          <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
-            対応が必要な顧客 <span className="text-gold font-mono ml-2">{totalPendingCount}</span>
-          </h3>
-          <PendingActionsTabs
-            ipsCount={ipsActionItems.length}
-            cfCount={cfActionItems.length}
-            ipsList={
-              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
-                {ipsActionItems.map((item, i) => (
-                  <PendingActionRow
-                    key={`${item.userId}-${i}`}
-                    href="/staff/members"
-                    memberNumber={item.memberNumber}
-                    name={item.name}
-                    action={item.action}
-                    icon={item.icon}
-                    actionColor={item.color}
-                    since={item.since}
-                  />
-                ))}
-              </div>
-            }
-            cfList={
-              <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
-                {cfActionItems.map((item, i) => (
-                  <PendingActionRow
-                    key={`${item.orderId}-${i}`}
-                    href="/staff/members"
-                    memberNumber={item.memberNumber}
-                    name={item.name}
-                    action={item.action}
-                    icon={item.icon}
-                    actionColor={item.color}
-                    since={item.since}
-                  />
-                ))}
-              </div>
-            }
-          />
-        </div>
-      )}
-
-      {/* ステータス別ファネル */}
-      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-8">
-        <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">ステータス別</h3>
-        <div className="space-y-2">
-          {["REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"].map(st => {
-            const count = statusCounts[st] || 0;
-            const pct = totalCustomers > 0 ? (count / totalCustomers) * 100 : 0;
-            return (
-              <div key={st} className="flex items-center gap-3">
-                <div className="w-40 text-[11px] text-text-muted truncate">{IPS_STATUS_LABELS[st as keyof typeof IPS_STATUS_LABELS] || st}</div>
-                <div className="flex-1 h-4 bg-bg-elevated rounded-full overflow-hidden">
-                  <div className="h-full bg-gold/40 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                </div>
-                <div className="w-8 text-right font-mono text-[11px] text-text-secondary">{count}</div>
-              </div>
-            );
-          })}
-        </div>
+      {/* ステータス別顧客数（タイムラインUI） */}
+      <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+        ステータス別顧客数
+      </h3>
+      <div className="mb-6 sm:mb-8">
+        <DashboardTimelineTabs
+          ipsCount={ipsTotal}
+          cfCount={cfTotal}
+          ipsContent={<TimelineView steps={ipsTimeline} hrefPrefix="/staff/members" />}
+          cfContent={<TimelineView steps={cfTimeline} hrefPrefix="/staff/members" />}
+        />
       </div>
 
       {/* 最近の担当顧客 */}
