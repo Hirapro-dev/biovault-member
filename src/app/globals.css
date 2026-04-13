@@ -60,10 +60,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 視認性向上: 極端に小さいフォントサイズを底上げ（カード裏面は除外） */
+/* 視認性向上: スマホでの最小フォントサイズを12pxに底上げ */
 @media (max-width: 640px) {
-  .text-\[9px\] { font-size: 10px !important; }
-  .text-\[10px\] { font-size: 11px !important; }
+  .text-\[9px\] { font-size: 12px !important; }
+  .text-\[10px\] { font-size: 12px !important; }
   .text-\[11px\] { font-size: 12px !important; }
 }
 
