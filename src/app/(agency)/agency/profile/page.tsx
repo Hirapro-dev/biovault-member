@@ -7,7 +7,7 @@ export default async function AgencyProfilePage() {
   const profile = await prisma.agencyProfile.findUnique({ where: { userId: sessionUser.id } });
   if (!user) return null;
 
-  const baseUrl = process.env.NEXTAUTH_URL || "https://biovault-member.vercel.app";
+  const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
   const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode}`;
 
   return (

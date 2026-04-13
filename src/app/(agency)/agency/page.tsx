@@ -97,7 +97,7 @@ export default async function AgencyDashboardPage() {
         <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">紹介用URL</h3>
         <p className="text-xs text-text-secondary mb-3">以下のURLを見込顧客にお伝えください。申込フォームに自動的にあなたの紹介元が挿入されます。</p>
         <div className="bg-bg-elevated border border-border rounded-md p-3 font-mono text-xs text-gold break-all">
-          {typeof window !== "undefined" ? window.location.origin : "https://biovault-member.vercel.app"}/form/app?ref={profile?.agencyCode || "---"}
+          {typeof window !== "undefined" ? window.location.origin : "https://member.biovault.jp"}/form/app?ref={profile?.agencyCode || "---"}
         </div>
       </div>
     </div>
