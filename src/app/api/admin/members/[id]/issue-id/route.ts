@@ -34,15 +34,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.user.update({
-    where: { id },
-    data: {
-      loginId,
-      passwordHash,
-      isIdIssued: true,
-      mustChangePassword: true,
-    },
-  });
+  try {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        loginId,
+        passwordHash,
+        isIdIssued: true,
+        mustChangePassword: true,
+      },
+    });
+  } catch (e: unknown) {
+    // Prisma ユニーク制約違反
+    if (e && typeof e === "object" && "code" in e && (e as { code: string }).code === "P2002") {
+      return NextResponse.json({ error: "このログインIDは既に使用されています" }, { status: 400 });
+    }
+    console.error("Issue ID failed:", e);
+    return NextResponse.json({ error: "ID発行に失敗しました" }, { status: 500 });
+  }
 
   // アカウント発行メール送信
   try {

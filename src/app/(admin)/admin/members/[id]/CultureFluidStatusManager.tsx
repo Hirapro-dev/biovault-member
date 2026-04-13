@@ -98,6 +98,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
   // 施術完了ポップアップ
   const [showCompletedPopup, setShowCompletedPopup] = useState<string | null>(null);
   const [inputCompletedDate, setInputCompletedDate] = useState("");
+  const [inputActualSessions, setInputActualSessions] = useState(1);
   const [completedLoading, setCompletedLoading] = useState(false);
 
   // 予約確定ポップアップ（確定日＋クリニック選択）
@@ -127,15 +128,18 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
 
   // フェーズ1のステップ完了判定
   const isPhase1StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
+    const now = new Date();
     switch (stepKey) {
       case "APPLIED":
         return true;
       case "PAYMENT_CONFIRMED":
         return order.paymentStatus === "COMPLETED";
       case "PRODUCING":
-        return !!order.producedAt;
+        // 精製完了日が設定済み かつ 現在日時を過ぎている
+        return !!order.producedAt && new Date(order.producedAt) <= now;
       case "STORAGE":
-        return !!order.producedAt && !!order.expiresAt;
+        // 精製完了済み かつ 管理期限が設定済み
+        return !!order.producedAt && new Date(order.producedAt) <= now && !!order.expiresAt;
       default:
         return false;
     }
@@ -206,6 +210,8 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
       }
       case "COMPLETED": {
         setInputCompletedDate(new Date().toISOString().split("T")[0]);
+        // 予約時の希望回数をデフォルト値として設定
+        setInputActualSessions(order.requestedSessionCount || 1);
         setShowCompletedPopup(order.id);
         break;
       }
@@ -640,48 +646,86 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">施術完了</h3>
-            <p className="text-xs text-text-muted mb-5">施術が完了した日付を入力してください。</p>
+            <p className="text-xs text-text-muted mb-5">施術が完了した日付と、実際に施術した回数を入力してください。</p>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-text-secondary mb-1">完了日</label>
-                <input
-                  type="date"
-                  value={inputCompletedDate}
-                  onChange={(e) => setInputCompletedDate(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button
-                  onClick={() => setShowCompletedPopup(null)}
-                  className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
-                >
-                  キャンセル
-                </button>
-                <button
-                  onClick={async () => {
-                    if (!inputCompletedDate || !showCompletedPopup) return;
-                    setCompletedLoading(true);
-                    try {
-                      await patchOrder(showCompletedPopup, {
-                        completedAt: new Date(inputCompletedDate).toISOString(),
-                      });
-                      setShowCompletedPopup(null);
-                      router.refresh();
-                    } catch {
-                      // エラーは静かに処理
-                    } finally {
-                      setCompletedLoading(false);
-                    }
-                  }}
-                  disabled={completedLoading || !inputCompletedDate}
-                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
-                >
-                  {completedLoading ? "更新中..." : "確定する"}
-                </button>
-              </div>
-            </div>
+            {(() => {
+              // 現在の注文の残り回数を算出
+              const popupOrder = orders.find(o => o.id === showCompletedPopup);
+              const popupTotal = popupOrder ? getTotalSessions(popupOrder.planType) : 1;
+              const popupRemaining = popupOrder ? popupTotal - (popupOrder.completedSessions ?? 0) : 1;
+              const maxActual = Math.min(popupRemaining, 3);
+
+              return (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-text-secondary mb-1">完了日</label>
+                    <input
+                      type="date"
+                      value={inputCompletedDate}
+                      onChange={(e) => setInputCompletedDate(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-text-secondary mb-1">実際の施術回数</label>
+                    <div className="flex items-center gap-3">
+                      {[1, 2, 3].filter(n => n <= maxActual).map((n) => (
+                        <label key={n} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-sm border cursor-pointer transition-all text-sm ${
+                          inputActualSessions === n
+                            ? "border-gold bg-gold/10 text-gold font-semibold"
+                            : "border-border text-text-muted hover:border-border-gold"
+                        }`}>
+                          <input
+                            type="radio"
+                            name="actualSessions"
+                            value={n}
+                            checked={inputActualSessions === n}
+                            onChange={() => setInputActualSessions(n)}
+                            className="sr-only"
+                          />
+                          {n}回分
+                        </label>
+                      ))}
+                    </div>
+                    {popupOrder && popupOrder.requestedSessionCount > 0 && (
+                      <div className="text-[10px] text-text-muted mt-1.5">
+                        予約時の希望: {popupOrder.requestedSessionCount}回分 ／ 残り: {popupRemaining}回
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => setShowCompletedPopup(null)}
+                      className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!inputCompletedDate || !showCompletedPopup) return;
+                        setCompletedLoading(true);
+                        try {
+                          await patchOrder(showCompletedPopup, {
+                            completedAt: new Date(inputCompletedDate).toISOString(),
+                            actualSessions: inputActualSessions,
+                          });
+                          setShowCompletedPopup(null);
+                          router.refresh();
+                        } catch {
+                          // エラーは静かに処理
+                        } finally {
+                          setCompletedLoading(false);
+                        }
+                      }}
+                      disabled={completedLoading || !inputCompletedDate}
+                      className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                    >
+                      {completedLoading ? "更新中..." : `${inputActualSessions}回分で完了する`}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>,
         document.body

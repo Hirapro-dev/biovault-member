@@ -79,11 +79,13 @@ export default function MobileNav({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
         </Link>
-        <button
-          onClick={() => setOpen(!open)}
-          className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text-secondary"
-          aria-label="メニュー"
-        >
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-text-muted">{userName} 様</span>
+          <button
+            onClick={() => setOpen(!open)}
+            className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text-secondary"
+            aria-label="メニュー"
+          >
           <span
             className={`block w-5 h-[1.5px] bg-current transition-all duration-300 ${
               open ? "rotate-45 translate-y-[4.5px]" : ""
@@ -99,7 +101,8 @@ export default function MobileNav({
               open ? "-rotate-45 -translate-y-[4.5px]" : ""
             }`}
           />
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* オーバーレイ */}

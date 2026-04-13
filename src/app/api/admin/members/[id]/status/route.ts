@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import type { IpsStatus, Prisma } from "@prisma/client";
+import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -19,6 +20,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const membership = await prisma.membership.findUnique({
     where: { userId: id },
+    include: { user: { select: { name: true } } },
   });
 
   if (!membership) {
@@ -160,6 +162,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       data: { status: "SIGNED", signedAt: new Date() },
     });
   }
+
+  // ステータス変更通知を送信（レスポンスをブロックしない）
+  notifyIpsStatusChange({
+    userId: id,
+    memberName: membership.user.name,
+    memberNumber: membership.memberNumber,
+    fromStatus,
+    toStatus: finalStatus,
+    changedBy: session.user.name || "管理者",
+    note,
+  }).catch(() => {});
 
   return NextResponse.json({ success: true });
 }

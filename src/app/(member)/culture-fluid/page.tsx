@@ -40,6 +40,13 @@ export default async function CultureFluidPage() {
 
   const defaultBank = await prisma.bankAccount.findFirst({ where: { isDefault: true, isActive: true } });
 
+  // iPS細胞のステータスを取得（付属分の表示切り替え用）
+  const membership = await prisma.membership.findUnique({
+    where: { userId: user.id },
+    select: { ipsStatus: true },
+  });
+  const isIpsStorageActive = membership?.ipsStatus === "STORAGE_ACTIVE";
+
   // 完了済み施術回数の合計（全注文のcompletedSessionsの合計）
   const completedCount = orders.reduce((sum, o) => sum + (o.completedSessions ?? 0), 0);
 
@@ -53,9 +60,9 @@ export default async function CultureFluidPage() {
   const currentSession = Math.min(completedSessions + 1, totalSessions); // 現在「何回目」の施術か
 
   // フェーズ1のステップ完了判定
-  // - PRODUCING（精製）: producedAt が設定されたら完了
-  // - STORAGE（管理保管）: producedAt かつ expiresAt が設定されていれば完了
-  //   （API側で精製完了と同時に両方セットされるため）
+  // - PRODUCING（精製）: producedAt が設定されており、かつ精製完了日を過ぎている場合に完了
+  // - STORAGE（管理保管）: 精製完了済み かつ expiresAt が設定されていれば完了
+  const now = new Date();
   const isPhase1StepDone = (key: string): boolean => {
     if (!activeOrder) return false;
     switch (key) {
@@ -65,9 +72,11 @@ export default async function CultureFluidPage() {
       case "PAYMENT_CONFIRMED":
         return activeOrder.paymentStatus === "COMPLETED";
       case "PRODUCING":
-        return !!activeOrder.producedAt;
+        // 精製完了日が設定済み かつ 現在日時を過ぎている
+        return !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now;
       case "STORAGE":
-        return !!activeOrder.producedAt && !!activeOrder.expiresAt;
+        // 精製完了済み かつ 管理期限が設定済み
+        return !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now && !!activeOrder.expiresAt;
       default:
         return false;
     }
@@ -138,8 +147,8 @@ export default async function CultureFluidPage() {
                 🧪
               </div>
               <div className="flex-1">
-                <div className="text-sm text-gold font-semibold tracking-wide">追加購入申込</div>
-                <div className="text-[11px] text-text-muted mt-0.5">点滴・注射プランを選択して申込</div>
+                <div className="text-sm text-gold font-semibold tracking-wide">iPS培養上清液の追加精製申込</div>
+                <div className="text-[11px] text-text-muted mt-0.5">プランを選択して申込</div>
               </div>
               <span className="text-gold text-xs group-hover:translate-x-1 transition-transform">→</span>
             </div>
@@ -168,8 +177,35 @@ export default async function CultureFluidPage() {
             次のステップ
           </h3>
 
-          {/* 入金待ち */}
-          {activeOrder.status === "APPLIED" && (
+          {/* iPSサービス付属分: iPS保管前 → 作製待ち、iPS保管後 → 精製中 */}
+          {activeOrder.planType === "iv_drip_1_included" && !isPhase1Complete && (
+            isIpsStorageActive ? (
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6 text-center">
+                  <div className="text-4xl mb-3">⚗️</div>
+                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS培養上清液を精製中</div>
+                  <div className="text-xs text-text-muted leading-relaxed">iPS細胞の保管が開始されました。<br />培養上清液の精製が完了次第、次のステップへ進みます。</div>
+                  {activeOrder.producedAt && (
+                    <div className="mt-4 bg-bg-elevated border border-border rounded-md p-3">
+                      <div className="text-[11px] text-text-muted mb-1">精製完了予定</div>
+                      <div className="font-mono text-sm text-gold">{formatDate(activeOrder.producedAt)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+                <div className="p-5 sm:p-6 text-center">
+                  <div className="text-4xl mb-3">🧬</div>
+                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
+                  <div className="text-xs text-text-muted leading-relaxed">iPS細胞が保管状態になりましたら、<br />培養上清液の精製が自動的に開始されます。</div>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* 入金待ち（付属分以外） */}
+          {activeOrder.status === "APPLIED" && activeOrder.planType !== "iv_drip_1_included" && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -205,8 +241,8 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* 精製中 */}
-          {activeOrder.status === "PAYMENT_CONFIRMED" && (
+          {/* 精製中（精製完了日がまだ来ていない場合、付属分は上の専用カードで表示） */}
+          {activeOrder.status === "PAYMENT_CONFIRMED" && activeOrder.planType !== "iv_drip_1_included" && !(activeOrder.producedAt && new Date(activeOrder.producedAt) <= now) && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">⚗️</div>
@@ -216,8 +252,10 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* クリニック予約（PRODUCING: 1回目 / CLINIC_BOOKING + 2回目以降: 施術フェーズから再スタート） */}
-          {(activeOrder.status === "PRODUCING" ||
+          {/* クリニック予約（フェーズ1完了後のみ表示） */}
+          {isPhase1Complete &&
+           (activeOrder.status === "PRODUCING" ||
+            (activeOrder.status === "PAYMENT_CONFIRMED" && !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now) ||
             (activeOrder.status === "CLINIC_BOOKING" && completedSessions >= 1 && !activeOrder.informedAgreedAt && !activeOrder.clinicDate)) && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
@@ -250,13 +288,13 @@ export default async function CultureFluidPage() {
                     <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
                   </div>
                 )}
-                <ClinicBookingButton orderId={activeOrder.id} maxSessions={remainingSessions} />
+                <ClinicBookingButton orderId={activeOrder.id} maxSessions={remainingSessions} needsCautionAgree={!activeOrder.cautionAgreedAt} />
               </div>
             </div>
           )}
 
-          {/* 事前説明・同意（未同意時） */}
-          {activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
+          {/* 事前説明・同意（フェーズ1完了後かつ未同意時） */}
+          {isPhase1Complete && activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
             <Link href={`/culture-fluid/informed-consent?orderId=${activeOrder.id}`} className="block group">
               <div className="rounded-xl border border-status-warning/30 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
                 <div className="p-5 sm:p-6">
@@ -282,7 +320,7 @@ export default async function CultureFluidPage() {
           {/* 日程調整中カード ──
               事前説明同意済みだがまだ clinicDate が未設定の場合に表示。
               管理者が予約日を設定するまでの待ち状態。 */}
-          {!activeOrder.clinicDate &&
+          {isPhase1Complete && !activeOrder.clinicDate &&
             (activeOrder.status === "INFORMED_AGREED" ||
               (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
               <div className="rounded-xl border border-border overflow-hidden bg-bg-secondary">
@@ -306,7 +344,7 @@ export default async function CultureFluidPage() {
               - RESERVATION_CONFIRMED:     「予約確定」
               ※ 「事前説明・同意」カードと併存する場合があるが、
                  同意前は予約日が決まっていない通常運用なので問題なし */}
-          {activeOrder.clinicDate &&
+          {isPhase1Complete && activeOrder.clinicDate &&
             (activeOrder.status === "RESERVATION_CONFIRMED" ||
               activeOrder.status === "INFORMED_AGREED" ||
               (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (

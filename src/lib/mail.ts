@@ -95,7 +95,7 @@ MAIL: info@biovault.jp
 <body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="https://biovault-member.vercel.app/logo_white.png" alt="BioVault" style="height:40px;width:auto;" />
+      <img src="https://biovault-member.vercel.app/logo.png" alt="BioVault" style="height:40px;width:auto;" />
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
@@ -164,7 +164,7 @@ MAIL: info@biovault.jp
 <body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="https://biovault-member.vercel.app/logo_white.png" alt="BioVault" style="height:40px;width:auto;" />
+      <img src="https://biovault-member.vercel.app/logo.png" alt="BioVault" style="height:40px;width:auto;" />
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 
 // 培養上清液の申込を受け付け可能な iPS ステータス
 // SERVICE_APPLIED 以降（iPSサービス申込済みの会員）であれば、
@@ -53,6 +54,23 @@ export async function POST(req: Request) {
       cautionAgreedAt: new Date(), // 留意事項は申込時に同意済み
     },
   });
+
+  // 通知送信
+  const member = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, membership: { select: { memberNumber: true } } },
+  });
+  if (member) {
+    notifyCultureFluidStatusChange({
+      userId,
+      memberName: member.name,
+      memberNumber: member.membership?.memberNumber,
+      planLabel: plan.label,
+      fromStatus: "---",
+      toStatus: "APPLIED",
+      changedBy: "会員本人",
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ success: true, orderId: order.id });
 }

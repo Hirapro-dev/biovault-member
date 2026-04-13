@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getRemainingSessions } from "@/lib/culture-fluid-plans";
+import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 
 /**
  * 培養上清液サービス クリニック予約リクエスト
@@ -73,6 +74,23 @@ export async function POST(req: Request) {
     where: { id: orderId },
     data: updateData,
   });
+
+  // 通知送信
+  const newStatus = order.status === "PRODUCING" ? "CLINIC_BOOKING" : order.status;
+  if (newStatus !== order.status) {
+    const member = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, membership: { select: { memberNumber: true } } } });
+    if (member) {
+      notifyCultureFluidStatusChange({
+        userId,
+        memberName: member.name,
+        memberNumber: member.membership?.memberNumber,
+        planLabel: order.planLabel,
+        fromStatus: order.status,
+        toStatus: newStatus,
+        changedBy: "会員本人",
+      }).catch(() => {});
+    }
+  }
 
   return NextResponse.json({ success: true });
 }

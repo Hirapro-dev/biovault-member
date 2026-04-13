@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 
 // 培養上清液 事前説明・同意
 export async function POST(req: Request) {
@@ -33,6 +34,23 @@ export async function POST(req: Request) {
       status: order.status === "CLINIC_BOOKING" ? "INFORMED_AGREED" : order.status,
     },
   });
+
+  // 通知送信
+  const newStatus = order.status === "CLINIC_BOOKING" ? "INFORMED_AGREED" : order.status;
+  if (newStatus !== order.status) {
+    const member = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, membership: { select: { memberNumber: true } } } });
+    if (member) {
+      notifyCultureFluidStatusChange({
+        userId,
+        memberName: member.name,
+        memberNumber: member.membership?.memberNumber,
+        planLabel: order.planLabel,
+        fromStatus: order.status,
+        toStatus: newStatus,
+        changedBy: "会員本人",
+      }).catch(() => {});
+    }
+  }
 
   return NextResponse.json({ success: true });
 }

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getTotalSessions } from "@/lib/culture-fluid-plans";
+import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
@@ -54,21 +55,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (body.clinicPhone !== undefined) updateData.clinicPhone = body.clinicPhone;
 
   // 施術完了日 → 指定された日付を completedAt に保存
-  // 複数回施術プランの場合は completedSessions をインクリメント
+  // actualSessions: 実際に施術した回数（デフォルト: requestedSessionCount or 1）
   // 残り回数がある場合は次の施術サイクルのためにフェーズ2（施術工程）をリセット
   if (body.completedAt) {
-    const newCompletedSessions = order.completedSessions + 1;
+    const actualSessions = Number(body.actualSessions) || order.requestedSessionCount || 1;
     const totalSessions = getTotalSessions(order.planType);
     const completedDate = new Date(body.completedAt);
+
+    // 実際の施術回数分を加算（上限: 残り回数）
+    const remaining = totalSessions - order.completedSessions;
+    const sessionsToAdd = Math.min(actualSessions, remaining);
+    const newCompletedSessions = order.completedSessions + sessionsToAdd;
 
     updateData.completedAt = completedDate;
     updateData.completedSessions = newCompletedSessions;
 
-    // sessionDates に各回の施術完了日を追記（JSON配列）
+    // sessionDates に施術完了日を追記（実施回数分）
     const existingDates: string[] = order.sessionDates
       ? JSON.parse(order.sessionDates as string)
       : [];
-    existingDates.push(completedDate.toISOString().split("T")[0]);
+    for (let i = 0; i < sessionsToAdd; i++) {
+      existingDates.push(completedDate.toISOString().split("T")[0]);
+    }
     updateData.sessionDates = JSON.stringify(existingDates);
 
     if (newCompletedSessions >= totalSessions) {
@@ -104,6 +112,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     where: { id: orderId },
     data: updateData,
   });
+
+  // ステータスが変更された場合に通知
+  if (updated.status !== order.status) {
+    const member = await prisma.user.findUnique({
+      where: { id },
+      select: { name: true, membership: { select: { memberNumber: true } } },
+    });
+    if (member) {
+      notifyCultureFluidStatusChange({
+        userId: id,
+        memberName: member.name,
+        memberNumber: member.membership?.memberNumber,
+        planLabel: order.planLabel,
+        fromStatus: order.status,
+        toStatus: updated.status,
+        changedBy: session.user.name || "管理者",
+      }).catch(() => {});
+    }
+  }
 
   return NextResponse.json(updated);
 }

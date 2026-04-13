@@ -32,11 +32,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "このログインIDは既に使用されています" }, { status: 400 });
   }
 
-  // メールアドレス（Staffに登録があればそれを使用、なければ仮アドレス）
-  const emailToUse = staff.email || `${loginId}@staff.biovault.internal`;
+  // メールアドレス（Staffのemailが他のUserと重複する可能性があるため、
+  // まずStaffのemailで試行し、重複している場合は内部用アドレスを使用）
+  let emailToUse = staff.email || `${loginId}@staff.biovault.internal`;
   const existingEmail = await prisma.user.findFirst({ where: { email: emailToUse } });
   if (existingEmail) {
-    return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+    // Staffのメールが既に別のUserで使われている場合、内部用アドレスにフォールバック
+    emailToUse = `${staff.staffCode.toLowerCase()}@staff.biovault.internal`;
+    const existingFallback = await prisma.user.findFirst({ where: { email: emailToUse } });
+    if (existingFallback) {
+      return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+    }
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
