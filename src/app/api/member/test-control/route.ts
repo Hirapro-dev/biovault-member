@@ -13,8 +13,18 @@ import type { IpsStatus } from "@prisma/client";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
-function isTester(email: string): boolean {
+function isTesterEmail(email: string): boolean {
   return TESTER_EMAILS.includes(email.toLowerCase());
+}
+
+/** ユーザーIDからDBのメールを取得してテスターか判定 */
+async function checkIsTester(userId: string): Promise<boolean> {
+  if (TESTER_EMAILS.length === 0) return false;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  });
+  return user ? isTesterEmail(user.email) : false;
 }
 
 // iPSステータスの順序
@@ -34,10 +44,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
   }
 
-  const userEmail = (session.user as { email: string }).email;
   const userId = (session.user as { id: string }).id;
 
-  if (!isTester(userEmail)) {
+  if (!(await checkIsTester(userId))) {
     return NextResponse.json({ error: "テスト機能は利用できません" }, { status: 403 });
   }
 
@@ -218,6 +227,7 @@ export async function GET() {
     return NextResponse.json({ isTester: false });
   }
 
-  const userEmail = (session.user as { email: string }).email;
-  return NextResponse.json({ isTester: isTester(userEmail) });
+  const userId = (session.user as { id: string }).id;
+  const result = await checkIsTester(userId);
+  return NextResponse.json({ isTester: result });
 }
