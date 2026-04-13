@@ -28,6 +28,7 @@ const MEMBER_NAV_GROUPS: NavGroup[] = [
   {
     heading: "その他規約等",
     items: [
+      { href: "/dashboard", label: "iPSとは？", icon: "🧬" },
       { href: "/settings/terms", label: "会員規約", icon: "📜" },
       { href: "/settings/legal", label: "特定商取引法に基づく表記", icon: "⚖️" },
       { href: "/settings/privacy", label: "プライバシーポリシー", icon: "🔒" },
