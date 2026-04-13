@@ -288,7 +288,22 @@ export default async function CultureFluidPage() {
                     <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
                   </div>
                 )}
-                <ClinicBookingButton orderId={activeOrder.id} maxSessions={remainingSessions} needsCautionAgree={!activeOrder.cautionAgreedAt} />
+                {!activeOrder.cautionAgreedAt ? (
+                  <div className="mt-4">
+                    <Link
+                      href={`/culture-fluid/caution?orderId=${activeOrder.id}&fromBooking=1`}
+                      className="block w-full py-3.5 rounded-lg text-sm font-bold tracking-wider text-center transition-all hover:opacity-90"
+                      style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}
+                    >
+                      クリニックの予約をする →
+                    </Link>
+                    <p className="text-[10px] text-text-muted text-center mt-2">
+                      ※ 留意事項への同意後、施術回数の選択に進みます
+                    </p>
+                  </div>
+                ) : (
+                  <ClinicBookingButton orderId={activeOrder.id} maxSessions={remainingSessions} />
+                )}
               </div>
             </div>
           )}

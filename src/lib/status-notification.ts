@@ -49,11 +49,9 @@ const fmtDate = (d: Date | null | undefined) =>
 async function getNotificationRecipients(userId: string): Promise<string[]> {
   const emails: string[] = [];
 
-  // 0. 固定の管理通知先（環境変数またはデフォルト）
   const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "app@biovault.jp").split(",").map(e => e.trim()).filter(Boolean);
   emails.push(...fixedNotifyEmails);
 
-  // 1. 管理者全員のメールアドレスを取得
   const admins = await prisma.user.findMany({
     where: { role: { in: ["ADMIN", "SUPER_ADMIN"] }, isActive: true },
     select: { email: true },
@@ -62,7 +60,6 @@ async function getNotificationRecipients(userId: string): Promise<string[]> {
     emails.push(admin.email);
   }
 
-  // 2. 対象会員の担当情報を取得
   const member = await prisma.user.findUnique({
     where: { id: userId },
     select: { referredByStaff: true, referredByAgency: true },
@@ -70,7 +67,6 @@ async function getNotificationRecipients(userId: string): Promise<string[]> {
 
   if (!member) return [...new Set(emails)];
 
-  // 3. 担当従業員のメールアドレス
   if (member.referredByStaff) {
     const staff = await prisma.staff.findUnique({
       where: { staffCode: member.referredByStaff },
@@ -81,7 +77,6 @@ async function getNotificationRecipients(userId: string): Promise<string[]> {
     }
   }
 
-  // 4. 担当代理店のメールアドレス
   if (member.referredByAgency) {
     const agency = await prisma.agencyProfile.findUnique({
       where: { agencyCode: member.referredByAgency },
@@ -96,32 +91,21 @@ async function getNotificationRecipients(userId: string): Promise<string[]> {
 }
 
 /**
- * 会員の詳細情報を取得する（通知メール用）
+ * 会員の詳細情報を取得する
  */
 async function getMemberDetails(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      name: true,
-      nameKana: true,
-      email: true,
-      phone: true,
-      referredByStaff: true,
-      referredByAgency: true,
+      name: true, nameKana: true, email: true, phone: true,
+      referredByStaff: true, referredByAgency: true,
       membership: {
         select: {
-          memberNumber: true,
-          ipsStatus: true,
-          paymentStatus: true,
-          totalAmount: true,
-          paidAmount: true,
-          contractDate: true,
-          clinicDate: true,
-          clinicName: true,
-          storageStartAt: true,
-          storageYears: true,
-          serviceAppliedAt: true,
-          contractSignedAt: true,
+          memberNumber: true, ipsStatus: true, paymentStatus: true,
+          totalAmount: true, paidAmount: true, contractDate: true,
+          clinicDate: true, clinicName: true, clinicAddress: true, clinicPhone: true,
+          storageStartAt: true, storageYears: true,
+          serviceAppliedAt: true, contractSignedAt: true,
         },
       },
     },
@@ -129,7 +113,6 @@ async function getMemberDetails(userId: string) {
 
   if (!user) return null;
 
-  // 担当従業員名
   let staffDisplay = "---";
   if (user.referredByStaff) {
     const staff = await prisma.staff.findUnique({
@@ -139,7 +122,6 @@ async function getMemberDetails(userId: string) {
     staffDisplay = staff ? `${staff.name}（${user.referredByStaff}）` : user.referredByStaff;
   }
 
-  // 担当代理店名
   let agencyDisplay = "---";
   if (user.referredByAgency) {
     const agency = await prisma.agencyProfile.findUnique({
@@ -154,32 +136,124 @@ async function getMemberDetails(userId: string) {
   return { ...user, staffDisplay, agencyDisplay };
 }
 
-/**
- * 詳細情報のHTML行を生成
- */
+// ── HTML行ヘルパー ──
 function detailRow(label: string, value: string) {
-  return `<tr><td style="font-size:12px;color:#A0A0B0;padding:6px 0;border-bottom:1px solid #2A2A38;width:120px;vertical-align:top;">${label}</td><td style="font-size:13px;color:#D5D5DE;padding:6px 0;border-bottom:1px solid #2A2A38;">${value}</td></tr>`;
+  return `<tr><td style="font-size:12px;color:#A0A0B0;padding:8px 0;border-bottom:1px solid #2A2A38;width:130px;vertical-align:top;">${label}</td><td style="font-size:13px;color:#D5D5DE;padding:8px 0;border-bottom:1px solid #2A2A38;">${value}</td></tr>`;
+}
+
+/** ハイライト付き行（今回変更された項目用） */
+function highlightRow(label: string, value: string) {
+  return `<tr><td style="font-size:12px;color:#BFA04B;font-weight:bold;padding:10px 0;border-bottom:1px solid #3A3520;width:130px;vertical-align:top;">${label}</td><td style="font-size:15px;color:#BFA04B;font-weight:bold;padding:10px 0;border-bottom:1px solid #3A3520;">${value}</td></tr>`;
+}
+
+/** ステータスに応じた「今回の更新ポイント」カードHTMLを生成 */
+function buildIpsHighlightCard(toStatus: string, details: Awaited<ReturnType<typeof getMemberDetails>>) {
+  if (!details?.membership) return "";
+  const m = details.membership;
+
+  const rows: string[] = [];
+  switch (toStatus) {
+    case "SERVICE_APPLIED":
+      rows.push(highlightRow("申込完了", "iPSサービス利用申込が完了しました"));
+      if (m.serviceAppliedAt) rows.push(highlightRow("申込日", fmtDate(m.serviceAppliedAt)));
+      rows.push(detailRow("入金状況", PAYMENT_LABELS[m.paymentStatus] || "---"));
+      rows.push(detailRow("契約金額", `¥${m.totalAmount.toLocaleString()}`));
+      break;
+    case "SCHEDULE_ARRANGED":
+      rows.push(highlightRow("日程調整", "クリニックの日程調整に進みます"));
+      if (m.clinicDate) {
+        rows.push(highlightRow("予約日", fmtDate(m.clinicDate)));
+        if (m.clinicName) rows.push(highlightRow("クリニック", m.clinicName));
+        if (m.clinicAddress) rows.push(detailRow("住所", m.clinicAddress));
+        if (m.clinicPhone) rows.push(detailRow("TEL", m.clinicPhone));
+      }
+      break;
+    case "BLOOD_COLLECTED":
+    case "IPS_CREATING":
+      rows.push(highlightRow("作製開始", "iPS細胞の作製を開始しました"));
+      if (m.clinicDate) rows.push(detailRow("問診・採血日", fmtDate(m.clinicDate)));
+      break;
+    case "STORAGE_ACTIVE": {
+      rows.push(highlightRow("保管開始", "iPS細胞の保管を開始しました"));
+      if (m.storageStartAt) rows.push(highlightRow("保管開始日", fmtDate(m.storageStartAt)));
+      const end = m.storageStartAt ? new Date(m.storageStartAt) : null;
+      if (end) {
+        end.setFullYear(end.getFullYear() + (m.storageYears || 10));
+        rows.push(highlightRow("保管期限", fmtDate(end)));
+      }
+      rows.push(detailRow("保管年数", `${m.storageYears || 10}年間`));
+      break;
+    }
+    default:
+      return "";
+  }
+
+  if (rows.length === 0) return "";
+  return `
+    <div style="background:#1A1A10;border:1px solid #3A3520;border-radius:8px;padding:20px 24px;margin-bottom:16px;">
+      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">TODAY&apos;S UPDATE</p>
+      <table style="width:100%;border-collapse:collapse;">${rows.join("")}</table>
+    </div>`;
+}
+
+/** 培養上清液ステータスに応じた「今回の更新ポイント」カード */
+function buildCfHighlightCard(
+  toStatus: string,
+  order: { planLabel?: string; totalAmount?: number; clinicDate?: Date | null; clinicName?: string | null; clinicAddress?: string | null; clinicPhone?: string | null; producedAt?: Date | null; expiresAt?: Date | null; requestedSessionCount?: number; completedSessions?: number } | null,
+) {
+  if (!order) return "";
+  const rows: string[] = [];
+
+  switch (toStatus) {
+    case "APPLIED":
+      rows.push(highlightRow("新規申込", `${order.planLabel || "---"}`));
+      rows.push(highlightRow("金額", `¥${(order.totalAmount || 0).toLocaleString()}`));
+      break;
+    case "PAYMENT_CONFIRMED":
+      rows.push(highlightRow("入金確認", "入金確認が完了しました"));
+      rows.push(detailRow("プラン", order.planLabel || "---"));
+      rows.push(detailRow("金額", `¥${(order.totalAmount || 0).toLocaleString()}`));
+      break;
+    case "PRODUCING":
+      rows.push(highlightRow("精製完了", "培養上清液の精製が完了しました"));
+      if (order.producedAt) rows.push(highlightRow("精製完了日", fmtDate(order.producedAt)));
+      if (order.expiresAt) rows.push(highlightRow("管理期限", fmtDate(order.expiresAt)));
+      break;
+    case "CLINIC_BOOKING":
+      rows.push(highlightRow("予約申込", "クリニック施術予約が申し込まれました"));
+      if (order.requestedSessionCount) rows.push(highlightRow("施術希望回数", `${order.requestedSessionCount}回分`));
+      break;
+    case "RESERVATION_CONFIRMED":
+      rows.push(highlightRow("予約確定", "クリニック施術予約が確定しました"));
+      if (order.clinicDate) rows.push(highlightRow("施術予定日", fmtDate(order.clinicDate)));
+      if (order.clinicName) rows.push(highlightRow("クリニック", order.clinicName));
+      if (order.clinicAddress) rows.push(detailRow("住所", order.clinicAddress));
+      if (order.clinicPhone) rows.push(detailRow("TEL", order.clinicPhone));
+      break;
+    case "COMPLETED":
+      rows.push(highlightRow("施術完了", "施術が完了しました"));
+      rows.push(highlightRow("完了済み", `${order.completedSessions || 0}回`));
+      break;
+    default:
+      return "";
+  }
+
+  if (rows.length === 0) return "";
+  return `
+    <div style="background:#1A1A10;border:1px solid #3A3520;border-radius:8px;padding:20px 24px;margin-bottom:16px;">
+      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">TODAY&apos;S UPDATE</p>
+      <table style="width:100%;border-collapse:collapse;">${rows.join("")}</table>
+    </div>`;
 }
 
 /**
  * iPSステータス変更通知を送信する
  */
 export async function notifyIpsStatusChange({
-  userId,
-  memberName,
-  memberNumber,
-  fromStatus,
-  toStatus,
-  changedBy,
-  note,
+  userId, memberName, memberNumber, fromStatus, toStatus, changedBy, note,
 }: {
-  userId: string;
-  memberName: string;
-  memberNumber?: string;
-  fromStatus: string;
-  toStatus: string;
-  changedBy: string;
-  note?: string;
+  userId: string; memberName: string; memberNumber?: string;
+  fromStatus: string; toStatus: string; changedBy: string; note?: string;
 }) {
   try {
     const recipients = await getNotificationRecipients(userId);
@@ -191,13 +265,14 @@ export async function notifyIpsStatusChange({
     const memberDisplay = memberNumber ? `${memberName}（${memberNumber}）` : memberName;
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
-    // 保管期限を算出
     let storageExpiry = "---";
     if (details?.membership?.storageStartAt) {
       const end = new Date(details.membership.storageStartAt);
       end.setFullYear(end.getFullYear() + (details.membership.storageYears || 10));
       storageExpiry = fmtDate(end);
     }
+
+    const highlightCard = buildIpsHighlightCard(toStatus, details);
 
     const subject = `【BioVault】${memberName}様のステータスが更新されました（${toLabel}）`;
 
@@ -231,8 +306,7 @@ iPSステータス: ${IPS_STATUS_LABELS[details?.membership?.ipsStatus || ""] ||
 保管期限: ${storageExpiry}
 
 ──────────────────
-BioVault 管理通知（自動送信）
-──────────────────`;
+BioVault 管理通知（自動送信）`;
 
     const bodyHtml = `
 <!DOCTYPE html>
@@ -245,7 +319,7 @@ BioVault 管理通知（自動送信）
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
 
-    <!-- ステータス変更 -->
+    <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">STATUS UPDATE</p>
       <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${memberDisplay}</p>
@@ -259,11 +333,12 @@ BioVault 管理通知（自動送信）
         </table>
       </div>
       <p style="font-size:12px;color:#A0A0B0;margin:0;">
-        変更者: ${changedBy}<br>
-        ${note ? `備考: ${note}<br>` : ""}
-        日時: ${nowStr}
+        変更者: ${changedBy}${note ? `<br>備考: ${note}` : ""}<br>日時: ${nowStr}
       </p>
     </div>
+
+    <!-- 今回の更新ポイント -->
+    ${highlightCard}
 
     <!-- 会員情報 -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
@@ -314,21 +389,10 @@ BioVault 管理通知（自動送信）
  * 培養上清液ステータス変更通知を送信する
  */
 export async function notifyCultureFluidStatusChange({
-  userId,
-  memberName,
-  memberNumber,
-  planLabel,
-  fromStatus,
-  toStatus,
-  changedBy,
+  userId, memberName, memberNumber, planLabel, fromStatus, toStatus, changedBy,
 }: {
-  userId: string;
-  memberName: string;
-  memberNumber?: string;
-  planLabel: string;
-  fromStatus: string;
-  toStatus: string;
-  changedBy: string;
+  userId: string; memberName: string; memberNumber?: string;
+  planLabel: string; fromStatus: string; toStatus: string; changedBy: string;
 }) {
   try {
     const recipients = await getNotificationRecipients(userId);
@@ -340,26 +404,19 @@ export async function notifyCultureFluidStatusChange({
     const memberDisplay = memberNumber ? `${memberName}（${memberNumber}）` : memberName;
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
-    // 対象注文の詳細を取得
     const orders = await prisma.cultureFluidOrder.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
       select: {
-        planLabel: true,
-        totalAmount: true,
-        status: true,
-        paymentStatus: true,
-        producedAt: true,
-        expiresAt: true,
-        clinicDate: true,
-        clinicName: true,
-        completedSessions: true,
-        requestedSessionCount: true,
+        planLabel: true, totalAmount: true, status: true, paymentStatus: true,
+        producedAt: true, expiresAt: true,
+        clinicDate: true, clinicName: true, clinicAddress: true, clinicPhone: true,
+        completedSessions: true, requestedSessionCount: true,
       },
     });
 
-    // アクティブな注文
     const activeOrder = orders[0];
+    const highlightCard = buildCfHighlightCard(toStatus, activeOrder);
 
     const subject = `【BioVault】${memberName}様の培養上清液ステータスが更新されました（${toLabel}）`;
 
@@ -391,8 +448,7 @@ ${fromLabel} → ${toLabel}
 完了回数: ${activeOrder?.completedSessions || 0}回
 
 ──────────────────
-BioVault 管理通知（自動送信）
-──────────────────`;
+BioVault 管理通知（自動送信）`;
 
     const bodyHtml = `
 <!DOCTYPE html>
@@ -405,7 +461,7 @@ BioVault 管理通知（自動送信）
       <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
     </div>
 
-    <!-- ステータス変更 -->
+    <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">CULTURE FLUID UPDATE</p>
       <p style="font-size:16px;color:#ffffff;margin:0 0 8px;font-weight:500;">${memberDisplay}</p>
@@ -422,6 +478,9 @@ BioVault 管理通知（自動送信）
       <p style="font-size:12px;color:#A0A0B0;margin:0;">変更者: ${changedBy}<br>日時: ${nowStr}</p>
     </div>
 
+    <!-- 今回の更新ポイント -->
+    ${highlightCard}
+
     <!-- 会員情報 -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 16px;">MEMBER INFO</p>
@@ -435,7 +494,7 @@ BioVault 管理通知（自動送信）
       </table>
     </div>
 
-    <!-- 培養上清液注文詳細 -->
+    <!-- 注文詳細 -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 16px;">ORDER DETAIL</p>
       <table style="width:100%;border-collapse:collapse;">
