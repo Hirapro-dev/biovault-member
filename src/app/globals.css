@@ -131,6 +131,13 @@ select {
   box-sizing: border-box;
 }
 
+/* date inputのカレンダーアイコンを白色に */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
 /* PWA スタンドアロンモード対応 */
 @media (display-mode: standalone) {
   /* iOSセーフエリア（ノッチ・ダイナミックアイランド）対応 */
