@@ -94,7 +94,7 @@ export default function TestControlPanel() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-[60px] right-3 z-[40] px-3 py-1.5 bg-status-danger/80 text-white text-[10px] font-bold rounded-full shadow-lg hover:bg-status-danger transition-colors cursor-pointer lg:top-4 lg:right-4 lg:z-[100]"
+        className="fixed top-[60px] right-3 z-[9999] px-3 py-1.5 bg-status-danger/80 text-white text-[10px] font-bold rounded-full shadow-lg hover:bg-status-danger transition-colors cursor-pointer lg:top-4 lg:right-4"
       >
         TEST
       </button>
@@ -104,8 +104,8 @@ export default function TestControlPanel() {
   return (
     <>
     {/* オーバーレイ: パネル外タップで閉じる */}
-    <div className="fixed inset-0 z-[99]" onClick={() => setOpen(false)} />
-    <div className="fixed top-[60px] right-3 z-[100] w-72 bg-bg-secondary border border-status-danger/30 rounded-xl shadow-2xl overflow-hidden lg:top-4 lg:right-4 max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+    <div className="fixed top-[60px] right-3 z-[9999] w-72 bg-bg-secondary border border-status-danger/30 rounded-xl shadow-2xl overflow-hidden lg:top-4 lg:right-4 max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-2.5 bg-status-danger/10 border-b border-status-danger/20">
         <span className="text-xs font-bold text-status-danger tracking-wider">TEST MODE</span>
         <button onClick={() => setOpen(false)} className="text-text-muted hover:text-white text-sm cursor-pointer">×</button>
