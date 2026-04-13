@@ -59,6 +59,11 @@ export default function TestControlPanel() {
           setTimeout(() => signOut({ callbackUrl: "/login" }), 1000);
           return;
         }
+        if (action === "reset_full") {
+          setMessage("削除完了。申込フォームへ移動します...");
+          setTimeout(() => signOut({ callbackUrl: "/form/app" }), 1000);
+          return;
+        }
         setMessage(d.message || "完了");
         router.refresh();
         setTimeout(() => fetchStatus(), 500);
@@ -171,6 +176,19 @@ export default function TestControlPanel() {
           className="w-full py-2 border border-status-danger/30 text-status-danger text-[10px] rounded cursor-pointer hover:bg-status-danger/10 disabled:opacity-40 transition-all"
         >
           工程をリセット
+        </button>
+
+        {/* フォームからやり直す */}
+        <button
+          onClick={() => {
+            if (confirm("アカウントを削除して申込フォームからやり直しますか？\n（現在のアカウントは完全に削除されます）")) {
+              handleAction("reset_full");
+            }
+          }}
+          disabled={loading}
+          className="w-full py-2 border border-status-danger/30 text-status-danger/60 text-[10px] rounded cursor-pointer hover:bg-status-danger/10 disabled:opacity-40 transition-all"
+        >
+          申込フォームからやり直す
         </button>
 
         {message && (

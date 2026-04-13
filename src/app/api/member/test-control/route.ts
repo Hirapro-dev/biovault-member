@@ -53,6 +53,30 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: "リセット完了" });
   }
 
+  // ── フォームからやり直す（アカウント完全削除） ──
+  if (action === "reset_full") {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    const email = user?.email || "";
+
+    await prisma.$transaction([
+      prisma.accessLog.deleteMany({ where: { userId } }),
+      prisma.adminNote.deleteMany({ where: { userId } }),
+      prisma.statusHistory.deleteMany({ where: { userId } }),
+      prisma.document.deleteMany({ where: { userId } }),
+      prisma.favorite.deleteMany({ where: { userId } }),
+      prisma.consentLog.deleteMany({ where: { userId } }),
+      prisma.contentUpdateRead.deleteMany({ where: { userId } }),
+      prisma.pushSubscription.deleteMany({ where: { userId } }),
+      prisma.cultureFluidOrder.deleteMany({ where: { userId } }),
+      prisma.treatment.deleteMany({ where: { membershipId: membership.id } }),
+      prisma.membership.delete({ where: { userId } }),
+      prisma.application.deleteMany({ where: { email } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
+
+    return NextResponse.json({ success: true, message: "アカウント削除完了" });
+  }
+
   // ── iPS admin_skip ──
   if (action === "admin_skip" && flow === "ips") {
     const now = new Date();
