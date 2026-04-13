@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
+import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 export async function POST(req: Request) {
   try {
@@ -180,6 +181,21 @@ export async function POST(req: Request) {
     await sendEmail({ to: body.email, ...emailContent });
   } catch (e) {
     console.error("Auto-reply email failed:", e);
+  }
+
+  // 8. 管理者・担当従業員・担当代理店へ新規申込通知
+  try {
+    await notifyIpsStatusChange({
+      userId: user.id,
+      memberName: body.name,
+      memberNumber,
+      fromStatus: "---",
+      toStatus: "REGISTERED",
+      changedBy: "新規申込フォーム",
+      note: `iPS細胞作製適合確認の新規申込（${body.email}）`,
+    });
+  } catch (e) {
+    console.error("Application notification failed:", e);
   }
 
   return NextResponse.json({
