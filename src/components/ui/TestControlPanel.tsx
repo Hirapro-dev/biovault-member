@@ -102,6 +102,9 @@ export default function TestControlPanel() {
   }
 
   return (
+    <>
+    {/* オーバーレイ: パネル外タップで閉じる */}
+    <div className="fixed inset-0 z-[99]" onClick={() => setOpen(false)} />
     <div className="fixed top-3 right-3 z-[100] w-72 bg-bg-secondary border border-status-danger/30 rounded-xl shadow-2xl overflow-hidden lg:top-4 lg:right-4 max-h-[90vh] overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-2.5 bg-status-danger/10 border-b border-status-danger/20">
         <span className="text-xs font-bold text-status-danger tracking-wider">TEST MODE</span>
@@ -180,5 +183,6 @@ export default function TestControlPanel() {
         )}
       </div>
     </div>
+    </>
   );
 }
