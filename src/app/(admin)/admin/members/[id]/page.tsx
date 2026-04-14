@@ -15,6 +15,7 @@ import IssueIdSection from "./IssueIdSection";
 import DeleteAccount from "./DeleteAccount";
 import CultureFluidStatusManager from "./CultureFluidStatusManager";
 import StatusTabs from "./StatusTabs";
+import SuperAdminEditSection from "./SuperAdminEditSection";
 
 export default async function MemberKartePage({
   params,
@@ -133,6 +134,41 @@ export default async function MemberKartePage({
           </div>
         </div>
       </div>
+
+      {/* 全権限者編集 — SUPER_ADMINのみ */}
+      {adminUser.role === "SUPER_ADMIN" && (
+        <SuperAdminEditSection
+          userId={user.id}
+          user={{
+            name: user.name,
+            nameKana: user.nameKana || null,
+            nameRomaji: user.nameRomaji || null,
+            email: user.email,
+            loginId: user.loginId,
+            phone: user.phone || null,
+            address: user.address || null,
+            postalCode: user.postalCode || null,
+            occupation: user.occupation || null,
+            dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,
+            hasAgreedTerms: user.hasAgreedTerms,
+            referredByStaff: user.referredByStaff || null,
+            referredByAgency: user.referredByAgency || null,
+            salesRepName: user.salesRepName || null,
+            paymentMethod: user.paymentMethod || null,
+          }}
+          membership={membership ? {
+            memberNumber: membership.memberNumber,
+            totalAmount: membership.totalAmount,
+            paidAmount: membership.paidAmount,
+            paymentStatus: membership.paymentStatus,
+            ipsStatus: membership.ipsStatus,
+            contractDate: membership.contractDate.toISOString(),
+            storageYears: membership.storageYears,
+            clinicDate: membership.clinicDate ? membership.clinicDate.toISOString() : null,
+            clinicName: membership.clinicName || null,
+          } : null}
+        />
+      )}
 
       {/* アカウント情報（ID発行・PW変更）— ADMIN以上のみ */}
       {canFullEdit && (
