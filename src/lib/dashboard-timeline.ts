@@ -105,19 +105,15 @@ function getCurrentStep(
     return false;
   };
 
-  // 最後に完了したステップを探す → そのステップに会員がいる
-  let lastDoneStep = "";
+  // 最初の未完了ステップを探す → そのステップに会員がいる（＝次にやるべきこと）
   for (const step of IPS_STEPS) {
-    if (isDone(step.key)) {
-      lastDoneStep = step.key;
-    } else {
-      break;
+    if (!isDone(step.key)) {
+      return step.key;
     }
   }
 
-  // 全ステップ未完了の場合は最初のステップ
   // 全ステップ完了の場合は最後のステップ
-  return lastDoneStep || IPS_STEPS[0].key;
+  return IPS_STEPS[IPS_STEPS.length - 1].key;
 }
 
 const fmtDate = (d: Date | null | undefined) =>
