@@ -1,8 +1,8 @@
-import { requireSuperAdmin } from "@/lib/auth-helpers";
+import { requireAdmin } from "@/lib/auth-helpers";
 import Link from "next/link";
 
 export default async function SettingsPage() {
-  await requireSuperAdmin();
+  await requireAdmin();
 
   const settingsMenu = [
     { href: "/admin/settings/users", label: "ユーザー管理", icon: "👤", description: "管理者アカウントの追加・ロール変更・削除" },

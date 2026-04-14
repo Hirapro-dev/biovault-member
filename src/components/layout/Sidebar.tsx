@@ -114,7 +114,7 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
                 </Link>
               );
             })}
-            {userRole === "SUPER_ADMIN" && (
+            {userRole && (
               <Link
                 href="/admin/settings"
                 className={`flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide mt-2 border-t border-border pt-3 ${

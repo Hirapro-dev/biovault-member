@@ -32,6 +32,7 @@ type User = {
 interface Props {
   users: User[];
   currentUserId: string;
+  isSuperAdmin: boolean;
 }
 
 function generatePassword(): string {
@@ -41,7 +42,7 @@ function generatePassword(): string {
   return pw;
 }
 
-export default function UserManagement({ users: initialUsers, currentUserId }: Props) {
+export default function UserManagement({ users: initialUsers, currentUserId, isSuperAdmin }: Props) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
 
@@ -59,6 +60,63 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
   // 削除確認
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // 編集ポップアップ
+  const [editTarget, setEditTarget] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", email: "", newPassword: "" });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
+  const [editShowPw, setEditShowPw] = useState(false);
+
+  const openEditPopup = (user: User) => {
+    setEditTarget(user);
+    setEditForm({ name: user.name, email: user.email, newPassword: "" });
+    setEditError("");
+    setEditSuccess("");
+    setEditShowPw(false);
+  };
+
+  const handleEdit = async () => {
+    if (!editTarget) return;
+    if (!editForm.name.trim() || !editForm.email.trim()) {
+      setEditError("名前とメールアドレスは必須です");
+      return;
+    }
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+    try {
+      const payload: Record<string, string> = {
+        name: editForm.name.trim(),
+        email: editForm.email.trim(),
+      };
+      if (editForm.newPassword) {
+        payload.newPassword = editForm.newPassword;
+      }
+      const res = await fetch(`/api/admin/users/${editTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setEditError(data.error || "エラーが発生しました");
+      } else {
+        setEditSuccess("更新しました");
+        setUsers(prev => prev.map(u => u.id === editTarget.id ? { ...u, name: data.name, email: data.email } : u));
+        setTimeout(() => {
+          setEditTarget(null);
+          setEditSuccess("");
+          router.refresh();
+        }, 1200);
+      }
+    } catch {
+      setEditError("エラーが発生しました");
+    } finally {
+      setEditLoading(false);
+    }
+  };
 
   const handleAdd = async () => {
     if (!addForm.name || !addForm.email || !addForm.loginId || !addForm.password) {
@@ -138,21 +196,22 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
 
   const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("ja-JP") : "---";
 
+  // 編集可能かどうか（SUPER_ADMINは全員、それ以外は自分のみ）
+  const canEdit = (userId: string) => isSuperAdmin || userId === currentUserId;
+
   return (
     <>
       {/* ヘッダー + 追加ボタン */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => {
-            setAddError("");
-            setAddSuccess("");
-            setShowAddPopup(true);
-          }}
-          className="px-4 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-xs sm:text-[13px] font-semibold tracking-wider hover:opacity-90 transition-all"
-        >
-          + ユーザー追加
-        </button>
-      </div>
+      {isSuperAdmin && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => { setAddError(""); setAddSuccess(""); setShowAddPopup(true); }}
+            className="px-4 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-xs sm:text-[13px] font-semibold tracking-wider hover:opacity-90 transition-all"
+          >
+            + ユーザー追加
+          </button>
+        </div>
+      )}
 
       {/* ユーザー一覧 */}
       <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
@@ -174,32 +233,42 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
                 <div className="text-[11px] text-text-muted mb-2">
                   {u.email} / {u.loginId}
                 </div>
-                {!isSelf && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <select
-                      value={u.role}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      disabled={roleLoading === u.id}
-                      className="flex-1 px-2 py-1.5 bg-bg-elevated border border-border rounded-sm text-xs text-text-primary outline-none"
-                    >
-                      {Object.entries(ROLE_LABELS).map(([key, label]) => (
-                        <option key={key} value={key}>{label}</option>
-                      ))}
-                    </select>
+                <div className="flex items-center gap-2 mt-2">
+                  {canEdit(u.id) && (
                     <button
-                      onClick={() => handleToggleActive(u.id, !u.isActive)}
-                      className={`px-2 py-1.5 border rounded-sm text-[10px] ${u.isActive ? "border-status-danger/30 text-status-danger" : "border-status-active/30 text-status-active"}`}
+                      onClick={() => openEditPopup(u)}
+                      className="px-2 py-1.5 border border-border-gold text-gold rounded-sm text-[10px]"
                     >
-                      {u.isActive ? "無効化" : "有効化"}
+                      編集
                     </button>
-                    <button
-                      onClick={() => setDeleteTarget(u)}
-                      className="px-2 py-1.5 border border-status-danger/30 text-status-danger rounded-sm text-[10px]"
-                    >
-                      削除
-                    </button>
-                  </div>
-                )}
+                  )}
+                  {isSuperAdmin && !isSelf && (
+                    <>
+                      <select
+                        value={u.role}
+                        onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                        disabled={roleLoading === u.id}
+                        className="flex-1 px-2 py-1.5 bg-bg-elevated border border-border rounded-sm text-xs text-text-primary outline-none"
+                      >
+                        {Object.entries(ROLE_LABELS).map(([key, label]) => (
+                          <option key={key} value={key}>{label}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleToggleActive(u.id, !u.isActive)}
+                        className={`px-2 py-1.5 border rounded-sm text-[10px] ${u.isActive ? "border-status-danger/30 text-status-danger" : "border-status-active/30 text-status-active"}`}
+                      >
+                        {u.isActive ? "無効化" : "有効化"}
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(u)}
+                        className="px-2 py-1.5 border border-status-danger/30 text-status-danger rounded-sm text-[10px]"
+                      >
+                        削除
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -226,7 +295,7 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
                   <td className="px-4 py-3 text-[12px] text-text-muted">{u.email}</td>
                   <td className="px-4 py-3 text-[12px] text-text-muted font-mono">{u.loginId}</td>
                   <td className="px-4 py-3">
-                    {isSelf ? (
+                    {!isSuperAdmin || isSelf ? (
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ROLE_COLORS[u.role] || ""}`}>
                         {ROLE_LABELS[u.role] || u.role}
                       </span>
@@ -244,8 +313,8 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {isSelf ? (
-                      <span className="text-[11px] text-status-active">有効</span>
+                    {!isSuperAdmin || isSelf ? (
+                      <span className={`text-[11px] ${u.isActive ? "text-status-active" : "text-status-danger"}`}>{u.isActive ? "有効" : "無効"}</span>
                     ) : (
                       <button
                         onClick={() => handleToggleActive(u.id, !u.isActive)}
@@ -262,14 +331,24 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
                   </td>
                   <td className="px-4 py-3 text-[11px] text-text-muted font-mono">{fmtDate(u.lastLoginAt)}</td>
                   <td className="px-4 py-3">
-                    {!isSelf && (
-                      <button
-                        onClick={() => setDeleteTarget(u)}
-                        className="px-2 py-1 border border-status-danger/30 text-status-danger rounded-sm text-[10px] hover:bg-status-danger/10 transition-all cursor-pointer"
-                      >
-                        削除
-                      </button>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {canEdit(u.id) && (
+                        <button
+                          onClick={() => openEditPopup(u)}
+                          className="px-2 py-1 border border-border-gold text-gold rounded-sm text-[10px] hover:bg-gold/10 transition-all cursor-pointer"
+                        >
+                          編集
+                        </button>
+                      )}
+                      {isSuperAdmin && !isSelf && (
+                        <button
+                          onClick={() => setDeleteTarget(u)}
+                          className="px-2 py-1 border border-status-danger/30 text-status-danger rounded-sm text-[10px] hover:bg-status-danger/10 transition-all cursor-pointer"
+                        >
+                          削除
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -277,6 +356,100 @@ export default function UserManagement({ users: initialUsers, currentUserId }: P
           </tbody>
         </table>
       </div>
+
+      {/* 編集ポップアップ */}
+      {editTarget && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setEditTarget(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-1">ユーザー情報編集</h3>
+            <p className="text-xs text-text-muted mb-5">
+              {editTarget.name}
+              {editTarget.id === currentUserId && <span className="text-gold ml-1">(自分)</span>}
+            </p>
+
+            {editSuccess && <div className="mb-3 p-2 bg-status-active/10 border border-status-active/20 rounded text-status-active text-[11px]">{editSuccess}</div>}
+            {editError && <div className="mb-3 p-2 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-[11px]">{editError}</div>}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">名前</label>
+                <input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">メールアドレス</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm(f => ({ ...f, email: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">
+                  新しいパスワード <span className="text-text-muted text-[10px]">（変更する場合のみ）</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={editShowPw ? "text" : "password"}
+                      value={editForm.newPassword}
+                      onChange={(e) => setEditForm(f => ({ ...f, newPassword: e.target.value }))}
+                      placeholder="変更しない場合は空欄"
+                      className="w-full px-3 py-2.5 pr-12 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none focus:border-border-gold"
+                    />
+                    {editForm.newPassword && (
+                      <button
+                        type="button"
+                        onClick={() => setEditShowPw(!editShowPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-xs cursor-pointer"
+                        tabIndex={-1}
+                      >
+                        {editShowPw ? "隠す" : "表示"}
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { setEditForm(f => ({ ...f, newPassword: generatePassword() })); setEditShowPw(true); }}
+                    className="px-3 py-2.5 border border-border text-text-muted rounded-sm text-xs hover:text-gold transition-colors cursor-pointer shrink-0"
+                  >
+                    生成
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">ログインID</label>
+                <input
+                  value={editTarget.loginId}
+                  readOnly
+                  className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-muted text-sm font-mono outline-none cursor-not-allowed"
+                />
+                <div className="text-[10px] text-text-muted mt-1">ログインIDは変更できません</div>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditTarget(null)}
+                  className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleEdit}
+                  disabled={editLoading}
+                  className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {editLoading ? "更新中..." : "更新する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* ユーザー追加ポップアップ */}
       {showAddPopup && createPortal(

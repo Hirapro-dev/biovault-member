@@ -164,7 +164,7 @@ export default function MobileNav({
                     </Link>
                   );
                 })}
-                {userRole === "SUPER_ADMIN" && (
+                {userRole && (
                   <Link
                     href="/admin/settings"
                     onClick={() => setOpen(false)}

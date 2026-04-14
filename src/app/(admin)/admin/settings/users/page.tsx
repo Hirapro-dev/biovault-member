@@ -1,4 +1,4 @@
-import { requireSuperAdmin } from "@/lib/auth-helpers";
+import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import UserManagement from "./UserManagement";
@@ -6,7 +6,8 @@ import UserManagement from "./UserManagement";
 const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "OPERATOR", "VIEWER"] as const;
 
 export default async function UsersSettingsPage() {
-  const currentUser = await requireSuperAdmin();
+  const currentUser = await requireAdmin();
+  const isSuperAdmin = currentUser.role === "SUPER_ADMIN";
 
   const users = await prisma.user.findMany({
     where: { role: { in: [...ADMIN_ROLES] } },
@@ -42,6 +43,7 @@ export default async function UsersSettingsPage() {
           createdAt: u.createdAt.toISOString(),
         }))}
         currentUserId={currentUser.id}
+        isSuperAdmin={isSuperAdmin}
       />
     </div>
   );
