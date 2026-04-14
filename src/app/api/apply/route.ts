@@ -125,7 +125,7 @@ export async function POST(req: Request) {
       address: body.address,
       occupation: body.occupation || null,
       role: "MEMBER",
-      isIdIssued: false,
+      isIdIssued: isTester,
       mustChangePassword: !isTester,
       referredByAgency: agencyCode,
       referredByStaff: staffCodeValue,
