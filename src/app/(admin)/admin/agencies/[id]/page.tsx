@@ -22,7 +22,7 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
 
   const profile = user.agencyProfile;
 
-  // 担当営業スタッフ
+  // 担当
   const staffRecord = user.referredByStaff
     ? await prisma.staff.findUnique({ where: { staffCode: user.referredByStaff }, select: { id: true, name: true, staffCode: true } })
     : null;
@@ -65,7 +65,7 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
           <Row label="住所" value={user.address || "---"} />
           <Row label="登録日" value={new Date(user.createdAt).toLocaleDateString("ja-JP")} />
           <div className="flex items-center py-2 border-t border-border mt-1">
-            <div className="w-28 text-[11px] text-text-muted shrink-0">担当営業</div>
+            <div className="w-28 text-[11px] text-text-muted shrink-0">担当</div>
             <div className="text-[13px]">
               {staffRecord ? (
                 <Link href={`/admin/staff/${staffRecord.id}`} className="text-gold hover:underline">

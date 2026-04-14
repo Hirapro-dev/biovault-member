@@ -102,7 +102,7 @@ export default async function StaffMemberKartePage({
           <InfoRow label="契約日" value={membership ? new Date(membership.contractDate).toLocaleDateString("ja-JP") : "---"} />
           <InfoRow label="入金状況" value={membership ? PAYMENT_STATUS_LABELS[membership.paymentStatus] : "---"} />
           <InfoRow label="入金額" value={membership ? `¥${membership.paidAmount.toLocaleString()} / ¥${membership.totalAmount.toLocaleString()}` : "---"} mono />
-          <InfoRow label="営業担当／代理店" value={referralDisplay} />
+          <InfoRow label="担当" value={referralDisplay} />
           <div className="flex items-center py-2 border-t border-border mt-1">
             <div className="w-24 text-[11px] text-text-muted shrink-0">重要事項同意</div>
             <div className="text-[13px]">
@@ -177,7 +177,7 @@ export default async function StaffMemberKartePage({
             <InfoRow label="郵便番号" value={user.postalCode || "---"} />
             <InfoRow label="支払方法" value={user.paymentMethod === "bank_transfer" ? "銀行振込" : user.paymentMethod || "---"} />
             <InfoRow label="支払予定日" value={user.paymentDate ? new Date(user.paymentDate).toLocaleDateString("ja-JP") : "---"} />
-            <InfoRow label="営業担当" value={user.referredByStaff ? `${staffName || user.salesRepName || "---"}（${user.referredByStaff}）` : user.salesRepName || "---"} />
+            <InfoRow label="担当" value={user.referredByStaff ? `${staffName || user.salesRepName || "---"}（${user.referredByStaff}）` : user.salesRepName || "---"} />
           </div>
           <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
             <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">健康状態（事前確認）</h3>

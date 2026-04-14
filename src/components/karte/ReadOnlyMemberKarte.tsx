@@ -216,7 +216,7 @@ export default function ReadOnlyMemberKarte({
 }) {
   const membership = user.membership;
 
-  // 営業担当／代理店の統合表示
+  // 担当の統合表示
   const referralDisplay =
     [
       staffName ? `${staffName}（${user.referredByStaff}）` : (user.salesRepName || null),
@@ -348,7 +348,7 @@ export default function ReadOnlyMemberKarte({
             }
             mono
           />
-          <InfoRow label="営業担当／代理店" value={referralDisplay} />
+          <InfoRow label="担当" value={referralDisplay} />
           <div className="flex items-center py-2 border-t border-border mt-1">
             <div className="w-24 text-[11px] text-text-muted shrink-0">重要事項同意</div>
             <div className="text-[13px]">
@@ -512,7 +512,7 @@ export default function ReadOnlyMemberKarte({
             />
             <InfoRow label="支払予定日" value={formatDate(user.paymentDate)} />
             <InfoRow
-              label="営業担当"
+              label="担当"
               value={
                 user.referredByStaff
                   ? `${staffName || user.salesRepName || "---"}（${user.referredByStaff}）`
