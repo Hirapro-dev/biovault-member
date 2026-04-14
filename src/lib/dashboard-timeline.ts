@@ -97,7 +97,7 @@ function getCurrentStep(
     if (key === "DOC_PRIVACY") return statusIdx >= DB_ORDER.indexOf("SERVICE_APPLIED");
     if (key === "CONTRACT_SIGNING") return !!contractSignedAt;
     if (key === "PAYMENT_CONFIRMED") return paymentStatus === "COMPLETED";
-    if (key === "SCHEDULE_ARRANGED") return statusIdx >= DB_ORDER.indexOf("SCHEDULE_ARRANGED") && signedDocTypes.includes("CELL_STORAGE_CONSENT") && !!clinicDate;
+    if (key === "SCHEDULE_ARRANGED") return statusIdx >= DB_ORDER.indexOf("SCHEDULE_ARRANGED") && !!clinicDate;
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
     if (key === "BLOOD_COLLECTED") return statusIdx >= DB_ORDER.indexOf("BLOOD_COLLECTED");
     if (key === "IPS_CREATING") return statusIdx >= DB_ORDER.indexOf("IPS_CREATING");
