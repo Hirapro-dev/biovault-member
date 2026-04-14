@@ -19,8 +19,8 @@ const IPS_STEPS = [
   { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整／細胞提供・保管同意待ち", icon: "📅", actor: "member" as const, note: "会員より、日程調整希望が入ったら、進行。管理側：クリニック側と会員と3者間で日程調整へ入る。" },
   { key: "CLINIC_CONFIRMED", label: "日程確定待ち", icon: "🏥", actor: "admin" as const, note: "管理側：日程が確定した日程を入力すると、進行。" },
   { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意待ち", icon: "📄", actor: "member" as const, note: "会員にて、問診・採血当日までに同意を結ぶ、同意後、進行" },
-  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "管理側：問診・採血完了の確認が取れたら完了日を入力し、進行。" },
-  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const, note: "管理側：iPS細胞作製が開始された日を入力し、進行。" },
+  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "管理側：問診・採血完了の確認が取れたら完了日を入力。" },
+  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const, note: "iPS細胞作製作業中の状態、作製完了報告待ちの状態。" },
   { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", actor: "admin" as const, note: "管理側：iPS細胞作製完了日・保管開始日を入力し、完了。" },
 ] as const;
 

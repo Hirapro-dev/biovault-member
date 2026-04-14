@@ -55,7 +55,7 @@ export default async function ApplicationDetailPage({
           <Row label="会員価格" value="¥8,800,000（税込）" />
           <Row label="支払方法" value={app.paymentMethod === "bank_transfer" ? "銀行振込" : app.paymentMethodOther || "その他"} />
           <Row label="支払予定日" value={app.paymentDate ? new Date(app.paymentDate).toLocaleDateString("ja-JP") : "---"} />
-          <Row label="営業担当／代理店" value={
+          <Row label="担当" value={
             [
               app.salesRepName ? `${app.salesRepName}${app.staffCode ? `（${app.staffCode}）` : ""}` : null,
               app.referrerName ? `代理店: ${app.referrerName}` : null,
