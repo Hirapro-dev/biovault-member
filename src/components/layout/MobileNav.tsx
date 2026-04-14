@@ -19,6 +19,12 @@ type NavGroup = {
 // 会員メニューグループ定義
 const MEMBER_NAV_GROUPS: NavGroup[] = [
   {
+    heading: "サービス利用",
+    items: [
+      { href: "/purchase-history", label: "購入履歴", icon: "🧾" },
+    ],
+  },
+  {
     heading: "契約・同意書類",
     items: [
       { href: "/documents", label: "iPS作製・保管書類一覧", icon: "🧬" },

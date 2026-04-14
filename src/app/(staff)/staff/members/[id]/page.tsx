@@ -10,6 +10,7 @@ import AdminStatusTimeline from "@/app/(admin)/admin/members/[id]/AdminStatusTim
 import CultureFluidStatusManager from "@/app/(admin)/admin/members/[id]/CultureFluidStatusManager";
 import DocumentManager from "@/app/(admin)/admin/members/[id]/DocumentManager";
 import StatusTabs from "@/app/(admin)/admin/members/[id]/StatusTabs";
+import PurchaseHistory from "@/components/purchase/PurchaseHistory";
 import Link from "next/link";
 
 /**
@@ -114,6 +115,11 @@ export default async function StaffMemberKartePage({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 購入履歴 */}
+      <div className="mt-6">
+        <PurchaseHistory userId={user.id} />
       </div>
 
       {/* ステータス（タブ切り替え）— 閲覧専用 */}

@@ -59,7 +59,19 @@ function DnaSvg() {
   );
 }
 
+// 購入履歴: レシート風アイコン
+function ReceiptSvg() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2-3-2z" />
+      <path d="M8 10h8" />
+      <path d="M8 14h4" />
+    </svg>
+  );
+}
+
 const memberNav = [
+  { href: "/purchase-history", label: "購入履歴", Icon: ReceiptSvg },
   { href: "/mypage", label: "マイページ", Icon: UserSvg },
   { href: "/info", label: "① iPS作製・保管サービス詳細", Icon: ServiceSvg },
   { href: "/culture-fluid", label: "② 培養上清液サービス詳細", Icon: FlaskSvg },

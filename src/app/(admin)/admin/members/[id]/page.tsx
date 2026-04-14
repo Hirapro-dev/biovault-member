@@ -16,6 +16,7 @@ import DeleteAccount from "./DeleteAccount";
 import CultureFluidStatusManager from "./CultureFluidStatusManager";
 import StatusTabs from "./StatusTabs";
 import SuperAdminEditSection from "./SuperAdminEditSection";
+import PurchaseHistory from "@/components/purchase/PurchaseHistory";
 
 export default async function MemberKartePage({
   params,
@@ -169,6 +170,11 @@ export default async function MemberKartePage({
           } : null}
         />
       )}
+
+      {/* 購入履歴 */}
+      <div className="mt-6">
+        <PurchaseHistory userId={user.id} />
+      </div>
 
       {/* アカウント情報（ID発行・PW変更）— ADMIN以上のみ */}
       {canFullEdit && (
