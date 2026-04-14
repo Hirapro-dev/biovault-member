@@ -57,6 +57,7 @@ export async function POST(req: Request) {
         role: "AGENCY",
         isIdIssued: false,
         mustChangePassword: true,
+        referredByStaff: body.staffCode || null,
         agencyProfile: {
           create: {
             agencyCode,

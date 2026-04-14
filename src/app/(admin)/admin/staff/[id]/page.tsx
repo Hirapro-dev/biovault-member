@@ -24,6 +24,13 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
     orderBy: { createdAt: "desc" },
   });
 
+  // 担当代理店一覧
+  const agencies = await prisma.user.findMany({
+    where: { referredByStaff: staff.staffCode, role: "AGENCY" },
+    include: { agencyProfile: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   // 売上サマリー（入金済み金額のみ）
   const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
 
@@ -121,6 +128,37 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
                 </div>
                 <Link href={`/admin/members/${c.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                   カルテ
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 担当代理店一覧 */}
+      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+          担当代理店 ({agencies.length}名)
+        </h3>
+        {agencies.length === 0 ? (
+          <div className="text-text-muted text-sm py-4 text-center">担当代理店なし</div>
+        ) : (
+          <div className="divide-y divide-border">
+            {agencies.map((a) => (
+              <div key={a.id} className="flex items-center justify-between py-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[13px] text-gold">{a.agencyProfile?.agencyCode || "---"}</span>
+                    <span className="text-sm text-text-primary">{a.name}</span>
+                  </div>
+                  <div className="text-[11px] text-text-muted mt-0.5">
+                    {a.agencyProfile?.companyName || "個人"} ・
+                    {a.agencyProfile?.isActive ? "有効" : "無効"} ・
+                    登録: {new Date(a.createdAt).toLocaleDateString("ja-JP")}
+                  </div>
+                </div>
+                <Link href={`/admin/agencies/${a.agencyProfile?.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
+                  詳細
                 </Link>
               </div>
             ))}

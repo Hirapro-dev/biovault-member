@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
 
-export default function AgencyApplyPage() {
+export default function AgencyApplyPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-primary" />}>
+      <AgencyApplyPage />
+    </Suspense>
+  );
+}
+
+function AgencyApplyPage() {
+  const searchParams = useSearchParams();
+  const staffCode = searchParams.get("staff") || "";
   const [form, setForm] = useState({
     companyName: "",
     representativeName: "",
@@ -26,7 +37,7 @@ export default function AgencyApplyPage() {
       const res = await fetch("/api/agency/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, staffCode }),
       });
       if (!res.ok) {
         const d = await res.json();
