@@ -79,9 +79,12 @@ function ApplyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         setError(data.error || "送信に失敗しました");
+      } else if (data.isTester) {
+        // テスターはログインページへ直接遷移（loginId/passwordを自動入力）
+        window.location.href = `/login?tid=${encodeURIComponent(data.loginId)}&tpw=${encodeURIComponent(data.tempPassword)}`;
       } else {
         setDone(true);
       }

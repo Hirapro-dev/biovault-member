@@ -210,6 +210,7 @@ export async function POST(req: Request) {
     tempPassword,
     memberNumber,
     success: true,
+    isTester,
   });
 
   } catch (error: unknown) {

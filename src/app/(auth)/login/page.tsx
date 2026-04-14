@@ -1,18 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import GoldParticles from "@/components/login/GoldParticles";
 import GoldDivider from "@/components/ui/GoldDivider";
 
-export default function LoginPage() {
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-primary" />}>
+      <LoginPage />
+    </Suspense>
+  );
+}
+
+function LoginPage() {
+  const searchParams = useSearchParams();
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  // テスター用：クエリパラメータからログインID・パスワードを自動入力
+  useEffect(() => {
+    const tid = searchParams.get("tid");
+    const tpw = searchParams.get("tpw");
+    if (tid) setLoginId(tid);
+    if (tpw) {
+      setPassword(tpw);
+      setShowPassword(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
