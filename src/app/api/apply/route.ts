@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
 
+const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+
 export async function POST(req: Request) {
   try {
   const body = await req.json();
@@ -90,11 +92,14 @@ export async function POST(req: Request) {
     },
   });
 
-  // 2. ログインID生成（苗字ローマ字 + 4桁）
-  const loginId = await generateUniqueLoginId(body.nameKana);
+  // 2. テスターアカウント判定
+  const isTester = TESTER_EMAILS.includes(body.email.toLowerCase());
 
-  // 3. 仮パスワード生成
-  const tempPassword = generatePassword();
+  // 3. ログインID生成（テスターは "master" 固定）
+  const loginId = isTester ? "master" : await generateUniqueLoginId(body.nameKana);
+
+  // 4. 仮パスワード生成（テスターは "master" 固定）
+  const tempPassword = isTester ? "master" : generatePassword();
   const passwordHash = await bcrypt.hash(tempPassword, 12);
 
   // 4. 会員番号の自動採番
@@ -121,7 +126,7 @@ export async function POST(req: Request) {
       occupation: body.occupation || null,
       role: "MEMBER",
       isIdIssued: false,
-      mustChangePassword: true,
+      mustChangePassword: !isTester,
       referredByAgency: agencyCode,
       referredByStaff: staffCodeValue,
       applicationId: application.id,

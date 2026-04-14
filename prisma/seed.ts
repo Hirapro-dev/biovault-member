@@ -83,7 +83,7 @@ async function main() {
       nameRomaji: "Kenta TAKAHASHI",
       phone: "090-5678-9012",
       memberNumber: "BV-0005",
-      ipsStatus: "REGISTERED" as const,  // ① メンバー登録済み
+      ipsStatus: "REGISTERED" as const,  // ① iPS細胞作製適合確認の新規申込
       paymentStatus: "PENDING" as const,
       paidAmount: 0,
     },
