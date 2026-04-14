@@ -104,7 +104,7 @@ function getCurrentStep(
     if (key === "CLINIC_CONFIRMED") return !!clinicDate;
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
     if (key === "BLOOD_COLLECTED") return statusIdx >= DB_ORDER.indexOf("BLOOD_COLLECTED");
-    if (key === "IPS_CREATING") return statusIdx >= DB_ORDER.indexOf("IPS_CREATING");
+    if (key === "IPS_CREATING") return ipsStatus === "STORAGE_ACTIVE";
     if (key === "STORAGE_ACTIVE") return ipsStatus === "STORAGE_ACTIVE";
     return false;
   };
