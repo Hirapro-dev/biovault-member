@@ -59,9 +59,9 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* ステータス別会員数（タイムラインUI） */}
+      {/* 状況別会員数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
-        ステータス別会員数
+        状況別会員数
       </h3>
       <div className="mb-6 sm:mb-8">
         <DashboardTimelineTabs
