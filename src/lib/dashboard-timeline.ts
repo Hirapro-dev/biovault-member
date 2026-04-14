@@ -11,28 +11,29 @@ import prisma from "@/lib/prisma";
 // actor: "admin" = 管理者対応, "member" = 会員待ち
 // note: ダッシュボードに表示する備考（やること）
 const IPS_STEPS = [
-  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認／IDパス発行", icon: "📋", actor: "admin" as const, note: "健康状態確認し、問題なければIDパス発行" },
-  { key: "DOC_IMPORTANT", label: "重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意待ち", icon: "📜", actor: "member" as const, note: "会員待ち" },
-  { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員待ち" },
-  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名待ち", icon: "📝", actor: "member" as const, note: "会員待ち（契約書署名完了後、PDFをアップ）" },
-  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認待ち", icon: "💰", actor: "member" as const, note: "会員待ち（入金確認後チェック）" },
-  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整／細胞提供・保管同意待ち", icon: "📅", actor: "member" as const, note: "会員待ち（日程調整希望が入ったら、日程調整へ入る）" },
-  { key: "CLINIC_CONFIRMED", label: "日程確定待ち", icon: "🏥", actor: "admin" as const, note: "確定した日程を入力" },
-  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意待ち", icon: "📄", actor: "member" as const, note: "会員待ち（問診・採血当日までに実施をさせる）" },
-  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "問診・採血完了の確認が取れたら完了日を入力" },
-  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const, note: "iPS細胞作製が開始された日を入力" },
-  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", actor: "admin" as const, note: "iPS細胞作製完了日・保管開始日を入力" },
+  { key: "TERMS_AGREED", label: "iPS細胞作製適合確認／IDパス発行", icon: "📋", actor: "admin" as const, note: "管理側：会員の健康状態確認し、問題なければIDパス発行後、進行。" },
+  { key: "DOC_IMPORTANT", label: "重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意待ち", icon: "📜", actor: "member" as const, note: "会員が、初ログインを行い同意書にチェック後、進行。" },
+  { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員より、iPSサービス利用申込があり次第、進行。" },
+  { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名待ち", icon: "📝", actor: "member" as const, note: "会員が、契約書署名後、管理側にて、PDFをアップロード後、進行。" },
+  { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認待ち", icon: "💰", actor: "member" as const, note: "会員が入金し、管理側にて入金確認が取れたら、チェックを行い、進行。" },
+  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整／細胞提供・保管同意待ち", icon: "📅", actor: "member" as const, note: "会員より、日程調整希望が入ったら、進行。管理側：クリニック側と会員と3者間で日程調整へ入る。" },
+  { key: "CLINIC_CONFIRMED", label: "日程確定待ち", icon: "🏥", actor: "admin" as const, note: "管理側：日程が確定した日程を入力すると、進行。" },
+  { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意待ち", icon: "📄", actor: "member" as const, note: "会員にて、問診・採血当日までに同意を結ぶ、同意後、進行" },
+  { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "管理側：問診・採血完了の確認が取れたら完了日を入力し、進行。" },
+  { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const, note: "管理側：iPS細胞作製が開始された日を入力し、進行。" },
+  { key: "STORAGE_ACTIVE", label: "iPS細胞保管", icon: "🏛️", actor: "admin" as const, note: "管理側：iPS細胞作製完了日・保管開始日を入力し、完了。" },
 ] as const;
 
 // 培養上清液ステップ定義
 const CF_STEPS = [
-  { key: "APPLIED", label: "追加購入申込", icon: "🧪", actor: "member" as const, note: "会員待ち" },
-  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", actor: "member" as const, note: "会員待ち（入金確認後チェック）" },
-  { key: "PRODUCING", label: "iPS培養上清液の精製", icon: "⚗️", actor: "admin" as const, note: "精製開始されたら開始日を入力" },
-  { key: "CLINIC_BOOKING", label: "クリニック予約", icon: "📅", actor: "member" as const, note: "会員待ち（予約希望が入ったら、日程調整に入る）" },
-  { key: "INFORMED_AGREED", label: "事前説明・同意", icon: "📄", actor: "member" as const, note: "会員待ち" },
-  { key: "RESERVATION_CONFIRMED", label: "予約確定", icon: "🏥", actor: "admin" as const, note: "予約が確定したら、日程とクリニックを入力" },
-  { key: "COMPLETED", label: "施術完了", icon: "✓", actor: "admin" as const, note: "施術の完了確認が入ったら日付を入力" },
+  { key: "APPLIED", label: "追加購入申込", icon: "🧪", actor: "member" as const, note: "会員より、iPS培養上清駅利用申込があり次第、進行" },
+  { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", actor: "member" as const, note: "会員が入金し、管理側にて入金確認が取れたら、チェックを行い、進行。" },
+  { key: "PRODUCING", label: "iPS培養上清液の精製", icon: "⚗️", actor: "admin" as const, note: "管理側：精製開始されたら開始日を入力。" },
+  { key: "CF_STORAGE", label: "iPS培養上清液の保管", icon: "🏛️", actor: "admin" as const, note: "管理側：精製完了し、iPS培養上清液の保管開始されたら開始日を入力。" },
+  { key: "CLINIC_BOOKING", label: "クリニック予約", icon: "📅", actor: "member" as const, note: "会員より、クリニック予約希望が入ったら、進行。管理側：クリニック側と会員と3者間で日程調整へ入る。" },
+  { key: "INFORMED_AGREED", label: "事前説明・同意", icon: "📄", actor: "member" as const, note: "会員にて、同意後、進行" },
+  { key: "RESERVATION_CONFIRMED", label: "予約確定", icon: "🏥", actor: "admin" as const, note: "管理側：予約が確定したら、日程とクリニックを入力" },
+  { key: "COMPLETED", label: "施術完了", icon: "✓", actor: "admin" as const, note: "管理側：施術の完了確認が入ったら日付を入力" },
 ] as const;
 
 const DB_ORDER = ["REGISTERED", "TERMS_AGREED", "SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"];
@@ -201,7 +202,7 @@ export async function getCfTimeline(
         orderBy: { updatedAt: "desc" },
         select: {
           id: true, status: true, planLabel: true, totalAmount: true,
-          clinicDate: true, clinicName: true, updatedAt: true,
+          clinicDate: true, clinicName: true, updatedAt: true, producedAt: true,
         },
       },
     },
@@ -214,8 +215,10 @@ export async function getCfTimeline(
 
   for (const user of users) {
     for (const order of user.cultureFluidOrders) {
-      if (stepMap[order.status]) {
-        stepMap[order.status].push({
+      // PRODUCINGステータスで精製完了済み（producedAt有）→ CF_STORAGE に振り分け
+      const stepKey = (order.status === "PRODUCING" && order.producedAt) ? "CF_STORAGE" : order.status;
+      if (stepMap[stepKey]) {
+        stepMap[stepKey].push({
           userId: user.id,
           name: user.name,
           memberNumber: user.membership?.memberNumber || "---",
