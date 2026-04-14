@@ -156,6 +156,12 @@ export default async function MemberKartePage({
               clinicName={membership.clinicName || null}
               clinicAddress={membership.clinicAddress || null}
               contractSignedAt={membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null}
+              contractDate={membership.contractDate ? membership.contractDate.toISOString() : null}
+              statusDates={Object.fromEntries(
+                user.statusHistory
+                  .filter(h => ["BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"].includes(h.toStatus))
+                  .map(h => [h.toStatus, h.changedAt.toISOString()])
+              )}
             />
           ) : <div className="text-text-muted text-sm py-4 text-center">会員権情報なし</div>
         }

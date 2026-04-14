@@ -458,6 +458,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                   type="date"
                   value={inputProducedDate}
                   onChange={(e) => setInputProducedDate(e.target.value)}
+                  min={(() => { const o = orders.find(o => o.id === showProducedPopup); return o?.paidAt?.split("T")[0] || ""; })()}
                   className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
                 />
               </div>
@@ -511,6 +512,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                   type="date"
                   value={inputClinicDate}
                   onChange={(e) => setInputClinicDate(e.target.value)}
+                  min={(() => { const o = orders.find(o => o.id === showClinicPopup); return o?.producedAt?.split("T")[0] || ""; })()}
                   className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
                 />
               </div>
@@ -601,6 +603,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                   type="date"
                   value={inputPaidDate}
                   onChange={(e) => setInputPaidDate(e.target.value)}
+                  min={(() => { const o = orders.find(o => o.id === showPaymentPopup); return o?.createdAt?.split("T")[0] || ""; })()}
                   className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
                 />
               </div>
@@ -663,6 +666,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                       type="date"
                       value={inputCompletedDate}
                       onChange={(e) => setInputCompletedDate(e.target.value)}
+                      min={(() => { const o = orders.find(o => o.id === showCompletedPopup); return o?.clinicDate?.split("T")[0] || ""; })()}
                       className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
                     />
                   </div>
@@ -746,6 +750,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                   type="date"
                   value={inputClinicDate}
                   onChange={(e) => setInputClinicDate(e.target.value)}
+                  min={(() => { const o = orders.find(o => o.id === showReservationPopup); return o?.producedAt?.split("T")[0] || ""; })()}
                   className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
                 />
               </div>

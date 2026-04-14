@@ -38,11 +38,14 @@ interface Props {
   clinicName: string | null;
   clinicAddress: string | null;
   contractSignedAt: string | null;
+  contractDate?: string | null;
+  /** 各ステータスの変更日（前ステップの日付制約に使用） */
+  statusDates?: Record<string, string>;
   /** 閲覧専用モード（従業員・代理店ページから利用される） */
   readOnly?: boolean;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt, readOnly = false }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt, contractDate, statusDates = {}, readOnly = false }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
@@ -293,7 +296,7 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
             <div className="space-y-4">
               <div>
                 <label className="block text-xs text-text-secondary mb-1">予定日</label>
-                <input type="date" value={inputClinicDate} onChange={(e) => setInputClinicDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
+                <input type="date" value={inputClinicDate} onChange={(e) => setInputClinicDate(e.target.value)} min={contractDate?.split("T")[0] || ""} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
               </div>
               <div>
                 <label className="block text-xs text-text-secondary mb-1">提携クリニック</label>
@@ -369,7 +372,12 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
             <div className="space-y-4">
               <div>
                 <label className="block text-xs text-text-secondary mb-1">{DATE_POPUP_CONFIG[showDatePopup].label}</label>
-                <input type="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
+                {/* 前ステップの日付より過去は入力不可 */}
+                <input type="date" value={inputDate} onChange={(e) => setInputDate(e.target.value)} min={
+                  showDatePopup === "BLOOD_COLLECTED" ? (clinicDate?.split("T")[0] || "") :
+                  showDatePopup === "IPS_CREATING" ? (statusDates["BLOOD_COLLECTED"]?.split("T")[0] || "") :
+                  showDatePopup === "STORAGE_ACTIVE" ? (statusDates["IPS_CREATING"]?.split("T")[0] || "") : ""
+                } className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none" />
               </div>
               {/* 問診・採血の場合、iPS作製中自動設定の案内 */}
               {showDatePopup === "BLOOD_COLLECTED" && inputDate && (
