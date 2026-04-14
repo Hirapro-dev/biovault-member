@@ -157,7 +157,7 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
                     登録: {new Date(a.createdAt).toLocaleDateString("ja-JP")}
                   </div>
                 </div>
-                <Link href={`/admin/agencies/${a.agencyProfile?.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
+                <Link href={`/admin/agencies/${a.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
                   詳細
                 </Link>
               </div>
