@@ -172,7 +172,7 @@ export default async function MemberKartePage({
       )}
 
       {/* 購入履歴 */}
-      <div className="mt-6">
+      <div className="mt-6 mb-8">
         <PurchaseHistory userId={user.id} />
       </div>
 
