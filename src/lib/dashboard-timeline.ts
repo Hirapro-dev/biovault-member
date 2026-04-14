@@ -12,6 +12,7 @@ import prisma from "@/lib/prisma";
 // note: ダッシュボードに表示する備考（やること）
 const IPS_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認／IDパス発行", icon: "📋", actor: "admin" as const, note: "健康状態確認し、問題なければIDパス発行" },
+  { key: "DOC_IMPORTANT", label: "重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意", icon: "📜", actor: "member" as const, note: "会員待ち" },
   { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員待ち" },
   { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝", actor: "member" as const, note: "会員待ち（契約書署名完了後、PDFをアップ）" },
   { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰", actor: "member" as const, note: "会員待ち（入金確認後チェック）" },
@@ -94,6 +95,7 @@ function getCurrentStep(
   // SCHEDULE_ARRANGED: 日程調整希望＋細胞提供・保管同意＋日程確定を統合
   const isDone = (key: string): boolean => {
     if (key === "TERMS_AGREED") return statusIdx >= DB_ORDER.indexOf("TERMS_AGREED") && isIdIssued;
+    if (key === "DOC_IMPORTANT") return (signedDocTypes.includes("CONTRACT") || hasAgreedTerms) && (signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms);
     if (key === "DOC_PRIVACY") return statusIdx >= DB_ORDER.indexOf("SERVICE_APPLIED");
     if (key === "CONTRACT_SIGNING") return !!contractSignedAt;
     if (key === "PAYMENT_CONFIRMED") return paymentStatus === "COMPLETED";
