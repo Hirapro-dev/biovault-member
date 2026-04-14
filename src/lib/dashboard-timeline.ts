@@ -16,7 +16,8 @@ const IPS_STEPS = [
   { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員待ち" },
   { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝", actor: "member" as const, note: "会員待ち（契約書署名完了後、PDFをアップ）" },
   { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰", actor: "member" as const, note: "会員待ち（入金確認後チェック）" },
-  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整／細胞提供・保管同意／日程確定", icon: "📅", actor: "admin" as const, note: "日程調整希望が入ったら日程調整し、確定した日程を入力" },
+  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整／細胞提供・保管同意待ち", icon: "📅", actor: "member" as const, note: "会員待ち（日程調整希望が入ったら、日程調整へ入る）" },
+  { key: "CLINIC_CONFIRMED", label: "日程確定待ち", icon: "🏥", actor: "admin" as const, note: "確定した日程を入力" },
   { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄", actor: "member" as const, note: "会員待ち（問診・採血当日までに実施をさせる）" },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "問診・採血完了の確認が取れたら完了日を入力" },
   { key: "IPS_CREATING", label: "iPS細胞作製中", icon: "🧬", actor: "admin" as const, note: "iPS細胞作製が開始された日を入力" },
@@ -92,14 +93,14 @@ function getCurrentStep(
   // 各ステップの完了判定
   // TERMS_AGREED: 適合確認＋ID発行を統合（両方完了で次へ）
   // DOC_PRIVACY: 重要事項確認＋iPSサービス利用申込を統合
-  // SCHEDULE_ARRANGED: 日程調整希望＋細胞提供・保管同意＋日程確定を統合
   const isDone = (key: string): boolean => {
     if (key === "TERMS_AGREED") return statusIdx >= DB_ORDER.indexOf("TERMS_AGREED") && isIdIssued;
     if (key === "DOC_IMPORTANT") return (signedDocTypes.includes("CONTRACT") || hasAgreedTerms) && (signedDocTypes.includes("PRIVACY_POLICY") || hasAgreedTerms);
     if (key === "DOC_PRIVACY") return statusIdx >= DB_ORDER.indexOf("SERVICE_APPLIED");
     if (key === "CONTRACT_SIGNING") return !!contractSignedAt;
     if (key === "PAYMENT_CONFIRMED") return paymentStatus === "COMPLETED";
-    if (key === "SCHEDULE_ARRANGED") return statusIdx >= DB_ORDER.indexOf("SCHEDULE_ARRANGED") && !!clinicDate;
+    if (key === "SCHEDULE_ARRANGED") return statusIdx >= DB_ORDER.indexOf("SCHEDULE_ARRANGED");
+    if (key === "CLINIC_CONFIRMED") return !!clinicDate;
     if (key === "DOC_INFORMED") return signedDocTypes.includes("INFORMED_CONSENT");
     if (key === "BLOOD_COLLECTED") return statusIdx >= DB_ORDER.indexOf("BLOOD_COLLECTED");
     if (key === "IPS_CREATING") return statusIdx >= DB_ORDER.indexOf("IPS_CREATING");
