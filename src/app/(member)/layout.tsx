@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
 import BottomNav from "@/components/layout/BottomNav";
 import AccessLogger from "@/components/analytics/AccessLogger";
@@ -45,13 +44,8 @@ export default async function MemberLayout({
       </div>
 
       <div className="flex-1 overflow-y-auto relative w-full">
-        {/* モバイル: ハンバーガーナビ */}
-        <MobileNav isAdmin={false} userName={user.name} signedDocTypes={signedDocTypes} />
-
-        {/* PC: ヘッダー */}
-        <div className="hidden lg:block">
-          <Header userName={user.name} isAdmin={false} />
-        </div>
+        {/* ハンバーガーナビ（PC・モバイル共通サブメニュー） */}
+        <MobileNav isAdmin={false} userName={user.name} signedDocTypes={signedDocTypes} showOnAllScreens />
 
         <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
           {children}
