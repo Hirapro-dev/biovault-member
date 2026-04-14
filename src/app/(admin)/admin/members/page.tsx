@@ -78,6 +78,29 @@ export default async function AdminMembersPage({
     ? members.filter((m) => m.membership?.ipsStatus === status)
     : members;
 
+  // 担当者名を一括取得（従業員コード → 名前、代理店コード → 名前）
+  const staffCodes = [...new Set(filtered.map((m) => m.referredByStaff).filter(Boolean))] as string[];
+  const agencyCodes = [...new Set(filtered.map((m) => m.referredByAgency).filter(Boolean))] as string[];
+
+  const [staffRecords, agencyRecords] = await Promise.all([
+    staffCodes.length > 0
+      ? prisma.staff.findMany({ where: { staffCode: { in: staffCodes } }, select: { staffCode: true, name: true } })
+      : [],
+    agencyCodes.length > 0
+      ? prisma.agencyProfile.findMany({ where: { agencyCode: { in: agencyCodes } }, select: { agencyCode: true, companyName: true, representativeName: true } })
+      : [],
+  ]);
+
+  const staffMap = new Map(staffRecords.map((s) => [s.staffCode, s.name]));
+  const agencyMap = new Map(agencyRecords.map((a) => [a.agencyCode, a.companyName || a.representativeName || a.agencyCode]));
+
+  const getAssignedName = (m: { referredByStaff: string | null; referredByAgency: string | null }): string => {
+    const parts: string[] = [];
+    if (m.referredByStaff && staffMap.has(m.referredByStaff)) parts.push(staffMap.get(m.referredByStaff)!);
+    if (m.referredByAgency && agencyMap.has(m.referredByAgency)) parts.push(agencyMap.get(m.referredByAgency)!);
+    return parts.join(" / ") || "---";
+  };
+
   const paymentColors: Record<string, string> = {
     COMPLETED: "text-status-active",
     PARTIAL: "text-status-warning",
@@ -121,7 +144,8 @@ export default async function AdminMembersPage({
                   {m.membership ? PAYMENT_STATUS_LABELS[m.membership.paymentStatus] : "---"}
                 </span>
               </div>
-              <div className="text-sm text-text-primary mb-2">{m.name}</div>
+              <div className="text-sm text-text-primary mb-1">{m.name}</div>
+              <div className="text-[10px] text-text-muted mb-2">{getAssignedName(m)}</div>
               <div className="flex items-center justify-between">
                 <span className={`text-[10px] px-2 py-0.5 rounded-full bg-gold/10 border border-gold/20 ${ds.color}`}>
                   {ds.label}
@@ -145,7 +169,7 @@ export default async function AdminMembersPage({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-border">
-              {["会員番号", "氏名", "現在のステップ", "入金状況", "申込日", ""].map((h, i) => (
+              {["会員番号", "氏名", "担当", "現在のステップ", "入金状況", "申込日", ""].map((h, i) => (
                 <th
                   key={i}
                   className="px-5 py-3.5 text-left text-[11px] text-text-muted tracking-wider font-normal"
@@ -167,6 +191,9 @@ export default async function AdminMembersPage({
                     {m.membership?.memberNumber || "---"}
                   </td>
                   <td className="px-5 py-3.5 text-[13px]">{m.name}</td>
+                  <td className="px-5 py-3.5 text-[11px] text-text-muted max-w-[140px] truncate">
+                    {getAssignedName(m)}
+                  </td>
                   <td className="px-5 py-3.5">
                     <span className={`text-[11px] px-2.5 py-1 rounded-full bg-gold/10 border border-gold/20 ${ds.color}`}>
                       {ds.label}
@@ -199,7 +226,7 @@ export default async function AdminMembersPage({
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-text-muted text-sm">
+                <td colSpan={7} className="px-5 py-12 text-center text-text-muted text-sm">
                   該当する会員が見つかりません
                 </td>
               </tr>
