@@ -15,7 +15,7 @@ const IPS_STEPS = [
   { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員待ち" },
   { key: "CONTRACT_SIGNING", label: "iPSサービス利用契約書署名", icon: "📝", actor: "member" as const, note: "会員待ち（契約書署名完了後、PDFをアップ）" },
   { key: "PAYMENT_CONFIRMED", label: "iPSサービス利用契約締結・入金確認", icon: "💰", actor: "member" as const, note: "会員待ち（入金確認後チェック）" },
-  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整希望／細胞提供・保管同意", icon: "📅", actor: "member" as const, note: "会員待ち（日程調整希望が入ったら、日程調整へ入る）" },
+  { key: "SCHEDULE_ARRANGED", label: "クリニック日程調整希望／細胞提供・保管同意", icon: "📅", actor: "admin" as const, note: "会員待ち（日程調整希望が入ったら、日程調整へ入る）" },
   { key: "CLINIC_CONFIRMED", label: "日程確定", icon: "🏥", actor: "admin" as const, note: "確定した日程の入力" },
   { key: "DOC_INFORMED", label: "iPS細胞作製における事前説明・同意", icon: "📄", actor: "member" as const, note: "会員待ち（問診・採血当日までに実施をさせる）" },
   { key: "BLOOD_COLLECTED", label: "問診・採血", icon: "💉", actor: "admin" as const, note: "問診・採血完了の確認が取れたら完了日を入力" },
