@@ -25,6 +25,8 @@ function ApplyPage() {
   };
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [testerRedirect, setTesterRedirect] = useState<{ loginId: string; password: string } | null>(null);
+  const [testerCountdown, setTesterCountdown] = useState(3);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -83,8 +85,8 @@ function ApplyPage() {
       if (!res.ok) {
         setError(data.error || "送信に失敗しました");
       } else if (data.isTester) {
-        // テスターはログインページへ直接遷移（loginId/passwordを自動入力）
-        window.location.href = `/login?tid=${encodeURIComponent(data.loginId)}&tpw=${encodeURIComponent(data.tempPassword)}`;
+        // テスター：サンクスページを表示後、3秒でログインページへ遷移
+        setTesterRedirect({ loginId: data.loginId, password: data.tempPassword });
       } else {
         setDone(true);
       }
@@ -94,6 +96,39 @@ function ApplyPage() {
       setSubmitting(false);
     }
   };
+
+  // テスター：サンクスページ表示 → 3秒後にログインページへリダイレクト
+  useEffect(() => {
+    if (!testerRedirect) return;
+    if (testerCountdown <= 0) {
+      window.location.href = `/login?tid=${encodeURIComponent(testerRedirect.loginId)}&tpw=${encodeURIComponent(testerRedirect.password)}`;
+      return;
+    }
+    const timer = setTimeout(() => setTesterCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [testerRedirect, testerCountdown]);
+
+  if (testerRedirect) {
+    return (
+      <PageWrapper>
+        <div className="text-center py-16">
+          <div className="text-5xl mb-6">✓</div>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">テストアカウントを作成しました</h2>
+          <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
+            <div className="bg-bg-elevated border border-border-gold rounded-md p-4 text-left">
+              <div className="text-[11px] text-text-muted mb-1">ログインID</div>
+              <div className="font-mono text-lg text-gold tracking-wider">{testerRedirect.loginId}</div>
+              <div className="text-[11px] text-text-muted mb-1 mt-3">パスワード</div>
+              <div className="font-mono text-lg text-gold tracking-wider">{testerRedirect.password}</div>
+            </div>
+            <p className="text-text-muted text-xs">
+              <span className="text-gold font-medium">{testerCountdown}秒後</span>にログインページへ移動します...
+            </p>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   if (done) {
     return (
