@@ -16,10 +16,22 @@ export async function requireAuth(): Promise<SessionUser> {
   return session.user as SessionUser;
 }
 
+// 管理画面にアクセスできるロール（4段階すべて）
+const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "OPERATOR", "VIEWER"];
+
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireAuth();
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+  if (!ADMIN_ROLES.includes(user.role)) {
     redirect("/dashboard");
+  }
+  return user;
+}
+
+// SUPER_ADMINのみ（ユーザー管理用）
+export async function requireSuperAdmin(): Promise<SessionUser> {
+  const user = await requireAuth();
+  if (user.role !== "SUPER_ADMIN") {
+    redirect("/admin");
   }
   return user;
 }

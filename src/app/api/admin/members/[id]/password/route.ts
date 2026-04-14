@@ -9,7 +9,7 @@ const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.tr
 // 管理者からパスワード変更
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 

@@ -14,12 +14,12 @@ export default async function AdminLayout({
     <div className="flex min-h-screen bg-bg-primary text-text-primary font-sans">
       {/* PC: サイドバー */}
       <div className="hidden lg:block">
-        <Sidebar isAdmin={true} />
+        <Sidebar isAdmin={true} userRole={user.role} />
       </div>
 
       <div className="flex-1 overflow-y-auto relative w-full">
         {/* モバイル: ハンバーガーナビ */}
-        <MobileNav isAdmin={true} userName={user.name} />
+        <MobileNav isAdmin={true} userName={user.name} userRole={user.role} />
 
         {/* PC: ヘッダー */}
         <div className="hidden lg:block">

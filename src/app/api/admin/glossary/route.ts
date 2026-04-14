@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // GET: 用語集一覧（カテゴリ→表示順）
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 
@@ -23,7 +23,7 @@ export async function GET() {
 // POST: 用語の新規作成
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 

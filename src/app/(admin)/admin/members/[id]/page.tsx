@@ -21,8 +21,12 @@ export default async function MemberKartePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
+  const adminUser = await requireAdmin();
   const { id } = await params;
+
+  // ロール別の権限フラグ
+  const isViewerOnly = adminUser.role === "VIEWER";
+  const canFullEdit = ["SUPER_ADMIN", "ADMIN"].includes(adminUser.role);
 
   const user = await prisma.user.findUnique({
     where: { id },
@@ -130,13 +134,15 @@ export default async function MemberKartePage({
         </div>
       </div>
 
-      {/* アカウント情報（ID発行・PW変更） */}
-      <IssueIdSection
-        userId={user.id}
-        currentLoginId={user.loginId}
-        nameKana={user.nameKana || ""}
-        isIdIssued={user.isIdIssued}
-      />
+      {/* アカウント情報（ID発行・PW変更）— ADMIN以上のみ */}
+      {canFullEdit && (
+        <IssueIdSection
+          userId={user.id}
+          currentLoginId={user.loginId}
+          nameKana={user.nameKana || ""}
+          isIdIssued={user.isIdIssued}
+        />
+      )}
 
       {/* ステータス（タブ切り替え） */}
       <StatusTabs
@@ -162,6 +168,7 @@ export default async function MemberKartePage({
                   .filter(h => ["BLOOD_COLLECTED", "IPS_CREATING", "STORAGE_ACTIVE"].includes(h.toStatus))
                   .map(h => [h.toStatus, h.changedAt.toISOString()])
               )}
+              readOnly={isViewerOnly}
             />
           ) : <div className="text-text-muted text-sm py-4 text-center">会員権情報なし</div>
         }
@@ -190,6 +197,7 @@ export default async function MemberKartePage({
               sessionDates: o.sessionDates ?? null,
               createdAt: o.createdAt.toISOString(),
             }))}
+            readOnly={isViewerOnly}
           />
         }
       />
@@ -359,8 +367,10 @@ export default async function MemberKartePage({
         )}
       </div>
 
-      {/* アカウント削除 */}
-      <DeleteAccount userId={user.id} loginId={user.loginId} />
+      {/* アカウント削除 — ADMIN以上のみ */}
+      {canFullEdit && (
+        <DeleteAccount userId={user.id} loginId={user.loginId} />
+      )}
     </div>
   );
 }

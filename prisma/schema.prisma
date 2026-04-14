@@ -79,6 +79,8 @@ enum Role {
   SUPER_ADMIN
   AGENCY
   STAFF
+  OPERATOR      // 処理者（ステータス更新・日付入力のみ）
+  VIEWER        // 閲覧者（閲覧のみ）
 }
 
 // ────────────────────────────────────────

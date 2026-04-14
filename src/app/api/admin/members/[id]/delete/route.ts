@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // 会員削除（関連データも全て削除）
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as { role: string }).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as { role: string }).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 

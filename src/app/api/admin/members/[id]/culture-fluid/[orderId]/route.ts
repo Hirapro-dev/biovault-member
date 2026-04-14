@@ -8,7 +8,7 @@ import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as { role: string }).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as { role: string }).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 

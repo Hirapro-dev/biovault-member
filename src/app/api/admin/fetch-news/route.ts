@@ -110,7 +110,7 @@ function decodeHtmlEntities(text: string): string {
 // POST: ニュース取得実行（高速版 — OGP画像取得なし、RSS即保存）
 export async function POST() {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 
@@ -154,7 +154,7 @@ export async function POST() {
 // GET: 外部ニュース一覧取得
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 
@@ -169,7 +169,7 @@ export async function GET() {
 // PATCH: 公開/非公開切り替え
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 

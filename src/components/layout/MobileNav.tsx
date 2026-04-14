@@ -57,12 +57,13 @@ const adminNav = [
 export default function MobileNav({
   isAdmin,
   userName,
+  userRole,
   // 後方互換のため受け取るが、新メニュー構造では使用しない
-  // （旧メニューでは同意済み書類のみ表示するために使われていた）
   signedDocTypes: _signedDocTypes = [],
 }: {
   isAdmin: boolean;
   userName: string;
+  userRole?: string;
   signedDocTypes?: string[];
 }) {
   // ESLint未使用警告を避けるため明示的に void
@@ -140,28 +141,44 @@ export default function MobileNav({
           {/* ナビゲーション */}
           <nav className="flex-1 p-3 overflow-y-auto">
             {isAdmin ? (
-              // 管理者: 従来通りフラットリスト
-              adminNav.map((item, idx) => {
-                const active =
-                  pathname === item.href || pathname.startsWith(item.href);
-                return (
+              // 管理者: フラットリスト + SUPER_ADMINのみ設定メニュー
+              <>
+                {adminNav.map((item, idx) => {
+                  const active =
+                    pathname === item.href || pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={`${item.href}-${idx}`}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base ${
+                        active
+                          ? "bg-bg-tertiary border border-border-gold text-gold"
+                          : "border border-transparent text-text-secondary active:bg-bg-elevated"
+                      }`}
+                    >
+                      <span className={`text-base ${active ? "opacity-100" : "opacity-50"}`}>
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </Link>
+                  );
+                })}
+                {userRole === "SUPER_ADMIN" && (
                   <Link
-                    key={`${item.href}-${idx}`}
-                    href={item.href}
+                    href="/admin/settings"
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base ${
-                      active
+                    className={`flex items-center gap-3 w-full px-4 py-4 mb-0.5 rounded transition-all duration-200 text-base mt-2 border-t border-border pt-4 ${
+                      pathname.startsWith("/admin/settings")
                         ? "bg-bg-tertiary border border-border-gold text-gold"
                         : "border border-transparent text-text-secondary active:bg-bg-elevated"
                     }`}
                   >
-                    <span className={`text-base ${active ? "opacity-100" : "opacity-50"}`}>
-                      {item.icon}
-                    </span>
-                    {item.label}
+                    <span className={`text-base ${pathname.startsWith("/admin/settings") ? "opacity-100" : "opacity-50"}`}>&#x2699;&#xFE0F;</span>
+                    設定
                   </Link>
-                );
-              })
+                )}
+              </>
             ) : (
               // 会員: グループ別表示
               MEMBER_NAV_GROUPS.map((group, gIdx) => (

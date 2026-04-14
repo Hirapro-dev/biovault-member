@@ -79,7 +79,7 @@ const adminNav = [
   { href: "/admin/glossary", label: "iPSとは？管理", icon: "🧬" },
 ];
 
-export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
+export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userRole?: string }) {
   const pathname = usePathname();
 
   return (
@@ -96,23 +96,39 @@ export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
       {/* ナビゲーション */}
       <nav className="flex-1 p-3 overflow-y-auto">
         {isAdmin ? (
-          adminNav.map((item) => {
-            const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-            return (
+          <>
+            {adminNav.map((item) => {
+              const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide ${
+                    active
+                      ? "bg-bg-tertiary border border-border-gold text-gold"
+                      : "border border-transparent text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                  }`}
+                >
+                  <span className={`text-sm ${active ? "opacity-100" : "opacity-50"}`}>{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
+            {userRole === "SUPER_ADMIN" && (
               <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide ${
-                  active
+                href="/admin/settings"
+                className={`flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide mt-2 border-t border-border pt-3 ${
+                  pathname.startsWith("/admin/settings")
                     ? "bg-bg-tertiary border border-border-gold text-gold"
                     : "border border-transparent text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 }`}
               >
-                <span className={`text-sm ${active ? "opacity-100" : "opacity-50"}`}>{item.icon}</span>
-                {item.label}
+                <span className={`text-sm ${pathname.startsWith("/admin/settings") ? "opacity-100" : "opacity-50"}`}>&#x2699;&#xFE0F;</span>
+                設定
               </Link>
-            );
-          })
+            )}
+          </>
+
         ) : (
           memberNav.map((item) => {
             const isExternal = "external" in item && item.external;
