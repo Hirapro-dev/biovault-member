@@ -43,7 +43,7 @@ export default async function AdminStaffPage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-border">
-                    {["コード", "氏名", "担当数", "入金済売上", "ステータス", ""].map((h, i) => (
+                    {["コード", "氏名", "担当数", "入金済売上", "ステータス"].map((h, i) => (
                       <th key={i} className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal">{h}</th>
                     ))}
                   </tr>
@@ -51,8 +51,16 @@ export default async function AdminStaffPage() {
                 <tbody>
                   {staffWithStats.map((s) => (
                     <tr key={s.id} className="border-b border-border hover:bg-bg-elevated transition-colors">
-                      <td className="px-4 py-3 font-mono text-[13px] text-gold">{s.staffCode}</td>
-                      <td className="px-4 py-3 text-sm">{s.name}</td>
+                      <td className="px-4 py-3 font-mono text-[13px] text-gold">
+                        <Link href={`/admin/staff/${s.id}`} className="hover:underline">
+                          {s.staffCode}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <Link href={`/admin/staff/${s.id}`} className="hover:text-gold transition-colors">
+                          {s.name}
+                        </Link>
+                      </td>
                       <td className="px-4 py-3 text-xs text-text-secondary font-mono">{s.customerCount}名</td>
                       <td className="px-4 py-3 text-xs text-gold font-mono">¥{s.paidAmount.toLocaleString()}</td>
                       <td className="px-4 py-3">
@@ -61,11 +69,6 @@ export default async function AdminStaffPage() {
                         ) : (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-text-muted/10 text-text-muted border border-text-muted/20">無効</span>
                         )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Link href={`/admin/staff/${s.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
-                          カルテ
-                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -78,20 +81,21 @@ export default async function AdminStaffPage() {
               {staffWithStats.map((s) => (
                 <div key={s.id} className="px-4 py-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[13px] text-gold">{s.staffCode}</span>
+                    <Link href={`/admin/staff/${s.id}`} className="font-mono text-[13px] text-gold hover:underline">
+                      {s.staffCode}
+                    </Link>
                     {s.isActive ? (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/10 text-status-active border border-status-active/20">有効</span>
                     ) : (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-text-muted/10 text-text-muted border border-text-muted/20">無効</span>
                     )}
                   </div>
-                  <div className="text-sm text-text-primary mb-1">{s.name}</div>
-                  <div className="text-[11px] text-text-muted mb-2">
+                  <Link href={`/admin/staff/${s.id}`} className="block text-sm text-text-primary mb-1 hover:text-gold transition-colors">
+                    {s.name}
+                  </Link>
+                  <div className="text-[11px] text-text-muted">
                     担当 {s.customerCount}名 ・ 入金済売上 ¥{s.paidAmount.toLocaleString()}
                   </div>
-                  <Link href={`/admin/staff/${s.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
-                    カルテ
-                  </Link>
                 </div>
               ))}
             </div>

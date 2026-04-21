@@ -217,28 +217,31 @@ export default async function MemberKartePage({
         cultureFluidTab={
           <CultureFluidStatusManager
             userId={user.id}
-            orders={user.cultureFluidOrders.map(o => ({
-              id: o.id,
-              planType: o.planType,
-              planLabel: o.planLabel,
-              totalAmount: o.totalAmount,
-              status: o.status,
-              paymentStatus: o.paymentStatus,
-              paidAt: o.paidAt ? o.paidAt.toISOString() : null,
-              producedAt: o.producedAt ? o.producedAt.toISOString() : null,
-              expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
-              clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
-              clinicName: o.clinicName,
-              clinicAddress: o.clinicAddress,
-              clinicPhone: o.clinicPhone,
-              cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null,
-              informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
-              completedAt: o.completedAt ? o.completedAt.toISOString() : null,
-              completedSessions: o.completedSessions ?? 0,
-              requestedSessionCount: o.requestedSessionCount ?? 1,
-              sessionDates: o.sessionDates ?? null,
-              createdAt: o.createdAt.toISOString(),
-            }))}
+            orders={user.cultureFluidOrders
+              // iPSサービス付属分は、iPS契約の入金が完了するまで非表示
+              .filter(o => o.planType !== "iv_drip_1_included" || membership?.paymentStatus === "COMPLETED")
+              .map(o => ({
+                id: o.id,
+                planType: o.planType,
+                planLabel: o.planLabel,
+                totalAmount: o.totalAmount,
+                status: o.status,
+                paymentStatus: o.paymentStatus,
+                paidAt: o.paidAt ? o.paidAt.toISOString() : null,
+                producedAt: o.producedAt ? o.producedAt.toISOString() : null,
+                expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
+                clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
+                clinicName: o.clinicName,
+                clinicAddress: o.clinicAddress,
+                clinicPhone: o.clinicPhone,
+                cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null,
+                informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null,
+                completedAt: o.completedAt ? o.completedAt.toISOString() : null,
+                completedSessions: o.completedSessions ?? 0,
+                requestedSessionCount: o.requestedSessionCount ?? 1,
+                sessionDates: o.sessionDates ?? null,
+                createdAt: o.createdAt.toISOString(),
+              }))}
             readOnly={isViewerOnly}
           />
         }

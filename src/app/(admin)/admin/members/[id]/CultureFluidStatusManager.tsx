@@ -128,18 +128,18 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
 
   // フェーズ1のステップ完了判定
   const isPhase1StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
-    const now = new Date();
     switch (stepKey) {
       case "APPLIED":
         return true;
       case "PAYMENT_CONFIRMED":
         return order.paymentStatus === "COMPLETED";
       case "PRODUCING":
-        // 精製完了日が設定済み かつ 現在日時を過ぎている
-        return !!order.producedAt && new Date(order.producedAt) <= now;
+        // 精製完了日が設定済みなら完了扱い
+        // （予定日が未来でも、管理側で設定した時点で「精製完了予定」として完了表示）
+        return !!order.producedAt;
       case "STORAGE":
-        // 精製完了済み かつ 管理期限が設定済み
-        return !!order.producedAt && new Date(order.producedAt) <= now && !!order.expiresAt;
+        // 精製完了日 かつ 管理期限が設定済み
+        return !!order.producedAt && !!order.expiresAt;
       default:
         return false;
     }

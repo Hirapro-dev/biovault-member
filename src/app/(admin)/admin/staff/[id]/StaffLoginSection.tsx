@@ -77,7 +77,12 @@ export default function StaffLoginSection({
         body: JSON.stringify({ loginId, password }),
       });
       if (res.ok) {
-        setMessage("ログインID・パスワードを発行しました");
+        const data = await res.json();
+        setMessage(
+          data.emailSent
+            ? "ログインID・パスワードを発行し、従業員宛にメールを送信しました"
+            : "ログインID・パスワードを発行しました（メール未送信：Staffマスタのメール未登録）"
+        );
         setOpen(false);
         router.refresh();
       } else {

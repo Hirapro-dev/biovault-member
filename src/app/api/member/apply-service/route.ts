@@ -38,12 +38,8 @@ export async function POST(req: Request) {
 
     const now = new Date();
 
-    // iPSサービス付属の培養上清液1回分が既に存在するか確認
-    const existingIncludedOrder = await prisma.cultureFluidOrder.findFirst({
-      where: { userId, planType: "iv_drip_1_included" },
-    });
-
     // トランザクションで一括更新
+    // （iPSサービス付属の培養上清液点滴1回分は、入金完了時に別途作成する）
     const transactionOps: Prisma.PrismaPromise<unknown>[] = [
       // 1. ユーザーの健康状態・支払情報を更新
       prisma.user.update({
@@ -91,25 +87,6 @@ export async function POST(req: Request) {
         },
       }),
     ];
-
-    // 4. iPSサービス付属の培養上清液点滴1回分を自動作成
-    //（880万円に含まれるため金額0、入金済み状態）
-    //（留意事項の同意はクリニック予約時に行うため cautionAgreedAt は未設定）
-    if (!existingIncludedOrder) {
-      transactionOps.push(
-        prisma.cultureFluidOrder.create({
-          data: {
-            userId,
-            planType: "iv_drip_1_included",
-            planLabel: "点滴1回分（10ml）※iPSサービス付属",
-            totalAmount: 0,
-            paymentStatus: "COMPLETED",
-            paidAt: now,
-            status: "APPLIED",
-          },
-        })
-      );
-    }
 
     await prisma.$transaction(transactionOps);
 

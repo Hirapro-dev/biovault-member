@@ -10,7 +10,7 @@ import prisma from "@/lib/prisma";
 // ── iPS ステップ定義（状況別） ──
 // actor: "admin" = 管理者対応, "member" = 会員待ち
 // note: ダッシュボードに表示する備考（やること）
-const IPS_STEPS = [
+export const IPS_STEPS = [
   { key: "TERMS_AGREED", label: "iPS細胞作製適合確認／IDパス発行", icon: "📋", actor: "admin" as const, note: "管理側：会員の健康状態確認し、問題なければIDパス発行後、進行。" },
   { key: "DOC_IMPORTANT", label: "重要事項説明書兼確認書／個人情報・個人遺伝情報等の取扱いに関する同意待ち", icon: "📜", actor: "member" as const, note: "会員が、初ログインを行い同意書にチェック後、進行。" },
   { key: "DOC_PRIVACY", label: "iPSサービス利用お申込待ち", icon: "✍️", actor: "member" as const, note: "会員より、iPSサービス利用申込があり次第、進行。" },
@@ -25,7 +25,7 @@ const IPS_STEPS = [
 ] as const;
 
 // 培養上清液ステップ定義
-const CF_STEPS = [
+export const CF_STEPS = [
   { key: "APPLIED", label: "追加購入申込", icon: "🧪", actor: "member" as const, note: "会員より、iPS培養上清駅利用申込があり次第、進行" },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", icon: "💰", actor: "member" as const, note: "会員が入金し、管理側にて入金確認が取れたら、チェックを行い、進行。" },
   { key: "PRODUCING", label: "iPS培養上清液の精製", icon: "⚗️", actor: "admin" as const, note: "管理側：精製開始されたら開始日を入力。" },
@@ -80,7 +80,7 @@ export type CfTimelineStep = {
 };
 
 // ── 各会員が「どのステップにいるか」を判定する ──
-function getCurrentStep(
+export function getCurrentStep(
   ipsStatus: string,
   isIdIssued: boolean,
   hasAgreedTerms: boolean,

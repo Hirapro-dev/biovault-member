@@ -2,7 +2,8 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
+import MembersTable from "@/components/members/MembersTable";
+import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import StaffReferralUrlSection from "./StaffReferralUrlSection";
 import StaffKarteActions from "./StaffKarteActions";
 import StaffLoginSection from "./StaffLoginSection";
@@ -20,8 +21,24 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
   // 担当顧客一覧
   const customers = await prisma.user.findMany({
     where: { referredByStaff: staff.staffCode, role: "MEMBER" },
-    include: { membership: true },
+    include: MEMBER_INCLUDE,
     orderBy: { createdAt: "desc" },
+  });
+
+  // 顧客の代理店担当名を解決
+  const custAgencyCodes = [...new Set(customers.map((c) => c.referredByAgency).filter(Boolean))] as string[];
+  const custAgencyRecords = custAgencyCodes.length > 0
+    ? await prisma.agencyProfile.findMany({
+        where: { agencyCode: { in: custAgencyCodes } },
+        select: { agencyCode: true, companyName: true, representativeName: true },
+      })
+    : [];
+  const custAgencyMap = new Map(
+    custAgencyRecords.map((a) => [a.agencyCode, a.companyName || a.representativeName || a.agencyCode])
+  );
+  const customerRows = customers.map((c) => {
+    const agencyName = c.referredByAgency ? custAgencyMap.get(c.referredByAgency) : null;
+    return buildMemberRow(c, agencyName || "---");
   });
 
   // 担当代理店一覧
@@ -105,34 +122,11 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
       <StaffReferralUrlSection staffCode={staff.staffCode} />
 
       {/* 担当顧客一覧 */}
-      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+      <div className="mt-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4">
           担当顧客 ({customers.length}名)
         </h3>
-        {customers.length === 0 ? (
-          <div className="text-text-muted text-sm py-4 text-center">担当顧客なし</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {customers.map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</span>
-                    <span className="text-sm text-text-primary">{c.name}</span>
-                  </div>
-                  <div className="text-[11px] text-text-muted mt-0.5">
-                    {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・
-                    {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"} ・
-                    ¥{(c.membership?.paidAmount || 0).toLocaleString()} / ¥{(c.membership?.totalAmount || 0).toLocaleString()}
-                  </div>
-                </div>
-                <Link href={`/admin/members/${c.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
-                  カルテ
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+        <MembersTable rows={customerRows} hrefPrefix="/admin/members" emptyMessage="担当顧客なし" />
       </div>
 
       {/* 担当代理店一覧 */}

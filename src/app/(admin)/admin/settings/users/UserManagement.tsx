@@ -136,13 +136,16 @@ export default function UserManagement({ users: initialUsers, currentUserId, isS
       if (!res.ok) {
         setAddError(data.error || "エラーが発生しました");
       } else {
-        setAddSuccess(`${data.name} を${ROLE_LABELS[data.role]}として追加しました`);
+        const mailNote = data.emailSent
+          ? "（登録アドレス宛にログイン情報を送信しました）"
+          : "（メール送信に失敗しました。ログをご確認ください）";
+        setAddSuccess(`${data.name} を${ROLE_LABELS[data.role]}として追加しました${mailNote}`);
         setTimeout(() => {
           setShowAddPopup(false);
           setAddForm({ name: "", email: "", loginId: "", password: generatePassword(), role: "OPERATOR" });
           setAddSuccess("");
           router.refresh();
-        }, 1500);
+        }, 2000);
       }
     } catch {
       setAddError("エラーが発生しました");
@@ -226,9 +229,11 @@ export default function UserManagement({ users: initialUsers, currentUserId, isS
                     <span className="text-sm text-text-primary font-medium">{u.name}</span>
                     {isSelf && <span className="text-[9px] text-gold">(自分)</span>}
                   </div>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ROLE_COLORS[u.role] || ""}`}>
-                    {ROLE_LABELS[u.role] || u.role}
-                  </span>
+                  {u.role === "SUPER_ADMIN" && (
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ROLE_COLORS[u.role] || ""}`}>
+                      {ROLE_LABELS[u.role] || u.role}
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-text-muted mb-2">
                   {u.email} / {u.loginId}
@@ -296,9 +301,11 @@ export default function UserManagement({ users: initialUsers, currentUserId, isS
                   <td className="px-4 py-3 text-[12px] text-text-muted font-mono">{u.loginId}</td>
                   <td className="px-4 py-3">
                     {!isSuperAdmin || isSelf ? (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ROLE_COLORS[u.role] || ""}`}>
-                        {ROLE_LABELS[u.role] || u.role}
-                      </span>
+                      u.role === "SUPER_ADMIN" && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${ROLE_COLORS[u.role] || ""}`}>
+                          {ROLE_LABELS[u.role] || u.role}
+                        </span>
+                      )
                     ) : (
                       <select
                         value={u.role}

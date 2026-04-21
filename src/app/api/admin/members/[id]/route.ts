@@ -123,6 +123,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (Object.keys(membershipData).length > 0) {
       await prisma.membership.update({ where: { userId: id }, data: membershipData });
     }
+
+    // 入金完了時: iPSサービス付属の培養上清液点滴1回分を自動作成
+    // （880万円に含まれるため金額0、入金済み状態で作成）
+    if (body.membership.paymentStatus === "COMPLETED") {
+      const existingIncludedOrder = await prisma.cultureFluidOrder.findFirst({
+        where: { userId: id, planType: "iv_drip_1_included" },
+      });
+      if (!existingIncludedOrder) {
+        const now = new Date();
+        await prisma.cultureFluidOrder.create({
+          data: {
+            userId: id,
+            planType: "iv_drip_1_included",
+            planLabel: "点滴1回分（10ml）※iPSサービス付属",
+            totalAmount: 0,
+            paymentStatus: "COMPLETED",
+            paidAt: now,
+            status: "APPLIED",
+          },
+        });
+      }
+    }
   }
 
   const updated = await prisma.user.findUnique({

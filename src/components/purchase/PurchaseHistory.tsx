@@ -44,7 +44,10 @@ export default async function PurchaseHistory({ userId }: Props) {
   if (!user) return null;
 
   const membership = user.membership;
-  const orders = user.cultureFluidOrders;
+  // iPSサービス付属分は、iPS契約の入金が完了するまで非表示
+  const orders = user.cultureFluidOrders.filter(
+    (o) => o.planType !== "iv_drip_1_included" || membership?.paymentStatus === "COMPLETED"
+  );
   const treatments = membership?.treatments || [];
 
   // 統合タイムラインを構築

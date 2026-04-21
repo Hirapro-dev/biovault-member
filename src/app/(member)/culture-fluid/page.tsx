@@ -33,7 +33,7 @@ const formatDate = (d: Date | string | null) => {
 export default async function CultureFluidPage() {
   const user = await requireAuth();
 
-  const orders = await prisma.cultureFluidOrder.findMany({
+  const allOrders = await prisma.cultureFluidOrder.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
   });
@@ -43,9 +43,15 @@ export default async function CultureFluidPage() {
   // iPS細胞のステータスを取得（付属分の表示切り替え用）
   const membership = await prisma.membership.findUnique({
     where: { userId: user.id },
-    select: { ipsStatus: true },
+    select: { ipsStatus: true, paymentStatus: true },
   });
   const isIpsStorageActive = membership?.ipsStatus === "STORAGE_ACTIVE";
+  const isIpsPaymentCompleted = membership?.paymentStatus === "COMPLETED";
+
+  // iPSサービス付属分は、iPS契約の入金が完了するまで非表示
+  const orders = allOrders.filter(
+    (o) => o.planType !== "iv_drip_1_included" || isIpsPaymentCompleted
+  );
 
   // 完了済み施術回数の合計（全注文のcompletedSessionsの合計）
   const completedCount = orders.reduce((sum, o) => sum + (o.completedSessions ?? 0), 0);

@@ -3,8 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendEmail, adminAccountCreatedEmail } from "@/lib/mail";
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "OPERATOR", "VIEWER"];
+
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "全権限者",
+  ADMIN: "管理者",
+  OPERATOR: "処理者",
+  VIEWER: "閲覧者",
+};
 
 // 管理者ユーザー一覧取得
 export async function GET() {
@@ -74,11 +82,33 @@ export async function POST(req: Request) {
     },
   });
 
+  // アカウント発行メール送信（平文パスワードはこのタイミングでしか扱えないため）
+  let emailSent = false;
+  try {
+    const roleLabel = ROLE_LABELS[user.role] || user.role;
+    const { subject, bodyText, bodyHtml } = adminAccountCreatedEmail(
+      user.name,
+      user.loginId,
+      password,
+      roleLabel
+    );
+    const result = await sendEmail({
+      to: user.email,
+      subject,
+      bodyText,
+      bodyHtml,
+    });
+    emailSent = result.success;
+  } catch (err) {
+    console.error("adminAccountCreatedEmail failed:", err);
+  }
+
   return NextResponse.json({
     id: user.id,
     name: user.name,
     email: user.email,
     loginId: user.loginId,
     role: user.role,
+    emailSent,
   });
 }

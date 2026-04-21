@@ -81,15 +81,35 @@ export default function TimelineView({ steps, hrefPrefix }: Props) {
                   <span className={`text-[13px] ${hasMembers ? "text-text-primary" : "text-text-muted"}`}>
                     {step.label}
                   </span>
-                  {step.actor && (
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${
-                      step.actor === "admin"
-                        ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    }`}>
-                      {step.actor === "admin" ? "管理者対応" : "会員待ち"}
-                    </span>
-                  )}
+                  {step.actor && (() => {
+                    // iPS保管完了 / 培養上清液保管 → グレーの「保管中」バッジ
+                    const isStorage = step.key === "STORAGE_ACTIVE" || step.key === "CF_STORAGE";
+                    // 施術完了 → グレーの「完了」バッジ
+                    const isCompleted = step.key === "COMPLETED";
+                    if (isStorage) {
+                      return (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full shrink-0 bg-gray-500/10 text-text-muted border border-border">
+                          保管中
+                        </span>
+                      );
+                    }
+                    if (isCompleted) {
+                      return (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full shrink-0 bg-gray-500/10 text-text-muted border border-border">
+                          完了
+                        </span>
+                      );
+                    }
+                    return (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                        step.actor === "admin"
+                          ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      }`}>
+                        {step.actor === "admin" ? "要対応" : "会員待ち"}
+                      </span>
+                    );
+                  })()}
                 </div>
                 {step.note && (
                   <div className="text-[10px] text-text-muted mt-0.5">{step.note}</div>

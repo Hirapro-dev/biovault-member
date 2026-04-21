@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendEmail, staffAccountCreatedEmail } from "@/lib/mail";
 
 // スタッフログインID発行
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as any).role)) {
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"].includes((session.user as { role: string }).role)) {
     return NextResponse.json({ error: "権限がありません" }, { status: 403 });
   }
 
@@ -67,5 +68,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     data: { userId: user.id },
   });
 
-  return NextResponse.json({ success: true, loginId });
+  // アカウント発行メール送信（Staffマスタにメールが登録されている場合のみ）
+  let emailSent = false;
+  if (staff.email) {
+    try {
+      const { subject, bodyText, bodyHtml } = staffAccountCreatedEmail(
+        staff.name,
+        loginId,
+        password
+      );
+      const result = await sendEmail({
+        to: staff.email,
+        subject,
+        bodyText,
+        bodyHtml,
+      });
+      emailSent = result.success;
+    } catch (err) {
+      console.error("staffAccountCreatedEmail failed:", err);
+    }
+  }
+
+  return NextResponse.json({ success: true, loginId, emailSent });
 }

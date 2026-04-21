@@ -3,7 +3,8 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
-import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
+import MembersTable from "@/components/members/MembersTable";
+import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import AgencyKarteActions from "./AgencyKarteActions";
 import ReferralUrlSection from "./ReferralUrlSection";
 import IssueIdSection from "../../members/[id]/IssueIdSection";
@@ -30,8 +31,22 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
   // 紹介顧客一覧
   const customers = await prisma.user.findMany({
     where: { referredByAgency: profile?.agencyCode, role: "MEMBER" },
-    include: { membership: true },
+    include: MEMBER_INCLUDE,
     orderBy: { createdAt: "desc" },
+  });
+
+  // 顧客の従業員担当名を解決
+  const custStaffCodes = [...new Set(customers.map((c) => c.referredByStaff).filter(Boolean))] as string[];
+  const custStaffRecords = custStaffCodes.length > 0
+    ? await prisma.staff.findMany({
+        where: { staffCode: { in: custStaffCodes } },
+        select: { staffCode: true, name: true },
+      })
+    : [];
+  const custStaffMap = new Map(custStaffRecords.map((s) => [s.staffCode, s.name]));
+  const customerRows = customers.map((c) => {
+    const staffName = c.referredByStaff ? custStaffMap.get(c.referredByStaff) : null;
+    return buildMemberRow(c, staffName || "---");
   });
 
   // 印刷依頼
@@ -119,33 +134,11 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
       />
 
       {/* 紹介顧客一覧 */}
-      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+      <div className="mt-6">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4">
           紹介顧客 ({customers.length}名)
         </h3>
-        {customers.length === 0 ? (
-          <div className="text-text-muted text-sm py-4 text-center">紹介顧客なし</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {customers.map((c) => (
-              <div key={c.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[13px] text-gold">{c.membership?.memberNumber || "---"}</span>
-                    <span className="text-sm text-text-primary">{c.name}</span>
-                  </div>
-                  <div className="text-[11px] text-text-muted mt-0.5">
-                    {c.membership ? IPS_STATUS_LABELS[c.membership.ipsStatus] : "---"} ・
-                    {c.membership ? PAYMENT_STATUS_LABELS[c.membership.paymentStatus] : "---"}
-                  </div>
-                </div>
-                <Link href={`/admin/members/${c.id}`} className="px-3 py-1 bg-transparent border border-border text-text-secondary rounded-sm text-[11px] hover:border-border-gold hover:text-gold transition-all">
-                  カルテ
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
+        <MembersTable rows={customerRows} hrefPrefix="/admin/members" emptyMessage="紹介顧客なし" />
       </div>
 
       {/* 報酬履歴 */}

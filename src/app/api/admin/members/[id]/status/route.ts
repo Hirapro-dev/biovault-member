@@ -101,29 +101,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     );
   }
 
-  // SERVICE_APPLIED: iPSサービス付属の培養上清液点滴1回分を自動作成
-  // （880万円に含まれるため金額0、入金済み状態で作成）
-  if (newStatus === "SERVICE_APPLIED") {
-    const existingIncludedOrder = await prisma.cultureFluidOrder.findFirst({
-      where: { userId: id, planType: "iv_drip_1_included" },
-    });
-
-    if (!existingIncludedOrder) {
-      transactionOps.push(
-        prisma.cultureFluidOrder.create({
-          data: {
-            userId: id,
-            planType: "iv_drip_1_included",
-            planLabel: "点滴1回分（10ml）※iPSサービス付属",
-            totalAmount: 0,
-            paymentStatus: "COMPLETED",
-            paidAt: specifiedDate,
-            status: "APPLIED",
-          },
-        })
-      );
-    }
-  }
+  // iPSサービス付属の培養上清液点滴1回分は、入金完了時に別途作成する
+  // （このAPIではステータス変更のみ）
 
   // STORAGE_ACTIVE: 付属の培養上清液の精製を開始
   // 保管開始日を起点に1ヶ月後を精製完了日、精製完了日+8ヶ月を管理期限として設定
