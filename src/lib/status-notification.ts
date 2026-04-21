@@ -2,10 +2,12 @@
  * ステータス変更通知ライブラリ
  *
  * 顧客のステータスが変更された際に、以下の宛先にメール通知を送信する:
- * - 固定管理メール（app@biovault.jp）
- * - 管理者（ADMIN / SUPER_ADMIN）全員
+ * - マスター通知メール（NOTIFY_ADMIN_EMAILS、デフォルトは noreply@sc-project-partners.co.jp）
  * - 担当従業員（referredByStaff → Staff.email）
  * - 担当代理店（referredByAgency → AgencyProfile → User.email）
+ *
+ * ※ 管理者（ADMIN / SUPER_ADMIN）ロールのユーザーには通知しません。
+ *   マスター通知が上記アドレスに届く運用のため。
  */
 
 import prisma from "@/lib/prisma";
@@ -56,16 +58,10 @@ const fmtDate = (d: Date | null | undefined) =>
 async function getNotificationRecipients(userId: string): Promise<string[]> {
   const emails: string[] = [];
 
-  const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "app@biovault.jp").split(",").map(e => e.trim()).filter(Boolean);
+  // マスター通知メール（管理者登録ユーザーには個別に送らない）
+  const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "noreply@sc-project-partners.co.jp")
+    .split(",").map(e => e.trim()).filter(Boolean);
   emails.push(...fixedNotifyEmails);
-
-  const admins = await prisma.user.findMany({
-    where: { role: { in: ["ADMIN", "SUPER_ADMIN"] }, isActive: true },
-    select: { email: true },
-  });
-  for (const admin of admins) {
-    emails.push(admin.email);
-  }
 
   const member = await prisma.user.findUnique({
     where: { id: userId },
