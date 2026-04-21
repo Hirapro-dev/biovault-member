@@ -2,7 +2,7 @@
  * ステータス変更通知ライブラリ
  *
  * 顧客のステータスが変更された際に、以下の宛先にメール通知を送信する:
- * - マスター通知メール（NOTIFY_ADMIN_EMAILS、デフォルトは noreply@sc-project-partners.co.jp）
+ * - マスター通知メール（NOTIFY_ADMIN_EMAILS、デフォルトは app@biovault.jp）
  * - 担当従業員（referredByStaff → Staff.email）
  * - 担当代理店（referredByAgency → AgencyProfile → User.email）
  *
@@ -59,7 +59,7 @@ async function getNotificationRecipients(userId: string): Promise<string[]> {
   const emails: string[] = [];
 
   // マスター通知メール（管理者登録ユーザーには個別に送らない）
-  const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "noreply@sc-project-partners.co.jp")
+  const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "app@biovault.jp")
     .split(",").map(e => e.trim()).filter(Boolean);
   emails.push(...fixedNotifyEmails);
 

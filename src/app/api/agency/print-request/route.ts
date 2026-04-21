@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   });
   // 管理者へメール通知
   try {
-    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || "noreply@sc-project-partners.co.jp";
+    const notifyEmail = process.env.ADMIN_NOTIFY_EMAIL || "app@biovault.jp";
     await sendEmail({
       to: notifyEmail,
       subject: `【BioVault】パンフレット印刷依頼（${profile?.agencyCode} / ${body.companyName}）`,
