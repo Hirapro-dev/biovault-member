@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, accountCreatedEmail, agencyAccountCreatedEmail } from "@/lib/mail";
-import { notifyIpsStatusChange } from "@/lib/status-notification";
+import { notifyIpsStatusChange, notifyAgencyIdIssued } from "@/lib/status-notification";
 
 // ID発行（ログインID確定 + パスワード設定 + isIdIssued=true）
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -64,21 +64,51 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     console.error("Account created email failed:", e);
   }
 
-  // メンバーシップ会員ID発行の通知
+  // ID発行の通知（ロール別に分岐）
   try {
-    const membership = await prisma.membership.findUnique({
-      where: { userId: id },
-      select: { memberNumber: true },
-    });
-    await notifyIpsStatusChange({
-      userId: id,
-      memberName: user.name,
-      memberNumber: membership?.memberNumber,
-      fromStatus: "REGISTERED",
-      toStatus: "ID_ISSUED",
-      changedBy: session.user.name || "管理者",
-      note: `ログインID: ${loginId}`,
-    });
+    if (user.role === "AGENCY") {
+      // エージェント用の通知
+      const profile = await prisma.agencyProfile.findUnique({
+        where: { userId: id },
+        select: { agencyCode: true, companyName: true },
+      });
+      // 担当従業員名を取得
+      let staffName: string | null = null;
+      if (user.referredByStaff) {
+        const staff = await prisma.staff.findUnique({
+          where: { staffCode: user.referredByStaff },
+          select: { name: true, staffCode: true },
+        });
+        staffName = staff ? `${staff.name}（${staff.staffCode}）` : null;
+      }
+      await notifyAgencyIdIssued({
+        userId: id,
+        agencyName: user.name,
+        agencyCode: profile?.agencyCode || null,
+        companyName: profile?.companyName || null,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        loginId,
+        changedBy: session.user.name || "管理者",
+        staffName,
+      });
+    } else {
+      // 会員用の通知（従来通り）
+      const membership = await prisma.membership.findUnique({
+        where: { userId: id },
+        select: { memberNumber: true },
+      });
+      await notifyIpsStatusChange({
+        userId: id,
+        memberName: user.name,
+        memberNumber: membership?.memberNumber,
+        fromStatus: "REGISTERED",
+        toStatus: "ID_ISSUED",
+        changedBy: session.user.name || "管理者",
+        note: `ログインID: ${loginId}`,
+      });
+    }
   } catch (e) {
     console.error("ID issue notification failed:", e);
   }

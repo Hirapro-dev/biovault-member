@@ -552,3 +552,140 @@ BioVault 管理通知（自動送信）`;
     console.error("Culture fluid notification failed:", e);
   }
 }
+
+/**
+ * エージェント（代理店）アカウントのID発行通知
+ *
+ * 宛先:
+ *  - マスター通知メール（NOTIFY_ADMIN_EMAILS、デフォルト app@biovault.jp）
+ *  - 担当従業員（referredByStaff → Staff.email）
+ */
+export async function notifyAgencyIdIssued({
+  userId, agencyName, agencyCode, companyName, email, phone, address, loginId, changedBy, staffName,
+}: {
+  userId: string;
+  agencyName: string;
+  agencyCode?: string | null;
+  companyName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  loginId: string;
+  changedBy: string;
+  staffName?: string | null;
+}) {
+  try {
+    // 宛先: マスター + 担当従業員（代理店自身には既に accountCreatedEmail が届くのでここでは送らない）
+    const emails: string[] = [];
+    const fixedNotifyEmails = (process.env.NOTIFY_ADMIN_EMAILS || "app@biovault.jp")
+      .split(",").map((e) => e.trim()).filter(Boolean);
+    emails.push(...fixedNotifyEmails);
+
+    // 担当従業員
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { referredByStaff: true },
+    });
+    if (user?.referredByStaff) {
+      const staff = await prisma.staff.findUnique({
+        where: { staffCode: user.referredByStaff },
+        select: { email: true },
+      });
+      if (staff?.email) emails.push(staff.email);
+    }
+
+    const recipients = [...new Set(emails)];
+    if (recipients.length === 0) return;
+
+    const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+    const displayName = companyName ? `${companyName}（${agencyName}）` : agencyName;
+    const subject = `【BioVault】エージェント「${agencyName}」のIDが発行されました`;
+
+    const bodyText = `BioVault エージェントアカウント発行通知
+
+━━━━━ ステータス変更 ━━━━━
+エージェント申込 → エージェントアカウントID発行
+変更者: ${changedBy}
+備考: ログインID: ${loginId}
+日時: ${nowStr}
+
+━━━━━ エージェント情報 ━━━━━
+エージェントコード: ${agencyCode || "---"}
+法人名/代表者名: ${displayName}
+メール: ${email || "---"}
+電話: ${phone || "---"}
+住所: ${address || "---"}
+担当従業員: ${staffName || "---"}
+
+━━━━━ ログイン情報 ━━━━━
+ログインID: ${loginId}
+ログインページ: https://member.biovault.jp/login
+
+──────────────────
+BioVault 管理通知（自動送信）`;
+
+    const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="https://member.biovault.jp/logo.png" alt="BioVault" style="height:40px;width:auto;" />
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
+    </div>
+
+    <!-- ステータス変更ヘッダー -->
+    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
+      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">AGENCY ID ISSUED</p>
+      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${displayName}</p>
+      <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:16px;margin-bottom:16px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="font-size:13px;color:#A0A0B0;text-align:center;padding:4px;">エージェント申込</td>
+            <td style="font-size:16px;color:#BFA04B;text-align:center;padding:4px;width:40px;">→</td>
+            <td style="font-size:14px;color:#BFA04B;font-weight:bold;text-align:center;padding:4px;">エージェントアカウントID発行</td>
+          </tr>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#A0A0B0;margin:0;">
+        変更者: ${changedBy}<br>備考: ログインID: ${loginId}<br>日時: ${nowStr}
+      </p>
+    </div>
+
+    <!-- エージェント情報 -->
+    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
+      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 16px;">AGENCY INFO</p>
+      <table style="width:100%;border-collapse:collapse;">
+        ${detailRow("エージェントコード", agencyCode || "---")}
+        ${detailRow("法人名/代表者名", displayName)}
+        ${detailRow("メール", email || "---")}
+        ${detailRow("電話番号", phone || "---")}
+        ${detailRow("住所", address || "---")}
+        ${detailRow("担当従業員", staffName || "---")}
+      </table>
+    </div>
+
+    <!-- ログイン情報 -->
+    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;">
+      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 16px;">LOGIN INFO</p>
+      <table style="width:100%;border-collapse:collapse;">
+        ${detailRow("ログインID", `<span style="font-family:monospace;color:#BFA04B;font-weight:bold;">${loginId}</span>`)}
+        ${detailRow("ログインページ", `<a href="https://member.biovault.jp/login" style="color:#BFA04B;text-decoration:none;">member.biovault.jp/login</a>`)}
+      </table>
+    </div>
+
+    <div style="margin-top:24px;text-align:center;">
+      <p style="font-size:10px;color:#727288;">BioVault 管理通知（自動送信）</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await Promise.allSettled(
+      recipients.map((to) => sendEmail({ to, subject, bodyText, bodyHtml }))
+    );
+  } catch (e) {
+    console.error("Agency ID issued notification failed:", e);
+  }
+}
