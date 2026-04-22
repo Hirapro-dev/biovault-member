@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AgencyKarteActions({
@@ -26,9 +26,43 @@ export default function AgencyKarteActions({
 
   // 報酬追加フォーム
   const [commForm, setCommForm] = useState({
-    memberName: "", memberNumber: "", saleAmount: "", commissionRate: String(currentRate),
+    memberName: "", memberNumber: "", memberUserId: "", saleAmount: "", commissionRate: String(currentRate),
     contributionType: "紹介のみ", status: "PENDING",
   });
+  // 会員番号ルックアップ状態
+  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "notfound">("idle");
+
+  // 会員番号が変わったらデバウンスで自動検索
+  useEffect(() => {
+    const num = commForm.memberNumber.trim();
+    if (!num) {
+      setLookupStatus("idle");
+      return;
+    }
+    // 既に同じ会員で補完済みなら何もしない
+    if (commForm.memberUserId && commForm.memberName && num === commForm.memberNumber.trim()) {
+      // 検索は必要に応じて実行されるので一旦続行
+    }
+    setLookupStatus("loading");
+    const handler = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/admin/members/lookup?memberNumber=${encodeURIComponent(num)}`);
+        const data = await res.json();
+        if (res.ok && data.found) {
+          setCommForm((f) => ({ ...f, memberName: data.user.name, memberUserId: data.user.id }));
+          setLookupStatus("found");
+        } else {
+          setCommForm((f) => ({ ...f, memberUserId: "" }));
+          setLookupStatus("notfound");
+        }
+      } catch {
+        setLookupStatus("notfound");
+      }
+    }, 400);
+    return () => clearTimeout(handler);
+    // memberNumber 変更時のみ発火（memberName は自動セットされるので依存に入れない）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commForm.memberNumber]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -48,11 +82,13 @@ export default function AgencyKarteActions({
     setSaving(true);
     const amt = parseInt(commForm.saleAmount);
     const r = parseFloat(commForm.commissionRate);
+    // 紹介された会員の userId を優先、見つからなければ後方互換で代理店の userId を送る
+    const targetUserId = commForm.memberUserId || userId;
     await fetch(`/api/admin/agencies/${agencyProfileId}/commissions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        memberUserId: userId,
+        memberUserId: targetUserId,
         memberName: commForm.memberName,
         memberNumber: commForm.memberNumber,
         saleAmount: amt,
@@ -64,7 +100,8 @@ export default function AgencyKarteActions({
     });
     setSaving(false);
     setShowAddCommission(false);
-    setCommForm({ memberName: "", memberNumber: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "紹介のみ", status: "PENDING" });
+    setCommForm({ memberName: "", memberNumber: "", memberUserId: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "紹介のみ", status: "PENDING" });
+    setLookupStatus("idle");
     setMessage("報酬を追加しました");
     router.refresh();
     setTimeout(() => setMessage(""), 3000);
@@ -108,8 +145,32 @@ export default function AgencyKarteActions({
           <button onClick={() => setShowAddCommission(true)} className="w-full py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold cursor-pointer">+ 報酬レコードを追加</button>
         ) : (
           <div className="space-y-3">
-            <div><label className="block text-xs text-text-secondary mb-1">顧客名</label><input value={commForm.memberName} onChange={(e) => setCommForm({ ...commForm, memberName: e.target.value })} className={ic} /></div>
-            <div><label className="block text-xs text-text-secondary mb-1">会員番号</label><input value={commForm.memberNumber} onChange={(e) => setCommForm({ ...commForm, memberNumber: e.target.value })} placeholder="BV-0001" className={ic + " font-mono"} /></div>
+            <div>
+              <label className="block text-xs text-text-secondary mb-1">会員番号</label>
+              <input
+                value={commForm.memberNumber}
+                onChange={(e) => setCommForm({ ...commForm, memberNumber: e.target.value, memberName: "", memberUserId: "" })}
+                placeholder="BV-0001"
+                className={ic + " font-mono"}
+              />
+              {commForm.memberNumber && (
+                <div className="mt-1 text-[10px]">
+                  {lookupStatus === "loading" && <span className="text-text-muted">検索中...</span>}
+                  {lookupStatus === "found" && <span className="text-status-active">✓ 一致する会員が見つかりました</span>}
+                  {lookupStatus === "notfound" && <span className="text-status-danger">該当する会員が見つかりません</span>}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs text-text-secondary mb-1">顧客名 <span className="text-[10px] text-text-muted">（会員番号から自動補完）</span></label>
+              <input
+                value={commForm.memberName}
+                onChange={(e) => setCommForm({ ...commForm, memberName: e.target.value })}
+                readOnly={lookupStatus === "found"}
+                placeholder="会員番号を入力すると自動入力されます"
+                className={ic + (lookupStatus === "found" ? " cursor-not-allowed opacity-90" : "")}
+              />
+            </div>
             <div><label className="block text-xs text-text-secondary mb-1">売上金額(円)</label><input type="number" value={commForm.saleAmount} onChange={(e) => setCommForm({ ...commForm, saleAmount: e.target.value })} className={ic + " font-mono"} /></div>
             <div><label className="block text-xs text-text-secondary mb-1">報酬率(%)</label><input type="number" step="0.1" value={commForm.commissionRate} onChange={(e) => setCommForm({ ...commForm, commissionRate: e.target.value })} className={ic} /></div>
             <div><label className="block text-xs text-text-secondary mb-1">貢献タイプ</label>
