@@ -135,7 +135,7 @@ function ApplyPage() {
       <PageWrapper>
         <div className="text-center py-16">
           <div className="text-5xl mb-6">✓</div>
-          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製の適合確認申込を<br />受け付けました</h2>
+          <h2 className="font-serif-jp text-xl text-gold mb-3">iPS細胞作製の<br />適合確認申込を<br />受け付けました</h2>
           <div className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto space-y-4">
             <p>
               お申し込みいただいた内容をもとに、<br />本部にてiPS細胞作製適合確認を行います。
