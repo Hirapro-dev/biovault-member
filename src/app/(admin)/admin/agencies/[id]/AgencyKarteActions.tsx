@@ -26,22 +26,24 @@ export default function AgencyKarteActions({
 
   // 報酬追加フォーム
   const [commForm, setCommForm] = useState({
-    memberName: "", memberNumber: "", memberUserId: "", saleAmount: "", commissionRate: String(currentRate),
+    memberName: "", memberNumber: "", memberUserId: "",
+    orderKey: "", // 選択された売上対象 ("ips:xxx" or "cf:xxx")
+    saleAmount: "", commissionRate: String(currentRate),
     contributionType: "紹介のみ", status: "PENDING",
   });
   // 会員番号ルックアップ状態
   const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "notfound">("idle");
+  // 売上対象オーダー候補
+  type OrderOption = { key: string; label: string; amount: number; paid: boolean; date: string | null };
+  const [orderOptions, setOrderOptions] = useState<OrderOption[]>([]);
 
   // 会員番号が変わったらデバウンスで自動検索
   useEffect(() => {
     const num = commForm.memberNumber.trim();
     if (!num) {
       setLookupStatus("idle");
+      setOrderOptions([]);
       return;
-    }
-    // 既に同じ会員で補完済みなら何もしない
-    if (commForm.memberUserId && commForm.memberName && num === commForm.memberNumber.trim()) {
-      // 検索は必要に応じて実行されるので一旦続行
     }
     setLookupStatus("loading");
     const handler = setTimeout(async () => {
@@ -49,20 +51,39 @@ export default function AgencyKarteActions({
         const res = await fetch(`/api/admin/members/lookup?memberNumber=${encodeURIComponent(num)}`);
         const data = await res.json();
         if (res.ok && data.found) {
-          setCommForm((f) => ({ ...f, memberName: data.user.name, memberUserId: data.user.id }));
+          setCommForm((f) => ({
+            ...f,
+            memberName: data.user.name,
+            memberUserId: data.user.id,
+            orderKey: "",
+            saleAmount: "",
+          }));
+          setOrderOptions(data.orders || []);
           setLookupStatus("found");
         } else {
-          setCommForm((f) => ({ ...f, memberUserId: "" }));
+          setCommForm((f) => ({ ...f, memberUserId: "", orderKey: "", saleAmount: "" }));
+          setOrderOptions([]);
           setLookupStatus("notfound");
         }
       } catch {
         setLookupStatus("notfound");
+        setOrderOptions([]);
       }
     }, 400);
     return () => clearTimeout(handler);
-    // memberNumber 変更時のみ発火（memberName は自動セットされるので依存に入れない）
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commForm.memberNumber]);
+
+  // 売上対象を選択したら、売上金額を自動入力
+  const handleSelectOrder = (key: string) => {
+    const order = orderOptions.find((o) => o.key === key);
+    setCommForm((f) => ({
+      ...f,
+      orderKey: key,
+      saleAmount: order ? String(order.amount) : "",
+    }));
+  };
+
+  const selectedOrder = orderOptions.find((o) => o.key === commForm.orderKey);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -84,6 +105,8 @@ export default function AgencyKarteActions({
     const r = parseFloat(commForm.commissionRate);
     // 紹介された会員の userId を優先、見つからなければ後方互換で代理店の userId を送る
     const targetUserId = commForm.memberUserId || userId;
+    // note: どのオーダーに対する報酬かの情報を保存
+    const note = selectedOrder ? `対象: ${selectedOrder.label}` : null;
     await fetch(`/api/admin/agencies/${agencyProfileId}/commissions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -96,12 +119,14 @@ export default function AgencyKarteActions({
         commissionAmount: Math.floor(amt * r / 100),
         contributionType: commForm.contributionType,
         status: commForm.status,
+        note,
       }),
     });
     setSaving(false);
     setShowAddCommission(false);
-    setCommForm({ memberName: "", memberNumber: "", memberUserId: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "紹介のみ", status: "PENDING" });
+    setCommForm({ memberName: "", memberNumber: "", memberUserId: "", orderKey: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "紹介のみ", status: "PENDING" });
     setLookupStatus("idle");
+    setOrderOptions([]);
     setMessage("報酬を追加しました");
     router.refresh();
     setTimeout(() => setMessage(""), 3000);
@@ -171,7 +196,50 @@ export default function AgencyKarteActions({
                 className={ic + (lookupStatus === "found" ? " cursor-not-allowed opacity-90" : "")}
               />
             </div>
-            <div><label className="block text-xs text-text-secondary mb-1">売上金額(円)</label><input type="number" value={commForm.saleAmount} onChange={(e) => setCommForm({ ...commForm, saleAmount: e.target.value })} className={ic + " font-mono"} /></div>
+
+            {/* 売上対象（会員番号がヒットしたら選択肢を出す） */}
+            {lookupStatus === "found" && orderOptions.length > 0 && (
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">売上対象</label>
+                <select
+                  value={commForm.orderKey}
+                  onChange={(e) => handleSelectOrder(e.target.value)}
+                  className={ic + " cursor-pointer"}
+                >
+                  <option value="">選択してください</option>
+                  {orderOptions.map((o) => (
+                    <option key={o.key} value={o.key}>
+                      {o.label}（¥{o.amount.toLocaleString()}）{o.paid ? " ✓入金済" : " ⚠未入金"}
+                    </option>
+                  ))}
+                </select>
+                {selectedOrder && (
+                  <div className="mt-1 text-[10px] text-text-muted">
+                    {selectedOrder.paid ? (
+                      <span className="text-status-active">✓ 入金済のオーダーです</span>
+                    ) : (
+                      <span className="text-status-warning">⚠ 未入金のオーダーです（入金後に確定してください）</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            {lookupStatus === "found" && orderOptions.length === 0 && (
+              <div className="text-[10px] text-text-muted">この会員には売上対象となるオーダーがありません</div>
+            )}
+
+            <div>
+              <label className="block text-xs text-text-secondary mb-1">
+                売上金額(円) <span className="text-[10px] text-text-muted">（売上対象を選ぶと自動入力）</span>
+              </label>
+              <input
+                type="number"
+                value={commForm.saleAmount}
+                onChange={(e) => setCommForm({ ...commForm, saleAmount: e.target.value })}
+                readOnly={!!selectedOrder}
+                className={ic + " font-mono" + (selectedOrder ? " cursor-not-allowed opacity-90" : "")}
+              />
+            </div>
             <div><label className="block text-xs text-text-secondary mb-1">報酬率(%)</label><input type="number" step="0.1" value={commForm.commissionRate} onChange={(e) => setCommForm({ ...commForm, commissionRate: e.target.value })} className={ic} /></div>
             <div><label className="block text-xs text-text-secondary mb-1">貢献タイプ</label>
               <select value={commForm.contributionType} onChange={(e) => setCommForm({ ...commForm, contributionType: e.target.value })} className={ic + " cursor-pointer"}>

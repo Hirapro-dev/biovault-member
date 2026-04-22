@@ -23,6 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       commissionAmount: body.commissionAmount,
       contributionType: body.contributionType,
       status: body.status || "PENDING",
+      note: body.note || null,
     },
   });
 

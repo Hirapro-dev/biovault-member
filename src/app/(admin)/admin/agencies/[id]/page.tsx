@@ -160,11 +160,14 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
               const st = stMap[c.status] || stMap.PENDING;
               return (
                 <div key={c.id} className="flex items-center justify-between py-3">
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-sm text-text-primary">{c.memberName}（{c.memberNumber}）</div>
+                    {c.note && (
+                      <div className="text-[11px] text-gold mt-0.5 truncate">{c.note}</div>
+                    )}
                     <div className="text-[11px] text-text-muted mt-0.5">{c.contributionType} ・ 売上 ¥{c.saleAmount.toLocaleString()} × {c.commissionRate}%</div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
                     <span className="font-mono text-sm text-gold">¥{c.commissionAmount.toLocaleString()}</span>
                     <Badge variant={st.variant}>{st.label}</Badge>
                   </div>
