@@ -36,6 +36,16 @@ export default async function AdminAgenciesPage() {
     }
   }
 
+  // 担当営業マン名（referredByStaff → Staff.name）を一括取得
+  const staffCodes = [...new Set(agencies.map((a) => a.referredByStaff).filter(Boolean))] as string[];
+  const staffRecords = staffCodes.length > 0
+    ? await prisma.staff.findMany({
+        where: { staffCode: { in: staffCodes } },
+        select: { staffCode: true, name: true },
+      })
+    : [];
+  const staffMap = new Map(staffRecords.map((s) => [s.staffCode, s.name]));
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
@@ -47,43 +57,85 @@ export default async function AdminAgenciesPage() {
           <div className="py-12 text-center text-text-muted text-sm">エージェントはありません</div>
         ) : (
           <>
-            {/* PC: テーブル */}
-            <div className="hidden sm:block">
-              <table className="w-full border-collapse">
+            {/* PC: テーブル（横スクロール + コード/法人名/担当営業マン 左固定） */}
+            <div className="hidden sm:block overflow-x-auto max-w-full">
+              <table className="border-collapse" style={{ tableLayout: "fixed", width: "1280px" }}>
+                <colgroup>
+                  <col style={{ width: "110px" }} />
+                  <col style={{ width: "200px" }} />
+                  <col style={{ width: "160px" }} />
+                  <col style={{ width: "120px" }} />
+                  <col style={{ width: "160px" }} />
+                  <col style={{ width: "110px" }} />
+                  <col style={{ width: "120px" }} />
+                  <col style={{ width: "140px" }} />
+                </colgroup>
                 <thead>
-                  <tr className="border-b border-border">
-                    {["コード", "法人名/氏名", "メール", "紹介数", "入金済売上", "報酬率", "ステータス", "ID"].map((h, i) => (
-                      <th key={i} className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal">{h}</th>
-                    ))}
+                  <tr className="border-b border-border bg-bg-secondary">
+                    <th
+                      className="sticky z-20 bg-bg-secondary px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap"
+                      style={{ left: 0 }}
+                    >
+                      コード
+                    </th>
+                    <th
+                      className="sticky z-20 bg-bg-secondary px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap"
+                      style={{ left: "110px" }}
+                    >
+                      法人名/氏名
+                    </th>
+                    <th
+                      className="sticky z-20 bg-bg-secondary px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap border-r border-border"
+                      style={{ left: "310px" }}
+                    >
+                      担当営業マン
+                    </th>
+                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">紹介数</th>
+                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">入金済売上</th>
+                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">報酬率</th>
+                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">ステータス</th>
+                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">ID</th>
                   </tr>
                 </thead>
                 <tbody>
                   {agencies.map((a) => {
                     const p = a.agencyProfile;
+                    const staffName = a.referredByStaff ? staffMap.get(a.referredByStaff) : null;
                     return (
-                      <tr key={a.id} className="border-b border-border hover:bg-bg-elevated transition-colors">
-                        <td className="px-4 py-3 font-mono text-[13px] text-gold">
+                      <tr key={a.id} className="border-b border-border">
+                        <td
+                          className="sticky z-10 bg-bg-secondary px-4 py-3 font-mono text-[13px] text-gold whitespace-nowrap"
+                          style={{ left: 0 }}
+                        >
                           <Link href={`/admin/agencies/${a.id}`} className="hover:underline">
                             {p?.agencyCode || "---"}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td
+                          className="sticky z-10 bg-bg-secondary px-4 py-3 text-sm whitespace-nowrap overflow-hidden text-ellipsis"
+                          style={{ left: "110px" }}
+                        >
                           <Link href={`/admin/agencies/${a.id}`} className="hover:text-gold transition-colors">
                             {p?.companyName || a.name}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-xs text-text-secondary">{a.email}</td>
-                        <td className="px-4 py-3 text-xs text-text-secondary font-mono">{customerCounts[a.id] || 0}名</td>
-                        <td className="px-4 py-3 text-xs text-gold font-mono">¥{(paidAmounts[a.id] || 0).toLocaleString()}</td>
-                        <td className="px-4 py-3 text-xs text-gold font-mono">{p?.commissionRate || 0}%</td>
-                        <td className="px-4 py-3">
+                        <td
+                          className="sticky z-10 bg-bg-secondary px-4 py-3 text-[12px] text-text-secondary whitespace-nowrap border-r border-border overflow-hidden text-ellipsis"
+                          style={{ left: "310px" }}
+                        >
+                          {staffName || "---"}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-text-secondary font-mono whitespace-nowrap">{customerCounts[a.id] || 0}名</td>
+                        <td className="px-4 py-3 text-xs text-gold font-mono whitespace-nowrap">¥{(paidAmounts[a.id] || 0).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-xs text-gold font-mono whitespace-nowrap">{p?.commissionRate || 0}%</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           {p?.agreedAt ? (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/10 text-status-active border border-status-active/20">同意済</span>
                           ) : (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-text-muted/10 text-text-muted border border-text-muted/20">未同意</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
                         </td>
                       </tr>
@@ -97,6 +149,7 @@ export default async function AdminAgenciesPage() {
             <div className="sm:hidden divide-y divide-border">
               {agencies.map((a) => {
                 const p = a.agencyProfile;
+                const staffName = a.referredByStaff ? staffMap.get(a.referredByStaff) : null;
                 return (
                   <div key={a.id} className="px-4 py-4">
                     <div className="flex items-center justify-between mb-2">
@@ -115,7 +168,7 @@ export default async function AdminAgenciesPage() {
                       {p?.companyName || a.name}
                     </Link>
                     <div className="text-[11px] text-text-muted mb-2">
-                      {a.email} ・ 報酬率 {p?.commissionRate || 0}% ・ 紹介 {customerCounts[a.id] || 0}名 ・ 入金済売上 ¥{(paidAmounts[a.id] || 0).toLocaleString()}
+                      担当営業マン: {staffName || "---"} ・ 報酬率 {p?.commissionRate || 0}% ・ 紹介 {customerCounts[a.id] || 0}名 ・ 入金済売上 ¥{(paidAmounts[a.id] || 0).toLocaleString()}
                     </div>
                     <div className="flex items-center gap-2">
                       <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
