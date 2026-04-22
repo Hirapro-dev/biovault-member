@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendEmail, agencyApplicationReceivedEmail } from "@/lib/mail";
+import { notifyAgencyApplied } from "@/lib/status-notification";
 
 export async function POST(req: Request) {
   try {
@@ -72,6 +74,41 @@ export async function POST(req: Request) {
       where: { id: application.id },
       data: { status: "REGISTERED", convertedUserId: user.id },
     });
+
+    // 申込者本人への自動返信メール送信
+    try {
+      const emailContent = agencyApplicationReceivedEmail(body.representativeName);
+      await sendEmail({ to: body.email, ...emailContent });
+    } catch (e) {
+      console.error("Agency apply auto-reply email failed:", e);
+    }
+
+    // 新規エージェント申込の通知メール送信
+    try {
+      let staffName: string | null = null;
+      if (body.staffCode) {
+        const staff = await prisma.staff.findUnique({
+          where: { staffCode: body.staffCode },
+          select: { name: true, staffCode: true },
+        });
+        staffName = staff ? `${staff.name}（${staff.staffCode}）` : null;
+      }
+      await notifyAgencyApplied({
+        userId: user.id,
+        agencyName: body.representativeName,
+        agencyCode,
+        companyName: body.companyName || null,
+        email: body.email,
+        phone: body.phone,
+        address: body.address,
+        occupation: body.occupation || null,
+        motivation: body.motivation || null,
+        experience: body.experience || null,
+        staffName,
+      });
+    } catch (e) {
+      console.error("Agency application notification failed:", e);
+    }
 
     return NextResponse.json({ id: application.id, userId: user.id, agencyCode, loginId, tempPassword, success: true });
   } catch (error: unknown) {

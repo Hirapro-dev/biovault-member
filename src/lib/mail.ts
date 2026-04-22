@@ -132,6 +132,75 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
+export function agencyApplicationReceivedEmail(name: string) {
+  const subject = "【BioVault】エージェント申込を受け付けました";
+  const bodyText = `${name} 様
+
+BioVault エージェント申込をいただき、
+誠にありがとうございます。
+
+お申込みいただいた内容をもとに、
+審査および準備を進めさせていただきます。
+
+追ってアカウント発行のご案内を
+メールにてお送りさせていただきます。
+
+ご不明な点がございましたら、
+下記までお気軽にお問い合わせください。
+
+
+──────────────────
+BioVault（株式会社SCPP）
+TEL: 0120-788-839
+MAIL: info@biovault.jp
+〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+──────────────────
+
+※ このメールは自動送信されています。
+※ このメールに心当たりがない場合は、お手数ですが上記連絡先までご連絡ください。`;
+
+  const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="https://member.biovault.jp/logo.png" alt="BioVault" style="height:40px;width:auto;" />
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
+    </div>
+    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
+      <p style="font-size:16px;color:#ffffff;margin:0 0 24px;">${name} 様</p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
+        BioVault エージェント申込をいただき、誠にありがとうございます。
+      </p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
+        お申込みいただいた内容をもとに、審査および準備を進めさせていただきます。
+      </p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 16px;">
+        追ってアカウント発行のご案内をメールにてお送りさせていただきます。
+      </p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0;">
+        ご不明な点がございましたら、下記までお気軽にお問い合わせください。
+      </p>
+    </div>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
+      <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
+        BioVault（株式会社SCPP）<br>
+        TEL: 0120-788-839 ／ MAIL: info@biovault.jp<br>
+        〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+      </p>
+      <p style="font-size:10px;color:#727288;margin-top:16px;">
+        ※ このメールは自動送信されています。
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return { subject, bodyText, bodyHtml };
+}
+
 export function adminAccountCreatedEmail(
   name: string,
   loginId: string,
