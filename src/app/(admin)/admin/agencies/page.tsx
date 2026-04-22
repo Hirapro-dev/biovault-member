@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import IssueIdModal from "../members/IssueIdModal";
 
 export default async function AdminAgenciesPage() {
   await requireAdmin();
@@ -59,7 +58,7 @@ export default async function AdminAgenciesPage() {
           <>
             {/* PC: テーブル（横スクロール + コード/法人名/担当営業マン 左固定） */}
             <div className="hidden sm:block overflow-x-auto max-w-full">
-              <table className="border-collapse" style={{ tableLayout: "fixed", width: "1280px" }}>
+              <table className="border-collapse" style={{ tableLayout: "fixed", width: "1140px" }}>
                 <colgroup>
                   <col style={{ width: "110px" }} />
                   <col style={{ width: "200px" }} />
@@ -68,7 +67,6 @@ export default async function AdminAgenciesPage() {
                   <col style={{ width: "160px" }} />
                   <col style={{ width: "110px" }} />
                   <col style={{ width: "120px" }} />
-                  <col style={{ width: "140px" }} />
                 </colgroup>
                 <thead>
                   <tr className="border-b border-border bg-bg-secondary">
@@ -94,7 +92,6 @@ export default async function AdminAgenciesPage() {
                     <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">入金済売上</th>
                     <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">報酬率</th>
                     <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">ステータス</th>
-                    <th className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap">ID</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -139,9 +136,6 @@ export default async function AdminAgenciesPage() {
                             {statusBadge.label}
                           </span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
-                        </td>
                       </tr>
                     );
                   })}
@@ -174,11 +168,8 @@ export default async function AdminAgenciesPage() {
                     <Link href={`/admin/agencies/${a.id}`} className="block text-sm text-text-primary mb-1 hover:text-gold transition-colors">
                       {p?.companyName || a.name}
                     </Link>
-                    <div className="text-[11px] text-text-muted mb-2">
+                    <div className="text-[11px] text-text-muted">
                       担当営業マン: {staffName || "---"} ・ 報酬率 {p?.commissionRate || 0}% ・ 紹介 {customerCounts[a.id] || 0}名 ・ 入金済売上 ¥{(paidAmounts[a.id] || 0).toLocaleString()}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <IssueIdModal userId={a.id} loginId={a.loginId} nameKana={a.nameKana || ""} isIdIssued={a.isIdIssued} />
                     </div>
                   </div>
                 );
