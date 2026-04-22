@@ -1,5 +1,6 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import BankAccountEditor from "./BankAccountEditor";
 
 export default async function AgencyProfilePage() {
   const sessionUser = await requireAgency();
@@ -28,12 +29,16 @@ export default async function AgencyProfilePage() {
 
         <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
           <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">振込先情報</h3>
-          <Row label="銀行名" value={profile?.bankName || "未登録"} />
-          <Row label="支店名" value={profile?.bankBranch || "未登録"} />
-          <Row label="口座種別" value={profile?.bankAccountType || "未登録"} />
-          <Row label="口座番号" value={profile?.bankAccountNumber || "未登録"} />
-          <Row label="口座名義" value={profile?.bankAccountName || "未登録"} />
-          <p className="text-[10px] text-text-muted mt-3">※ 振込先の変更は管理者までお問い合わせください</p>
+          <BankAccountEditor
+            initial={{
+              bankName: profile?.bankName || "",
+              bankBranch: profile?.bankBranch || "",
+              bankAccountType: profile?.bankAccountType || "",
+              bankAccountNumber: profile?.bankAccountNumber || "",
+              bankAccountName: profile?.bankAccountName || "",
+            }}
+          />
+          <p className="text-[10px] text-text-muted mt-3">※ 変更内容は管理側にも即時反映されます</p>
         </div>
       </div>
 

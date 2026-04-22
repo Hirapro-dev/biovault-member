@@ -60,6 +60,11 @@ export default async function StaffAgencyKartePage({ params }: { params: Promise
           <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">契約情報</h3>
           <Row label="エージェントコード" value={profile?.agencyCode || "---"} mono />
           <Row label="報酬率" value={profile?.commissionRate ? `${profile.commissionRate}%` : "未設定"} />
+          <Row label="銀行名" value={profile?.bankName || "未登録"} />
+          <Row label="支店名" value={profile?.bankBranch || "未登録"} />
+          <Row label="口座種別" value={profile?.bankAccountType || "未登録"} />
+          <Row label="口座番号" value={profile?.bankAccountNumber || "未登録"} />
+          <Row label="口座名義" value={profile?.bankAccountName || "未登録"} />
           <div className="flex items-center py-2 border-t border-border mt-1">
             <div className="w-28 text-[11px] text-text-muted shrink-0">契約同意</div>
             <div className="text-[13px]">
