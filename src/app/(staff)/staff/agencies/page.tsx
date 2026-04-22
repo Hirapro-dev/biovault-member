@@ -83,6 +83,11 @@ export default async function StaffAgenciesPage() {
                 <tbody>
                   {agencies.map((a) => {
                     const p = a.agencyProfile;
+                    const statusBadge = !a.isIdIssued
+                      ? { label: "ID未発行", className: "bg-text-muted/10 text-text-muted border border-text-muted/20" }
+                      : p?.agreedAt
+                        ? { label: "同意書済", className: "bg-status-active/10 text-status-active border border-status-active/20" }
+                        : { label: "同意書未", className: "bg-status-warning/10 text-status-warning border border-status-warning/20" };
                     return (
                       <tr key={a.id} className="border-b border-border">
                         <td
@@ -105,11 +110,9 @@ export default async function StaffAgenciesPage() {
                         <td className="px-4 py-3 text-xs text-gold font-mono whitespace-nowrap">¥{(paidAmounts[a.id] || 0).toLocaleString()}</td>
                         <td className="px-4 py-3 text-xs text-gold font-mono whitespace-nowrap">{p?.commissionRate || 0}%</td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {p?.agreedAt ? (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/10 text-status-active border border-status-active/20">同意済</span>
-                          ) : (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-text-muted/10 text-text-muted border border-text-muted/20">未同意</span>
-                          )}
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusBadge.className}`}>
+                            {statusBadge.label}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-text-muted font-mono whitespace-nowrap">
                           {new Date(a.createdAt).toLocaleDateString("ja-JP")}
@@ -125,6 +128,11 @@ export default async function StaffAgenciesPage() {
             <div className="sm:hidden divide-y divide-border">
               {agencies.map((a) => {
                 const p = a.agencyProfile;
+                const statusBadge = !a.isIdIssued
+                  ? { label: "ID未発行", className: "bg-text-muted/10 text-text-muted border border-text-muted/20" }
+                  : p?.agreedAt
+                    ? { label: "同意書済", className: "bg-status-active/10 text-status-active border border-status-active/20" }
+                    : { label: "同意書未", className: "bg-status-warning/10 text-status-warning border border-status-warning/20" };
                 return (
                   <div key={a.id} className="px-4 py-4">
                     <div className="flex items-center justify-between mb-2">
@@ -132,11 +140,9 @@ export default async function StaffAgenciesPage() {
                         {p?.agencyCode || "---"}
                       </Link>
                       <div className="flex items-center gap-1.5">
-                        {p?.agreedAt ? (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/10 text-status-active border border-status-active/20">同意済</span>
-                        ) : (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-text-muted/10 text-text-muted border border-text-muted/20">未同意</span>
-                        )}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusBadge.className}`}>
+                          {statusBadge.label}
+                        </span>
                       </div>
                     </div>
                     <Link href={`/staff/agencies/${a.id}`} className="block text-sm text-text-primary mb-1 hover:text-gold transition-colors">
