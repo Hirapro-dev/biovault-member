@@ -276,6 +276,74 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
+export function agencyAccountCreatedEmail(name: string, loginId: string, password: string) {
+  const subject = "【BioVault】エージェントアカウントが発行されました";
+  const bodyText = `${name} 様
+
+BioVault エージェントポータルへようこそ。
+エージェントアカウントが発行されましたので、以下の情報でログインしてください。
+
+────────────
+ログインID: ${loginId}
+パスワード: ${password}
+────────────
+
+ログインページ: https://member.biovault.jp/login
+
+※ 初回ログイン後、パスワードの変更をお願いいたします。
+※ ログインID・パスワードは第三者に知られないよう大切に管理してください。
+
+ご不明な点がございましたら、下記までお気軽にお問い合わせください。
+
+──────────────────
+BioVault（株式会社SCPP）
+TEL: 0120-788-839
+MAIL: info@biovault.jp
+──────────────────`;
+
+  const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="https://member.biovault.jp/logo.png" alt="BioVault" style="height:40px;width:auto;" />
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
+    </div>
+    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
+      <p style="font-size:16px;color:#ffffff;margin:0 0 8px;">${name} 様</p>
+      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 24px;">
+        BioVault エージェントポータルへようこそ。<br>
+        エージェントアカウントが発行されました。
+      </p>
+      <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:20px;margin-bottom:24px;">
+        <div style="font-size:11px;color:#A0A0B0;margin-bottom:4px;">ログインID</div>
+        <div style="font-size:18px;color:#BFA04B;font-family:monospace;letter-spacing:2px;margin-bottom:16px;">${loginId}</div>
+        <div style="font-size:11px;color:#A0A0B0;margin-bottom:4px;">パスワード</div>
+        <div style="font-size:14px;color:#BFA04B;font-family:monospace;letter-spacing:1px;">${password}</div>
+      </div>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="https://member.biovault.jp/login" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#BFA04B,#8F7A3E);color:#070709;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:2px;border-radius:4px;">ログイン画面へ</a>
+      </div>
+      <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
+        ※ 初回ログイン後、パスワードの変更をお願いいたします。<br>
+        ※ ログイン情報は第三者に知られないよう大切に管理してください。
+      </p>
+    </div>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
+      <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
+        BioVault（株式会社SCPP）<br>
+        TEL: 0120-788-839 ／ MAIL: info@biovault.jp
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return { subject, bodyText, bodyHtml };
+}
+
 export function accountCreatedEmail(name: string, loginId: string, password: string) {
   const subject = "【BioVault】メンバーシップアカウントが発行されました";
   const bodyText = `${name} 様

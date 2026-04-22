@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sendEmail, accountCreatedEmail } from "@/lib/mail";
+import { sendEmail, accountCreatedEmail, agencyAccountCreatedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 // ID発行（ログインID確定 + パスワード設定 + isIdIssued=true）
@@ -54,9 +54,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "ID発行に失敗しました" }, { status: 500 });
   }
 
-  // アカウント発行メール送信
+  // アカウント発行メール送信（ロール別にテンプレートを切り替え）
   try {
-    const emailContent = accountCreatedEmail(user.name, loginId, password);
+    const emailContent = user.role === "AGENCY"
+      ? agencyAccountCreatedEmail(user.name, loginId, password)
+      : accountCreatedEmail(user.name, loginId, password);
     await sendEmail({ to: user.email, ...emailContent });
   } catch (e) {
     console.error("Account created email failed:", e);
