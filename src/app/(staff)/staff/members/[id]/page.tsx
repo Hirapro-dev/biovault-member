@@ -43,8 +43,21 @@ export default async function StaffMemberKartePage({
     },
   });
 
-  // 担当外の会員アクセスは404扱い
-  if (!user || user.role !== "MEMBER" || user.referredByStaff !== staffCode) {
+  if (!user || user.role !== "MEMBER") {
+    notFound();
+  }
+
+  // アクセス権チェック: 直接担当 or 担当代理店経由の顧客のみ閲覧可
+  const isDirect = user.referredByStaff === staffCode;
+  let isViaManagedAgency = false;
+  if (!isDirect && user.referredByAgency) {
+    const agency = await prisma.agencyProfile.findUnique({
+      where: { agencyCode: user.referredByAgency },
+      select: { user: { select: { referredByStaff: true } } },
+    });
+    isViaManagedAgency = agency?.user?.referredByStaff === staffCode;
+  }
+  if (!isDirect && !isViaManagedAgency) {
     notFound();
   }
 
