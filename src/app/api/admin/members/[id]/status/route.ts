@@ -67,6 +67,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
+  // 入金確認の場合: paymentStatus を完了に、paidAmount を契約金額に反映
+  if (newStatus === "PAYMENT_CONFIRMED") {
+    updateData.paymentStatus = "COMPLETED";
+    updateData.paidAmount = membership.totalAmount;
+  }
+
   // トランザクション: ステータス更新 + 履歴記録
   const transactionOps: Prisma.PrismaPromise<unknown>[] = [
     prisma.membership.update({
