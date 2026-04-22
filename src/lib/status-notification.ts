@@ -561,7 +561,7 @@ BioVault 管理通知（自動送信）`;
  *  - 担当従業員（referredByStaff → Staff.email）
  */
 export async function notifyAgencyApplied({
-  userId, agencyName, agencyCode, companyName, email, phone, address, occupation, motivation, experience, staffName,
+  userId, agencyName, agencyCode, companyName, email, phone, address, occupation, staffName,
 }: {
   userId: string;
   agencyName: string;
@@ -571,8 +571,6 @@ export async function notifyAgencyApplied({
   phone?: string | null;
   address?: string | null;
   occupation?: string | null;
-  motivation?: string | null;
-  experience?: string | null;
   staffName?: string | null;
 }) {
   try {
@@ -615,10 +613,6 @@ export async function notifyAgencyApplied({
 住所: ${address || "---"}
 職業: ${occupation || "---"}
 担当従業員: ${staffName || "---"}
-
-━━━━━ 申込内容 ━━━━━
-申込動機: ${motivation || "---"}
-営業経験: ${experience || "---"}
 
 ※ この申込に対して管理画面からID発行を行うと、
    エージェントアカウントが有効化されます。
@@ -664,15 +658,6 @@ BioVault 管理通知（自動送信）`;
         ${detailRow("住所", address || "---")}
         ${detailRow("職業", occupation || "---")}
         ${detailRow("担当従業員", staffName || "---")}
-      </table>
-    </div>
-
-    <!-- 申込内容 -->
-    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
-      <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 16px;">APPLICATION DETAIL</p>
-      <table style="width:100%;border-collapse:collapse;">
-        ${detailRow("申込動機", motivation || "---")}
-        ${detailRow("営業経験", experience || "---")}
       </table>
     </div>
 

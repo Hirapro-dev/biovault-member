@@ -102,8 +102,6 @@ export async function POST(req: Request) {
         phone: body.phone,
         address: body.address,
         occupation: body.occupation || null,
-        motivation: body.motivation || null,
-        experience: body.experience || null,
         staffName,
       });
     } catch (e) {
