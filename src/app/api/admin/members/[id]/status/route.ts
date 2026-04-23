@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import type { IpsStatus, Prisma } from "@prisma/client";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
+import { autoCreateCommissionForIps } from "@/lib/commission-auto";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -146,6 +147,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       where: { userId: id, type: "SERVICE_TERMS", status: "PENDING" },
       data: { status: "SIGNED", signedAt: new Date() },
     });
+  }
+
+  // 入金確認になった場合、代理店報酬レコードを自動作成（紹介代理店がいる場合のみ）
+  if (newStatus === "PAYMENT_CONFIRMED") {
+    try {
+      await autoCreateCommissionForIps(id);
+    } catch (e) {
+      console.error("Auto-create agency commission (IPS) failed:", e);
+    }
   }
 
   // ステータス変更通知を送信

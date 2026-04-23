@@ -2,11 +2,11 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Badge from "@/components/ui/Badge";
 import MembersTable from "@/components/members/MembersTable";
 import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import AgencyKarteActions from "./AgencyKarteActions";
 import ReferralUrlSection from "./ReferralUrlSection";
+import CommissionList from "./CommissionList";
 import IssueIdSection from "../../members/[id]/IssueIdSection";
 import DeleteAccount from "../../members/[id]/DeleteAccount";
 
@@ -142,41 +142,23 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
       </div>
 
       {/* 報酬履歴 */}
-      <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
-          報酬履歴 ({profile?.commissions.length || 0}件)
-        </h3>
-        {!profile?.commissions.length ? (
-          <div className="text-text-muted text-sm py-4 text-center">報酬記録なし</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {profile.commissions.map((c) => {
-              const stMap: Record<string, { label: string; variant: "gold" | "success" | "warning" | "muted" }> = {
-                PENDING: { label: "未確定", variant: "warning" },
-                CONFIRMED: { label: "確定", variant: "gold" },
-                PAID: { label: "支払済", variant: "success" },
-                CANCELLED: { label: "取消", variant: "muted" },
-              };
-              const st = stMap[c.status] || stMap.PENDING;
-              return (
-                <div key={c.id} className="flex items-center justify-between py-3">
-                  <div className="min-w-0">
-                    <div className="text-sm text-text-primary">{c.memberName}（{c.memberNumber}）</div>
-                    {c.note && (
-                      <div className="text-[11px] text-gold mt-0.5 truncate">{c.note}</div>
-                    )}
-                    <div className="text-[11px] text-text-muted mt-0.5">{c.contributionType} ・ 売上 ¥{c.saleAmount.toLocaleString()} × {c.commissionRate}%</div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-3">
-                    <span className="font-mono text-sm text-gold">¥{c.commissionAmount.toLocaleString()}</span>
-                    <Badge variant={st.variant}>{st.label}</Badge>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <CommissionList
+        agencyProfileId={profile?.id || ""}
+        commissions={(profile?.commissions || []).map((c) => ({
+          id: c.id,
+          memberName: c.memberName,
+          memberNumber: c.memberNumber,
+          saleAmount: c.saleAmount,
+          commissionRate: c.commissionRate,
+          commissionAmount: c.commissionAmount,
+          contributionType: c.contributionType,
+          status: c.status,
+          note: c.note,
+          sourceType: c.sourceType,
+          paidAt: c.paidAt,
+          createdAt: c.createdAt,
+        }))}
+      />
 
       {/* 印刷依頼履歴 */}
       <div className="mt-6 bg-bg-secondary border border-border rounded-md p-4 sm:p-6">

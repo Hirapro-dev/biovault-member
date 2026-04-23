@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getTotalSessions } from "@/lib/culture-fluid-plans";
 import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
+import { autoCreateCommissionForCf } from "@/lib/commission-auto";
 
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
@@ -112,6 +113,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     where: { id: orderId },
     data: updateData,
   });
+
+  // 入金完了になった場合、代理店報酬レコードを自動作成
+  if (body.paymentStatus === "COMPLETED" && order.paymentStatus !== "COMPLETED") {
+    try {
+      await autoCreateCommissionForCf(orderId);
+    } catch (e) {
+      console.error("Auto-create agency commission (CF) failed:", e);
+    }
+  }
 
   // ステータスが変更された場合に通知
   if (updated.status !== order.status) {

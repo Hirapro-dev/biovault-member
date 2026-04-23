@@ -485,11 +485,17 @@ model AgencyCommission {
   saleAmount        Int                             // 売上金額
   commissionRate    Float                           // 適用報酬率(%)
   commissionAmount  Int                             // 報酬金額
-  contributionType  String                          // 紹介のみ/説明補助/クロージング協力
+  contributionType  String                          // 備考（自由入力、旧: 紹介のみ/説明補助/クロージング協力）
   status            CommissionStatus @default(PENDING)
   paidAt            DateTime?
   note              String?
   createdAt         DateTime         @default(now())
+
+  // 自動生成レコードの重複防止用。手動作成は両方 null
+  sourceType        String?                         // "IPS" | "CF" | null
+  sourceOrderId     String?                         // IPS: membership.id, CF: cultureFluidOrder.id
+
+  @@unique([agencyProfileId, sourceType, sourceOrderId])
 }
 
 enum CommissionStatus {

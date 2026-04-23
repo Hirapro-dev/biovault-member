@@ -29,7 +29,7 @@ export default function AgencyKarteActions({
     memberName: "", memberNumber: "", memberUserId: "",
     orderKey: "", // 選択された売上対象 ("ips:xxx" or "cf:xxx")
     saleAmount: "", commissionRate: String(currentRate),
-    contributionType: "紹介のみ", status: "PENDING",
+    contributionType: "", status: "PENDING",
   });
   // 会員番号ルックアップ状態
   const [lookupStatus, setLookupStatus] = useState<"idle" | "loading" | "found" | "notfound">("idle");
@@ -124,7 +124,7 @@ export default function AgencyKarteActions({
     });
     setSaving(false);
     setShowAddCommission(false);
-    setCommForm({ memberName: "", memberNumber: "", memberUserId: "", orderKey: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "紹介のみ", status: "PENDING" });
+    setCommForm({ memberName: "", memberNumber: "", memberUserId: "", orderKey: "", saleAmount: "", commissionRate: String(currentRate), contributionType: "", status: "PENDING" });
     setLookupStatus("idle");
     setOrderOptions([]);
     setMessage("報酬を追加しました");
@@ -241,10 +241,15 @@ export default function AgencyKarteActions({
               />
             </div>
             <div><label className="block text-xs text-text-secondary mb-1">報酬率(%)</label><input type="number" step="0.1" value={commForm.commissionRate} onChange={(e) => setCommForm({ ...commForm, commissionRate: e.target.value })} className={ic} /></div>
-            <div><label className="block text-xs text-text-secondary mb-1">貢献タイプ</label>
-              <select value={commForm.contributionType} onChange={(e) => setCommForm({ ...commForm, contributionType: e.target.value })} className={ic + " cursor-pointer"}>
-                <option value="紹介のみ">紹介のみ</option><option value="説明補助">説明補助</option><option value="クロージング協力">クロージング協力</option>
-              </select>
+            <div>
+              <label className="block text-xs text-text-secondary mb-1">備考 <span className="text-[10px] text-text-muted">（自由入力）</span></label>
+              <input
+                type="text"
+                value={commForm.contributionType}
+                onChange={(e) => setCommForm({ ...commForm, contributionType: e.target.value })}
+                placeholder="例: 紹介のみ、説明補助、クロージング協力 など"
+                className={ic}
+              />
             </div>
             <div><label className="block text-xs text-text-secondary mb-1">ステータス</label>
               <select value={commForm.status} onChange={(e) => setCommForm({ ...commForm, status: e.target.value })} className={ic + " cursor-pointer"}>
