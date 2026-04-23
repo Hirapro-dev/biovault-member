@@ -12,16 +12,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const body = await req.json();
 
+  const updateData: Record<string, unknown> = {};
+  if (body.companyName !== undefined) updateData.companyName = body.companyName || null;
+  if (body.representativeName !== undefined) updateData.representativeName = body.representativeName || null;
+  if (typeof body.commissionRate === "number") updateData.commissionRate = body.commissionRate;
+  if (typeof body.staffCommissionRate === "number") updateData.staffCommissionRate = body.staffCommissionRate;
+  if (body.bankName !== undefined) updateData.bankName = body.bankName || null;
+  if (body.bankBranch !== undefined) updateData.bankBranch = body.bankBranch || null;
+  if (body.bankAccountType !== undefined) updateData.bankAccountType = body.bankAccountType || null;
+  if (body.bankAccountNumber !== undefined) updateData.bankAccountNumber = body.bankAccountNumber || null;
+  if (body.bankAccountName !== undefined) updateData.bankAccountName = body.bankAccountName || null;
+
   const profile = await prisma.agencyProfile.update({
     where: { id },
-    data: {
-      commissionRate: body.commissionRate,
-      bankName: body.bankName || null,
-      bankBranch: body.bankBranch || null,
-      bankAccountType: body.bankAccountType || null,
-      bankAccountNumber: body.bankAccountNumber || null,
-      bankAccountName: body.bankAccountName || null,
-    },
+    data: updateData,
   });
 
   return NextResponse.json(profile);

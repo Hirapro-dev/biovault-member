@@ -11,6 +11,9 @@ type Commission = {
   saleAmount: number;
   commissionRate: number;
   commissionAmount: number;
+  staffCommissionRate: number;
+  staffCommissionAmount: number;
+  staffCode: string | null;
   contributionType: string;
   status: string;
   note: string | null;
@@ -35,13 +38,14 @@ export default function CommissionList({
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<Commission | null>(null);
-  const [form, setForm] = useState({ commissionRate: "", status: "", contributionType: "" });
+  const [form, setForm] = useState({ commissionRate: "", staffCommissionRate: "", status: "", contributionType: "" });
   const [saving, setSaving] = useState(false);
 
   const openEdit = (c: Commission) => {
     setEditing(c);
     setForm({
       commissionRate: String(c.commissionRate),
+      staffCommissionRate: String(c.staffCommissionRate ?? 0),
       status: c.status,
       contributionType: c.contributionType || "",
     });
@@ -61,6 +65,7 @@ export default function CommissionList({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           commissionRate: parseFloat(form.commissionRate),
+          staffCommissionRate: parseFloat(form.staffCommissionRate),
           status: form.status,
           contributionType: form.contributionType,
         }),
@@ -94,7 +99,9 @@ export default function CommissionList({
   };
 
   const ic = "w-full px-3 py-2 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm outline-none focus:border-border-gold";
-  const previewAmount = editing ? Math.floor((editing.saleAmount * (parseFloat(form.commissionRate) || 0)) / 100) : 0;
+
+  const previewAgency = editing ? Math.floor((editing.saleAmount * (parseFloat(form.commissionRate) || 0)) / 100) : 0;
+  const previewStaff = editing ? Math.floor((editing.saleAmount * (parseFloat(form.staffCommissionRate) || 0)) / 100) : 0;
 
   return (
     <>
@@ -116,7 +123,7 @@ export default function CommissionList({
                   className="w-full flex items-center justify-between py-3 text-left hover:bg-bg-elevated/40 transition-colors cursor-pointer px-2 -mx-2 rounded"
                 >
                   <div className="min-w-0">
-                    <div className="text-sm text-text-primary flex items-center gap-2">
+                    <div className="text-sm text-text-primary flex items-center gap-2 flex-wrap">
                       {c.memberName}（{c.memberNumber}）
                       {c.sourceType && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">
@@ -126,11 +133,17 @@ export default function CommissionList({
                     </div>
                     {c.note && <div className="text-[11px] text-gold mt-0.5 truncate">{c.note}</div>}
                     <div className="text-[11px] text-text-muted mt-0.5">
-                      {c.contributionType || "備考なし"} ・ 売上 ¥{c.saleAmount.toLocaleString()} × {c.commissionRate}%
+                      {c.contributionType || "備考なし"} ・ 売上 ¥{c.saleAmount.toLocaleString()}
+                    </div>
+                    <div className="text-[11px] text-text-muted mt-0.5 font-mono">
+                      代理店 {c.commissionRate}% = ¥{c.commissionAmount.toLocaleString()}
+                      {(c.staffCommissionRate ?? 0) > 0 && (
+                        <span className="ml-2 text-gold">／ 営業マン {c.staffCommissionRate}% = ¥{c.staffCommissionAmount.toLocaleString()}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-3">
-                    <span className="font-mono text-sm text-gold">¥{c.commissionAmount.toLocaleString()}</span>
+                    <span className="font-mono text-sm text-gold">¥{(c.commissionAmount + (c.staffCommissionAmount ?? 0)).toLocaleString()}</span>
                     <Badge variant={st.variant}>{st.label}</Badge>
                   </div>
                 </button>
@@ -147,7 +160,7 @@ export default function CommissionList({
           onClick={closeEdit}
         >
           <div
-            className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 w-full max-w-md"
+            className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">
@@ -164,7 +177,7 @@ export default function CommissionList({
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-text-secondary mb-1">報酬率(%)</label>
+                <label className="block text-xs text-text-secondary mb-1">代理店報酬率(%)</label>
                 <input
                   type="number"
                   step="0.1"
@@ -173,8 +186,25 @@ export default function CommissionList({
                   className={ic + " font-mono"}
                 />
                 <div className="text-[11px] text-gold font-mono mt-1">
-                  報酬額: ¥{previewAmount.toLocaleString()}
+                  代理店報酬: ¥{previewAgency.toLocaleString()}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">営業マン報酬率(%)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={form.staffCommissionRate}
+                  onChange={(e) => setForm({ ...form, staffCommissionRate: e.target.value })}
+                  className={ic + " font-mono"}
+                />
+                <div className="text-[11px] text-gold font-mono mt-1">
+                  営業マン報酬: ¥{previewStaff.toLocaleString()}
+                </div>
+                {editing.staffCode && (
+                  <div className="text-[10px] text-text-muted mt-1">営業マン: {editing.staffCode}</div>
+                )}
               </div>
 
               <div>
@@ -197,7 +227,7 @@ export default function CommissionList({
                   type="text"
                   value={form.contributionType}
                   onChange={(e) => setForm({ ...form, contributionType: e.target.value })}
-                  placeholder="自由記入（例: 紹介のみ、説明補助、クロージング協力）"
+                  placeholder="自由記入"
                   className={ic}
                 />
               </div>

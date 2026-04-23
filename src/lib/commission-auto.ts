@@ -4,6 +4,9 @@
  * 会員の売上（iPS契約入金完了 / 培養上清液オーダー入金完了）に対して、
  * 紹介代理店の報酬レコードを自動で作成する。
  *
+ * 合計報酬率(totalRate) = 代理店(agencyRate) + 営業マン(staffRate)
+ * それぞれの報酬額を AgencyCommission に保持する。
+ *
  * 重複防止: (agencyProfileId, sourceType, sourceOrderId) でユニーク制約
  */
 
@@ -17,14 +20,21 @@ async function upsertCommission(params: {
   memberName: string;
   memberNumber: string;
   saleAmount: number;
-  commissionRate: number;
+  totalRate: number;
+  staffRate: number;
+  staffCode: string | null;
   sourceType: SourceType;
   sourceOrderId: string;
   noteLabel: string;
 }) {
-  const { agencyProfileId, memberUserId, memberName, memberNumber, saleAmount, commissionRate, sourceType, sourceOrderId, noteLabel } = params;
+  const {
+    agencyProfileId, memberUserId, memberName, memberNumber, saleAmount,
+    totalRate, staffRate, staffCode, sourceType, sourceOrderId, noteLabel,
+  } = params;
 
-  const commissionAmount = Math.floor((saleAmount * commissionRate) / 100);
+  const agencyRate = Math.max(0, totalRate - staffRate);
+  const commissionAmount = Math.floor((saleAmount * agencyRate) / 100);
+  const staffCommissionAmount = Math.floor((saleAmount * staffRate) / 100);
 
   // 既に同一 sourceType/sourceOrderId のレコードがあればスキップ（重複防止）
   const existing = await prisma.agencyCommission.findFirst({
@@ -39,9 +49,12 @@ async function upsertCommission(params: {
       memberName,
       memberNumber,
       saleAmount,
-      commissionRate,
+      commissionRate: agencyRate,
       commissionAmount,
-      contributionType: "", // 備考（自由入力）は空欄でスタート
+      staffCommissionRate: staffRate,
+      staffCommissionAmount,
+      staffCode,
+      contributionType: "", // 備考は空欄
       status: "PENDING",
       note: `自動生成: ${noteLabel}`,
       sourceType,
@@ -70,7 +83,12 @@ export async function autoCreateCommissionForIps(userId: string) {
 
   const agency = await prisma.agencyProfile.findUnique({
     where: { agencyCode: user.referredByAgency },
-    select: { id: true, commissionRate: true },
+    select: {
+      id: true,
+      commissionRate: true,
+      staffCommissionRate: true,
+      user: { select: { referredByStaff: true } },
+    },
   });
   if (!agency) return null;
 
@@ -80,7 +98,9 @@ export async function autoCreateCommissionForIps(userId: string) {
     memberName: user.name,
     memberNumber: user.membership.memberNumber,
     saleAmount: user.membership.totalAmount,
-    commissionRate: agency.commissionRate ?? 0,
+    totalRate: agency.commissionRate ?? 0,
+    staffRate: agency.staffCommissionRate ?? 0,
+    staffCode: agency.user?.referredByStaff ?? null,
     sourceType: "IPS",
     sourceOrderId: user.membership.id,
     noteLabel: "iPS作製・保管 基本パッケージ",
@@ -114,7 +134,12 @@ export async function autoCreateCommissionForCf(orderId: string) {
 
   const agency = await prisma.agencyProfile.findUnique({
     where: { agencyCode: order.user.referredByAgency },
-    select: { id: true, commissionRate: true },
+    select: {
+      id: true,
+      commissionRate: true,
+      staffCommissionRate: true,
+      user: { select: { referredByStaff: true } },
+    },
   });
   if (!agency) return null;
 
@@ -124,7 +149,9 @@ export async function autoCreateCommissionForCf(orderId: string) {
     memberName: order.user.name,
     memberNumber: order.user.membership.memberNumber,
     saleAmount: order.totalAmount,
-    commissionRate: agency.commissionRate ?? 0,
+    totalRate: agency.commissionRate ?? 0,
+    staffRate: agency.staffCommissionRate ?? 0,
+    staffCode: agency.user?.referredByStaff ?? null,
     sourceType: "CF",
     sourceOrderId: order.id,
     noteLabel: order.planLabel,

@@ -26,10 +26,16 @@ export async function PATCH(
 
   const updateData: Record<string, unknown> = {};
 
-  // 報酬率更新（commissionAmount を再計算）
+  // 代理店報酬率更新（commissionAmount を再計算）
   if (typeof body.commissionRate === "number") {
     updateData.commissionRate = body.commissionRate;
     updateData.commissionAmount = Math.floor((commission.saleAmount * body.commissionRate) / 100);
+  }
+
+  // 営業マン報酬率更新（staffCommissionAmount を再計算）
+  if (typeof body.staffCommissionRate === "number") {
+    updateData.staffCommissionRate = body.staffCommissionRate;
+    updateData.staffCommissionAmount = Math.floor((commission.saleAmount * body.staffCommissionRate) / 100);
   }
 
   // ステータス更新

@@ -456,7 +456,8 @@ model AgencyProfile {
   agencyCode          String    @unique             // AG-0001形式
   companyName         String?                       // 法人名
   representativeName  String?                       // 代表者名
-  commissionRate      Float     @default(0)         // 基本成果報酬率(%)
+  commissionRate      Float     @default(0)         // 合計報酬率(%) = 代理店 + 営業マン
+  staffCommissionRate Float     @default(0)         // 営業マン取り分(%) （合計の内数）
   bankName            String?                       // 振込先銀行
   bankBranch          String?                       // 支店名
   bankAccountType     String?                       // 口座種別（普通/当座）
@@ -483,8 +484,11 @@ model AgencyCommission {
   memberName        String                          // 会員名
   memberNumber      String                          // 会員番号
   saleAmount        Int                             // 売上金額
-  commissionRate    Float                           // 適用報酬率(%)
-  commissionAmount  Int                             // 報酬金額
+  commissionRate    Float                           // 代理店適用報酬率(%)
+  commissionAmount  Int                             // 代理店報酬金額
+  staffCommissionRate   Float  @default(0)          // 営業マン適用報酬率(%)
+  staffCommissionAmount Int    @default(0)          // 営業マン報酬金額
+  staffCode         String?                         // 対象営業マン（代理店の担当従業員）
   contributionType  String                          // 備考（自由入力、旧: 紹介のみ/説明補助/クロージング協力）
   status            CommissionStatus @default(PENDING)
   paidAt            DateTime?

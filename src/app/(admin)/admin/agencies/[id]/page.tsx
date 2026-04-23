@@ -5,8 +5,11 @@ import Link from "next/link";
 import MembersTable from "@/components/members/MembersTable";
 import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import AgencyKarteActions from "./AgencyKarteActions";
+import AgencyInfoEditor from "./AgencyInfoEditor";
 import ReferralUrlSection from "./ReferralUrlSection";
 import CommissionList from "./CommissionList";
+import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
+import { calcSummary } from "@/lib/commission-summary";
 import IssueIdSection from "../../members/[id]/IssueIdSection";
 import DeleteAccount from "../../members/[id]/DeleteAccount";
 
@@ -55,6 +58,9 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
     orderBy: { createdAt: "desc" },
   });
 
+  // サマリー集計
+  const summary = calcSummary(profile?.commissions || []);
+
   return (
     <div>
       <div className="text-[11px] text-text-muted mb-5">
@@ -67,50 +73,55 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
         代理店カルテ — {profile?.companyName || user.name}
       </h2>
 
-      {/* 基本情報 + 契約情報 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5">
-        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-          <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">基本情報</h3>
-          <Row label="法人名/屋号" value={profile?.companyName || "---"} />
-          <Row label="代表者名" value={profile?.representativeName || user.name} />
-          <Row label="フリガナ" value={user.nameKana || "---"} />
-          <Row label="ログインID" value={user.loginId} mono />
-          <Row label="メール" value={user.email} />
-          <Row label="電話番号" value={user.phone || "---"} />
-          <Row label="住所" value={user.address || "---"} />
-          <Row label="登録日" value={new Date(user.createdAt).toLocaleDateString("ja-JP")} />
-          <div className="flex items-center py-2 border-t border-border mt-1">
-            <div className="w-28 text-[11px] text-text-muted shrink-0">担当</div>
-            <div className="text-[13px]">
-              {staffRecord ? (
-                <Link href={`/admin/staff/${staffRecord.id}`} className="text-gold hover:underline">
-                  {staffRecord.staffCode} — {staffRecord.name}
-                </Link>
-              ) : (
-                <span className="text-text-muted">---</span>
-              )}
-            </div>
+      {/* 売上・報酬サマリー */}
+      <CommissionSummaryCards summary={summary} />
+
+      {/* 基本情報 + 契約情報（編集可） */}
+      <AgencyInfoEditor
+        userId={user.id}
+        agencyProfileId={profile?.id || ""}
+        initial={{
+          companyName: profile?.companyName || "",
+          representativeName: profile?.representativeName || user.name,
+          nameKana: user.nameKana || "",
+          loginId: user.loginId,
+          email: user.email,
+          phone: user.phone || "",
+          address: user.address || "",
+          agencyCode: profile?.agencyCode || "",
+          commissionRate: profile?.commissionRate || 0,
+          staffCommissionRate: profile?.staffCommissionRate || 0,
+          bankName: profile?.bankName || "",
+          bankBranch: profile?.bankBranch || "",
+          bankAccountType: profile?.bankAccountType || "",
+          bankAccountNumber: profile?.bankAccountNumber || "",
+          bankAccountName: profile?.bankAccountName || "",
+        }}
+      />
+
+      {/* 担当営業マン・契約同意（読み取り） */}
+      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-5">
+        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">担当営業マン・契約同意</h3>
+        <div className="flex items-center py-2 border-b border-border">
+          <div className="w-28 text-[11px] text-text-muted shrink-0">担当営業マン</div>
+          <div className="text-[13px]">
+            {staffRecord ? (
+              <Link href={`/admin/staff/${staffRecord.id}`} className="text-gold hover:underline">
+                {staffRecord.staffCode} — {staffRecord.name}
+              </Link>
+            ) : (
+              <span className="text-text-muted">---</span>
+            )}
           </div>
         </div>
-
-        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-          <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">契約情報</h3>
-          <Row label="エージェントコード" value={profile?.agencyCode || "---"} mono />
-          <Row label="報酬率" value={profile?.commissionRate ? `${profile.commissionRate}%` : "未設定"} />
-          <Row label="銀行名" value={profile?.bankName || "未登録"} />
-          <Row label="支店名" value={profile?.bankBranch || "未登録"} />
-          <Row label="口座種別" value={profile?.bankAccountType || "未登録"} />
-          <Row label="口座番号" value={profile?.bankAccountNumber || "未登録"} />
-          <Row label="口座名義" value={profile?.bankAccountName || "未登録"} />
-          <div className="flex items-center py-2 border-t border-border mt-1">
-            <div className="w-28 text-[11px] text-text-muted shrink-0">契約同意</div>
-            <div className="text-[13px]">
-              {profile?.agreedAt ? (
-                <span className="text-status-active">同意済 <span className="text-text-muted text-[11px] ml-1">({new Date(profile.agreedAt).toLocaleDateString("ja-JP")})</span></span>
-              ) : (
-                <span className="text-status-warning">未同意</span>
-              )}
-            </div>
+        <div className="flex items-center py-2">
+          <div className="w-28 text-[11px] text-text-muted shrink-0">契約同意</div>
+          <div className="text-[13px]">
+            {profile?.agreedAt ? (
+              <span className="text-status-active">同意済 <span className="text-text-muted text-[11px] ml-1">({new Date(profile.agreedAt).toLocaleDateString("ja-JP")})</span></span>
+            ) : (
+              <span className="text-status-warning">未同意</span>
+            )}
           </div>
         </div>
       </div>
@@ -121,16 +132,11 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
       {/* アカウント情報（ID発行・PW変更） */}
       <IssueIdSection userId={user.id} currentLoginId={user.loginId} nameKana={user.nameKana || ""} isIdIssued={user.isIdIssued} />
 
-      {/* 報酬率・振込先の編集 */}
+      {/* 手動での報酬レコード追加（自動生成を補完） */}
       <AgencyKarteActions
         userId={user.id}
         agencyProfileId={profile?.id || ""}
         currentRate={profile?.commissionRate || 0}
-        bankName={profile?.bankName || ""}
-        bankBranch={profile?.bankBranch || ""}
-        bankAccountType={profile?.bankAccountType || ""}
-        bankAccountNumber={profile?.bankAccountNumber || ""}
-        bankAccountName={profile?.bankAccountName || ""}
       />
 
       {/* 紹介顧客一覧 */}
@@ -151,6 +157,9 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
           saleAmount: c.saleAmount,
           commissionRate: c.commissionRate,
           commissionAmount: c.commissionAmount,
+          staffCommissionRate: c.staffCommissionRate ?? 0,
+          staffCommissionAmount: c.staffCommissionAmount ?? 0,
+          staffCode: c.staffCode ?? null,
           contributionType: c.contributionType,
           status: c.status,
           note: c.note,
@@ -184,15 +193,6 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
 
       {/* アカウント削除 */}
       <DeleteAccount userId={user.id} loginId={user.loginId} />
-    </div>
-  );
-}
-
-function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center py-2 border-b border-border last:border-b-0">
-      <div className="w-28 text-[11px] text-text-muted shrink-0">{label}</div>
-      <div className={`text-[13px] text-text-primary ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
   );
 }

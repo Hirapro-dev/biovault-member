@@ -7,6 +7,8 @@ import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import StaffReferralUrlSection from "./StaffReferralUrlSection";
 import StaffKarteActions from "./StaffKarteActions";
 import StaffLoginSection from "./StaffLoginSection";
+import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
+import { calcSummary } from "@/lib/commission-summary";
 
 export default async function StaffKartePage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -51,6 +53,14 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
   // 売上サマリー（入金済み金額のみ）
   const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
 
+  // 報酬サマリー（この従業員が担当営業マンの報酬レコードを集計）
+  const commissions = await prisma.agencyCommission.findMany({
+    where: { staffCode: staff.staffCode },
+    select: { saleAmount: true, commissionAmount: true, staffCommissionAmount: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  });
+  const summary = calcSummary(commissions);
+
   return (
     <div>
       <div className="text-[11px] text-text-muted mb-5">
@@ -62,6 +72,9 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         従業員カルテ — {staff.name}
       </h2>
+
+      {/* 売上・報酬サマリー（営業マン取り分のみ） */}
+      <CommissionSummaryCards summary={summary} showAgency={false} />
 
       {/* 基本情報 + 実績サマリー */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5">

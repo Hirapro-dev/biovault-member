@@ -1,15 +1,25 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
-import BankAccountEditor from "./BankAccountEditor";
 
+/**
+ * 代理店プロフィール画面（閲覧専用）
+ * 変更希望がある場合は管理者への連絡が必要
+ */
 export default async function AgencyProfilePage() {
   const sessionUser = await requireAgency();
-  const user = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { name: true, email: true, phone: true, address: true } });
+  const user = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+    select: { name: true, email: true, phone: true, address: true, nameKana: true },
+  });
   const profile = await prisma.agencyProfile.findUnique({ where: { userId: sessionUser.id } });
   if (!user) return null;
 
   const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
   const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode}`;
+
+  const totalRate = profile?.commissionRate ?? 0;
+  const staffRate = profile?.staffCommissionRate ?? 0;
+  const agencyRate = Math.max(0, totalRate - staffRate);
 
   return (
     <div>
@@ -21,24 +31,21 @@ export default async function AgencyProfilePage() {
           <Row label="エージェントコード" value={profile?.agencyCode || "---"} mono />
           <Row label="法人名" value={profile?.companyName || "---"} />
           <Row label="代表者名" value={profile?.representativeName || user?.name || "---"} />
+          <Row label="フリガナ" value={user?.nameKana || "---"} />
           <Row label="メール" value={user?.email || "---"} />
           <Row label="電話番号" value={user?.phone || "---"} />
           <Row label="住所" value={user?.address || "---"} />
-          <Row label="報酬率" value={profile?.commissionRate ? `${profile.commissionRate}%` : "未設定"} />
+          <Row label="報酬率" value={totalRate > 0 ? `${agencyRate}%（合計 ${totalRate}%）` : "未設定"} />
         </div>
 
         <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
           <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">振込先情報</h3>
-          <BankAccountEditor
-            initial={{
-              bankName: profile?.bankName || "",
-              bankBranch: profile?.bankBranch || "",
-              bankAccountType: profile?.bankAccountType || "",
-              bankAccountNumber: profile?.bankAccountNumber || "",
-              bankAccountName: profile?.bankAccountName || "",
-            }}
-          />
-          <p className="text-[10px] text-text-muted mt-3">※ 変更内容は管理側にも即時反映されます</p>
+          <Row label="銀行名" value={profile?.bankName || "未登録"} />
+          <Row label="支店名" value={profile?.bankBranch || "未登録"} />
+          <Row label="口座種別" value={profile?.bankAccountType || "未登録"} />
+          <Row label="口座番号" value={profile?.bankAccountNumber || "未登録"} mono />
+          <Row label="口座名義" value={profile?.bankAccountName || "未登録"} />
+          <p className="text-[10px] text-text-muted mt-3">※ 情報の変更は管理者までご連絡ください</p>
         </div>
       </div>
 
