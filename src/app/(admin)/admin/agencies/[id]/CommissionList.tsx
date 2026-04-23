@@ -143,7 +143,7 @@ export default function CommissionList({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-3">
-                    <span className="font-mono text-sm text-gold">¥{(c.commissionAmount + (c.staffCommissionAmount ?? 0)).toLocaleString()}</span>
+                    <span className="font-mono text-sm text-gold">¥{c.commissionAmount.toLocaleString()}</span>
                     <Badge variant={st.variant}>{st.label}</Badge>
                   </div>
                 </button>
