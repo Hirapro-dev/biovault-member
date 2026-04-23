@@ -11,6 +11,7 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
+  LabelList,
 } from "recharts";
 import type {
   LineMetric,
@@ -251,10 +252,16 @@ function StaffTab() {
     contracts: "成約人数（入金済）",
   };
 
+  // グラフ全体の累計値（フィルター適用後）
+  const grandTotal = data.reduce((sum, d) => sum + d.value, 0);
+  const grandTotalUnitLabel =
+    metric === "registrations" ? "名" : metric === "contracts" ? "件" : "";
+
   return (
     <>
       {/* フィルター */}
-      <div className="bg-bg-secondary border border-border rounded-md p-4 mb-4 flex flex-wrap gap-3 items-center">
+      <div className="bg-bg-secondary border border-border rounded-md p-4 mb-4 flex flex-wrap gap-3 items-end justify-between">
+        <div className="flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-[10px] text-text-muted mb-1">種別</label>
           <select
@@ -334,6 +341,17 @@ function StaffTab() {
             </select>
           </div>
         )}
+        </div>
+
+        {/* グラフ累計値（右端） */}
+        <div className="text-right">
+          <div className="text-[10px] text-text-muted tracking-wider mb-1">累計</div>
+          <div className="text-lg sm:text-xl font-mono text-gold">
+            {isMoney
+              ? `¥${grandTotal.toLocaleString()}`
+              : `${grandTotal.toLocaleString()} ${grandTotalUnitLabel}`}
+          </div>
+        </div>
       </div>
 
       {/* 棒グラフ */}
@@ -382,7 +400,21 @@ function StaffTab() {
                 }}
                 labelStyle={{ color: "#BFA04B" }}
               />
-              <Bar dataKey="value" fill="#BFA04B" />
+              <Bar dataKey="value" fill="#BFA04B">
+                <LabelList
+                  dataKey="value"
+                  position="top"
+                  fill="#BFA04B"
+                  fontSize={10}
+                  formatter={(v) => {
+                    const n = typeof v === "number" ? v : Number(v);
+                    if (!n) return "";
+                    return isMoney
+                      ? `¥${n >= 10000 ? `${Math.round(n / 10000).toLocaleString()}万` : n.toLocaleString()}`
+                      : `${n.toLocaleString()}`;
+                  }}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
