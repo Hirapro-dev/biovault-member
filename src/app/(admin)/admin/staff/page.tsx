@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import StaffCreateForm from "./StaffCreateForm";
 import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
-import { calcSummary } from "@/lib/commission-summary";
+import { calcSummaryForAllStaff } from "@/lib/commission-summary-from-data";
 
 export default async function AdminStaffPage() {
   await requireAdmin();
@@ -25,17 +25,8 @@ export default async function AdminStaffPage() {
     })
   );
 
-  // 全営業マン合算の売上・報酬サマリー（営業マン取り分のみ）
-  const allStaffCommissions = await prisma.agencyCommission.findMany({
-    where: { staffCode: { not: null } },
-    select: {
-      saleAmount: true,
-      commissionAmount: true,
-      staffCommissionAmount: true,
-      createdAt: true,
-    },
-  });
-  const summary = calcSummary(allStaffCommissions);
+  // 全営業マン合算の売上・報酬サマリー（実データから集計）
+  const summary = await calcSummaryForAllStaff();
 
   return (
     <div>

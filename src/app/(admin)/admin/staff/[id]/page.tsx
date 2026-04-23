@@ -8,7 +8,7 @@ import StaffReferralUrlSection from "./StaffReferralUrlSection";
 import StaffKarteActions from "./StaffKarteActions";
 import StaffLoginSection from "./StaffLoginSection";
 import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
-import { calcSummary } from "@/lib/commission-summary";
+import { calcSummaryForStaff } from "@/lib/commission-summary-from-data";
 
 export default async function StaffKartePage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -53,13 +53,8 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
   // 売上サマリー（入金済み金額のみ）
   const paidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
 
-  // 報酬サマリー（この従業員が担当営業マンの報酬レコードを集計）
-  const commissions = await prisma.agencyCommission.findMany({
-    where: { staffCode: staff.staffCode },
-    select: { saleAmount: true, commissionAmount: true, staffCommissionAmount: true, createdAt: true },
-    orderBy: { createdAt: "desc" },
-  });
-  const summary = calcSummary(commissions);
+  // 報酬サマリー（実データから集計）
+  const summary = await calcSummaryForStaff(staff.staffCode);
 
   return (
     <div>

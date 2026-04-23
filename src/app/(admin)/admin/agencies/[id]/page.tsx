@@ -9,7 +9,7 @@ import AgencyInfoEditor from "./AgencyInfoEditor";
 import ReferralUrlSection from "./ReferralUrlSection";
 import CommissionList from "./CommissionList";
 import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
-import { calcSummary } from "@/lib/commission-summary";
+import { calcSummaryForAgency } from "@/lib/commission-summary-from-data";
 import IssueIdSection from "../../members/[id]/IssueIdSection";
 import DeleteAccount from "../../members/[id]/DeleteAccount";
 
@@ -58,8 +58,10 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
     orderBy: { createdAt: "desc" },
   });
 
-  // サマリー集計
-  const summary = calcSummary(profile?.commissions || []);
+  // サマリー集計（実データから）
+  const summary = profile?.agencyCode
+    ? await calcSummaryForAgency(profile.agencyCode)
+    : { totalSales: 0, monthSales: 0, totalAgencyCommission: 0, monthAgencyCommission: 0, totalStaffCommission: 0, monthStaffCommission: 0 };
 
   return (
     <div>
