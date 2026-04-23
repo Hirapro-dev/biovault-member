@@ -2,6 +2,8 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import StaffCreateForm from "./StaffCreateForm";
+import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
+import { calcSummary } from "@/lib/commission-summary";
 
 export default async function AdminStaffPage() {
   await requireAdmin();
@@ -23,11 +25,26 @@ export default async function AdminStaffPage() {
     })
   );
 
+  // 全営業マン合算の売上・報酬サマリー（営業マン取り分のみ）
+  const allStaffCommissions = await prisma.agencyCommission.findMany({
+    where: { staffCode: { not: null } },
+    select: {
+      saleAmount: true,
+      commissionAmount: true,
+      staffCommissionAmount: true,
+      createdAt: true,
+    },
+  });
+  const summary = calcSummary(allStaffCommissions);
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         従業員管理
       </h2>
+
+      {/* 全営業マン合算サマリー */}
+      <CommissionSummaryCards summary={summary} showAgency={false} />
 
       {/* 新規作成フォーム */}
       <StaffCreateForm />

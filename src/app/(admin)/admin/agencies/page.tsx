@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
+import { calcSummary } from "@/lib/commission-summary";
 
 export default async function AdminAgenciesPage() {
   await requireAdmin();
@@ -10,6 +12,17 @@ export default async function AdminAgenciesPage() {
     include: { agencyProfile: true },
     orderBy: { createdAt: "desc" },
   });
+
+  // 全代理店合算の売上・報酬サマリー
+  const allCommissions = await prisma.agencyCommission.findMany({
+    select: {
+      saleAmount: true,
+      commissionAmount: true,
+      staffCommissionAmount: true,
+      createdAt: true,
+    },
+  });
+  const summary = calcSummary(allCommissions);
 
   // 各エージェントの紹介顧客数・入金済売上を取得
   const customerCounts: Record<string, number> = {};
@@ -50,6 +63,9 @@ export default async function AdminAgenciesPage() {
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         エージェント一覧
       </h2>
+
+      {/* 全代理店合算サマリー */}
+      <CommissionSummaryCards summary={summary} />
 
       <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
         {agencies.length === 0 ? (
