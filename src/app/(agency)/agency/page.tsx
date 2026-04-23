@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
 import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
 import TimelineView from "@/components/dashboard/TimelineView";
+import MonthlyBarChart from "@/components/dashboard/MonthlyBarChart";
 
 export default async function AgencyDashboardPage() {
   const user = await requireAgency();
@@ -35,6 +36,17 @@ export default async function AgencyDashboardPage() {
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         ダッシュボード
       </h2>
+
+      {/* 月次グラフ */}
+      <MonthlyBarChart
+        apiPath="/api/agency/analytics/monthly-bar"
+        defaultMetric="totalSales"
+        metricOptions={[
+          { value: "totalSales", label: "累計売上" },
+          { value: "registrations", label: "メンバーシップ登録人数" },
+          { value: "contracts", label: "成約人数（入金済）" },
+        ]}
+      />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <StatCard label="紹介顧客数" value={String(customerCount)} sub="名" />

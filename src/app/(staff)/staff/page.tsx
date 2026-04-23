@@ -6,6 +6,7 @@ import StaffFormUrl from "./StaffFormUrl";
 import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
 import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
 import TimelineView from "@/components/dashboard/TimelineView";
+import MonthlyBarChart from "@/components/dashboard/MonthlyBarChart";
 
 export default async function StaffDashboardPage() {
   const { staffCode, name } = await requireStaff();
@@ -51,6 +52,19 @@ export default async function StaffDashboardPage() {
         ダッシュボード
       </h2>
       <p className="text-sm text-text-muted mb-6">{name}（{staffCode}）の担当顧客データ</p>
+
+      {/* 月次グラフ */}
+      <MonthlyBarChart
+        apiPath="/api/staff/analytics/monthly-bar"
+        defaultMetric="totalSales"
+        metricOptions={[
+          { value: "totalSales", label: "累計売上" },
+          { value: "staffSales", label: "営業マン売上" },
+          { value: "viaAgencySales", label: "代理店経由売上" },
+          { value: "registrations", label: "メンバーシップ登録人数" },
+          { value: "contracts", label: "成約人数（入金済）" },
+        ]}
+      />
 
       {/* 専用申込フォームURL */}
       <StaffFormUrl staffCode={staffCode} />

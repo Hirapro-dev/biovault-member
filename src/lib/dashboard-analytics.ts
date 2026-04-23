@@ -284,3 +284,142 @@ export async function fetchStaffBarData(req: StaffBarRequest): Promise<StaffBarP
 
   return results;
 }
+
+// ────────────────────────────────────────
+// 月次棒グラフ（従業員 / 代理店の自分のダッシュボード向け）
+// ────────────────────────────────────────
+
+export type MonthlyBarMetric =
+  | "totalSales"
+  | "staffSales"
+  | "viaAgencySales"
+  | "registrations"
+  | "contracts";
+
+export type MonthlyBarPoint = {
+  month: number; // 1-12
+  label: string; // "1月"
+  value: number;
+};
+
+type MonthlyBarScope =
+  | { kind: "staff"; staffCode: string }
+  | { kind: "agency"; agencyCode: string };
+
+export async function fetchMonthlyBarData(params: {
+  metric: MonthlyBarMetric;
+  year: number;
+  scope: MonthlyBarScope;
+}): Promise<MonthlyBarPoint[]> {
+  const { metric, year, scope } = params;
+
+  // スコープに応じた対象代理店コード・直接担当条件
+  let directFilter: { referredByStaff?: string } = {};
+  let viaAgencyCodes: string[] = [];
+
+  if (scope.kind === "staff") {
+    directFilter = { referredByStaff: scope.staffCode };
+    const managed = await prisma.user.findMany({
+      where: { role: "AGENCY", referredByStaff: scope.staffCode },
+      select: { agencyProfile: { select: { agencyCode: true } } },
+    });
+    viaAgencyCodes = managed
+      .map((a) => a.agencyProfile?.agencyCode)
+      .filter((c): c is string => !!c);
+  } else {
+    // 代理店: 自分経由の会員のみ
+    viaAgencyCodes = [scope.agencyCode];
+  }
+
+  const members = await prisma.user.findMany({
+    where: {
+      role: "MEMBER",
+      OR: [
+        ...(directFilter.referredByStaff ? [{ referredByStaff: directFilter.referredByStaff }] : []),
+        ...(viaAgencyCodes.length > 0 ? [{ referredByAgency: { in: viaAgencyCodes } }] : []),
+      ],
+    },
+    select: {
+      referredByStaff: true,
+      referredByAgency: true,
+      membership: {
+        select: {
+          paidAmount: true,
+          paymentStatus: true,
+          contractDate: true,
+          contractSignedAt: true,
+        },
+      },
+      cultureFluidOrders: {
+        where: { paymentStatus: "COMPLETED" },
+        select: { totalAmount: true, paidAt: true, updatedAt: true },
+      },
+    },
+  });
+
+  // 12ヶ月ぶんの初期値
+  const buckets: number[] = Array.from({ length: 12 }, () => 0);
+
+  const addIfYearMatch = (d: Date | null | undefined, amt: number) => {
+    if (!d) return;
+    if (d.getFullYear() !== year) return;
+    buckets[d.getMonth()] += amt;
+  };
+
+  for (const m of members) {
+    const isDirect = scope.kind === "staff" && m.referredByStaff === scope.staffCode;
+    const isViaAgency =
+      !!m.referredByAgency && viaAgencyCodes.includes(m.referredByAgency);
+
+    if (!isDirect && !isViaAgency) continue;
+
+    if (metric === "registrations") {
+      if (m.membership) addIfYearMatch(m.membership.contractDate, 1);
+      continue;
+    }
+    if (metric === "contracts") {
+      if (
+        m.membership &&
+        m.membership.paymentStatus === "COMPLETED" &&
+        m.membership.paidAmount > 0
+      ) {
+        addIfYearMatch(m.membership.contractSignedAt || m.membership.contractDate, 1);
+      }
+      continue;
+    }
+
+    // 売上系
+    const considerDirect = metric === "totalSales" || metric === "staffSales";
+    const considerViaAgency = metric === "totalSales" || metric === "viaAgencySales";
+
+    if (isDirect && considerDirect) {
+      if (m.membership && m.membership.paidAmount > 0) {
+        addIfYearMatch(
+          m.membership.contractSignedAt || m.membership.contractDate,
+          m.membership.paidAmount,
+        );
+      }
+      for (const o of m.cultureFluidOrders) {
+        if (o.totalAmount === 0) continue;
+        addIfYearMatch(o.paidAt || o.updatedAt, o.totalAmount);
+      }
+    } else if (isViaAgency && considerViaAgency) {
+      if (m.membership && m.membership.paidAmount > 0) {
+        addIfYearMatch(
+          m.membership.contractSignedAt || m.membership.contractDate,
+          m.membership.paidAmount,
+        );
+      }
+      for (const o of m.cultureFluidOrders) {
+        if (o.totalAmount === 0) continue;
+        addIfYearMatch(o.paidAt || o.updatedAt, o.totalAmount);
+      }
+    }
+  }
+
+  return buckets.map((value, idx) => ({
+    month: idx + 1,
+    label: `${idx + 1}月`,
+    value,
+  }));
+}
