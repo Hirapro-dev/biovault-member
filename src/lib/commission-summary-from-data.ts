@@ -79,10 +79,18 @@ export async function calcSummaryForAgency(agencyCode: string): Promise<Commissi
 
 /**
  * 従業員向けサマリー型
- * - totalStaffCommission / monthStaffCommission: 直接紹介分 × 営業マン%（営業マン売上報酬）
- * - totalAgencyDistribution / monthAgencyDistribution: 担当代理店経由分 × 代理店%（代理店分配報酬）
+ * 売上:
+ * - totalDirectSales / monthDirectSales: 直接紹介分の売上（営業マン売上）
+ * - totalViaAgencySales / monthViaAgencySales: 担当代理店経由分の売上
+ * 報酬（現状は管理ページでは使用せず将来用に保持）:
+ * - totalStaffCommission / monthStaffCommission
+ * - totalAgencyDistribution / monthAgencyDistribution
  */
 export type StaffSummary = CommissionSummary & {
+  totalDirectSales: number;
+  monthDirectSales: number;
+  totalViaAgencySales: number;
+  monthViaAgencySales: number;
   totalAgencyDistribution: number;
   monthAgencyDistribution: number;
 };
@@ -170,6 +178,10 @@ async function calcStaffSummary(params: {
 
   let totalSales = 0,
     monthSales = 0,
+    totalDirectSales = 0,
+    monthDirectSales = 0,
+    totalViaAgencySales = 0,
+    monthViaAgencySales = 0,
     totalStaffCommission = 0,
     monthStaffCommission = 0,
     totalAgencyDistribution = 0,
@@ -178,7 +190,6 @@ async function calcStaffSummary(params: {
   for (const m of members) {
     const rate = resolveRate(rateMap, m.referredByAgency, m.referredByStaff);
     const agencyRate = Math.max(0, rate.total - rate.staff);
-    const staffRate = rate.staff;
 
     const isViaAgency = !!m.referredByAgency && viaAgencyCodes.includes(m.referredByAgency);
 
@@ -187,19 +198,20 @@ async function calcStaffSummary(params: {
       if (inMonth) monthSales += amt;
 
       if (isViaAgency) {
-        // 担当代理店経由 → 代理店分配報酬
+        // 担当代理店経由
+        totalViaAgencySales += amt;
+        if (inMonth) monthViaAgencySales += amt;
         const dist = Math.floor((amt * agencyRate) / 100);
         totalAgencyDistribution += dist;
         if (inMonth) monthAgencyDistribution += dist;
       } else {
-        // 直接紹介 → 営業マン売上報酬（総額 = total%）
+        // 直接紹介
+        totalDirectSales += amt;
+        if (inMonth) monthDirectSales += amt;
         const staffComm = Math.floor((amt * rate.total) / 100);
         totalStaffCommission += staffComm;
         if (inMonth) monthStaffCommission += staffComm;
       }
-      // 注: 担当代理店経由の場合の「営業マン取り分(staffRate)」は営業マン売上報酬ではなく
-      // 代理店分配報酬とは別概念。必要であれば要件確認。ここでは代理店経由分は全額=代理店分配扱い。
-      void staffRate; // lint 回避
     };
 
     if (m.membership && m.membership.paidAmount > 0) {
@@ -216,6 +228,10 @@ async function calcStaffSummary(params: {
   return {
     totalSales,
     monthSales,
+    totalDirectSales,
+    monthDirectSales,
+    totalViaAgencySales,
+    monthViaAgencySales,
     totalAgencyCommission: 0,
     monthAgencyCommission: 0,
     totalStaffCommission,

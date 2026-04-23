@@ -1,16 +1,19 @@
 import type { CommissionSummary } from "@/lib/commission-summary";
 
 type StaffSummary = CommissionSummary & {
-  // 担当代理店経由分の「代理店分配報酬」（従業員向け）
+  totalDirectSales?: number;
+  monthDirectSales?: number;
+  totalViaAgencySales?: number;
+  monthViaAgencySales?: number;
   totalAgencyDistribution?: number;
   monthAgencyDistribution?: number;
 };
 
 /**
- * 代理店カルテ / 従業員カルテ上部のサマリー表示
+ * サマリー表示
  *
  * 代理店カルテ: 売上 / 代理店報酬 / 営業マン報酬
- * 従業員カルテ: 売上 / 営業マン売上報酬 / 代理店分配報酬
+ * 従業員カルテ: 営業マン売上 / 代理店経由売上 （報酬は表示しない）
  */
 export default function CommissionSummaryCards({
   summary,
@@ -23,20 +26,19 @@ export default function CommissionSummaryCards({
   showAgency?: boolean;
   variant?: "agency" | "staff";
 }) {
-  // 従業員向け表示: 売上 / 営業マン売上報酬 / 代理店分配報酬
+  // 従業員向け表示: 営業マン売上 / 代理店経由売上
   if (variant === "staff") {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-        <SummaryCard label="売上" total={summary.totalSales} month={summary.monthSales} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
         <SummaryCard
-          label="営業マン売上報酬"
-          total={summary.totalStaffCommission}
-          month={summary.monthStaffCommission}
+          label="営業マン売上"
+          total={summary.totalDirectSales ?? 0}
+          month={summary.monthDirectSales ?? 0}
         />
         <SummaryCard
-          label="代理店分配報酬"
-          total={summary.totalAgencyDistribution ?? 0}
-          month={summary.monthAgencyDistribution ?? 0}
+          label="代理店経由売上"
+          total={summary.totalViaAgencySales ?? 0}
+          month={summary.monthViaAgencySales ?? 0}
         />
       </div>
     );
