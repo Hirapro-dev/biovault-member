@@ -1,16 +1,16 @@
 import { requireAdmin } from "@/lib/auth-helpers";
-import prisma from "@/lib/prisma";
 import { IPS_STATUS_LABELS } from "@/types";
 import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
+import { fetchMonthlyLineData, fetchOverallTotal } from "@/lib/dashboard-analytics";
 import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
 import TimelineView from "@/components/dashboard/TimelineView";
+import DashboardCharts from "./DashboardCharts";
+import prisma from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
-  const [totalMembers, paymentCompleted, recentLogs, ipsTimeline, cfTimeline] = await Promise.all([
-    prisma.user.count({ where: { role: "MEMBER" } }),
-    prisma.membership.count({ where: { paymentStatus: "COMPLETED" } }),
+  const [recentLogs, ipsTimeline, cfTimeline, monthlyData, overall] = await Promise.all([
     prisma.statusHistory.findMany({
       take: 10,
       orderBy: { changedAt: "desc" },
@@ -18,29 +18,12 @@ export default async function AdminDashboardPage() {
     }),
     getIpsTimeline(),
     getCfTimeline(),
+    fetchMonthlyLineData(),
+    fetchOverallTotal(),
   ]);
-
-  // 成約数（SERVICE_APPLIED以降）
-  const statusCounts = await prisma.membership.groupBy({ by: ["ipsStatus"], _count: true });
-  const countMap: Record<string, number> = {};
-  for (const item of statusCounts) countMap[item.ipsStatus] = item._count;
-  const serviceApplied = (countMap["SERVICE_APPLIED"] || 0) + (countMap["SCHEDULE_ARRANGED"] || 0) +
-    (countMap["BLOOD_COLLECTED"] || 0) + (countMap["IPS_CREATING"] || 0) + (countMap["STORAGE_ACTIVE"] || 0);
-
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  const newThisMonth = await prisma.user.count({ where: { role: "MEMBER", createdAt: { gte: startOfMonth } } });
 
   const ipsTotal = ipsTimeline.reduce((sum, s) => sum + s.members.length, 0);
   const cfTotal = cfTimeline.reduce((sum, s) => sum + s.members.length, 0);
-
-  const stats = [
-    { label: "総会員数", value: String(totalMembers), sub: "名" },
-    { label: "成約数", value: String(serviceApplied), sub: "名" },
-    { label: "入金完了", value: String(paymentCompleted), sub: "名" },
-    { label: "今月新規", value: String(newThisMonth), sub: "名" },
-  ];
 
   return (
     <div>
@@ -48,16 +31,8 @@ export default async function AdminDashboardPage() {
         管理ダッシュボード
       </h2>
 
-      {/* 統計カード */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        {stats.map((s, i) => (
-          <div key={i} className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 text-center">
-            <div className="text-[11px] text-text-muted tracking-[2px] mb-2">{s.label}</div>
-            <div className="font-mono text-4xl text-gold font-light">{s.value}</div>
-            <div className="text-[11px] text-text-secondary">{s.sub}</div>
-          </div>
-        ))}
-      </div>
+      {/* グラフエリア（累計/従業員別） */}
+      <DashboardCharts monthlyData={monthlyData} overall={overall} />
 
       {/* 状況別会員数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
