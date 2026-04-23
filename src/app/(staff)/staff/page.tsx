@@ -21,21 +21,6 @@ export default async function StaffDashboardPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const totalCustomers = customers.length;
-  const ipsPaidAmount = customers.reduce((sum, c) => sum + (c.membership?.paidAmount || 0), 0);
-  const cfPaidAmount = customers.reduce((sum, c) =>
-    sum + c.cultureFluidOrders
-      .filter(o => o.paymentStatus === "COMPLETED")
-      .reduce((s, o) => s + o.totalAmount, 0),
-    0
-  );
-  const paidAmount = ipsPaidAmount + cfPaidAmount;
-  const paymentCompleted = customers.filter(c => c.membership?.paymentStatus === "COMPLETED").length;
-
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const thisMonthNew = customers.filter(c => new Date(c.createdAt) >= monthStart).length;
-
   // タイムラインデータ（自分の担当顧客のみ）
   const extraWhere = { referredByStaff: staffCode };
   const [ipsTimeline, cfTimeline] = await Promise.all([
@@ -68,14 +53,6 @@ export default async function StaffDashboardPage() {
 
       {/* 専用申込フォームURL */}
       <StaffFormUrl staffCode={staffCode} />
-
-      {/* 統計カード */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
-        <StatCard label="担当顧客数" value={String(totalCustomers)} unit="名" />
-        <StatCard label="入金完了" value={String(paymentCompleted)} unit="名" color="text-status-active" />
-        <StatCard label="入金済売上" value={`¥${paidAmount.toLocaleString()}`} />
-        <StatCard label="今月新規" value={String(thisMonthNew)} unit="名" color="text-gold" />
-      </div>
 
       {/* ステータス別顧客数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
@@ -120,12 +97,3 @@ export default async function StaffDashboardPage() {
   );
 }
 
-function StatCard({ label, value, unit, color }: { label: string; value: string; unit?: string; color?: string }) {
-  return (
-    <div className="bg-bg-secondary border border-border rounded-md p-4 text-center">
-      <div className="text-[10px] text-text-muted tracking-wider mb-1">{label}</div>
-      <div className={`font-mono text-xl ${color || "text-text-primary"}`}>{value}</div>
-      {unit && <div className="text-[10px] text-text-muted">{unit}</div>}
-    </div>
-  );
-}
