@@ -78,40 +78,42 @@ export async function calcSummaryForAgency(agencyCode: string): Promise<Commissi
 }
 
 /**
- * 全営業マン合算サマリー（従業員一覧向け）
- * 直接担当 or 担当代理店経由の会員
+ * 従業員向けサマリー型
+ * - totalStaffCommission / monthStaffCommission: 直接紹介分 × 営業マン%（営業マン売上報酬）
+ * - totalAgencyDistribution / monthAgencyDistribution: 担当代理店経由分 × 代理店%（代理店分配報酬）
  */
-export async function calcSummaryForAllStaff(): Promise<CommissionSummary> {
+export type StaffSummary = CommissionSummary & {
+  totalAgencyDistribution: number;
+  monthAgencyDistribution: number;
+};
+
+/**
+ * 全営業マン合算サマリー（従業員一覧向け）
+ * 直接担当 → 営業マン売上報酬 / 担当代理店経由 → 代理店分配報酬
+ */
+export async function calcSummaryForAllStaff(): Promise<StaffSummary> {
   const rateMap = await buildRateMaps();
 
-  // 従業員が担当する代理店コード一覧
+  // 担当代理店コードの集合
   const managed = await prisma.user.findMany({
     where: { role: "AGENCY", referredByStaff: { not: null } },
-    select: { referredByStaff: true, agencyProfile: { select: { agencyCode: true } } },
+    select: { agencyProfile: { select: { agencyCode: true } } },
   });
-  const agencyCodesByStaff: Record<string, string[]> = {};
-  const allManagedAgencyCodes: string[] = [];
-  for (const a of managed) {
-    if (!a.referredByStaff || !a.agencyProfile) continue;
-    (agencyCodesByStaff[a.referredByStaff] ||= []).push(a.agencyProfile.agencyCode);
-    allManagedAgencyCodes.push(a.agencyProfile.agencyCode);
-  }
+  const managedAgencyCodes = managed
+    .map((a) => a.agencyProfile?.agencyCode)
+    .filter((c): c is string => !!c);
 
-  return await calcSummaryFromSource({
+  return await calcStaffSummary({
     rateMap,
-    filter: {
-      OR: [
-        { referredByStaff: { not: null } },
-        { referredByAgency: { in: allManagedAgencyCodes } },
-      ],
-    },
+    directFilter: { referredByStaff: { not: null } },
+    viaAgencyCodes: managedAgencyCodes,
   });
 }
 
 /**
  * 特定従業員のサマリー（従業員カルテ向け）
  */
-export async function calcSummaryForStaff(staffCode: string): Promise<CommissionSummary> {
+export async function calcSummaryForStaff(staffCode: string): Promise<StaffSummary> {
   const rateMap = await buildRateMaps();
 
   const managed = await prisma.user.findMany({
@@ -122,15 +124,105 @@ export async function calcSummaryForStaff(staffCode: string): Promise<Commission
     .map((a) => a.agencyProfile?.agencyCode)
     .filter((c): c is string => !!c);
 
-  return await calcSummaryFromSource({
+  return await calcStaffSummary({
     rateMap,
-    filter: {
+    directFilter: { referredByStaff: staffCode },
+    viaAgencyCodes: managedAgencyCodes,
+  });
+}
+
+/**
+ * 従業員向け売上・報酬集計（直接紹介 / 代理店経由で分離）
+ */
+async function calcStaffSummary(params: {
+  rateMap: RateMap;
+  directFilter: Prisma.UserWhereInput;
+  viaAgencyCodes: string[];
+}): Promise<StaffSummary> {
+  const { rateMap, directFilter, viaAgencyCodes } = params;
+  const now = new Date();
+
+  // 対象会員を一括取得
+  const members = await prisma.user.findMany({
+    where: {
+      role: "MEMBER",
       OR: [
-        { referredByStaff: staffCode },
-        ...(managedAgencyCodes.length > 0 ? [{ referredByAgency: { in: managedAgencyCodes } }] : []),
+        directFilter,
+        ...(viaAgencyCodes.length > 0 ? [{ referredByAgency: { in: viaAgencyCodes } }] : []),
       ],
     },
+    select: {
+      referredByAgency: true,
+      referredByStaff: true,
+      membership: {
+        select: {
+          paidAmount: true,
+          contractSignedAt: true,
+          updatedAt: true,
+        },
+      },
+      cultureFluidOrders: {
+        where: { paymentStatus: "COMPLETED" },
+        select: { totalAmount: true, paidAt: true, updatedAt: true },
+      },
+    },
   });
+
+  let totalSales = 0,
+    monthSales = 0,
+    totalStaffCommission = 0,
+    monthStaffCommission = 0,
+    totalAgencyDistribution = 0,
+    monthAgencyDistribution = 0;
+
+  for (const m of members) {
+    const rate = resolveRate(rateMap, m.referredByAgency, m.referredByStaff);
+    const agencyRate = Math.max(0, rate.total - rate.staff);
+    const staffRate = rate.staff;
+
+    const isViaAgency = !!m.referredByAgency && viaAgencyCodes.includes(m.referredByAgency);
+
+    const accumulate = (amt: number, inMonth: boolean) => {
+      totalSales += amt;
+      if (inMonth) monthSales += amt;
+
+      if (isViaAgency) {
+        // 担当代理店経由 → 代理店分配報酬
+        const dist = Math.floor((amt * agencyRate) / 100);
+        totalAgencyDistribution += dist;
+        if (inMonth) monthAgencyDistribution += dist;
+      } else {
+        // 直接紹介 → 営業マン売上報酬（総額 = total%）
+        const staffComm = Math.floor((amt * rate.total) / 100);
+        totalStaffCommission += staffComm;
+        if (inMonth) monthStaffCommission += staffComm;
+      }
+      // 注: 担当代理店経由の場合の「営業マン取り分(staffRate)」は営業マン売上報酬ではなく
+      // 代理店分配報酬とは別概念。必要であれば要件確認。ここでは代理店経由分は全額=代理店分配扱い。
+      void staffRate; // lint 回避
+    };
+
+    if (m.membership && m.membership.paidAmount > 0) {
+      const d = m.membership.contractSignedAt || m.membership.updatedAt;
+      accumulate(m.membership.paidAmount, d ? inThisMonth(d, now) : false);
+    }
+    for (const o of m.cultureFluidOrders) {
+      if (o.totalAmount === 0) continue;
+      const d = o.paidAt || o.updatedAt;
+      accumulate(o.totalAmount, d ? inThisMonth(d, now) : false);
+    }
+  }
+
+  return {
+    totalSales,
+    monthSales,
+    totalAgencyCommission: 0,
+    monthAgencyCommission: 0,
+    totalStaffCommission,
+    monthStaffCommission,
+    totalAgencyDistribution,
+    monthAgencyDistribution,
+  };
 }
 
 async function calcSummaryFromSource(params: {

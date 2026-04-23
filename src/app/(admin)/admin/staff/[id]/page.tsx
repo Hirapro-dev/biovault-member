@@ -68,8 +68,8 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
         従業員カルテ — {staff.name}
       </h2>
 
-      {/* 売上・報酬サマリー（営業マン取り分のみ） */}
-      <CommissionSummaryCards summary={summary} showAgency={false} />
+      {/* 売上・報酬サマリー（営業マン向け: 売上 / 営業マン売上報酬 / 代理店分配報酬） */}
+      <CommissionSummaryCards summary={summary} variant="staff" />
 
       {/* 基本情報 + 実績サマリー */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5">

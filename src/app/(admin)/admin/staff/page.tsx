@@ -35,7 +35,7 @@ export default async function AdminStaffPage() {
       </h2>
 
       {/* 全営業マン合算サマリー */}
-      <CommissionSummaryCards summary={summary} showAgency={false} />
+      <CommissionSummaryCards summary={summary} variant="staff" />
 
       {/* 新規作成フォーム */}
       <StaffCreateForm />
