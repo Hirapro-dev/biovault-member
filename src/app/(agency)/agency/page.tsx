@@ -31,6 +31,9 @@ export default async function AgencyDashboardPage() {
   const ipsTotal = ipsTimeline.reduce((sum, s) => sum + s.members.length, 0);
   const cfTotal = cfTimeline.reduce((sum, s) => sum + s.members.length, 0);
 
+  const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
+  const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode || "---"}`;
+
   return (
     <div>
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
@@ -55,6 +58,15 @@ export default async function AgencyDashboardPage() {
         <StatCard label="支払済報酬" value={`¥${paidCommission.toLocaleString()}`} sub="" />
       </div>
 
+      {/* 紹介用URL（ステータスの上に配置） */}
+      <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6 mb-6 sm:mb-8">
+        <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">紹介用URL</h3>
+        <p className="text-xs text-text-secondary mb-3">以下のURLを見込顧客にお伝えください。申込フォームに自動的にあなたの紹介元が挿入されます。</p>
+        <div className="bg-bg-elevated border border-border rounded-md p-3 font-mono text-xs text-gold break-all select-all">
+          {referralUrl}
+        </div>
+      </div>
+
       {/* ステータス別顧客数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
         ステータス別顧客数
@@ -75,14 +87,6 @@ export default async function AgencyDashboardPage() {
           <InfoRow label="法人名" value={profile?.companyName || "---"} />
           <InfoRow label="代表者名" value={profile?.representativeName || user.name} />
           <InfoRow label="報酬率" value={profile?.commissionRate ? `${profile.commissionRate}%` : "未設定"} />
-        </div>
-      </div>
-
-      <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
-        <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">紹介用URL</h3>
-        <p className="text-xs text-text-secondary mb-3">以下のURLを見込顧客にお伝えください。申込フォームに自動的にあなたの紹介元が挿入されます。</p>
-        <div className="bg-bg-elevated border border-border rounded-md p-3 font-mono text-xs text-gold break-all">
-          {typeof window !== "undefined" ? window.location.origin : "https://member.biovault.jp"}/form/app?ref={profile?.agencyCode || "---"}
         </div>
       </div>
     </div>
