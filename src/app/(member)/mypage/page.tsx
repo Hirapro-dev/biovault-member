@@ -221,7 +221,7 @@ export default async function MyPage() {
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用申込</div>
-                  <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞作製適合の可能性が極めて高いと判断いたしました。サービスへのお申込みに進めます。</div>
+                  <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞作製適合の確認が完了しました。iPS細胞作製は可能になります。サービスへのお申込みに進めます。</div>
                   <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
                     申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
@@ -536,7 +536,7 @@ export default async function MyPage() {
                   })()}
                   {/* 適合確認のサブテキスト */}
                   {isFirstAdaptCheck && done && (
-                    <div className="text-[11px] text-status-active mt-0.5">適合の可能性が極めて高い</div>
+                    <div className="text-[11px] text-status-active mt-0.5">iPS細胞作製は可能です</div>
                   )}
                   {/* 保管中の補足 */}
                   {isStorage && done && storageEndDate && (
