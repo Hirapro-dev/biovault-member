@@ -7,6 +7,7 @@ import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import StaffReferralUrlSection from "./StaffReferralUrlSection";
 import StaffKarteActions from "./StaffKarteActions";
 import StaffLoginSection from "./StaffLoginSection";
+import DeleteStaffAccount from "./DeleteStaffAccount";
 import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
 import { calcSummaryForStaff } from "@/lib/commission-summary-from-data";
 
@@ -167,6 +168,13 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
           </div>
         )}
       </div>
+
+      {/* アカウント削除 */}
+      <DeleteStaffAccount
+        staffId={staff.id}
+        staffCode={staff.staffCode}
+        hasLogin={!!staff.userId}
+      />
     </div>
   );
 }
