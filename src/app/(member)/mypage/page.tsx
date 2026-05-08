@@ -536,7 +536,11 @@ export default async function MyPage() {
                   })()}
                   {/* 適合確認のサブテキスト */}
                   {isFirstAdaptCheck && done && (
-                    <div className="text-[11px] text-status-active mt-0.5">iPS細胞作製は可能です</div>
+                    <div className="mt-1">
+                      <span className="inline-block text-[11px] font-bold text-status-active border border-status-active/50 bg-status-active/10 rounded-full px-2.5 py-0.5">
+                        iPS細胞作製可能
+                      </span>
+                    </div>
                   )}
                   {/* 保管中の補足 */}
                   {isStorage && done && storageEndDate && (
