@@ -460,6 +460,9 @@ MAIL: info@biovault.jp
         <div style="font-size:11px;color:#A0A0B0;margin-bottom:4px;">パスワード</div>
         <div style="font-size:14px;color:#BFA04B;font-family:monospace;letter-spacing:1px;">${password}</div>
       </div>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="https://member.biovault.jp/login" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#BFA04B,#8F7A3E);color:#070709;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:2px;border-radius:4px;">ログイン画面へ</a>
+      </div>
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
         ※ 初回ログイン後、パスワードの変更をお願いいたします。<br>
         ※ ログイン情報は第三者に知られないよう大切に管理してください。
