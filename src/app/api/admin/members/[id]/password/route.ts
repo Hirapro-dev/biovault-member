@@ -6,6 +6,20 @@ import bcrypt from "bcryptjs";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
+// 伴走用テスターアカウントのメアドも対象に含める
+const TESTER_ACCOUNT_EMAILS: string[] = (() => {
+  const list: string[] = [];
+  const raw = process.env.TESTER_ACCOUNTS || "";
+  for (const entry of raw.split(",")) {
+    const parts = entry.split(":").map(s => s.trim());
+    if (parts.length < 4) continue;
+    const [email, loginId, password, displayName] = parts;
+    if (!email || !loginId || !password || !displayName) continue;
+    list.push(email.toLowerCase());
+  }
+  return list;
+})();
+
 // 管理者からパスワード変更
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -16,9 +30,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const { newPassword } = await req.json();
 
-  // 対象ユーザーがテスターか判定
+  // 対象ユーザーがテスターか判定（master固定 / 伴走用 両対応）
   const targetUser = await prisma.user.findUnique({ where: { id }, select: { email: true } });
-  const isTester = targetUser ? TESTER_EMAILS.includes(targetUser.email.toLowerCase()) : false;
+  const targetEmail = targetUser?.email.toLowerCase() || "";
+  const isTester = !!targetUser && (TESTER_EMAILS.includes(targetEmail) || TESTER_ACCOUNT_EMAILS.includes(targetEmail));
 
   // テスターは短いパスワードも許可、通常は8文字以上必須
   const minLength = isTester ? 1 : 8;

@@ -6,6 +6,23 @@ import { notifyIpsStatusChange } from "@/lib/status-notification";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
+// メアドごとに個別のID/PW/表示名を指定するテスターアカウント
+// 形式: email:loginId:password:displayName をカンマ区切り
+// 例: ueda@gmail.com:mueda:mueda:伴走用植田,morita@gmail.com:mmorita:mmorita:伴走用守田
+type TesterAccount = { loginId: string; password: string; displayName: string };
+const TESTER_ACCOUNTS: Record<string, TesterAccount> = (() => {
+  const map: Record<string, TesterAccount> = {};
+  const raw = process.env.TESTER_ACCOUNTS || "";
+  for (const entry of raw.split(",")) {
+    const parts = entry.split(":").map(s => s.trim());
+    if (parts.length < 4) continue;
+    const [email, loginId, password, displayName] = parts;
+    if (!email || !loginId || !password || !displayName) continue;
+    map[email.toLowerCase()] = { loginId, password, displayName };
+  }
+  return map;
+})();
+
 export async function POST(req: Request) {
   try {
   const body = await req.json();
@@ -93,13 +110,27 @@ export async function POST(req: Request) {
   });
 
   // 2. テスターアカウント判定
-  const isTester = TESTER_EMAILS.includes(body.email.toLowerCase());
+  const emailLower = body.email.toLowerCase();
+  const testerAccount = TESTER_ACCOUNTS[emailLower] || null;
+  const isLegacyTester = TESTER_EMAILS.includes(emailLower);
+  const isTester = !!testerAccount || isLegacyTester;
 
-  // 3. ログインID生成（テスターは "master" 固定）
-  const loginId = isTester ? "master" : await generateUniqueLoginId(body.nameKana);
+  // 3. ログインID生成
+  //    - 個別マッピングあり: 指定の loginId
+  //    - 旧 TESTER_EMAILS のみ: "master" 固定（後方互換）
+  //    - 通常会員: フリガナから自動生成
+  const loginId = testerAccount
+    ? testerAccount.loginId
+    : isLegacyTester
+      ? "master"
+      : await generateUniqueLoginId(body.nameKana);
 
-  // 4. 仮パスワード生成（テスターは "master" 固定）
-  const tempPassword = isTester ? "master" : generatePassword();
+  // 4. 仮パスワード生成
+  const tempPassword = testerAccount
+    ? testerAccount.password
+    : isLegacyTester
+      ? "master"
+      : generatePassword();
   const passwordHash = await bcrypt.hash(tempPassword, 12);
 
   // 4. 会員番号の自動採番
@@ -117,7 +148,7 @@ export async function POST(req: Request) {
       loginId,
       email: body.email,
       passwordHash,
-      name: body.name,
+      name: testerAccount?.displayName || body.name,
       nameKana: body.nameKana,
       phone: body.phone,
       dateOfBirth: new Date(body.dateOfBirth),

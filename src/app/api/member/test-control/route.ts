@@ -6,10 +6,27 @@ import type { IpsStatus } from "@prisma/client";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
+// 伴走用テスターアカウントのメアドも対象に含める
+// 形式: email:loginId:password:displayName をカンマ区切り
+const TESTER_ACCOUNT_EMAILS: string[] = (() => {
+  const list: string[] = [];
+  const raw = process.env.TESTER_ACCOUNTS || "";
+  for (const entry of raw.split(",")) {
+    const parts = entry.split(":").map(s => s.trim());
+    if (parts.length < 4) continue;
+    const [email, loginId, password, displayName] = parts;
+    if (!email || !loginId || !password || !displayName) continue;
+    list.push(email.toLowerCase());
+  }
+  return list;
+})();
+
 async function checkIsTester(userId: string): Promise<boolean> {
-  if (TESTER_EMAILS.length === 0) return false;
+  if (TESTER_EMAILS.length === 0 && TESTER_ACCOUNT_EMAILS.length === 0) return false;
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
-  return user ? TESTER_EMAILS.includes(user.email.toLowerCase()) : false;
+  if (!user) return false;
+  const emailLower = user.email.toLowerCase();
+  return TESTER_EMAILS.includes(emailLower) || TESTER_ACCOUNT_EMAILS.includes(emailLower);
 }
 
 const IPS_STATUS_ORDER: IpsStatus[] = [
