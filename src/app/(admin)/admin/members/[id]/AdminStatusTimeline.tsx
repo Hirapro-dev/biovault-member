@@ -24,6 +24,15 @@ const ADMIN_TIMELINE = [
 const KANA_MAP: Record<string, string> = {"ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o","カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko","サ":"sa","シ":"shi","ス":"su","セ":"se","ソ":"so","タ":"ta","チ":"chi","ツ":"tsu","テ":"te","ト":"to","ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no","ハ":"ha","ヒ":"hi","フ":"fu","ヘ":"he","ホ":"ho","マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo","ヤ":"ya","ユ":"yu","ヨ":"yo","ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro","ワ":"wa","ヲ":"wo","ン":"n","ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go","ザ":"za","ジ":"ji","ズ":"zu","ゼ":"ze","ゾ":"zo","ダ":"da","ヂ":"di","ヅ":"du","デ":"de","ド":"do","バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo","パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po","ッ":"tt","ー":""};
 function kataToRomaji(kana: string) { let r="",i=0; while(i<kana.length){if(i+1<kana.length&&KANA_MAP[kana.substring(i,i+2)]){r+=KANA_MAP[kana.substring(i,i+2)];i+=2;continue;}if(kana[i]==="ッ"&&i+1<kana.length){const n=KANA_MAP[kana[i+1]];if(n)r+=n[0];i++;continue;}if(KANA_MAP[kana[i]]!==undefined)r+=KANA_MAP[kana[i]];i++;}return r; }
 function generatePw() { const c="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";let p="";for(let i=0;i<8;i++)p+=c[Math.floor(Math.random()*c.length)];return p; }
+// 生年月日からMMDD（4桁）を取得。未設定や不正なら null
+function extractMMDD(dateOfBirth: string | null): string | null {
+  if (!dateOfBirth) return null;
+  const d = new Date(dateOfBirth);
+  if (isNaN(d.getTime())) return null;
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}${dd}`;
+}
 
 interface Props {
   userId: string;
@@ -34,6 +43,8 @@ interface Props {
   isIdIssued: boolean;
   currentLoginId: string;
   nameKana: string;
+  /** 生年月日（ISO文字列）。初回ID発行時のID/パスワード生成（姓+MMDD）に使用 */
+  dateOfBirth?: string | null;
   clinicDate: string | null;
   clinicName: string | null;
   clinicAddress: string | null;
@@ -45,7 +56,7 @@ interface Props {
   readOnly?: boolean;
 }
 
-export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, clinicDate, clinicName, clinicAddress, contractSignedAt, contractDate, statusDates = {}, readOnly = false }: Props) {
+export default function AdminStatusTimeline({ userId, currentStatus, paymentStatus, signedDocTypes, hasAgreedTerms, isIdIssued, currentLoginId, nameKana, dateOfBirth, clinicDate, clinicName, clinicAddress, contractSignedAt, contractDate, statusDates = {}, readOnly = false }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
@@ -79,9 +90,19 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
   const contractFileRef = useRef<HTMLInputElement>(null);
 
   // ID発行ポップアップ
+  // 初回発行時のみ「姓ローマ字+MMDD」をID/パスワード初期値に使用
+  // 重複時はサーバー側で末尾2桁連番を付与してくれる
+  const initialMmddBase = (() => {
+    const mmdd = extractMMDD(dateOfBirth ?? null);
+    if (!mmdd) return null;
+    const lastName = (nameKana || "").trim().split(/[\s　]+/)[0];
+    const base = kataToRomaji(lastName).toLowerCase();
+    if (!base) return null;
+    return `${base}${mmdd}`;
+  })();
   const [showIdPopup, setShowIdPopup] = useState(false);
-  const [loginId, setLoginId] = useState(currentLoginId || "");
-  const [password, setPassword] = useState(() => generatePw());
+  const [loginId, setLoginId] = useState(currentLoginId || initialMmddBase || "");
+  const [password, setPassword] = useState(() => initialMmddBase ?? generatePw());
   const [showPw, setShowPw] = useState(true);
   const [idLoading, setIdLoading] = useState(false);
   const [idMessage, setIdMessage] = useState("");
@@ -111,9 +132,12 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
     setPendingChanges((prev) => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; });
   };
 
+  // 初回発行用：姓ローマ字+MMDD（生年月日があればそれを優先、なければ従来の乱数4桁）
   const generateLoginId = () => {
     const lastName = (nameKana || "").trim().split(/[\s　]+/)[0];
     const base = kataToRomaji(lastName).toLowerCase() || "user";
+    const mmdd = extractMMDD(dateOfBirth ?? null);
+    if (mmdd) return `${base}${mmdd}`;
     return `${base}${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
   };
 
@@ -153,7 +177,11 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
 
       // 適合確認チェック & ID未発行 → ID発行ポップアップ
       if (willCheckTerms && !isIdIssued) {
-        if (!loginId) setLoginId(generateLoginId());
+        const generated = generateLoginId();
+        // 初回発行時のみ：ID未入力ならMMDDベースをセット、パスワードもID/MMDDベースと同一値に
+        if (!loginId) setLoginId(generated);
+        const mmdd = extractMMDD(dateOfBirth ?? null);
+        if (mmdd) setPassword(loginId || generated);
         setShowIdPopup(true);
       }
 
@@ -169,8 +197,11 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
         body: JSON.stringify({ loginId, password }),
       });
       if (res.ok) {
-        setIdMessage("ID・パスワードを発行しました");
-        setTimeout(() => { setShowIdPopup(false); router.refresh(); }, 1500);
+        const data = await res.json();
+        // サーバー側で重複時にIDが末尾連番付与されている可能性があるので反映
+        if (data.loginId && data.loginId !== loginId) setLoginId(data.loginId);
+        setIdMessage(`ID・パスワードを発行しました（ログインID: ${data.loginId || loginId}）`);
+        setTimeout(() => { setShowIdPopup(false); router.refresh(); }, 1800);
       } else {
         const d = await res.json();
         setIdError(d.error || "エラーが発生しました");

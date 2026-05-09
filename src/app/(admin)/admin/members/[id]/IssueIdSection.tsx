@@ -29,25 +29,49 @@ function generatePw() {
   for (let i = 0; i < 8; i++) p += c[Math.floor(Math.random() * c.length)];
   return p;
 }
+// 生年月日からMMDD（4桁）を取得。未設定や不正なら null
+function extractMMDD(dateOfBirth: string | null | undefined): string | null {
+  if (!dateOfBirth) return null;
+  const d = new Date(dateOfBirth);
+  if (isNaN(d.getTime())) return null;
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}${dd}`;
+}
 
 export default function IssueIdSection({
   userId,
   currentLoginId,
   nameKana,
   isIdIssued,
+  dateOfBirth,
 }: {
   userId: string;
   currentLoginId: string;
   nameKana: string;
   isIdIssued: boolean;
+  /** 生年月日（ISO文字列）。初回ID発行時のID/パスワード生成（姓+MMDD）に使用。代理店等で未指定可 */
+  dateOfBirth?: string | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const shouldOpen = searchParams.get("issueId") === "1";
 
+  // 初回発行時のみ「姓ローマ字+MMDD」をID/パスワード初期値に使用
+  // 既に発行済みの場合は通常のPW変更フォーム経由なのでこの初期値は使われない
+  const initialMmddBase = (() => {
+    if (isIdIssued) return null;
+    const mmdd = extractMMDD(dateOfBirth);
+    if (!mmdd) return null;
+    const lastName = (nameKana || "").trim().split(/[\s　]+/)[0];
+    const base = kataToRomaji(lastName).toLowerCase();
+    if (!base) return null;
+    return `${base}${mmdd}`;
+  })();
+
   const [open, setOpen] = useState(shouldOpen && !isIdIssued);
-  const [loginId, setLoginId] = useState(currentLoginId);
-  const [password, setPassword] = useState(() => generatePw());
+  const [loginId, setLoginId] = useState(currentLoginId || initialMmddBase || "");
+  const [password, setPassword] = useState(() => initialMmddBase ?? generatePw());
   const [showPw, setShowPw] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -59,12 +83,15 @@ export default function IssueIdSection({
   const [pwLoading, setPwLoading] = useState(false);
   const [pwMsg, setPwMsg] = useState("");
 
+  // 初回発行用：姓ローマ字+MMDD（生年月日があればそれを優先、なければ従来の乱数4桁）
   const generateLoginId = useCallback(() => {
     const lastName = (nameKana || "").trim().split(/[\s　]+/)[0];
     const base = kataToRomaji(lastName).toLowerCase() || "user";
+    const mmdd = !isIdIssued ? extractMMDD(dateOfBirth) : null;
+    if (mmdd) return `${base}${mmdd}`;
     const num = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
     return `${base}${num}`;
-  }, [nameKana]);
+  }, [nameKana, dateOfBirth, isIdIssued]);
 
   useEffect(() => {
     if (open && !loginId) {
@@ -81,7 +108,11 @@ export default function IssueIdSection({
         body: JSON.stringify({ loginId, password }),
       });
       if (res.ok) {
-        setMessage("ID を発行しました");
+        const data = await res.json();
+        // サーバー側で重複時にIDが末尾連番付与されている可能性があるので反映
+        const finalLoginId = data.loginId || loginId;
+        if (finalLoginId !== loginId) setLoginId(finalLoginId);
+        setMessage(`ID を発行しました（ログインID: ${finalLoginId}）`);
         setOpen(false);
         router.refresh();
       } else {

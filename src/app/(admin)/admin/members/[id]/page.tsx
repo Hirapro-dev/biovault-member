@@ -183,6 +183,7 @@ export default async function MemberKartePage({
           currentLoginId={user.loginId}
           nameKana={user.nameKana || ""}
           isIdIssued={user.isIdIssued}
+          dateOfBirth={user.dateOfBirth ? user.dateOfBirth.toISOString() : null}
         />
       )}
 
@@ -200,6 +201,7 @@ export default async function MemberKartePage({
               isIdIssued={user.isIdIssued}
               currentLoginId={user.loginId}
               nameKana={user.nameKana || ""}
+              dateOfBirth={user.dateOfBirth ? user.dateOfBirth.toISOString() : null}
               clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null}
               clinicName={membership.clinicName || null}
               clinicAddress={membership.clinicAddress || null}

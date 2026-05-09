@@ -25,12 +25,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
-  // ログインID重複チェック（自分以外）
-  const existing = await prisma.user.findFirst({
-    where: { loginId, id: { not: id } },
-  });
-  if (existing) {
-    return NextResponse.json({ error: "このログインIDは既に使用されています" }, { status: 400 });
+  // 初回発行時のみ：ログインID重複時に末尾2桁連番（02〜99）を付与して衝突を回避
+  // 既に発行済みのユーザーがIDを変更する場合は従来通りエラーを返す
+  let finalLoginId = loginId;
+  if (!user.isIdIssued) {
+    const existing = await prisma.user.findFirst({
+      where: { loginId: finalLoginId, id: { not: id } },
+    });
+    if (existing) {
+      let resolved: string | null = null;
+      for (let suffix = 2; suffix <= 99; suffix++) {
+        const candidate = `${loginId}${String(suffix).padStart(2, "0")}`;
+        const dup = await prisma.user.findFirst({
+          where: { loginId: candidate, id: { not: id } },
+        });
+        if (!dup) { resolved = candidate; break; }
+      }
+      if (!resolved) {
+        return NextResponse.json({ error: "ログインIDの自動採番に失敗しました（候補がすべて重複）" }, { status: 400 });
+      }
+      finalLoginId = resolved;
+    }
+  } else {
+    const existing = await prisma.user.findFirst({
+      where: { loginId: finalLoginId, id: { not: id } },
+    });
+    if (existing) {
+      return NextResponse.json({ error: "このログインIDは既に使用されています" }, { status: 400 });
+    }
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -39,7 +61,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await prisma.user.update({
       where: { id },
       data: {
-        loginId,
+        loginId: finalLoginId,
         passwordHash,
         isIdIssued: true,
         mustChangePassword: true,
@@ -57,8 +79,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // アカウント発行メール送信（ロール別にテンプレートを切り替え）
   try {
     const emailContent = user.role === "AGENCY"
-      ? agencyAccountCreatedEmail(user.name, loginId, password)
-      : accountCreatedEmail(user.name, loginId, password);
+      ? agencyAccountCreatedEmail(user.name, finalLoginId, password)
+      : accountCreatedEmail(user.name, finalLoginId, password);
     await sendEmail({ to: user.email, ...emailContent });
   } catch (e) {
     console.error("Account created email failed:", e);
@@ -89,7 +111,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         email: user.email,
         phone: user.phone,
         address: user.address,
-        loginId,
+        loginId: finalLoginId,
         changedBy: session.user.name || "管理者",
         staffName,
       });
@@ -106,12 +128,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         fromStatus: "REGISTERED",
         toStatus: "ID_ISSUED",
         changedBy: session.user.name || "管理者",
-        note: `ログインID: ${loginId}`,
+        note: `ログインID: ${finalLoginId}`,
       });
     }
   } catch (e) {
     console.error("ID issue notification failed:", e);
   }
 
-  return NextResponse.json({ success: true, loginId });
+  return NextResponse.json({ success: true, loginId: finalLoginId });
 }
