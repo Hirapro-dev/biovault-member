@@ -21,6 +21,11 @@ export default async function AgencyDashboardPage() {
   const pendingCommission = profile?.commissions.filter((c) => c.status === "PENDING").reduce((sum, c) => sum + c.commissionAmount, 0) || 0;
   const paidCommission = profile?.commissions.filter((c) => c.status === "PAID").reduce((sum, c) => sum + c.commissionAmount, 0) || 0;
 
+  // 代理店本人の取り分のみ表示（合計報酬率や営業マン分配は本人に開示しない）
+  const totalRate = profile?.commissionRate ?? 0;
+  const staffRate = profile?.staffCommissionRate ?? 0;
+  const agencyRate = Math.max(0, totalRate - staffRate);
+
   // タイムラインデータ（自分が紹介した顧客のみ）
   const extraWhere = profile?.agencyCode ? { referredByAgency: profile.agencyCode } : { id: "___none___" };
   const [ipsTimeline, cfTimeline] = await Promise.all([
@@ -86,7 +91,7 @@ export default async function AgencyDashboardPage() {
           <InfoRow label="エージェントコード" value={profile?.agencyCode || "---"} mono />
           <InfoRow label="法人名" value={profile?.companyName || "---"} />
           <InfoRow label="代表者名" value={profile?.representativeName || user.name} />
-          <InfoRow label="報酬率" value={profile?.commissionRate ? `${profile.commissionRate}%` : "未設定"} />
+          <InfoRow label="報酬率" value={totalRate > 0 ? `${agencyRate}%` : "未設定"} />
         </div>
       </div>
     </div>

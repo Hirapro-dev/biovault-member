@@ -17,9 +17,11 @@ export default async function AgencyProfilePage() {
   const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
   const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode}`;
 
+  // 代理店本人の取り分のみ表示（合計報酬率や営業マン分配は本人に開示しない）
   const totalRate = profile?.commissionRate ?? 0;
   const staffRate = profile?.staffCommissionRate ?? 0;
   const agencyRate = Math.max(0, totalRate - staffRate);
+  const hasRate = totalRate > 0;
 
   return (
     <div>
@@ -35,7 +37,7 @@ export default async function AgencyProfilePage() {
           <Row label="メール" value={user?.email || "---"} />
           <Row label="電話番号" value={user?.phone || "---"} />
           <Row label="住所" value={user?.address || "---"} />
-          <Row label="報酬率" value={totalRate > 0 ? `${agencyRate}%（合計 ${totalRate}%）` : "未設定"} />
+          <Row label="報酬率" value={hasRate ? `${agencyRate}%` : "未設定"} />
         </div>
 
         <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
