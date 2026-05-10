@@ -36,9 +36,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/settings/terms": "利用規約",
   "/settings/legal": "特商法",
   "/settings/privacy": "プライバシーポリシー",
-  "/concierge": "コンシェルジュ",
   "/important-notice": "重要事項説明",
-  "/treatment": "投与記録",
   "/glossary": "用語集",
   "/about-ips": "コンテンツ",
   "/about-ips/news": "ニュース一覧",
@@ -59,9 +57,7 @@ const PAGE_FILTER_OPTIONS = [
   { value: "/status", label: "ステータス詳細" },
   { value: "/pamphlet", label: "パンフレット" },
   { value: "/settings", label: "設定" },
-  { value: "/concierge", label: "コンシェルジュ" },
   { value: "/important-notice", label: "重要事項説明" },
-  { value: "/treatment", label: "投与記録" },
   { value: "/about-ips", label: "コンテンツ（記事・動画）" },
 ];
 

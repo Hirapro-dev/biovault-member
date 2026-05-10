@@ -20,7 +20,7 @@ export default function ComingSoon({
         {description}
       </p> */}
       <p className="text-[14px] text-text-muted mt-6">
-        サービス開始までしばらくお待ちください
+        随時情報を掲載していきます。
       </p>
     </div>
   );

@@ -88,7 +88,7 @@ export default withAuth(
 export const config = {
   matcher: [
     "/dashboard/:path*", "/mypage/:path*", "/status/:path*", "/documents/:path*",
-    "/glossary/:path*", "/treatment/:path*", "/concierge/:path*",
+    "/glossary/:path*",
     "/settings/:path*", "/admin/:path*", "/about-ips/:path*",
     "/important-notice", "/apply-service/:path*", "/favorites/:path*", "/info/:path*", "/pamphlet/:path*",
     "/agency/:path*", "/agency-agree",
