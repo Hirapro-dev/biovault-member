@@ -5,6 +5,7 @@ import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import MembersTable from "@/components/members/MembersTable";
 import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
+import AgencyReferralUrl from "./AgencyReferralUrl";
 
 export default async function StaffAgencyKartePage({ params }: { params: Promise<{ id: string }> }) {
   const { staffCode } = await requireStaff();
@@ -77,6 +78,9 @@ export default async function StaffAgencyKartePage({ params }: { params: Promise
           </div>
         </div>
       </div>
+
+      {/* 代理店専用 iPS適合確認申込フォームURL（営業マンから代理店本人に案内する用） */}
+      {profile?.agencyCode && <AgencyReferralUrl agencyCode={profile.agencyCode} />}
 
       {/* 紹介顧客一覧 */}
       <div className="mt-6">
