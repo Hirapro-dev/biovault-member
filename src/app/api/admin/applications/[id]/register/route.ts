@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, accountCreatedEmail } from "@/lib/mail";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 // 申込→会員登録
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -24,10 +25,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "既に会員登録済みです" }, { status: 400 });
   }
 
-  // 重複チェック
-  const existingEmail = await prisma.user.findUnique({ where: { email: application.email } });
-  if (existingEmail) {
-    return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 400 });
+  // 重複チェック（メール：許可リスト対応）
+  const dupErr = await checkEmailDuplicate(application.email);
+  if (dupErr) {
+    return NextResponse.json({ error: dupErr }, { status: 400 });
   }
 
   const existingLoginId = await prisma.user.findUnique({ where: { loginId } });

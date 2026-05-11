@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 // プロフィール更新（会員自身）
 export async function PATCH(req: Request) {
@@ -17,12 +18,10 @@ export async function PATCH(req: Request) {
   const allowedFields: Record<string, unknown> = {};
 
   if (body.email !== undefined) {
-    // メールの重複チェック
-    const existing = await prisma.user.findFirst({
-      where: { email: body.email, id: { not: userId } },
-    });
-    if (existing) {
-      return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+    // メールの重複チェック（許可リスト対応）
+    const dupErr = await checkEmailDuplicate(body.email, userId);
+    if (dupErr) {
+      return NextResponse.json({ error: dupErr }, { status: 400 });
     }
     allowedFields.email = body.email;
   }

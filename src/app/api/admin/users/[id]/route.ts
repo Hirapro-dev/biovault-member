@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "OPERATOR", "VIEWER"];
 
@@ -63,13 +64,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     updateData.name = body.name.trim();
   }
 
-  // メールアドレス変更
+  // メールアドレス変更（許可リスト対応）
   if (body.email !== undefined && body.email.trim()) {
     const newEmail = body.email.trim().toLowerCase();
     if (newEmail !== targetUser.email) {
-      const existing = await prisma.user.findUnique({ where: { email: newEmail } });
-      if (existing) {
-        return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+      const dupErr = await checkEmailDuplicate(newEmail, id);
+      if (dupErr) {
+        return NextResponse.json({ error: dupErr }, { status: 400 });
       }
       updateData.email = newEmail;
     }

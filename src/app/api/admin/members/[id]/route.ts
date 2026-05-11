@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 // 会員詳細取得
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -57,9 +58,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // SUPER_ADMIN専用: 追加フィールド
   if (isSuperAdmin) {
     if (body.email !== undefined) {
-      const existing = await prisma.user.findFirst({ where: { email: body.email, id: { not: id } } });
-      if (existing) {
-        return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+      const dupErr = await checkEmailDuplicate(body.email, id);
+      if (dupErr) {
+        return NextResponse.json({ error: dupErr }, { status: 400 });
       }
       userData.email = body.email;
     }

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, staffAccountCreatedEmail } from "@/lib/mail";
+import { isEmailAllowedToDuplicate } from "@/lib/email-duplicate";
 
 // スタッフログインID発行
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -35,14 +36,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // メールアドレス（Staffのemailが他のUserと重複する可能性があるため、
   // まずStaffのemailで試行し、重複している場合は内部用アドレスを使用）
+  // 許可リスト対象のメアドは重複OKとしてそのまま使う
   let emailToUse = staff.email || `${loginId}@staff.biovault.internal`;
-  const existingEmail = await prisma.user.findFirst({ where: { email: emailToUse } });
-  if (existingEmail) {
-    // Staffのメールが既に別のUserで使われている場合、内部用アドレスにフォールバック
-    emailToUse = `${staff.staffCode.toLowerCase()}@staff.biovault.internal`;
-    const existingFallback = await prisma.user.findFirst({ where: { email: emailToUse } });
-    if (existingFallback) {
-      return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+  if (!isEmailAllowedToDuplicate(emailToUse)) {
+    const existingEmail = await prisma.user.findFirst({ where: { email: emailToUse } });
+    if (existingEmail) {
+      // Staffのメールが既に別のUserで使われている場合、内部用アドレスにフォールバック
+      emailToUse = `${staff.staffCode.toLowerCase()}@staff.biovault.internal`;
+      const existingFallback = await prisma.user.findFirst({ where: { email: emailToUse } });
+      if (existingFallback) {
+        return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+      }
     }
   }
 

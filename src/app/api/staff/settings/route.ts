@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 // スタッフ設定取得
 export async function GET() {
@@ -31,13 +32,11 @@ export async function PATCH(req: Request) {
 
   const updateData: Record<string, unknown> = {};
 
-  // メールアドレス変更
+  // メールアドレス変更（許可リスト対応）
   if (body.email) {
-    const existing = await prisma.user.findFirst({
-      where: { email: body.email, id: { not: userId } },
-    });
-    if (existing) {
-      return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+    const dupErr = await checkEmailDuplicate(body.email, userId);
+    if (dupErr) {
+      return NextResponse.json({ error: dupErr }, { status: 400 });
     }
     updateData.email = body.email;
   }

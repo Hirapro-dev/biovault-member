@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { isEmailAllowedToDuplicate } from "@/lib/email-duplicate";
 
 // メールアドレスの重複チェック（フォームのリアルタイムバリデーション用）
 //
@@ -20,9 +21,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ available: false, error: "メールアドレスを入力してください" });
   }
 
+  // 許可リストに含まれているメアドは重複OKなので即時利用可能を返す
+  if (isEmailAllowedToDuplicate(email)) {
+    return NextResponse.json({ available: true });
+  }
+
   // 1) 既存の User と一致するメール → 重複
   //    role に応じてメッセージを具体化（会員 / 代理店 / 従業員 / 管理者）
-  const existingUser = await prisma.user.findUnique({
+  const existingUser = await prisma.user.findFirst({
     where: { email },
     select: { role: true },
   });

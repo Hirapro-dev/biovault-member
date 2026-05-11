@@ -9,7 +9,7 @@ async function main() {
   // 管理者アカウント
   const adminHash = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@biovault.jp" },
+    where: { loginId: "admin0001" },
     update: {},
     create: {
       loginId: "admin0001",
@@ -100,7 +100,7 @@ async function main() {
 
   for (const data of membersData) {
     const user = await prisma.user.upsert({
-      where: { email: data.email },
+      where: { loginId: data.loginId },
       update: {},
       create: {
         loginId: data.loginId,
@@ -158,7 +158,7 @@ async function main() {
 
   // 田中太郎に培養上清液投与記録を追加
   const tanaka = await prisma.user.findUnique({
-    where: { email: "tanaka@example.com" },
+    where: { loginId: "tanaka0001" },
     include: { membership: true },
   });
   if (tanaka?.membership) {
@@ -184,9 +184,9 @@ async function main() {
   // ステータス変更履歴サンプル
   const statusHistoryCount = await prisma.statusHistory.count();
   if (statusHistoryCount === 0) {
-    const tanakaUser = await prisma.user.findUnique({ where: { email: "tanaka@example.com" } });
-    const satoUser = await prisma.user.findUnique({ where: { email: "sato@example.com" } });
-    const yamadaUser = await prisma.user.findUnique({ where: { email: "yamada@example.com" } });
+    const tanakaUser = await prisma.user.findUnique({ where: { loginId: "tanaka0001" } });
+    const satoUser = await prisma.user.findUnique({ where: { loginId: "sato0001" } });
+    const yamadaUser = await prisma.user.findUnique({ where: { loginId: "yamada0001" } });
 
     if (tanakaUser) {
       await prisma.statusHistory.create({

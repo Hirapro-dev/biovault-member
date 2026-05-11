@@ -13,7 +13,8 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   loginId       String    @unique           // ログインID
-  email         String    @unique
+  // メールアドレス。原則として一意だが、EMAIL_DUPLICATE_ALLOWLIST に含まれるアドレスのみ重複可能（API側で制御）
+  email         String
   passwordHash  String
   role          Role      @default(MEMBER)
   name          String

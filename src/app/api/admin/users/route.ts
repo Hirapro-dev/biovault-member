@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, adminAccountCreatedEmail } from "@/lib/mail";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN", "OPERATOR", "VIEWER"];
 
@@ -56,10 +57,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "無効なロールです" }, { status: 400 });
   }
 
-  // 重複チェック
-  const existingEmail = await prisma.user.findUnique({ where: { email } });
-  if (existingEmail) {
-    return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+  // 重複チェック（メール：許可リスト対応）
+  const dupErr = await checkEmailDuplicate(email);
+  if (dupErr) {
+    return NextResponse.json({ error: dupErr }, { status: 400 });
   }
 
   const existingLoginId = await prisma.user.findUnique({ where: { loginId } });

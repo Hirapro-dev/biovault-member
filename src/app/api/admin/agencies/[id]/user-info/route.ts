@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 /**
  * 代理店ユーザー基本情報の更新（管理者用）
@@ -22,11 +23,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "対象ユーザーが見つかりません" }, { status: 404 });
   }
 
-  // メール変更時は重複チェック
+  // メール変更時は重複チェック（許可リスト対応）
   if (body.email && body.email !== target.email) {
-    const exists = await prisma.user.findUnique({ where: { email: body.email } });
-    if (exists) {
-      return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+    const dupErr = await checkEmailDuplicate(body.email, id);
+    if (dupErr) {
+      return NextResponse.json({ error: dupErr }, { status: 400 });
     }
   }
 

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, agencyApplicationReceivedEmail } from "@/lib/mail";
 import { notifyAgencyApplied } from "@/lib/status-notification";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 export async function POST(req: Request) {
   try {
@@ -12,10 +13,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "必須項目が入力されていません" }, { status: 400 });
     }
 
-    // メール重複チェック
-    const existingUser = await prisma.user.findUnique({ where: { email: body.email } });
-    if (existingUser) {
-      return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 400 });
+    // メール重複チェック（許可リスト対応）
+    const dupErr = await checkEmailDuplicate(body.email);
+    if (dupErr) {
+      return NextResponse.json({ error: dupErr }, { status: 400 });
     }
 
     // 申込データ保存

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
@@ -32,10 +33,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "必須項目が入力されていません" }, { status: 400 });
   }
 
-  // メール重複チェック
-  const existingUser = await prisma.user.findUnique({ where: { email: body.email } });
-  if (existingUser) {
-    return NextResponse.json({ error: "このメールアドレスは既に登録されています" }, { status: 400 });
+  // メール重複チェック（許可リスト対応）
+  const dupErr = await checkEmailDuplicate(body.email);
+  if (dupErr) {
+    return NextResponse.json({ error: dupErr }, { status: 400 });
   }
 
   // 0. 代理店コードから代理店名を自動解決

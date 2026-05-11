@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkEmailDuplicate } from "@/lib/email-duplicate";
 
 // 会員一覧取得
 export async function GET() {
@@ -37,10 +38,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "フリガナは必須です" }, { status: 400 });
   }
 
-  // メールアドレスの重複チェック
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return NextResponse.json({ error: "このメールアドレスは既に使用されています" }, { status: 400 });
+  // メールアドレスの重複チェック（許可リスト対応）
+  const dupErr = await checkEmailDuplicate(email);
+  if (dupErr) {
+    return NextResponse.json({ error: dupErr }, { status: 400 });
   }
 
   // ログインID: フロントから指定があればそれを使用、なければ自動生成
