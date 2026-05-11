@@ -2,11 +2,29 @@
 
 import { useState } from "react";
 
-export default function StaffFormUrl({ staffCode }: { staffCode: string }) {
+/**
+ * 担当営業マン専用の申込フォームURL表示。
+ * type="ips" は「iPS細胞作製適合確認」、type="agency" は「代理店登録」フォームへのURLを生成。
+ * いずれも ?staff=ST-XXXX 経由で担当営業マンに自動紐付けされる。
+ */
+export default function StaffFormUrl({
+  staffCode,
+  type = "ips",
+}: {
+  staffCode: string;
+  type?: "ips" | "agency";
+}) {
   const [copied, setCopied] = useState(false);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const formUrl = `${baseUrl}/form/app?staff=${staffCode}`;
+  const path = type === "agency" ? "/agency/form/app" : "/form/app";
+  const formUrl = `${baseUrl}${path}?staff=${staffCode}`;
+
+  const title = type === "agency" ? "代理店登録申込フォーム" : "iPS細胞作製適合確認申込フォーム";
+  const description =
+    type === "agency"
+      ? "代理店として登録される方にこのURLをご案内ください。申込は自動的にあなたの担当として記録されます。"
+      : "このURLからの申込は自動的にあなたの担当として記録されます。";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(formUrl);
@@ -15,13 +33,11 @@ export default function StaffFormUrl({ staffCode }: { staffCode: string }) {
   };
 
   return (
-    <div className="bg-bg-secondary border border-border-gold rounded-md p-4 sm:p-6 mb-8">
+    <div className="bg-bg-secondary border border-border-gold rounded-md p-4 sm:p-6 mb-4">
       <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-3 pb-3 border-b border-border">
-        iPS細胞作製適合確認申込フォーム
+        {title}
       </h3>
-      <p className="text-xs text-text-muted mb-3">
-        このURLからの申込は自動的にあなたの担当として記録されます。
-      </p>
+      <p className="text-xs text-text-muted mb-3">{description}</p>
       <div className="flex gap-2">
         <input
           type="text"

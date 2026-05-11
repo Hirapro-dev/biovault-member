@@ -51,8 +51,9 @@ export default async function StaffDashboardPage() {
         ]}
       />
 
-      {/* 専用申込フォームURL */}
-      <StaffFormUrl staffCode={staffCode} />
+      {/* 専用申込フォームURL（iPS適合確認 + 代理店登録） */}
+      <StaffFormUrl staffCode={staffCode} type="ips" />
+      <StaffFormUrl staffCode={staffCode} type="agency" />
 
       {/* ステータス別顧客数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
