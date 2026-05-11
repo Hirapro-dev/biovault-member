@@ -19,7 +19,7 @@ export default async function AdminLayout({
 
       <div className="flex-1 overflow-y-auto relative w-full">
         {/* モバイル: ハンバーガーナビ */}
-        <MobileNav isAdmin={true} userName={user.name} userRole={user.role} />
+        <MobileNav isAdmin={true} userName={user.name} userRole={user.role} userId={user.id} />
 
         {/* PC: ヘッダー */}
         <div className="hidden lg:block">

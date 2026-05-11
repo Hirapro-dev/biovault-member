@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import AccountSwitcher from "../layout/AccountSwitcher";
 
 const nav = [
   { href: "/staff", label: "ダッシュボード", icon: "◈" },
@@ -13,7 +14,7 @@ const nav = [
   { href: "/staff/settings", label: "設定", icon: "⚙" },
 ];
 
-export default function StaffMobileNav({ userName }: { userName: string }) {
+export default function StaffMobileNav({ userName, userId }: { userName: string; userId?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   return (
@@ -51,8 +52,35 @@ export default function StaffMobileNav({ userName }: { userName: string }) {
               );
             })}
           </nav>
+          {userId && (
+            <div className="px-4 py-3 border-t border-border">
+              <div className="text-[10px] text-text-muted tracking-[2px] mb-2 uppercase">
+                アカウント切り替え
+              </div>
+              <AccountSwitcher
+                currentUserId={userId}
+                currentUserName={userName}
+                currentUserRole="STAFF"
+                onClose={() => setOpen(false)}
+              />
+            </div>
+          )}
           <div className="p-4 border-t border-border">
-            <button onClick={() => signOut({ callbackUrl: "/login" })} className="w-full py-3 bg-transparent border border-border text-text-secondary rounded text-xs cursor-pointer">ログアウト</button>
+            <button
+              onClick={async () => {
+                try {
+                  await fetch("/api/auth/secondary/remove", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ clearAll: true }),
+                  });
+                } catch {}
+                signOut({ callbackUrl: "/login" });
+              }}
+              className="w-full py-3 bg-transparent border border-border text-text-secondary rounded text-xs cursor-pointer"
+            >
+              ログアウト
+            </button>
           </div>
         </div>
       </div>

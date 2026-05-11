@@ -12,7 +12,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         <StaffSidebar />
       </div>
       <div className="flex-1 overflow-y-auto relative w-full">
-        <StaffMobileNav userName={user.name} />
+        <StaffMobileNav userName={user.name} userId={user.id} />
         <div className="hidden lg:block">
           <Header userName={user.name} isAdmin={false} />
         </div>

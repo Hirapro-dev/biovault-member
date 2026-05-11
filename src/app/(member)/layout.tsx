@@ -45,7 +45,7 @@ export default async function MemberLayout({
 
       <div className="flex-1 overflow-y-auto relative w-full">
         {/* ハンバーガーナビ（PC・モバイル共通サブメニュー） */}
-        <MobileNav isAdmin={false} userName={user.name} signedDocTypes={signedDocTypes} showOnAllScreens />
+        <MobileNav isAdmin={false} userName={user.name} userRole={user.role} userId={user.id} signedDocTypes={signedDocTypes} showOnAllScreens />
 
         <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
           {children}

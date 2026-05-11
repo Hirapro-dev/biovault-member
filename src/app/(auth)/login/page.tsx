@@ -92,6 +92,13 @@ function LoginPage() {
           onSubmit={handleSubmit}
           className="bg-bg-secondary border border-border-gold rounded px-6 py-8 sm:px-5 sm:py-10"
         >
+          {/* アカウント追加モード時のヒント表示（前のアカウントは保存済み・ログイン後はメニューから切替可能） */}
+          {searchParams.get("addAccount") === "1" && (
+            <div className="mb-4 p-3 bg-gold/5 border border-gold/30 rounded text-gold text-xs text-center">
+              別のアカウントでログインしてください。<br />
+              ログイン後、メニューから保存済みアカウントとパスワード入力なしで切り替えられます。
+            </div>
+          )}
           {error && (
             <div className="mb-4 p-3 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-xs text-center">
               {error}

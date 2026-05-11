@@ -31,7 +31,7 @@ export default async function AgencyLayout({ children }: { children: React.React
         <AgencySidebar />
       </div>
       <div className="flex-1 overflow-y-auto relative w-full">
-        <AgencyMobileNav userName={user.name} />
+        <AgencyMobileNav userName={user.name} userId={user.id} />
         <div className="hidden lg:block">
           <Header userName={user.name} isAdmin={false} />
         </div>

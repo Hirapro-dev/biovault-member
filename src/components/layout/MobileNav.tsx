@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import AccountSwitcher from "./AccountSwitcher";
 
 type NavItem = {
   href: string;
@@ -64,6 +65,7 @@ export default function MobileNav({
   isAdmin,
   userName,
   userRole,
+  userId,
   showOnAllScreens = false,
   // 後方互換のため受け取るが、新メニュー構造では使用しない
   signedDocTypes: _signedDocTypes = [],
@@ -71,6 +73,8 @@ export default function MobileNav({
   isAdmin: boolean;
   userName: string;
   userRole?: string;
+  /** アカウント切替UI表示用。指定しない場合は切替UIを非表示 */
+  userId?: string;
   showOnAllScreens?: boolean;
   signedDocTypes?: string[];
 }) {
@@ -225,10 +229,35 @@ export default function MobileNav({
             )}
           </nav>
 
+          {/* アカウント切替 */}
+          {userId && userRole && (
+            <div className="px-4 py-3 border-t border-border">
+              <div className="text-[10px] text-text-muted tracking-[2px] mb-2 uppercase">
+                アカウント切り替え
+              </div>
+              <AccountSwitcher
+                currentUserId={userId}
+                currentUserName={userName}
+                currentUserRole={userRole}
+                onClose={() => setOpen(false)}
+              />
+            </div>
+          )}
+
           {/* ログアウト */}
           <div className="p-4 border-t border-border">
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={async () => {
+                // サブCookieも全てクリア（全アカウントを完全ログアウト）
+                try {
+                  await fetch("/api/auth/secondary/remove", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ clearAll: true }),
+                  });
+                } catch {}
+                signOut({ callbackUrl: "/login" });
+              }}
               className="w-full py-3 bg-transparent border border-border text-text-secondary rounded text-xs hover:border-border-gold hover:text-gold transition-all cursor-pointer"
             >
               ログアウト
