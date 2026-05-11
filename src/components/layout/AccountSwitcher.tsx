@@ -221,9 +221,6 @@ export default function AccountSwitcher({
         >
           + 別のアカウントを追加
         </button>
-        <p className="text-[10px] text-text-muted px-1 mt-1">
-          最大 {max} アカウントまで保存可能
-        </p>
       </div>
 
       {/* 確認ダイアログ */}
