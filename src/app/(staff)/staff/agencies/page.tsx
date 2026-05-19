@@ -1,13 +1,24 @@
 import { requireStaff } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import { getCompany } from "@/lib/scheme";
 
-export default async function StaffAgenciesPage() {
+export default async function StaffAgenciesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scheme?: string }>;
+}) {
   const { staffCode } = await requireStaff();
+  const { scheme } = await searchParams;
 
   // 自分（= staffCode）が担当する代理店のみ取得
+  // スキームでの絞り込み（SCPP / MRT）
   const agencies = await prisma.user.findMany({
-    where: { role: "AGENCY", referredByStaff: staffCode },
+    where: {
+      role: "AGENCY",
+      referredByStaff: staffCode,
+      ...(scheme === "SCPP" || scheme === "MRT" ? { scheme: scheme as "SCPP" | "MRT" } : {}),
+    },
     include: { agencyProfile: true },
     orderBy: { createdAt: "desc" },
   });
@@ -41,6 +52,14 @@ export default async function StaffAgenciesPage() {
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         担当代理店 <span className="text-sm text-text-muted font-normal">（{agencies.length}名）</span>
       </h2>
+
+      {/* スキームフィルタ（SCPP / MRT） */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-[11px] text-text-muted mr-1">スキーム:</span>
+        <SchemeFilterLink current={scheme} value="" label="全て" />
+        <SchemeFilterLink current={scheme} value="SCPP" label="SCPPのみ" />
+        <SchemeFilterLink current={scheme} value="MRT" label="MRTのみ" />
+      </div>
 
       <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
         {agencies.length === 0 ? (
@@ -94,9 +113,12 @@ export default async function StaffAgenciesPage() {
                           className="sticky z-10 bg-bg-secondary px-4 py-3 font-mono text-[13px] text-gold whitespace-nowrap"
                           style={{ left: 0 }}
                         >
-                          <Link href={`/staff/agencies/${a.id}`} className="hover:underline">
-                            {p?.agencyCode || "---"}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/staff/agencies/${a.id}`} className="hover:underline">
+                              {p?.agencyCode || "---"}
+                            </Link>
+                            <SchemeBadge scheme={a.scheme} />
+                          </div>
                         </td>
                         <td
                           className="sticky z-10 bg-bg-secondary px-4 py-3 text-sm whitespace-nowrap border-r border-border overflow-hidden text-ellipsis"
@@ -136,9 +158,12 @@ export default async function StaffAgenciesPage() {
                 return (
                   <div key={a.id} className="px-4 py-4">
                     <div className="flex items-center justify-between mb-2">
-                      <Link href={`/staff/agencies/${a.id}`} className="font-mono text-[13px] text-gold hover:underline">
-                        {p?.agencyCode || "---"}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/staff/agencies/${a.id}`} className="font-mono text-[13px] text-gold hover:underline">
+                          {p?.agencyCode || "---"}
+                        </Link>
+                        <SchemeBadge scheme={a.scheme} />
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusBadge.className}`}>
                           {statusBadge.label}
@@ -159,5 +184,41 @@ export default async function StaffAgenciesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function SchemeBadge({ scheme }: { scheme: string | null | undefined }) {
+  const company = getCompany(scheme);
+  return (
+    <span className={`text-[9px] px-1.5 py-0.5 rounded-sm border ${company.badgeClass}`}>
+      {company.shortName}
+    </span>
+  );
+}
+
+function SchemeFilterLink({
+  current,
+  value,
+  label,
+}: {
+  current: string | undefined;
+  value: string;
+  label: string;
+}) {
+  const params = new URLSearchParams();
+  if (value) params.set("scheme", value);
+  const href = `/staff/agencies${params.toString() ? `?${params.toString()}` : ""}`;
+  const active = (current || "") === value;
+  return (
+    <Link
+      href={href}
+      className={`text-[11px] px-2.5 py-1 rounded-sm border transition-colors ${
+        active
+          ? "bg-gold/20 text-gold border-gold/60"
+          : "bg-bg-secondary text-text-muted border-border hover:border-gold/40"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
