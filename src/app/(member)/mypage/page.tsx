@@ -71,8 +71,12 @@ export default async function MyPage() {
     select: { planType: true, completedSessions: true, expiresAt: true },
   });
 
-  // 振込先情報（デフォルト口座を取得）
-  const defaultBank = await prisma.bankAccount.findFirst({ where: { isDefault: true, isActive: true } });
+  // 振込先情報（ユーザーのスキームに応じた有効な口座を取得）
+  const userScheme = (user as { scheme?: "SCPP" | "MRT" }).scheme === "MRT" ? "MRT" : "SCPP";
+  const defaultBank = await prisma.bankAccount.findFirst({
+    where: { isActive: true, scheme: userScheme },
+    orderBy: { createdAt: "desc" },
+  });
 
   // ステータス到達日マッピング
   const statusDates: Record<string, string> = {};

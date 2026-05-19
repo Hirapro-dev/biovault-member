@@ -1,7 +1,9 @@
 import Link from "next/link";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCurrentCompany } from "@/lib/scheme-server";
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const company = await getCurrentCompany();
   return (
     <div className="max-w-[700px]">
       <div className="text-[11px] text-text-muted mb-5">
@@ -20,7 +22,7 @@ export default function TermsPage() {
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8">
         <article className="text-[13px] text-text-secondary leading-[2] space-y-6">
           <Section title="第1条（目的）">
-            <p>本規約は、株式会社SCPP（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p>
+            <p>本規約は、{company.name}（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p>
           </Section>
 
           <Section title="第2条（定義）">
@@ -147,7 +149,7 @@ export default function TermsPage() {
 
           <div className="text-[11px] text-text-muted pt-4 border-t border-border">
             <p>制定日：2025年4月1日</p>
-            <p>株式会社SCPP</p>
+            <p>{company.name}</p>
           </div>
         </article>
       </div>

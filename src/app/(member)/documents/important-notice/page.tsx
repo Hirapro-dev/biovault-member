@@ -2,9 +2,12 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import { getCompany } from "@/lib/scheme";
 
 export default async function ImportantNoticeViewPage() {
   const sessionUser = await requireAuth();
+  const userRecord = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { scheme: true } });
+  const company = getCompany(userRecord?.scheme);
 
   const doc = await prisma.document.findFirst({
     where: { userId: sessionUser.id, type: "CONTRACT" },
@@ -32,7 +35,7 @@ export default async function ImportantNoticeViewPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-6">
-          <p>株式会社SCPP（以下「当社」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
+          <p>{company.name}（以下「当社」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
           <p>申込者は、本書の内容を十分に確認し、理解したうえで、本サービスの申込みおよび契約締結を行うものとします。</p>
 
           <S t="第1条（本書の目的）">

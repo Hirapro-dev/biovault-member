@@ -1,6 +1,10 @@
 import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Badge from "@/components/ui/Badge";
+import { getCompany } from "@/lib/scheme";
+
+// 会員カルテはステータス変更が頻繁に発生するため、毎回最新データでサーバーレンダリングする
+export const dynamic = "force-dynamic";
 import {
   IPS_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -91,6 +95,17 @@ export default async function MemberKartePage({
             }
           />
           <InfoRow label="住所" value={user.address || "---"} />
+          <InfoRow
+            label="流入経路"
+            value={
+              <span className="flex items-center gap-2">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-sm border ${getCompany(user.scheme).badgeClass}`}>
+                  {getCompany(user.scheme).shortName}
+                </span>
+                <span className="text-[12px] text-text-secondary">{getCompany(user.scheme).name}スキーム</span>
+              </span>
+            }
+          />
         </div>
 
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
@@ -242,6 +257,7 @@ export default async function MemberKartePage({
                 completedSessions: o.completedSessions ?? 0,
                 requestedSessionCount: o.requestedSessionCount ?? 1,
                 sessionDates: o.sessionDates ?? null,
+                clinicBookingRequestedAt: o.clinicBookingRequestedAt ? o.clinicBookingRequestedAt.toISOString() : null,
                 createdAt: o.createdAt.toISOString(),
               }))}
             readOnly={isViewerOnly}
@@ -428,7 +444,7 @@ function InfoRow({
   mono = false,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
   mono?: boolean;
 }) {
   return (

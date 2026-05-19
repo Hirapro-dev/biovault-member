@@ -88,7 +88,7 @@ function OverallTab({
   monthlyData: MonthlyPoint[];
   overall: OverallTotal;
 }) {
-  const [metric, setMetric] = useState<LineMetric>("sales");
+  const [metric, setMetric] = useState<LineMetric>("registrations");
 
   const label =
     metric === "sales" ? "売上" : metric === "registrations" ? "登録数" : "成約数";
@@ -202,7 +202,7 @@ function MetricSelect({
 // 従業員別タブ
 // ────────────────────────────────────────
 function StaffTab() {
-  const [metric, setMetric] = useState<StaffMetric>("totalSales");
+  const [metric, setMetric] = useState<StaffMetric>("registrations");
   const [kind, setKind] = useState<PeriodKind>("all");
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [quarter, setQuarter] = useState<number>(

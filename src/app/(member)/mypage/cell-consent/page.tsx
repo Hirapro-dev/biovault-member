@@ -2,10 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { getCompany } from "@/lib/scheme";
 
 export default function CellConsentPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -90,7 +94,7 @@ export default function CellConsentPage() {
       <div ref={scrollRef} className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7 max-h-[55vh] overflow-y-auto">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
           <p className="text-text-secondary/80 text-[11px]">（自家iPS細胞等の提供、保管、将来利用および死亡時取扱いに関する同意書）</p>
-          <p>株式会社SCPP（以下「甲」という。）は、BioVaultが提供するiPSサービスに関連して、メンバーシップ登録者本人（以下「乙」という。）に由来する血液、細胞その他の試料ならびにこれらから作製される自家iPS細胞その他関連物および関連情報の提供、保管、管理、将来利用、死亡時取扱いその他必要事項について、以下のとおり説明します。</p>
+          <p>{company.name}（以下「甲」という。）は、BioVaultが提供するiPSサービスに関連して、メンバーシップ登録者本人（以下「乙」という。）に由来する血液、細胞その他の試料ならびにこれらから作製される自家iPS細胞その他関連物および関連情報の提供、保管、管理、将来利用、死亡時取扱いその他必要事項について、以下のとおり説明します。</p>
           <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
 
           <Sec t="第1条（目的）">

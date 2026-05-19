@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
+import { normalizeScheme } from "@/lib/scheme";
 
 const TESTER_EMAILS = (process.env.TESTER_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
@@ -38,6 +39,9 @@ export async function POST(req: Request) {
   if (dupErr) {
     return NextResponse.json({ error: dupErr }, { status: 400 });
   }
+
+  // 流入スキーム（SCPP or MRT）
+  const scheme = normalizeScheme(body.scheme);
 
   // 0. 代理店コードから代理店名を自動解決
   let referrerName: string | null = null;
@@ -107,6 +111,7 @@ export async function POST(req: Request) {
       receivedPrivacy: body.receivedPrivacy || false,
       receivedCellStorage: body.receivedCellStorage || false,
       receivedIpsConsent: body.receivedIpsConsent || false,
+      scheme,
     },
   });
 
@@ -161,6 +166,7 @@ export async function POST(req: Request) {
       mustChangePassword: !isTester,
       referredByAgency: agencyCode,
       referredByStaff: staffCodeValue,
+      scheme,
       applicationId: application.id,
       paymentMethod: body.paymentMethod || "bank_transfer",
       paymentDate: body.paymentDate ? new Date(body.paymentDate) : null,
@@ -214,7 +220,7 @@ export async function POST(req: Request) {
 
   // 7. 自動返信メール送信
   try {
-    const emailContent = applicationReceivedEmail(body.name);
+    const emailContent = applicationReceivedEmail(body.name, scheme);
     await sendEmail({ to: body.email, ...emailContent });
   } catch (e) {
     console.error("Auto-reply email failed:", e);

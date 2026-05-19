@@ -111,7 +111,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // iPSサービス付属の培養上清液点滴1回分は、入金完了時に別途作成する
   // （このAPIではステータス変更のみ）
 
-  // STORAGE_ACTIVE: 付属の培養上清液の精製を開始
+  // STORAGE_ACTIVE: 付属の培養上清液の精製も同時に完了させる
+  // 仕様：基本パック付属の培養上清液はiPS細胞作製と同時に作られるため、
+  //       フェーズ1（申込→入金→精製→保管）は全てチェック済みとして扱い、
+  //       フェーズ2（クリニック予約以降）から開始する。
+  //       → status を CLINIC_BOOKING まで進める。
   // 保管開始日を起点に1ヶ月後を精製完了日、精製完了日+8ヶ月を管理期限として設定
   if (newStatus === "STORAGE_ACTIVE") {
     const includedOrder = await prisma.cultureFluidOrder.findFirst({
@@ -128,7 +132,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         prisma.cultureFluidOrder.update({
           where: { id: includedOrder.id },
           data: {
-            status: "PAYMENT_CONFIRMED",
+            status: "CLINIC_BOOKING",
             producedAt,
             expiresAt,
           },

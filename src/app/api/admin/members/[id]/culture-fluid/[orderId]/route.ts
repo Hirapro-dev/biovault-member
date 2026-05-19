@@ -92,6 +92,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       updateData.clinicAddress = null;
       updateData.clinicPhone = null;
       updateData.informedAgreedAt = null;
+      // 会員側で再度「クリニックの予約をする」ボタンを表示するためにリセット
+      updateData.clinicBookingRequestedAt = null;
     }
   }
 
@@ -107,6 +109,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     updateData.clinicPhone = null;
     updateData.informedAgreedAt = null;
     updateData.completedAt = null;
+    // 会員側で再度「クリニックの予約をする」ボタンを表示するためにリセット
+    updateData.clinicBookingRequestedAt = null;
   }
 
   const updated = await prisma.cultureFluidOrder.update({

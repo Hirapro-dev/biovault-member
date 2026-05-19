@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCompany } from "@/lib/scheme";
 
 // 職業選択肢
 const OCCUPATION_OPTIONS = [
@@ -21,6 +22,7 @@ const OCCUPATION_OPTIONS = [
 export default function ApplyServicePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
 
   // ステップ管理（1: 情報・確認, 2: 利用規約, 3: iPSサービス利用契約書, 4: 最終確認）
   const [step, setStep] = useState(1);
@@ -412,7 +414,7 @@ export default function ApplyServicePage() {
                 onChange={(v) => updateConfirm("confirmNotMedical", v)}
               />
               <ConfirmItem
-                label="株式会社SCPPがBioVaultの運営主体であることを確認しました"
+                label={`${company.name}がBioVaultの運営主体であることを確認しました`}
                 checked={confirmChecks.confirmScppRole}
                 onChange={(v) => updateConfirm("confirmScppRole", v)}
               />
@@ -474,7 +476,7 @@ export default function ApplyServicePage() {
               onScroll={handleTermsScroll}
               className="max-h-[50vh] overflow-y-auto border border-border rounded p-4 bg-bg-tertiary text-xs sm:text-sm text-text-secondary leading-[2] space-y-4"
             >
-              <TermsContent />
+              <TermsContent companyName={company.name} />
             </div>
 
             {!termsScrolled && (
@@ -641,10 +643,10 @@ function ConfirmItem({
 }
 
 // 利用規約コンテンツ
-function TermsContent() {
+function TermsContent({ companyName }: { companyName: string }) {
   return (
     <>
-      <TS t="第1条（目的）"><p>本規約は、株式会社SCPP（以下「当社」という。）が運営するBioVaultメンバーシップ登録者限定の「iPSサービス」に適用される利用条件、資格、運営上の取扱いその他必要事項を定めるものです。</p></TS>
+      <TS t="第1条（目的）"><p>本規約は、{companyName}（以下「当社」という。）が運営するBioVaultメンバーシップ登録者限定の「iPSサービス」に適用される利用条件、資格、運営上の取扱いその他必要事項を定めるものです。</p></TS>
       <TS t="第2条（定義）"><p>「本サービス」とは、当社が「BioVault」の名称で運営するメンバーシップ制サービスおよびiPSサービス、これに付随する一切のサービスをいいます。</p><p>「メンバーシップ登録者」とは、当社所定の手続きにより本サービスの申込みを行い、当社が承認し、メンバーシップ資格を付与された個人または法人をいいます。</p><p>「メンバーシップ権」とは、本サービスの利用資格として当社が付与する地位をいいます。</p><p>「CellAsset」とは、メンバーシップ登録者本人に由来する血液その他検体に関して、提携先における細胞の作製、加工、保管その他関連手続きの実施に向けた案内、申込管理、日程調整、情報提供および運営上の連携サービスをいいます。</p></TS>
       <TS t="第3条（本規約の適用）"><p>本規約は、メンバーシップ登録者と当社との間の本サービス利用に関する一切の関係に適用されます。</p><p>関連文書は、本規約と一体として適用されます。</p></TS>
       <TS t="第4条（本サービスの位置付け）"><p>当社は、本サービスの運営主体であり、メンバーシップ登録者に対し医療行為を行うものではありません。</p><p>診察、問診、採血、医学的判断、施術その他の医療行為は、提携医療機関またはその所属医師等が、その責任において行うものとします。</p><p>本サービスは、特定の美容上、健康上、医療上または将来の治療機会を保証するものではありません。</p></TS>

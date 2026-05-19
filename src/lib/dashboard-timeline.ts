@@ -201,7 +201,7 @@ export async function getCfTimeline(
       cultureFluidOrders: {
         orderBy: { updatedAt: "desc" },
         select: {
-          id: true, status: true, planLabel: true, totalAmount: true,
+          id: true, status: true, planType: true, planLabel: true, totalAmount: true,
           clinicDate: true, clinicName: true, updatedAt: true, producedAt: true,
         },
       },
@@ -215,8 +215,19 @@ export async function getCfTimeline(
 
   for (const user of users) {
     for (const order of user.cultureFluidOrders) {
+      // 基本パック付属（iv_drip_1_included）は iPS細胞作製と同時に培養上清液も作られるため、
+      // フェーズ1ステップ（APPLIED〜CF_STORAGE）にはマッピングせず、status のままフェーズ2に位置づける。
+      // status がフェーズ1の値（APPLIED/PAYMENT_CONFIRMED/PRODUCING）のまま残っている古いレコードは
+      // 仮想的に CF_STORAGE 扱いとし、ダッシュボード上ではフェーズ2準備中（保管）として表示する。
+      const isIncluded = order.planType === "iv_drip_1_included";
+      const PHASE1_STATUSES = ["APPLIED", "PAYMENT_CONFIRMED", "PRODUCING"];
       // PRODUCINGステータスで精製完了済み（producedAt有）→ CF_STORAGE に振り分け
-      const stepKey = (order.status === "PRODUCING" && order.producedAt) ? "CF_STORAGE" : order.status;
+      let stepKey: string;
+      if (isIncluded && PHASE1_STATUSES.includes(order.status)) {
+        stepKey = "CF_STORAGE";
+      } else {
+        stepKey = (order.status === "PRODUCING" && order.producedAt) ? "CF_STORAGE" : order.status;
+      }
       if (stepMap[stepKey]) {
         stepMap[stepKey].push({
           userId: user.id,

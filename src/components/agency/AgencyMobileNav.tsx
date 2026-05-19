@@ -16,7 +16,7 @@ const nav = [
   { href: "/agency/settings", label: "設定", icon: "⚙" },
 ];
 
-export default function AgencyMobileNav({ userName, userId }: { userName: string; userId?: string }) {
+export default function AgencyMobileNav({ userName, userId, showAccountSwitcher = false }: { userName: string; userId?: string; showAccountSwitcher?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   return (
@@ -53,20 +53,24 @@ export default function AgencyMobileNav({ userName, userId }: { userName: string
                 </Link>
               );
             })}
-          </nav>
-          {userId && (
-            <div className="px-4 py-3 border-t border-border">
-              <div className="text-[10px] text-text-muted tracking-[2px] mb-2 uppercase">
-                アカウント切り替え
+
+            {/* アカウント切替（EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみ表示） */}
+            {showAccountSwitcher && userId && (
+              <div className="mt-5 pt-4 border-t border-border">
+                <div className="text-[10px] text-text-muted tracking-[2px] px-4 mb-2 uppercase">
+                  アカウント切り替え
+                </div>
+                <div className="px-4">
+                  <AccountSwitcher
+                    currentUserId={userId}
+                    currentUserName={userName}
+                    currentUserRole="AGENCY"
+                    onClose={() => setOpen(false)}
+                  />
+                </div>
               </div>
-              <AccountSwitcher
-                currentUserId={userId}
-                currentUserName={userName}
-                currentUserRole="AGENCY"
-                onClose={() => setOpen(false)}
-              />
-            </div>
-          )}
+            )}
+          </nav>
           <div className="p-4 border-t border-border">
             <button
               onClick={async () => {

@@ -9,6 +9,7 @@
  */
 
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { getCompany, type SchemeKey } from "./scheme";
 
 const ses = new SESClient({
   region: process.env.AWS_SES_REGION || "ap-northeast-1",
@@ -57,7 +58,8 @@ export async function sendEmail({
 
 // ── メールテンプレート ──
 
-export function applicationReceivedEmail(name: string) {
+export function applicationReceivedEmail(name: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】iPS細胞作製の適合確認申込を受け付けました";
   const bodyText = `${name} 様
 
@@ -79,10 +81,10 @@ iPS作製適合確認を行わせていただく上で、
 
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
-〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
+〒${company.postalCode} ${company.address}
 ──────────────────
 
 ※ このメールは自動送信されています。
@@ -117,9 +119,9 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp<br>
-        〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}<br>
+        〒${company.postalCode} ${company.address}
       </p>
       <p style="font-size:10px;color:#727288;margin-top:16px;">
         ※ このメールは自動送信されています。
@@ -132,7 +134,8 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
-export function agencyApplicationReceivedEmail(name: string) {
+export function agencyApplicationReceivedEmail(name: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】エージェント申込を受け付けました";
   const bodyText = `${name} 様
 
@@ -150,10 +153,10 @@ BioVault エージェント申込をいただき、
 
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
-〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
+〒${company.postalCode} ${company.address}
 ──────────────────
 
 ※ このメールは自動送信されています。
@@ -186,9 +189,9 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp<br>
-        〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}<br>
+        〒${company.postalCode} ${company.address}
       </p>
       <p style="font-size:10px;color:#727288;margin-top:16px;">
         ※ このメールは自動送信されています。
@@ -205,8 +208,10 @@ export function adminAccountCreatedEmail(
   name: string,
   loginId: string,
   password: string,
-  roleLabel: string
+  roleLabel: string,
+  scheme?: SchemeKey
 ) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】管理画面アカウントが発行されました";
   const bodyText = `${name} 様
 
@@ -227,9 +232,9 @@ BioVault 管理画面のアカウントが発行されました。
 ご不明な点がございましたら、下記までお気軽にお問い合わせください。
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
 ──────────────────`;
 
   const bodyHtml = `
@@ -266,8 +271,8 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
       </p>
     </div>
   </div>
@@ -277,7 +282,8 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
-export function staffAccountCreatedEmail(name: string, loginId: string, password: string) {
+export function staffAccountCreatedEmail(name: string, loginId: string, password: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】従業員アカウントが発行されました";
   const bodyText = `${name} 様
 
@@ -297,9 +303,9 @@ BioVault 従業員アカウントが発行されました。
 ご不明な点がございましたら、下記までお気軽にお問い合わせください。
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
 ──────────────────`;
 
   const bodyHtml = `
@@ -334,8 +340,8 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
       </p>
     </div>
   </div>
@@ -345,7 +351,8 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
-export function agencyAccountCreatedEmail(name: string, loginId: string, password: string) {
+export function agencyAccountCreatedEmail(name: string, loginId: string, password: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】エージェントアカウントが発行されました";
   const bodyText = `${name} 様
 
@@ -365,9 +372,9 @@ BioVault エージェントポータルへようこそ。
 ご不明な点がございましたら、下記までお気軽にお問い合わせください。
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
 ──────────────────`;
 
   const bodyHtml = `
@@ -402,8 +409,8 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
       </p>
     </div>
   </div>
@@ -413,7 +420,8 @@ MAIL: info@biovault.jp
   return { subject, bodyText, bodyHtml };
 }
 
-export function accountCreatedEmail(name: string, loginId: string, password: string) {
+export function accountCreatedEmail(name: string, loginId: string, password: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
   const subject = "【BioVault】メンバーシップアカウントが発行されました";
   const bodyText = `${name} 様
 
@@ -433,9 +441,9 @@ BioVault メンバーシップサイトへようこそ。
 ご不明な点がございましたら、下記までお気軽にお問い合わせください。
 
 ──────────────────
-BioVault（株式会社SCPP）
-TEL: 0120-788-839
-MAIL: info@biovault.jp
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
 ──────────────────`;
 
   const bodyHtml = `
@@ -470,8 +478,8 @@ MAIL: info@biovault.jp
     </div>
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
       <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（株式会社SCPP）<br>
-        TEL: 0120-788-839 ／ MAIL: info@biovault.jp
+        BioVault（${company.name}）<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
       </p>
     </div>
   </div>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import MembersTable from "@/components/members/MembersTable";
 import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
-import StaffReferralUrlSection from "./StaffReferralUrlSection";
+import StaffReferralUrlPanel from "@/components/staff/StaffReferralUrlPanel";
 import StaffKarteActions from "./StaffKarteActions";
 import StaffLoginSection from "./StaffLoginSection";
 import DeleteStaffAccount from "./DeleteStaffAccount";
@@ -127,8 +127,10 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
         isIssued={!!staff.userId}
       />
 
-      {/* 紹介URL発行 */}
-      <StaffReferralUrlSection staffCode={staff.staffCode} />
+      {/* 紹介URL発行（SCPP / MRT スキーム × iPS / 代理店 = 4種） */}
+      <div className="mt-6">
+        <StaffReferralUrlPanel staffCode={staff.staffCode} />
+      </div>
 
       {/* 担当顧客一覧 */}
       <div className="mt-6">

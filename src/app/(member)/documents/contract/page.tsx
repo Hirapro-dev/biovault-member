@@ -2,9 +2,12 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import { getCompany } from "@/lib/scheme";
 
 export default async function ContractViewPage() {
   const sessionUser = await requireAuth();
+  const userRecord = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { scheme: true } });
+  const company = getCompany(userRecord?.scheme);
 
   // 契約書の署名状態を確認
   const doc = await prisma.document.findFirst({
@@ -34,7 +37,7 @@ export default async function ContractViewPage() {
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
           <p className="text-text-secondary/80 text-[11px]">（自家iPS細胞等の提供、保管、将来利用および死亡時取扱いに関する同意書）</p>
-          <p>株式会社SCPP（以下「甲」という。）は、BioVaultが提供するiPSサービスに関連して、メンバーシップ登録者本人（以下「乙」という。）に由来する血液、細胞その他の試料ならびにこれらから作製される自家iPS細胞その他関連物および関連情報の提供、保管、管理、将来利用、死亡時取扱いその他必要事項について、以下のとおり説明します。</p>
+          <p>{company.name}（以下「甲」という。）は、BioVaultが提供するiPSサービスに関連して、メンバーシップ登録者本人（以下「乙」という。）に由来する血液、細胞その他の試料ならびにこれらから作製される自家iPS細胞その他関連物および関連情報の提供、保管、管理、将来利用、死亡時取扱いその他必要事項について、以下のとおり説明します。</p>
           <p>乙は、本書の内容を確認し、理解したうえで、これに同意するものとします。</p>
 
           <S t="第1条（目的）">

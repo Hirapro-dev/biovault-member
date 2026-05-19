@@ -2,10 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { getCompany } from "@/lib/scheme";
 
 export default function InformedConsentPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -72,7 +76,7 @@ export default function InformedConsentPage() {
         className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7 max-h-[55vh] overflow-y-auto"
       >
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
-          <p>私は、自家iPS細胞作製に関して、株式会社SCPPより以下の説明を受け、その内容を理解したうえで同意します。</p>
+          <p>私は、自家iPS細胞作製に関して、{company.name}より以下の説明を受け、その内容を理解したうえで同意します。</p>
 
           <Sec t="1. 本説明書の目的">
             <p>本書は、私自身の血液その他の生体由来試料を用いて、自家iPS細胞の作製を行うにあたり、その内容、注意点および限界について説明を受け、理解したことを確認するためのものです。</p>
@@ -84,8 +88,8 @@ export default function InformedConsentPage() {
             <p>ただし、本書に基づく同意は、自家iPS細胞の作製に向けた説明を受けたことおよびその工程に進むことへの同意であり、将来の治療、美容施術、研究利用その他の具体的な利用について包括的に同意するものではありません。これらについては、必要に応じて別途説明および同意が行われます。</p>
           </Sec>
 
-          <Sec t="3. 株式会社SCPPの立場について">
-            <p>株式会社SCPPは、本サービスの運営主体であり、医療行為を直接行うものではありません。</p>
+          <Sec t={`3. ${company.name}の立場について`}>
+            <p>{company.name}は、本サービスの運営主体であり、医療行為を直接行うものではありません。</p>
             <p>診察、問診、採血、医学的判断その他の医療行為は、提携医療機関またはその所属医師等が行います。</p>
             <p>また、細胞の作製、培養、品質評価、保管等の工程は、提携先機関が行います。</p>
           </Sec>

@@ -4,11 +4,21 @@ import Link from "next/link";
 import CommissionSummaryCards from "@/components/commission/CommissionSummaryCards";
 import { calcSummaryForAllAgencies } from "@/lib/commission-summary-from-data";
 
-export default async function AdminAgenciesPage() {
+export default async function AdminAgenciesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scheme?: string }>;
+}) {
   await requireAdmin();
+  const { scheme } = await searchParams;
+
+  const whereAgency: Record<string, unknown> = { role: "AGENCY" };
+  if (scheme === "SCPP" || scheme === "MRT") {
+    whereAgency.scheme = scheme;
+  }
 
   const agencies = await prisma.user.findMany({
-    where: { role: "AGENCY" },
+    where: whereAgency,
     include: { agencyProfile: true },
     orderBy: { createdAt: "desc" },
   });
@@ -55,6 +65,14 @@ export default async function AdminAgenciesPage() {
       <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
         エージェント一覧
       </h2>
+
+      {/* スキームフィルタ（SCPP / MRT） */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-[11px] text-text-muted mr-1">スキーム:</span>
+        <AgencySchemeFilterLink current={scheme} value="" label="全て" />
+        <AgencySchemeFilterLink current={scheme} value="SCPP" label="SCPPのみ" />
+        <AgencySchemeFilterLink current={scheme} value="MRT" label="MRTのみ" />
+      </div>
 
       {/* 全代理店合算サマリー */}
       <CommissionSummaryCards summary={summary} />
@@ -118,9 +136,12 @@ export default async function AdminAgenciesPage() {
                           className="sticky z-10 bg-bg-secondary px-4 py-3 font-mono text-[13px] text-gold whitespace-nowrap"
                           style={{ left: 0 }}
                         >
-                          <Link href={`/admin/agencies/${a.id}`} className="hover:underline">
-                            {p?.agencyCode || "---"}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/admin/agencies/${a.id}`} className="hover:underline">
+                              {p?.agencyCode || "---"}
+                            </Link>
+                            <SchemeBadge scheme={a.scheme} />
+                          </div>
                         </td>
                         <td
                           className="sticky z-10 bg-bg-secondary px-4 py-3 text-sm whitespace-nowrap overflow-hidden text-ellipsis"
@@ -164,9 +185,12 @@ export default async function AdminAgenciesPage() {
                 return (
                   <div key={a.id} className="px-4 py-4">
                     <div className="flex items-center justify-between mb-2">
-                      <Link href={`/admin/agencies/${a.id}`} className="font-mono text-[13px] text-gold hover:underline">
-                        {p?.agencyCode || "---"}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/admin/agencies/${a.id}`} className="font-mono text-[13px] text-gold hover:underline">
+                          {p?.agencyCode || "---"}
+                        </Link>
+                        <SchemeBadge scheme={a.scheme} />
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${statusBadge.className}`}>
                           {statusBadge.label}
@@ -187,5 +211,40 @@ export default async function AdminAgenciesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function SchemeBadge({ scheme }: { scheme: string | null | undefined }) {
+  const s = scheme === "MRT" ? "MRT" : "SCPP";
+  const cls = s === "MRT"
+    ? "bg-orange-900/30 text-orange-300 border-orange-500/40"
+    : "bg-blue-900/30 text-blue-300 border-blue-500/40";
+  return <span className={`text-[9px] px-1.5 py-0.5 rounded-sm border ${cls}`}>{s}</span>;
+}
+
+function AgencySchemeFilterLink({
+  current,
+  value,
+  label,
+}: {
+  current: string | undefined;
+  value: string;
+  label: string;
+}) {
+  const params = new URLSearchParams();
+  if (value) params.set("scheme", value);
+  const href = `/admin/agencies${params.toString() ? `?${params.toString()}` : ""}`;
+  const active = (current || "") === value;
+  return (
+    <Link
+      href={href}
+      className={`text-[11px] px-2.5 py-1 rounded-sm border transition-colors ${
+        active
+          ? "bg-gold/20 text-gold border-gold/60"
+          : "bg-bg-secondary text-text-muted border-border hover:border-gold/40"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }

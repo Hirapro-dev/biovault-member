@@ -2,9 +2,12 @@ import { requireAuth } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import { getCompany } from "@/lib/scheme";
 
 export default async function PrivacyConsentViewPage() {
   const sessionUser = await requireAuth();
+  const userRecord = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { scheme: true } });
+  const company = getCompany(userRecord?.scheme);
 
   const doc = await prisma.document.findFirst({
     where: { userId: sessionUser.id, type: "PRIVACY_POLICY" },
@@ -32,7 +35,7 @@ export default async function PrivacyConsentViewPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-6">
-          <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
+          <p>{company.name}（以下「甲」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
           <p>乙は、本書の内容を確認し、理解したうえで、必要な範囲について同意するものとします。</p>
 
           <S t="第1条（目的）">
@@ -98,10 +101,10 @@ export default async function PrivacyConsentViewPage() {
           <S t="第16条（お問い合わせ窓口）">
             <p>本同意書に基づく個人情報等の取扱いに関するお問い合わせ、開示等請求、苦情または相談の窓口は、以下のとおりとします。</p>
             <div className="mt-2 p-4 bg-bg-elevated rounded-md text-[12px] space-y-1">
-              <p>株式会社SCPP サポートデスク</p>
-              <p>〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F</p>
-              <p>TEL: 0120-788-839</p>
-              <p>MAIL: support@biovault.jp</p>
+              <p>{company.name} サポートデスク</p>
+              <p>〒{company.postalCode} {company.address}</p>
+              <p>TEL: {company.phone}</p>
+              <p>MAIL: {company.supportEmail}</p>
             </div>
           </S>
         </article>

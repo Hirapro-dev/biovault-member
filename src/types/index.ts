@@ -1,6 +1,6 @@
-import type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentType, Role } from "@prisma/client";
+import type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentType, Role, Scheme } from "@prisma/client";
 
-export type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentType, Role };
+export type { IpsStatus, PaymentStatus, DocumentStatus, DocumentType, TreatmentType, Role, Scheme };
 
 // iPS ステータスの日本語ラベル
 export const IPS_STATUS_LABELS: Record<IpsStatus, string> = {
@@ -132,4 +132,5 @@ export interface SessionUser {
   mustChangePassword: boolean;
   hasAgreedTerms?: boolean;
   staffCode?: string;
+  scheme?: Scheme;  // 流入スキーム（契約主体の会社識別）
 }

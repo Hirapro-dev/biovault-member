@@ -1,10 +1,15 @@
 import { requireStaff } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+
+// 会員カルテはステータス変更が頻繁に発生するため、毎回最新データでサーバーレンダリングする
+export const dynamic = "force-dynamic";
+
 import {
   IPS_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
   TREATMENT_TYPE_LABELS,
 } from "@/types";
+import { getCompany } from "@/lib/scheme";
 import { notFound } from "next/navigation";
 import AdminStatusTimeline from "@/app/(admin)/admin/members/[id]/AdminStatusTimeline";
 import CultureFluidStatusManager from "@/app/(admin)/admin/members/[id]/CultureFluidStatusManager";
@@ -107,6 +112,17 @@ export default async function StaffMemberKartePage({
           <InfoRow label="電話" value={user.phone || "---"} />
           <InfoRow label="生年月日" value={user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString("ja-JP") : "---"} />
           <InfoRow label="住所" value={user.address || "---"} />
+          <InfoRow
+            label="流入経路"
+            value={
+              <span className="flex items-center gap-2">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-sm border ${getCompany(user.scheme).badgeClass}`}>
+                  {getCompany(user.scheme).shortName}
+                </span>
+                <span className="text-[12px] text-text-secondary">{getCompany(user.scheme).name}スキーム</span>
+              </span>
+            }
+          />
         </div>
 
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
@@ -180,6 +196,7 @@ export default async function StaffMemberKartePage({
               completedSessions: o.completedSessions ?? 0,
               requestedSessionCount: o.requestedSessionCount ?? 1,
               sessionDates: o.sessionDates ?? null,
+              clinicBookingRequestedAt: o.clinicBookingRequestedAt ? o.clinicBookingRequestedAt.toISOString() : null,
               createdAt: o.createdAt.toISOString(),
             }))}
             readOnly={true}
@@ -288,7 +305,7 @@ export default async function StaffMemberKartePage({
   );
 }
 
-function InfoRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function InfoRow({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex items-center py-2 border-b border-border last:border-b-0">
       <div className="w-24 text-[11px] text-text-muted shrink-0">{label}</div>

@@ -102,6 +102,7 @@ async function getMemberDetails(userId: string) {
     select: {
       name: true, nameKana: true, email: true, phone: true,
       referredByStaff: true, referredByAgency: true,
+      scheme: true,
       membership: {
         select: {
           memberNumber: true, ipsStatus: true, paymentStatus: true,
@@ -290,7 +291,13 @@ export async function notifyIpsStatusChange({
     const details = await getMemberDetails(userId);
     const fromLabel = IPS_STATUS_LABELS[fromStatus] || fromStatus;
     const toLabel = IPS_STATUS_LABELS[toStatus] || toStatus;
+    // 流入スキームタグ（SCPP/MRT）。件名と本文の名前の右に付与する。
+    const schemeTag = details?.scheme === "MRT" ? "［MRT］" : "［SCPP］";
+    const schemeBadgeHtml = details?.scheme === "MRT"
+      ? `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(251,146,60,0.4);background:rgba(120,53,15,0.3);color:#fdba74;border-radius:3px;letter-spacing:1px;">MRT</span>`
+      : `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(30,58,138,0.3);color:#93c5fd;border-radius:3px;letter-spacing:1px;">SCPP</span>`;
     const memberDisplay = memberNumber ? `${memberName}（${memberNumber}）` : memberName;
+    const memberDisplayHtml = `${memberDisplay}${schemeBadgeHtml}`;
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
     let storageExpiry = "---";
@@ -302,7 +309,7 @@ export async function notifyIpsStatusChange({
 
     const highlightCard = buildIpsHighlightCard(toStatus, details);
 
-    const subject = `【BioVault】${memberName}様のステータスが更新されました（${toLabel}）`;
+    const subject = `【BioVault】${schemeTag}${memberName}様のステータスが更新されました（${toLabel}）`;
 
     const bodyText = `BioVault ステータス変更通知
 
@@ -350,7 +357,7 @@ BioVault 管理通知（自動送信）`;
     <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">STATUS UPDATE</p>
-      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${memberDisplay}</p>
+      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${memberDisplayHtml}</p>
       <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:16px;margin-bottom:16px;">
         <table style="width:100%;border-collapse:collapse;">
           <tr>
@@ -429,7 +436,13 @@ export async function notifyCultureFluidStatusChange({
     const details = await getMemberDetails(userId);
     const fromLabel = CF_STATUS_LABELS[fromStatus] || fromStatus;
     const toLabel = CF_STATUS_LABELS[toStatus] || toStatus;
+    // 流入スキームタグ
+    const schemeTag = details?.scheme === "MRT" ? "［MRT］" : "［SCPP］";
+    const schemeBadgeHtml = details?.scheme === "MRT"
+      ? `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(251,146,60,0.4);background:rgba(120,53,15,0.3);color:#fdba74;border-radius:3px;letter-spacing:1px;">MRT</span>`
+      : `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(30,58,138,0.3);color:#93c5fd;border-radius:3px;letter-spacing:1px;">SCPP</span>`;
     const memberDisplay = memberNumber ? `${memberName}（${memberNumber}）` : memberName;
+    const memberDisplayHtml = `${memberDisplay}${schemeBadgeHtml}`;
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
     const orders = await prisma.cultureFluidOrder.findMany({
@@ -446,7 +459,7 @@ export async function notifyCultureFluidStatusChange({
     const activeOrder = orders[0];
     const highlightCard = buildCfHighlightCard(toStatus, activeOrder);
 
-    const subject = `【BioVault】${memberName}様の培養上清液ステータスが更新されました（${toLabel}）`;
+    const subject = `【BioVault】${schemeTag}${memberName}様の培養上清液ステータスが更新されました（${toLabel}）`;
 
     const bodyText = `BioVault 培養上清液ステータス変更通知
 
@@ -492,7 +505,7 @@ BioVault 管理通知（自動送信）`;
     <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">CULTURE FLUID UPDATE</p>
-      <p style="font-size:16px;color:#ffffff;margin:0 0 8px;font-weight:500;">${memberDisplay}</p>
+      <p style="font-size:16px;color:#ffffff;margin:0 0 8px;font-weight:500;">${memberDisplayHtml}</p>
       <p style="font-size:13px;color:#A0A0B0;margin:0 0 20px;">${planLabel}</p>
       <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:16px;margin-bottom:16px;">
         <table style="width:100%;border-collapse:collapse;">
@@ -579,10 +592,10 @@ export async function notifyAgencyApplied({
       .split(",").map((e) => e.trim()).filter(Boolean);
     emails.push(...fixedNotifyEmails);
 
-    // 担当従業員
+    // 担当従業員 + 流入スキーム
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { referredByStaff: true },
+      select: { referredByStaff: true, scheme: true },
     });
     if (user?.referredByStaff) {
       const staff = await prisma.staff.findUnique({
@@ -597,7 +610,13 @@ export async function notifyAgencyApplied({
 
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
     const displayName = companyName ? `${companyName}（${agencyName}）` : agencyName;
-    const subject = `【BioVault】エージェント「${agencyName}」から新規申込がありました`;
+    // 流入スキームタグ
+    const schemeTag = user?.scheme === "MRT" ? "［MRT］" : "［SCPP］";
+    const schemeBadgeHtml = user?.scheme === "MRT"
+      ? `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(251,146,60,0.4);background:rgba(120,53,15,0.3);color:#fdba74;border-radius:3px;letter-spacing:1px;">MRT</span>`
+      : `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(30,58,138,0.3);color:#93c5fd;border-radius:3px;letter-spacing:1px;">SCPP</span>`;
+    const displayNameHtml = `${displayName}${schemeBadgeHtml}`;
+    const subject = `【BioVault】${schemeTag}エージェント「${agencyName}」から新規申込がありました`;
 
     const bodyText = `BioVault エージェント申込通知
 
@@ -634,7 +653,7 @@ BioVault 管理通知（自動送信）`;
     <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">AGENCY APPLICATION</p>
-      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${displayName}</p>
+      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${displayNameHtml}</p>
       <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:16px;margin-bottom:16px;">
         <table style="width:100%;border-collapse:collapse;">
           <tr>
@@ -714,7 +733,7 @@ export async function notifyAgencyIdIssued({
     // 担当従業員
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { referredByStaff: true },
+      select: { referredByStaff: true, scheme: true },
     });
     if (user?.referredByStaff) {
       const staff = await prisma.staff.findUnique({
@@ -729,7 +748,13 @@ export async function notifyAgencyIdIssued({
 
     const nowStr = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
     const displayName = companyName ? `${companyName}（${agencyName}）` : agencyName;
-    const subject = `【BioVault】エージェント「${agencyName}」のIDが発行されました`;
+    // 流入スキームタグ
+    const schemeTag = user?.scheme === "MRT" ? "［MRT］" : "［SCPP］";
+    const schemeBadgeHtml = user?.scheme === "MRT"
+      ? `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(251,146,60,0.4);background:rgba(120,53,15,0.3);color:#fdba74;border-radius:3px;letter-spacing:1px;">MRT</span>`
+      : `<span style="display:inline-block;font-size:10px;padding:2px 6px;margin-left:6px;border:1px solid rgba(59,130,246,0.4);background:rgba(30,58,138,0.3);color:#93c5fd;border-radius:3px;letter-spacing:1px;">SCPP</span>`;
+    const displayNameHtml = `${displayName}${schemeBadgeHtml}`;
+    const subject = `【BioVault】${schemeTag}エージェント「${agencyName}」のIDが発行されました`;
 
     const bodyText = `BioVault エージェントアカウント発行通知
 
@@ -768,7 +793,7 @@ BioVault 管理通知（自動送信）`;
     <!-- ステータス変更ヘッダー -->
     <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:24px;margin-bottom:16px;">
       <p style="font-size:11px;color:#BFA04B;letter-spacing:2px;margin:0 0 12px;">AGENCY ID ISSUED</p>
-      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${displayName}</p>
+      <p style="font-size:16px;color:#ffffff;margin:0 0 20px;font-weight:500;">${displayNameHtml}</p>
       <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:16px;margin-bottom:16px;">
         <table style="width:100%;border-collapse:collapse;">
           <tr>

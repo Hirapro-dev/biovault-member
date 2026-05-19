@@ -4,6 +4,7 @@ import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
 import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
 import TimelineView from "@/components/dashboard/TimelineView";
 import MonthlyBarChart from "@/components/dashboard/MonthlyBarChart";
+import { getSchemePathPrefix } from "@/lib/scheme";
 
 export default async function AgencyDashboardPage() {
   const user = await requireAgency();
@@ -37,7 +38,9 @@ export default async function AgencyDashboardPage() {
   const cfTotal = cfTimeline.reduce((sum, s) => sum + s.members.length, 0);
 
   const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
-  const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode || "---"}`;
+  // 代理店自身のスキーム（SCPP / MRT）に応じてURLプレフィックスを切り替える
+  const schemePrefix = getSchemePathPrefix(profile?.scheme);
+  const referralUrl = `${baseUrl}${schemePrefix}/form/app?ref=${profile?.agencyCode || "---"}`;
 
   return (
     <div>
@@ -48,7 +51,7 @@ export default async function AgencyDashboardPage() {
       {/* 月次グラフ */}
       <MonthlyBarChart
         apiPath="/api/agency/analytics/monthly-bar"
-        defaultMetric="totalSales"
+        defaultMetric="registrations"
         metricOptions={[
           { value: "totalSales", label: "累計売上" },
           { value: "registrations", label: "メンバーシップ登録人数" },

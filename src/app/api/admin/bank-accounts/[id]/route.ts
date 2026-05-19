@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { normalizeScheme } from "@/lib/scheme";
 
 // PATCH: 振込先口座の更新
 export async function PATCH(
@@ -16,14 +17,6 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json();
 
-  // デフォルト設定の場合、他の口座のデフォルトを解除
-  if (body.isDefault) {
-    await prisma.bankAccount.updateMany({
-      where: { isDefault: true, id: { not: id } },
-      data: { isDefault: false },
-    });
-  }
-
   const account = await prisma.bankAccount.update({
     where: { id },
     data: {
@@ -32,8 +25,8 @@ export async function PATCH(
       ...(body.accountType !== undefined && { accountType: body.accountType }),
       ...(body.accountNumber !== undefined && { accountNumber: body.accountNumber }),
       ...(body.accountName !== undefined && { accountName: body.accountName }),
-      ...(body.isDefault !== undefined && { isDefault: body.isDefault }),
       ...(body.isActive !== undefined && { isActive: body.isActive }),
+      ...(body.scheme !== undefined && { scheme: normalizeScheme(body.scheme) }),
     },
   });
 

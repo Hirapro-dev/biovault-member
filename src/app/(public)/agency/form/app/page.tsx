@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { detectSchemeFromPath } from "@/lib/scheme";
 
 export default function AgencyApplyPageWrapper() {
   return (
@@ -14,7 +15,10 @@ export default function AgencyApplyPageWrapper() {
 
 function AgencyApplyPage() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const staffCode = searchParams.get("staff") || "";
+  // 流入スキーム判定（/m/ 配下 → MRT、それ以外 → SCPP）
+  const scheme = detectSchemeFromPath(pathname);
   const [form, setForm] = useState({
     companyName: "",
     representativeName: "",
@@ -37,7 +41,7 @@ function AgencyApplyPage() {
       const res = await fetch("/api/agency/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, staffCode }),
+        body: JSON.stringify({ ...form, staffCode, scheme }),
       });
       if (!res.ok) {
         const d = await res.json();

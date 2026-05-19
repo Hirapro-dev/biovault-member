@@ -60,9 +60,12 @@ export async function POST(req: Request) {
     );
   }
 
-  // ステータス更新 + 施術回数を保存
+  // ステータス更新 + 施術回数を保存 + 申込日時を記録
+  // clinicBookingRequestedAt は会員が「予約申込」した瞬間を示すフラグで、
+  // 画面側で「申込前/申込後」を判別するために使用する。
   const updateData: Record<string, unknown> = {
     requestedSessionCount: count,
+    clinicBookingRequestedAt: new Date(),
   };
 
   // PRODUCING の場合は CLINIC_BOOKING に遷移、既に CLINIC_BOOKING の場合はステータス維持

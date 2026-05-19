@@ -3,9 +3,12 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import InformedConsentContent from "@/components/culture-fluid/InformedConsentContent";
+import { getCompany } from "@/lib/scheme";
 
 export default async function CultureFluidInformedConsentViewPage() {
   const sessionUser = await requireAuth();
+  const userRecord = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { scheme: true } });
+  const company = getCompany(userRecord?.scheme);
 
   // 同意済みの最新注文があるか確認（informedAgreedAt が設定されているもの）
   const latestOrder = await prisma.cultureFluidOrder.findFirst({
@@ -38,7 +41,7 @@ export default async function CultureFluidInformedConsentViewPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
-          <InformedConsentContent />
+          <InformedConsentContent companyName={company.name} />
         </article>
       </div>
     </div>

@@ -3,9 +3,13 @@ import prisma from "@/lib/prisma";
 import AgencySidebar from "@/components/agency/AgencySidebar";
 import AgencyMobileNav from "@/components/agency/AgencyMobileNav";
 import Header from "@/components/layout/Header";
+import { isEmailAllowedToDuplicate } from "@/lib/email-duplicate";
 
 export default async function AgencyLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAgency();
+
+  // EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみアカウント切替UIを表示
+  const showAccountSwitcher = isEmailAllowedToDuplicate(user.email || "");
 
   const profile = await prisma.agencyProfile.findUnique({
     where: { userId: user.id },
@@ -31,7 +35,7 @@ export default async function AgencyLayout({ children }: { children: React.React
         <AgencySidebar />
       </div>
       <div className="flex-1 overflow-y-auto relative w-full">
-        <AgencyMobileNav userName={user.name} userId={user.id} />
+        <AgencyMobileNav userName={user.name} userId={user.id} showAccountSwitcher={showAccountSwitcher} />
         <div className="hidden lg:block">
           <Header userName={user.name} isAdmin={false} />
         </div>

@@ -1,18 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { getCompany, getSchemePathPrefix, type SchemeKey } from "@/lib/scheme";
 
 /**
  * 代理店専用のiPS適合確認申込フォームURL表示。
  * 担当営業マンが代理店本人にURLを案内する用途を想定。
- * URL: /form/app?ref=<agencyCode>
+ *
+ * URL は代理店自身のスキーム（SCPP / MRT）に応じて切り替わる:
+ *   - SCPP: /form/app?ref=<agencyCode>
+ *   - MRT : /m/form/app?ref=<agencyCode>
+ *
  * このURLからの申込はAPI側のロジックにより自動的にこの代理店経由として記録される。
  */
-export default function AgencyReferralUrl({ agencyCode }: { agencyCode: string }) {
+export default function AgencyReferralUrl({
+  agencyCode,
+  scheme = "SCPP",
+}: {
+  agencyCode: string;
+  scheme?: SchemeKey;
+}) {
   const [copied, setCopied] = useState(false);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const formUrl = `${baseUrl}/form/app?ref=${agencyCode}`;
+  const schemePrefix = getSchemePathPrefix(scheme);
+  const company = getCompany(scheme);
+  const formUrl = `${baseUrl}${schemePrefix}/form/app?ref=${agencyCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(formUrl);
@@ -22,11 +35,16 @@ export default function AgencyReferralUrl({ agencyCode }: { agencyCode: string }
 
   return (
     <div className="bg-bg-secondary border border-border-gold rounded-md p-4 sm:p-6 mb-5">
-      <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-3 pb-3 border-b border-border">
-        代理店専用 iPS細胞作製適合確認申込フォーム
-      </h3>
+      <div className="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-border">
+        <h3 className="font-serif-jp text-sm text-gold tracking-wider">
+          代理店専用 iPS細胞作製適合確認申込フォーム
+        </h3>
+        <span className={`text-[10px] px-2 py-0.5 rounded-sm border ${company.badgeClass}`}>
+          {company.shortName}
+        </span>
+      </div>
       <p className="text-xs text-text-muted mb-3">
-        この代理店が顧客に案内するためのURLです。このURLからの申込は自動的に当該代理店経由として記録されます。
+        この代理店が顧客に案内するためのURLです。このURLからの申込は自動的に当該代理店経由として記録されます。契約主体は{company.name}となります。
       </p>
       <div className="flex gap-2">
         <input

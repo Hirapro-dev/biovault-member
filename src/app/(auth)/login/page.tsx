@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import GoldParticles from "@/components/login/GoldParticles";
 import GoldDivider from "@/components/ui/GoldDivider";
 
@@ -21,7 +21,6 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
 
   // テスター用：クエリパラメータからログインID・パスワードを自動入力
   useEffect(() => {
@@ -54,19 +53,21 @@ function LoginPage() {
     }
 
     // セッションからロールを取得してリダイレクト先を分岐
+    // フルリロードによる遷移にして、ミドルウェアと layout の再評価を確実に行う
+    // （router.push だとサーバーコンポーネント側のレンダリングが未完了のまま
+    //   遷移できず、メニューを開くまで真っ白に見える現象を回避する）
     const session = await getSession();
     const role = (session?.user as any)?.role;
 
+    let target = "/mypage";
     if (role === "ADMIN" || role === "SUPER_ADMIN") {
-      router.push("/admin");
+      target = "/admin";
     } else if (role === "AGENCY") {
-      router.push("/agency");
+      target = "/agency";
     } else if (role === "STAFF") {
-      router.push("/staff");
-    } else {
-      router.push("/mypage");
+      target = "/staff";
     }
-    router.refresh();
+    window.location.href = target;
   };
 
   return (

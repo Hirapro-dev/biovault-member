@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { getCompany } from "@/lib/scheme";
 
 // 会員用SVGアイコン（BottomNavと統一）
 function UserSvg() {
@@ -92,6 +94,9 @@ const adminNav = [
 
 export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userRole?: string }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  // 流入スキームに応じてコピーライト会社名を切り替える（管理画面はSCPP固定）
+  const copyrightCompany = isAdmin ? "SCPP Inc." : `${getCompany((session?.user as { scheme?: string } | undefined)?.scheme).shortName} Inc.`;
 
   return (
     <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
@@ -180,7 +185,7 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
 
       {/* フッター */}
       <div className="px-5 py-4 border-t border-border text-[10px] text-text-muted tracking-wider">
-        &copy; 2025 SCPP Inc.
+        &copy; 2025 {copyrightCompany}
       </div>
     </div>
   );

@@ -4,9 +4,11 @@ import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { getCompany } from "@/lib/scheme";
 
 export default function CultureFluidInformedConsentPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
@@ -93,7 +95,10 @@ export default function CultureFluidInformedConsentPage() {
           自家iPS培養上清液に関する説明書兼同意書へのご同意ありがとうございます。
         </p>
         <button
-          onClick={() => router.push("/culture-fluid")}
+          onClick={() => {
+            // フルリロードでサーバーコンポーネントを再評価させ、最新の同意状態を反映する
+            window.location.href = "/culture-fluid";
+          }}
           className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer"
         >
           マイページに戻る
@@ -131,7 +136,7 @@ export default function CultureFluidInformedConsentPage() {
       >
         <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5">
           <p>
-            私は、自家iPS培養上清液の精製およびこれを用いた施術に関して、株式会社SCPPより以下の説明を受け、その内容を理解したうえで同意します。
+            私は、自家iPS培養上清液の精製およびこれを用いた施術に関して、{company.name}より以下の説明を受け、その内容を理解したうえで同意します。
           </p>
           <p>
             また、点滴注入、局所注射その他これに準ずる施術の医学的適応、施術可否、施術方法、危険性その他の医学的事項については、別途、提携医療機関の医師その他の医療従事者から説明を受け、必要な同意を行うことを確認します。
@@ -139,7 +144,7 @@ export default function CultureFluidInformedConsentPage() {
 
           <Sec t="1. 本説明書の目的">
             <p>
-              本書は、私自身に由来する自家iPS細胞から培養上清液の精製を行い、当該培養上清液を用いた点滴注入、局所注射その他これに準ずる施術を受けるにあたり、株式会社SCPPから、サービスの内容、提供条件、留意点、限界その他の重要事項について説明を受け、これを理解したことを確認するためのものです。
+              本書は、私自身に由来する自家iPS細胞から培養上清液の精製を行い、当該培養上清液を用いた点滴注入、局所注射その他これに準ずる施術を受けるにあたり、{company.name}から、サービスの内容、提供条件、留意点、限界その他の重要事項について説明を受け、これを理解したことを確認するためのものです。
             </p>
             <p>
               本書に基づく同意は、自家iPS培養上清液の精製および施術提供に関するサービス上の説明を受けたうえで、その工程に進むことへの同意を確認するものであり、医学的適応、施術可否、具体的な施術方法、危険性その他の医学的事項に関する最終的な説明および同意を包含するものではありません。これらについては、必要に応じて別途、提携医療機関の医師その他の医療従事者による説明および同意が行われます。
@@ -161,12 +166,12 @@ export default function CultureFluidInformedConsentPage() {
             </p>
           </Sec>
 
-          <Sec t="3. 株式会社SCPPの立場について">
+          <Sec t={`3. ${company.name}の立場について`}>
             <p>
-              株式会社SCPPは、本サービスの運営主体であり、医療行為を直接行うものではありません。
+              {company.name}は、本サービスの運営主体であり、医療行為を直接行うものではありません。
             </p>
             <p>
-              株式会社SCPPが行うのは、サービスの案内、申込受付、連絡調整、提携先との運営上の連携、精製や施術に関する一般的説明その他これらに付随する業務です。
+              {company.name}が行うのは、サービスの案内、申込受付、連絡調整、提携先との運営上の連携、精製や施術に関する一般的説明その他これらに付随する業務です。
             </p>
             <p>
               これに対し、診察、問診、検査、医学的適応判断、施術可否の判断、投与方法の決定、点滴注入または局所注射等の施術、施術後の医学的対応その他の医療行為は、提携医療機関またはその所属医師その他の医療従事者が行います。
@@ -175,7 +180,7 @@ export default function CultureFluidInformedConsentPage() {
               また、自家iPS培養上清液の精製、加工、品質評価、保管、納品等の工程は、提携先機関または提携先医療機関その他の関係機関が、その責任と基準に基づいて行います。
             </p>
             <p>
-              私は、株式会社SCPPから受ける説明と、提携医療機関の医師その他の医療従事者から受ける医学的説明とは、役割と内容が異なることを理解しました。
+              私は、{company.name}から受ける説明と、提携医療機関の医師その他の医療従事者から受ける医学的説明とは、役割と内容が異なることを理解しました。
             </p>
           </Sec>
 
@@ -298,8 +303,8 @@ export default function CultureFluidInformedConsentPage() {
           <Sec t="11. 確認事項">
             <p>私は、少なくとも以下の事項を確認しました。</p>
             <ol className="list-decimal pl-5 space-y-1">
-              <li>本書は、株式会社SCPPから、自家iPS培養上清液の精製および施術提供に関するサービス上の説明を受け、理解したことを確認するための書面であること。</li>
-              <li>株式会社SCPPは医療行為を直接行う主体ではなく、診察、問診、医学的適応判断、施術判断および施術は提携医療機関等が行うこと。</li>
+              <li>本書は、{company.name}から、自家iPS培養上清液の精製および施術提供に関するサービス上の説明を受け、理解したことを確認するための書面であること。</li>
+              <li>{company.name}は医療行為を直接行う主体ではなく、診察、問診、医学的適応判断、施術判断および施術は提携医療機関等が行うこと。</li>
               <li>自家iPS培養上清液の精製および施術は、特定の治療効果、美容効果または身体改善効果を保証するものではないこと。</li>
               <li>精製または施術が行えない場合、予定どおり進まない場合または中止される場合があること。</li>
               <li>施術に伴い、局所反応、アレルギー反応、感染その他の有害事象が生じ得ること。</li>

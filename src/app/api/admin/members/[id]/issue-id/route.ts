@@ -78,9 +78,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // アカウント発行メール送信（ロール別にテンプレートを切り替え）
   try {
+    const scheme = user.scheme === "MRT" ? "MRT" : "SCPP";
     const emailContent = user.role === "AGENCY"
-      ? agencyAccountCreatedEmail(user.name, finalLoginId, password)
-      : accountCreatedEmail(user.name, finalLoginId, password);
+      ? agencyAccountCreatedEmail(user.name, finalLoginId, password, scheme)
+      : accountCreatedEmail(user.name, finalLoginId, password, scheme);
     await sendEmail({ to: user.email, ...emailContent });
   } catch (e) {
     console.error("Account created email failed:", e);

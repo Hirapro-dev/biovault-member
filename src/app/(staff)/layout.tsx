@@ -2,9 +2,13 @@ import { requireStaff } from "@/lib/auth-helpers";
 import StaffSidebar from "@/components/staff/StaffSidebar";
 import StaffMobileNav from "@/components/staff/StaffMobileNav";
 import Header from "@/components/layout/Header";
+import { isEmailAllowedToDuplicate } from "@/lib/email-duplicate";
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
+
+  // EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみアカウント切替UIを表示
+  const showAccountSwitcher = isEmailAllowedToDuplicate(user.email || "");
 
   return (
     <div className="flex min-h-screen bg-bg-primary text-text-primary font-sans">
@@ -12,7 +16,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         <StaffSidebar />
       </div>
       <div className="flex-1 overflow-y-auto relative w-full">
-        <StaffMobileNav userName={user.name} userId={user.id} />
+        <StaffMobileNav userName={user.name} userId={user.id} showAccountSwitcher={showAccountSwitcher} />
         <div className="hidden lg:block">
           <Header userName={user.name} isAdmin={false} />
         </div>

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import AccountSwitcher from "./AccountSwitcher";
+import { getCompany } from "@/lib/scheme";
 
 type NavItem = {
   href: string;
@@ -67,6 +68,7 @@ export default function MobileNav({
   userRole,
   userId,
   showOnAllScreens = false,
+  showAccountSwitcher = false,
   // 後方互換のため受け取るが、新メニュー構造では使用しない
   signedDocTypes: _signedDocTypes = [],
 }: {
@@ -76,6 +78,8 @@ export default function MobileNav({
   /** アカウント切替UI表示用。指定しない場合は切替UIを非表示 */
   userId?: string;
   showOnAllScreens?: boolean;
+  /** アカウント切替UIを表示するか（EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみ true） */
+  showAccountSwitcher?: boolean;
   signedDocTypes?: string[];
 }) {
   // ESLint未使用警告を避けるため明示的に void
@@ -83,6 +87,9 @@ export default function MobileNav({
 
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
+  // 流入スキームに応じてコピーライト会社名を切り替える（管理画面はSCPP固定）
+  const copyrightCompany = isAdmin ? "SCPP Inc." : `${getCompany((session?.user as { scheme?: string } | undefined)?.scheme).shortName} Inc.`;
 
   return (
     <>
@@ -227,22 +234,25 @@ export default function MobileNav({
                 </div>
               ))
             )}
-          </nav>
 
-          {/* アカウント切替 */}
-          {userId && userRole && (
-            <div className="px-4 py-3 border-t border-border">
-              <div className="text-[10px] text-text-muted tracking-[2px] mb-2 uppercase">
-                アカウント切り替え
+            {/* アカウント切替（EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみ、
+                「パスワード変更」の下のセクションに追加で表示する） */}
+            {showAccountSwitcher && userId && userRole && (
+              <div className="mt-5 pt-4 border-t border-border">
+                <div className="text-[10px] text-text-muted tracking-[2px] px-4 mb-2 uppercase">
+                  アカウント切り替え
+                </div>
+                <div className="px-4">
+                  <AccountSwitcher
+                    currentUserId={userId}
+                    currentUserName={userName}
+                    currentUserRole={userRole}
+                    onClose={() => setOpen(false)}
+                  />
+                </div>
               </div>
-              <AccountSwitcher
-                currentUserId={userId}
-                currentUserName={userName}
-                currentUserRole={userRole}
-                onClose={() => setOpen(false)}
-              />
-            </div>
-          )}
+            )}
+          </nav>
 
           {/* ログアウト */}
           <div className="p-4 border-t border-border">
@@ -263,7 +273,7 @@ export default function MobileNav({
               ログアウト
             </button>
             <div className="text-center text-[9px] text-text-muted mt-3 tracking-wider">
-              &copy; 2025 SCPP Inc.
+              &copy; 2025 {copyrightCompany}
             </div>
           </div>
         </div>

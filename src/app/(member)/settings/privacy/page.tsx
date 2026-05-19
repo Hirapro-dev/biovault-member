@@ -1,7 +1,9 @@
 import Link from "next/link";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCurrentCompany } from "@/lib/scheme-server";
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const company = await getCurrentCompany();
   return (
     <div className="max-w-[700px]">
       <div className="text-[11px] text-text-muted mb-5">
@@ -19,7 +21,7 @@ export default function PrivacyPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8">
         <article className="text-[13px] text-text-secondary leading-[2] space-y-6">
-          <p>株式会社SCPP（以下「当社」）は、BioVaultメンバーサイトの運営において、お客様の個人情報の保護を重要な責務と認識し、以下のとおりプライバシーポリシーを定めます。</p>
+          <p>{company.name}（以下「当社」）は、BioVaultメンバーサイトの運営において、お客様の個人情報の保護を重要な責務と認識し、以下のとおりプライバシーポリシーを定めます。</p>
 
           <Section title="1. 収集する個人情報">
             <p>当社は、サービス提供にあたり以下の個人情報を収集します。</p>
@@ -73,16 +75,16 @@ export default function PrivacyPage() {
           <Section title="8. お問い合わせ窓口">
             <p>個人情報の取り扱いに関するお問い合わせは、以下までご連絡ください。</p>
             <div className="mt-2 p-4 bg-bg-elevated rounded-md text-[12px] space-y-1">
-              <p>株式会社SCPP サポートデスク</p>
-              <p>〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F</p>
-              <p>TEL: 0120-788-839</p>
-              <p>MAIL: support@biovault.jp</p>
+              <p>{company.name} サポートデスク</p>
+              <p>〒{company.postalCode} {company.address}</p>
+              <p>TEL: {company.phone}</p>
+              <p>MAIL: {company.supportEmail}</p>
             </div>
           </Section>
 
           <div className="text-[11px] text-text-muted pt-4 border-t border-border">
             <p>制定日：2025年4月1日</p>
-            <p>株式会社SCPP</p>
+            <p>{company.name}</p>
           </div>
         </article>
       </div>

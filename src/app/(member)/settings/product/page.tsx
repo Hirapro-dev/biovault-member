@@ -1,7 +1,9 @@
 import Link from "next/link";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCurrentCompany } from "@/lib/scheme-server";
 
-export default function ProductDefinitionPage() {
+export default async function ProductDefinitionPage() {
+  const company = await getCurrentCompany();
   return (
     <div className="max-w-[700px]">
       <div className="text-[11px] text-text-muted mb-5">
@@ -161,7 +163,7 @@ export default function ProductDefinitionPage() {
           </Section>
 
           <div className="text-[11px] text-text-muted pt-4 border-t border-border">
-            <p>株式会社SCPP</p>
+            <p>{company.name}</p>
           </div>
         </article>
       </div>

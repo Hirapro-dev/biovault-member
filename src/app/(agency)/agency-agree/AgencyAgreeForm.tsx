@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCompany } from "@/lib/scheme";
 
 export default function AgencyAgreeForm() {
   const router = useRouter();
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -55,7 +57,7 @@ export default function AgencyAgreeForm() {
           <div className="text-center mb-4">
             <h2 className="text-base text-text-primary font-medium">BioVault代理店契約書</h2>
           </div>
-          <p>株式会社SCPP（以下「甲」という。）と代理店（以下「乙」という。）は、甲が提供するBioVaultメンバーシップサービスに関する販売協力業務について、以下のとおり代理店契約を締結する。</p>
+          <p>{company.name}（以下「甲」という。）と代理店（以下「乙」という。）は、甲が提供するBioVaultメンバーシップサービスに関する販売協力業務について、以下のとおり代理店契約を締結する。</p>
 
           <S t="第1条（目的）"><p>甲は乙に対し、甲が提供するBioVaultメンバーシップサービスその他甲が別途指定するサービス（以下「本サービス」という。）に関する販売協力業務を委託し、乙はこれを受託する。</p></S>
           <S t="第2条（契約期間）"><p>本契約の有効期間は1年間とする。期間満了日の30日前までに甲乙いずれからも書面または電磁的方法による更新拒絶の意思表示がないときは、本契約は同一条件でさらに1年間更新されるものとし、以後も同様とする。</p></S>
@@ -83,7 +85,7 @@ export default function AgencyAgreeForm() {
             <h2 className="text-base text-text-primary font-medium">遵守誓約書</h2>
           </div>
           <p>私は、甲が提供するBioVaultメンバーシップサービスその他甲が指定する関連サービスに関する販売協力業務を行うにあたり、以下の事項を確認し、これを遵守することを誓約します。</p>
-          <S t="基本認識"><p>私は、BioVaultメンバーシップサービスが、医療行為そのものの直接提供契約ではなく、会員制サービスであることを理解しています。株式会社SCPPが本サービスの運営主体であり、診察、問診、採血、医学的判断、施術その他の医療行為を直接行うものではないことを理解しています。</p></S>
+          <S t="基本認識"><p>私は、BioVaultメンバーシップサービスが、医療行為そのものの直接提供契約ではなく、会員制サービスであることを理解しています。{company.name}が本サービスの運営主体であり、診察、問診、採血、医学的判断、施術その他の医療行為を直接行うものではないことを理解しています。</p></S>
           <S t="連鎖販売・ネットワーク型勧誘の禁止"><p>私は、本サービスの販売協力が、一時代理店による販売協力であり、連鎖販売取引、マルチ商法、ネットワークビジネスその他これらに類する仕組みではないことを理解しています。自らの下に第三者を再代理店、下位代理店、二次代理店、組織員、傘下メンバーその他これらに類する立場として関与させません。</p></S>
           <S t="法令遵守"><p>私は、営業活動にあたり、特定商取引法、景品表示法、個人情報保護法、医療法、医薬品医療機器等法その他関連法令および甲の販売ルールを遵守します。</p></S>
           <S t="表現規制の遵守"><p>私は、本サービスについて、特定の治療効果、美容効果、若返り効果、疾病予防効果、安全性、有効性、研究成果、経済的利益または資産的価値を保証し、断定し、またはそれに類する表現を用いません。</p></S>
@@ -107,7 +109,7 @@ export default function AgencyAgreeForm() {
           <div className="text-center mb-4">
             <h2 className="text-base text-text-primary font-medium">秘密保持契約書（NDA）</h2>
           </div>
-          <p>株式会社SCPP（以下「甲」という。）と代理店（以下「乙」という。）は、甲が提供するBioVaultメンバーシップサービスその他関連事業に関し、乙が販売協力業務その他甲が認める業務を遂行するにあたり、相互に開示または知得する秘密情報の取扱いについて、以下のとおり秘密保持契約を締結する。</p>
+          <p>{company.name}（以下「甲」という。）と代理店（以下「乙」という。）は、甲が提供するBioVaultメンバーシップサービスその他関連事業に関し、乙が販売協力業務その他甲が認める業務を遂行するにあたり、相互に開示または知得する秘密情報の取扱いについて、以下のとおり秘密保持契約を締結する。</p>
           <S t="秘密情報の定義">
             <p>秘密情報には、次の各号を含む。</p>
             <ul className="list-none space-y-1 pl-2">

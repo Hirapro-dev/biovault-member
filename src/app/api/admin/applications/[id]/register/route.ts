@@ -102,7 +102,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   // アカウント発行メール送信
   try {
-    const emailContent = accountCreatedEmail(application.name, loginId, password);
+    const scheme = application.scheme === "MRT" ? "MRT" : "SCPP";
+    const emailContent = accountCreatedEmail(application.name, loginId, password, scheme);
     await sendEmail({
       to: application.email,
       ...emailContent,

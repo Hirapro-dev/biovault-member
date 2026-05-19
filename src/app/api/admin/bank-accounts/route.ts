@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { normalizeScheme } from "@/lib/scheme";
 
 // GET: 振込先口座一覧
 export async function GET() {
@@ -30,13 +31,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "銀行名・支店名・口座種別・口座番号・口座名義は必須です" }, { status: 400 });
   }
 
-  // デフォルト設定の場合、他の口座のデフォルトを解除
-  if (body.isDefault) {
-    await prisma.bankAccount.updateMany({
-      where: { isDefault: true },
-      data: { isDefault: false },
-    });
-  }
+  // 使用スキーム（SCPP / MRT）
+  const scheme = normalizeScheme(body.scheme);
 
   const account = await prisma.bankAccount.create({
     data: {
@@ -45,7 +41,7 @@ export async function POST(req: Request) {
       accountType: body.accountType,
       accountNumber: body.accountNumber,
       accountName: body.accountName,
-      isDefault: body.isDefault || false,
+      scheme,
     },
   });
 

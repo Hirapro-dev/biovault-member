@@ -6,6 +6,7 @@ import Badge from "@/components/ui/Badge";
 import MembersTable from "@/components/members/MembersTable";
 import { buildMemberRow, MEMBER_INCLUDE } from "@/lib/members-row";
 import AgencyReferralUrl from "./AgencyReferralUrl";
+import { getCompany } from "@/lib/scheme";
 
 export default async function StaffAgencyKartePage({ params }: { params: Promise<{ id: string }> }) {
   const { staffCode } = await requireStaff();
@@ -55,6 +56,17 @@ export default async function StaffAgencyKartePage({ params }: { params: Promise
           <Row label="電話番号" value={user.phone || "---"} />
           <Row label="住所" value={user.address || "---"} />
           <Row label="登録日" value={new Date(user.createdAt).toLocaleDateString("ja-JP")} />
+          <Row
+            label="流入経路"
+            value={
+              <span className="flex items-center gap-2">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-sm border ${getCompany(profile?.scheme).badgeClass}`}>
+                  {getCompany(profile?.scheme).shortName}
+                </span>
+                <span className="text-[12px] text-text-secondary">{getCompany(profile?.scheme).name}スキーム</span>
+              </span>
+            }
+          />
         </div>
 
         <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
@@ -80,7 +92,7 @@ export default async function StaffAgencyKartePage({ params }: { params: Promise
       </div>
 
       {/* 代理店専用 iPS適合確認申込フォームURL（営業マンから代理店本人に案内する用） */}
-      {profile?.agencyCode && <AgencyReferralUrl agencyCode={profile.agencyCode} />}
+      {profile?.agencyCode && <AgencyReferralUrl agencyCode={profile.agencyCode} scheme={profile.scheme === "MRT" ? "MRT" : "SCPP"} />}
 
       {/* 紹介顧客一覧 */}
       <div className="mt-6">
@@ -130,7 +142,7 @@ export default async function StaffAgencyKartePage({ params }: { params: Promise
   );
 }
 
-function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Row({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex items-center py-2 border-b border-border last:border-b-0">
       <div className="w-28 text-[11px] text-text-muted shrink-0">{label}</div>

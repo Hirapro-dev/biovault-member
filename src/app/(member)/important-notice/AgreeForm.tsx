@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCompany, type CompanyInfo } from "@/lib/scheme";
 
 export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; agreedAt: string | null }) {
   const router = useRouter();
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
+  const company = getCompany((session?.user as { scheme?: string } | undefined)?.scheme);
 
   // 書類1: 重要事項説明書兼確認書
   const scroll1Ref = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
           ref={scroll1Ref}
           className={`bg-bg-secondary border border-border rounded-md p-5 sm:p-7 ${isAgreed ? "" : "max-h-[50vh] overflow-y-auto"}`}
         >
-          <ImportantNoticeContent />
+          <ImportantNoticeContent company={company} />
         </div>
 
         {/* 書類1の同意チェック（未同意時のみ） */}
@@ -135,7 +137,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
           ref={scroll2Ref}
           className={`bg-bg-secondary border border-border rounded-md p-5 sm:p-7 ${isAgreed ? "" : "max-h-[50vh] overflow-y-auto"}`}
         >
-          <PrivacyConsentContent />
+          <PrivacyConsentContent company={company} />
         </div>
 
         {/* 書類2の同意チェック（未同意時のみ） */}
@@ -175,10 +177,11 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 }
 
 // ── 重要事項説明書の本文 ──
-function ImportantNoticeContent() {
+function ImportantNoticeContent({ company }: { company: CompanyInfo }) {
+  const companyName = company.name;
   return (
     <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-6">
-      <p>株式会社SCPP（以下「当社」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
+      <p>{companyName}（以下「当社」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の申込みに先立ち、申込者に対し、以下の重要事項を説明します。</p>
       <p>申込者は、本書の内容を十分に確認し、理解したうえで、本サービスの申込みおよび契約締結を行うものとします。</p>
 
       <S t="第1条（本書の目的）">
@@ -291,10 +294,11 @@ function ImportantNoticeContent() {
 }
 
 // ── 個人情報同意書の本文 ──
-function PrivacyConsentContent() {
+function PrivacyConsentContent({ company }: { company: CompanyInfo }) {
+  const companyName = company.name;
   return (
     <article className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-6">
-      <p>株式会社SCPP（以下「甲」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
+      <p>{companyName}（以下「甲」という。）は、BioVaultメンバーシップサービスならびにiPSサービス（以下「本サービス」という。）の提供にあたり、申込者兼メンバーシップ（以下「乙」という。）の個人情報、要配慮個人情報、個人遺伝情報その他本サービスに関連して取得する情報を、以下のとおり取り扱います。</p>
       <p>乙は、本書の内容を確認し、理解したうえで、必要な範囲について同意するものとします。</p>
 
       <S t="第1条（目的）">
@@ -398,10 +402,10 @@ function PrivacyConsentContent() {
       <S t="第16条（お問い合わせ窓口）">
         <p>本同意書に基づく個人情報等の取扱いに関するお問い合わせ、開示等請求、苦情または相談の窓口は、以下のとおりとします。</p>
         <div className="mt-2 p-4 bg-bg-elevated rounded-md text-[12px] space-y-1">
-          <p>株式会社SCPP サポートデスク</p>
-          <p>〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F</p>
-          <p>TEL: 0120-788-839</p>
-          <p>MAIL: support@biovault.jp</p>
+          <p>{companyName} サポートデスク</p>
+          <p>〒{company.postalCode} {company.address}</p>
+          <p>TEL: {company.phone}</p>
+          <p>MAIL: {company.supportEmail}</p>
         </div>
       </S>
     </article>

@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { sendEmail, agencyApplicationReceivedEmail } from "@/lib/mail";
 import { notifyAgencyApplied } from "@/lib/status-notification";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
+import { normalizeScheme } from "@/lib/scheme";
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +20,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: dupErr }, { status: 400 });
     }
 
+    // 流入スキーム（SCPP or MRT）
+    const scheme = normalizeScheme(body.scheme);
+
     // 申込データ保存
     const application = await prisma.agencyApplication.create({
       data: {
@@ -32,6 +36,7 @@ export async function POST(req: Request) {
         occupation: body.occupation || null,
         motivation: body.motivation || null,
         experience: body.experience || null,
+        scheme,
       },
     });
 
@@ -61,11 +66,13 @@ export async function POST(req: Request) {
         isIdIssued: false,
         mustChangePassword: true,
         referredByStaff: body.staffCode || null,
+        scheme,
         agencyProfile: {
           create: {
             agencyCode,
             companyName: body.companyName || null,
             representativeName: body.representativeName,
+            scheme,
           },
         },
       },
@@ -78,7 +85,7 @@ export async function POST(req: Request) {
 
     // 申込者本人への自動返信メール送信
     try {
-      const emailContent = agencyApplicationReceivedEmail(body.representativeName);
+      const emailContent = agencyApplicationReceivedEmail(body.representativeName, scheme);
       await sendEmail({ to: body.email, ...emailContent });
     } catch (e) {
       console.error("Agency apply auto-reply email failed:", e);

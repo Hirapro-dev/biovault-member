@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getCompany, type SchemeKey } from "@/lib/scheme";
 
 /**
  * 管理者用: 代理店の基本情報・契約情報を編集可能にする
@@ -31,6 +32,7 @@ export default function AgencyInfoEditor({
     bankAccountType: string;
     bankAccountNumber: string;
     bankAccountName: string;
+    scheme: SchemeKey;            // 流入スキーム（SCPP / MRT）
   };
 }) {
   const router = useRouter();
@@ -123,6 +125,17 @@ export default function AgencyInfoEditor({
             <Row label="メール" value={initial.email || "---"} />
             <Row label="電話番号" value={initial.phone || "---"} />
             <Row label="住所" value={initial.address || "---"} />
+            <Row
+              label="流入経路"
+              value={
+                <span className="flex items-center gap-2">
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-sm border ${getCompany(initial.scheme).badgeClass}`}>
+                    {getCompany(initial.scheme).shortName}
+                  </span>
+                  <span className="text-[12px] text-text-secondary">{getCompany(initial.scheme).name}スキーム</span>
+                </span>
+              }
+            />
           </div>
 
           <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
@@ -228,7 +241,7 @@ export default function AgencyInfoEditor({
   );
 }
 
-function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function Row({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex items-center py-2 border-b border-border last:border-b-0">
       <div className="w-28 text-[11px] text-text-muted shrink-0">{label}</div>

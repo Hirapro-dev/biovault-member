@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { SchemeKey } from "@/lib/scheme";
 
 // 口座種別の選択肢
 const ACCOUNT_TYPES = ["普通", "当座"];
+
+// 使用スキームの選択肢（株式会社SCPP / 株式会社MRT）
+const SCHEME_OPTIONS: { value: SchemeKey; label: string }[] = [
+  { value: "SCPP", label: "株式会社SCPP" },
+  { value: "MRT", label: "株式会社MRT" },
+];
 
 // ────────────────────────────────────────
 // 新規作成フォーム
@@ -18,7 +25,7 @@ export function BankAccountForm() {
   const [accountType, setAccountType] = useState("普通");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
-  const [isDefault, setIsDefault] = useState(false);
+  const [scheme, setScheme] = useState<SchemeKey>("SCPP");
 
   const handleSubmit = async () => {
     if (!bankName.trim() || !branchName.trim() || !accountNumber.trim() || !accountName.trim()) return;
@@ -33,7 +40,7 @@ export function BankAccountForm() {
           accountType,
           accountNumber: accountNumber.trim(),
           accountName: accountName.trim(),
-          isDefault,
+          scheme,
         }),
       });
       if (res.ok) {
@@ -42,7 +49,7 @@ export function BankAccountForm() {
         setAccountType("普通");
         setAccountNumber("");
         setAccountName("");
-        setIsDefault(false);
+        setScheme("SCPP");
         setOpen(false);
         router.refresh();
       }
@@ -86,11 +93,16 @@ export function BankAccountForm() {
             </div>
             <div>
               <label className="block text-[11px] text-text-muted mb-1">口座名義 <span className="text-status-danger">*</span></label>
-              <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="カ）バイオボルト" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
+              <input value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="カ)バイオボルト" className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
             </div>
-            <div className="flex items-center gap-2 pt-5">
-              <input type="checkbox" id="isDefault" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="w-4 h-4 accent-gold" />
-              <label htmlFor="isDefault" className="text-xs text-text-secondary cursor-pointer">デフォルト振込先に設定</label>
+            <div>
+              <label className="block text-[11px] text-text-muted mb-1">使用スキーム <span className="text-status-danger">*</span></label>
+              <select value={scheme} onChange={(e) => setScheme(e.target.value as SchemeKey)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold">
+                {SCHEME_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-text-muted mt-1">このスキームで登録された会員のみに表示されます</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -117,8 +129,8 @@ interface BankAccount {
   accountType: string;
   accountNumber: string;
   accountName: string;
-  isDefault: boolean;
   isActive: boolean;
+  scheme: SchemeKey;
 }
 
 export function BankAccountEditButton({ account }: { account: BankAccount }) {
@@ -130,7 +142,7 @@ export function BankAccountEditButton({ account }: { account: BankAccount }) {
   const [accountType, setAccountType] = useState(account.accountType);
   const [accountNumber, setAccountNumber] = useState(account.accountNumber);
   const [accountName, setAccountName] = useState(account.accountName);
-  const [isDefault, setIsDefault] = useState(account.isDefault);
+  const [scheme, setScheme] = useState<SchemeKey>(account.scheme);
 
   const handleUpdate = async () => {
     setSubmitting(true);
@@ -144,7 +156,7 @@ export function BankAccountEditButton({ account }: { account: BankAccount }) {
           accountType,
           accountNumber: accountNumber.trim(),
           accountName: accountName.trim(),
-          isDefault,
+          scheme,
         }),
       });
       if (res.ok) {
@@ -191,9 +203,13 @@ export function BankAccountEditButton({ account }: { account: BankAccount }) {
                 <label className="block text-[11px] text-text-muted mb-1">口座名義</label>
                 <input value={accountName} onChange={(e) => setAccountName(e.target.value)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold" />
               </div>
-              <div className="flex items-center gap-2 pt-5">
-                <input type="checkbox" id={`default-${account.id}`} checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="w-4 h-4 accent-gold" />
-                <label htmlFor={`default-${account.id}`} className="text-xs text-text-secondary cursor-pointer">デフォルト振込先</label>
+              <div>
+                <label className="block text-[11px] text-text-muted mb-1">使用スキーム</label>
+                <select value={scheme} onChange={(e) => setScheme(e.target.value as SchemeKey)} className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary outline-none focus:border-border-gold">
+                  {SCHEME_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex gap-2">

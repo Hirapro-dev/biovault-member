@@ -1,5 +1,6 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+import { getSchemePathPrefix } from "@/lib/scheme";
 
 /**
  * 代理店プロフィール画面（閲覧専用）
@@ -15,7 +16,9 @@ export default async function AgencyProfilePage() {
   if (!user) return null;
 
   const baseUrl = process.env.NEXTAUTH_URL || "https://member.biovault.jp";
-  const referralUrl = `${baseUrl}/form/app?ref=${profile?.agencyCode}`;
+  // 代理店自身のスキーム（SCPP / MRT）に応じてURLプレフィックスを切り替える
+  const schemePrefix = getSchemePathPrefix(profile?.scheme);
+  const referralUrl = `${baseUrl}${schemePrefix}/form/app?ref=${profile?.agencyCode}`;
 
   // 代理店本人の取り分のみ表示（合計報酬率や営業マン分配は本人に開示しない）
   const totalRate = profile?.commissionRate ?? 0;

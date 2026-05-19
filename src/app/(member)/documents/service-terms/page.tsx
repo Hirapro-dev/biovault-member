@@ -1,8 +1,12 @@
 import { requireAuth } from "@/lib/auth-helpers";
 import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { getCompany } from "@/lib/scheme";
 
 export default async function ServiceTermsPage() {
-  await requireAuth();
+  const sessionUser = await requireAuth();
+  const userRecord = await prisma.user.findUnique({ where: { id: sessionUser.id }, select: { scheme: true } });
+  const company = getCompany(userRecord?.scheme);
 
   return (
     <div className="max-w-[700px]">
@@ -18,18 +22,18 @@ export default async function ServiceTermsPage() {
 
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8">
         <article className="space-y-6 text-xs text-text-secondary leading-relaxed">
-          <ServiceTermsContent />
+          <ServiceTermsContent companyName={company.name} />
         </article>
       </div>
     </div>
   );
 }
 
-function ServiceTermsContent() {
+function ServiceTermsContent({ companyName }: { companyName: string }) {
   return (
     <>
       <TS t="第1条（目的）">
-        <p>本規約は、株式会社SCPP（以下「当社」という。）が運営するBioVaultメンバーシップ登録者限定の「iPSサービス」に適用される利用条件、資格、運営上の取扱いその他必要事項を定めるものです。</p>
+        <p>本規約は、{companyName}（以下「当社」という。）が運営するBioVaultメンバーシップ登録者限定の「iPSサービス」に適用される利用条件、資格、運営上の取扱いその他必要事項を定めるものです。</p>
       </TS>
       <TS t="第2条（定義）">
         <p>「本サービス」とは、当社が「BioVault」の名称で運営するメンバーシップ制サービスおよびiPSサービス、これに付随する一切のサービスをいいます。</p>

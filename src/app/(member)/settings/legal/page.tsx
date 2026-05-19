@@ -1,7 +1,9 @@
 import Link from "next/link";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { getCurrentCompany } from "@/lib/scheme-server";
 
-export default function LegalPage() {
+export default async function LegalPage() {
+  const company = await getCurrentCompany();
   return (
     <div className="max-w-[700px]">
       <div className="text-[11px] text-text-muted mb-5">
@@ -24,11 +26,11 @@ export default function LegalPage() {
           <section>
             <h2 className="text-sm text-text-primary font-medium mb-4">事業者情報</h2>
             <div className="space-y-0">
-              <LegalRow label="販売事業者名" value="株式会社SCPP" />
-              <LegalRow label="運営責任者" value="代表取締役" />
-              <LegalRow label="所在地" value="〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F" />
-              <LegalRow label="電話番号" value="0120-788-839" />
-              <LegalRow label="メールアドレス" value="info@biovault.jp" />
+              <LegalRow label="販売事業者名" value={company.name} />
+              <LegalRow label="運営責任者" value={company.representative || "代表取締役"} />
+              <LegalRow label="所在地" value={`〒${company.postalCode} ${company.address}`} />
+              <LegalRow label="電話番号" value={company.phone} />
+              <LegalRow label="メールアドレス" value={company.supportEmail} />
             </div>
           </section>
 
@@ -40,7 +42,7 @@ export default function LegalPage() {
               <LegalRow label="役務の内容" value="本サービスは、会員本人に由来する血液その他の試料に関し、提携医療機関、提携加工施設、提携保管施設その他提携先における自家iPS細胞の作製、加工、保管その他関連手続について、案内、申込管理、日程調整、情報提供および運営上の連携を受けることができるサービスです。" />
             </div>
             <div className="mt-3 text-xs text-text-muted space-y-1.5">
-              <p>株式会社SCPPは本サービスの運営主体であり、診察、問診、採血、医学的判断、施術その他の医療行為を直接提供するものではありません。これらは提携医療機関またはその所属医師等が行います。</p>
+              <p>{company.name}は本サービスの運営主体であり、診察、問診、採血、医学的判断、施術その他の医療行為を直接提供するものではありません。これらは提携医療機関またはその所属医師等が行います。</p>
               <p>また、細胞の作製、培養、品質評価、保管その他の技術的工程は提携先が行います。</p>
             </div>
           </section>
@@ -131,14 +133,14 @@ export default function LegalPage() {
           {/* 不良品・役務の不適合 */}
           <section>
             <h2 className="text-sm text-text-primary font-medium mb-4">不良品・役務の不適合について</h2>
-            <p className="text-xs text-text-muted">本サービスはメンバーシップサービスであり、採血、細胞作製、保管その他の実施可否については、提携医療機関または提携先による判断が介在します。株式会社SCPPは、本サービスに関連して、会員契約書その他適用文書に定める範囲で責任を負います。</p>
+            <p className="text-xs text-text-muted">本サービスはメンバーシップサービスであり、採血、細胞作製、保管その他の実施可否については、提携医療機関または提携先による判断が介在します。{company.name}は、本サービスに関連して、会員契約書その他適用文書に定める範囲で責任を負います。</p>
           </section>
 
           {/* 表現および役務提供に関する重要事項 */}
           <section>
             <h2 className="text-sm text-text-primary font-medium mb-4">表現および役務提供に関する重要事項</h2>
             <ul className="text-xs text-text-muted space-y-1.5 list-none">
-              <li>・株式会社SCPPは医療行為の実施主体ではありません。</li>
+              <li>・{company.name}は医療行為の実施主体ではありません。</li>
               <li>・診察、採血、医学的判断等は提携医療機関等が行います。</li>
               <li>・細胞作製、培養、品質評価、保管等は提携先が行います。</li>
               <li>・会員資格および本サービス利用上の地位は、第三者へ譲渡することはできません。</li>
@@ -172,15 +174,15 @@ export default function LegalPage() {
               <h2 className="text-sm text-gold font-bold">クーリング・オフ通知先</h2>
             </div>
             <div className="space-y-0">
-              <LegalRow label="事業者名" value="株式会社SCPP" />
-              <LegalRow label="所在地" value="〒107-6012 東京都港区赤坂1-12-32 アークヒルズ 森ビル12F" />
-              <LegalRow label="メールアドレス" value="info@biovault.jp" />
+              <LegalRow label="事業者名" value={company.name} />
+              <LegalRow label="所在地" value={`〒${company.postalCode} ${company.address}`} />
+              <LegalRow label="メールアドレス" value={company.supportEmail} />
             </div>
           </section>
 
           <div className="text-[11px] text-text-muted pt-4 border-t border-border">
             <p>制定日：2025年4月1日</p>
-            <p>株式会社SCPP</p>
+            <p>{company.name}</p>
           </div>
         </article>
       </div>

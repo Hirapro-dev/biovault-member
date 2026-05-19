@@ -98,6 +98,7 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
           bankAccountType: profile?.bankAccountType || "",
           bankAccountNumber: profile?.bankAccountNumber || "",
           bankAccountName: profile?.bankAccountName || "",
+          scheme: profile?.scheme === "MRT" ? "MRT" : "SCPP",
         }}
       />
 
@@ -129,7 +130,7 @@ export default async function AgencyKartePage({ params }: { params: Promise<{ id
       </div>
 
       {/* 紹介URL発行 */}
-      <ReferralUrlSection agencyCode={profile?.agencyCode || ""} />
+      <ReferralUrlSection agencyCode={profile?.agencyCode || ""} scheme={profile?.scheme === "MRT" ? "MRT" : "SCPP"} />
 
       {/* アカウント情報（ID発行・PW変更） */}
       <IssueIdSection userId={user.id} currentLoginId={user.loginId} nameKana={user.nameKana || ""} isIdIssued={user.isIdIssued} />

@@ -5,6 +5,10 @@ import { getTotalSessions, getRemainingSessions, isAllSessionsCompleted } from "
 import DocumentModal from "../mypage/DocumentModal";
 import ClinicBookingButton from "./ClinicBookingButton";
 
+// CFオーダーのステータスは API 更新後に即時反映する必要があるため
+// ページキャッシュを無効化し、毎回最新のデータでサーバーレンダリングする。
+export const dynamic = "force-dynamic";
+
 // フェーズ1：保管まで（4ステップ）
 const PHASE1_STEPS = [
   { key: "APPLIED", label: "iPS培養上清液の追加購入申込み", icon: "🧪" },
@@ -38,7 +42,12 @@ export default async function CultureFluidPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const defaultBank = await prisma.bankAccount.findFirst({ where: { isDefault: true, isActive: true } });
+  // 振込先情報（ユーザーのスキームに応じた有効な口座を取得）
+  const userScheme = (user as { scheme?: "SCPP" | "MRT" }).scheme === "MRT" ? "MRT" : "SCPP";
+  const defaultBank = await prisma.bankAccount.findFirst({
+    where: { isActive: true, scheme: userScheme },
+    orderBy: { createdAt: "desc" },
+  });
 
   // iPS細胞のステータスを取得（付属分の表示切り替え用）
   const membership = await prisma.membership.findUnique({
@@ -68,9 +77,13 @@ export default async function CultureFluidPage() {
   // フェーズ1のステップ完了判定
   // - PRODUCING（精製）: producedAt が設定されており、かつ精製完了日を過ぎている場合に完了
   // - STORAGE（管理保管）: 精製完了済み かつ expiresAt が設定されていれば完了
+  //
+  // 基本パック付属（iv_drip_1_included）は iPS細胞作製と同時に培養上清液も作られるため、
+  // フェーズ1（申込→入金→精製→保管）は最初から全て完了済みとして扱う。
   const now = new Date();
   const isPhase1StepDone = (key: string): boolean => {
     if (!activeOrder) return false;
+    if (activeOrder.planType === "iv_drip_1_included") return true;
     switch (key) {
       case "APPLIED":
         // 注文作成時点で完了
@@ -92,14 +105,27 @@ export default async function CultureFluidPage() {
   const isPhase1Complete = isPhase1StepDone("STORAGE");
 
   // フェーズ2のステップ完了判定
-  // 施術完了後に残回数がある場合は status が CLINIC_BOOKING に戻るため、
-  // その場合はフェーズ2のすべてのステップが未完了として扱う
+  // 各ステップは “対応するフィールドに値がセットされたら完了” として判定する。
+  //   - CLINIC_BOOKING:        clinicBookingRequestedAt がセット済み（会員が予約申込）
+  //   - INFORMED_AGREED:       informedAgreedAt がセット済み（会員が事前説明同意）
+  //   - RESERVATION_CONFIRMED: clinicDate がセット済み（管理者が予約日入力）
+  //   - COMPLETED:             completedAt がセット済み（管理者が施術完了入力）
+  // 施術完了後に残回数がある場合、これらフィールドは null にリセットされるため、
+  // 次サイクルではフェーズ2のすべてのステップが未完了として扱われる。
   const isPhase2StepDone = (key: string): boolean => {
     if (!activeOrder || !isPhase1Complete) return false;
-    const statusIdx = PHASE2_DB_ORDER.indexOf(activeOrder.status);
-    if (statusIdx === -1) return false;
-    const stepIdx = PHASE2_DB_ORDER.indexOf(key);
-    return stepIdx !== -1 && statusIdx >= stepIdx;
+    switch (key) {
+      case "CLINIC_BOOKING":
+        return !!activeOrder.clinicBookingRequestedAt;
+      case "INFORMED_AGREED":
+        return !!activeOrder.informedAgreedAt;
+      case "RESERVATION_CONFIRMED":
+        return !!activeOrder.clinicDate;
+      case "COMPLETED":
+        return !!activeOrder.completedAt || activeOrder.status === "COMPLETED";
+      default:
+        return false;
+    }
   };
 
   return (
@@ -183,31 +209,19 @@ export default async function CultureFluidPage() {
             次のステップ
           </h3>
 
-          {/* iPSサービス付属分: iPS保管前 → 作製待ち、iPS保管後 → 精製中 */}
-          {activeOrder.planType === "iv_drip_1_included" && !isPhase1Complete && (
-            isIpsStorageActive ? (
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6 text-center">
-                  <div className="text-4xl mb-3">⚗️</div>
-                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS培養上清液を精製中</div>
-                  <div className="text-xs text-text-muted leading-relaxed">iPS細胞の保管が開始されました。<br />培養上清液の精製が完了次第、次のステップへ進みます。</div>
-                  {activeOrder.producedAt && (
-                    <div className="mt-4 bg-bg-elevated border border-border rounded-md p-3">
-                      <div className="text-[11px] text-text-muted mb-1">精製完了予定</div>
-                      <div className="font-mono text-sm text-gold">{formatDate(activeOrder.producedAt)}</div>
-                    </div>
-                  )}
-                </div>
+          {/* iPSサービス付属分の特別表示:
+              iPS細胞作製と同時に培養上清液も作られる仕様のため、
+              フェーズ1は最初から完了済みとして扱う。
+              ただし iPS が保管中になるまでは「クリニック予約は不可」のため、
+              iPS未保管なら「iPS作製完了待ち」のカードを表示する。 */}
+          {activeOrder.planType === "iv_drip_1_included" && !isIpsStorageActive && (
+            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="p-5 sm:p-6 text-center">
+                <div className="text-4xl mb-3">🧬</div>
+                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
+                <div className="text-xs text-text-muted leading-relaxed">iPS細胞が保管状態になりましたら、<br />クリニック予約に進むことができます。</div>
               </div>
-            ) : (
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
-                <div className="p-5 sm:p-6 text-center">
-                  <div className="text-4xl mb-3">🧬</div>
-                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
-                  <div className="text-xs text-text-muted leading-relaxed">iPS細胞が保管状態になりましたら、<br />培養上清液の精製が自動的に開始されます。</div>
-                </div>
-              </div>
-            )
+            </div>
           )}
 
           {/* 入金待ち（付属分以外） */}
@@ -258,11 +272,19 @@ export default async function CultureFluidPage() {
             </div>
           )}
 
-          {/* クリニック予約（フェーズ1完了後のみ表示） */}
+          {/* クリニック予約（フェーズ1完了後のみ表示）
+              - 通常購入：精製済（PRODUCING / PAYMENT_CONFIRMED+producedAt）でクリニック予約に進む
+              - 基本パック付属（iv_drip_1_included）：iPS保管完了時に status=CLINIC_BOOKING になり、
+                初回（completedSessions===0）からそのまま予約申込できるようにする
+              - 追加施術（2回目以降）：CLINIC_BOOKING に戻った状態
+              ※ ClinicBookingButton で予約申込済み（clinicBookingRequestedAt 設定済み）の場合は
+                 「事前説明・同意」へ進むため、このカードは非表示にする。 */}
           {isPhase1Complete &&
+           !activeOrder.clinicBookingRequestedAt &&
            (activeOrder.status === "PRODUCING" ||
             (activeOrder.status === "PAYMENT_CONFIRMED" && !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now) ||
-            (activeOrder.status === "CLINIC_BOOKING" && completedSessions >= 1 && !activeOrder.informedAgreedAt && !activeOrder.clinicDate)) && (
+            (activeOrder.status === "CLINIC_BOOKING" && completedSessions >= 1 && !activeOrder.informedAgreedAt && !activeOrder.clinicDate) ||
+            (activeOrder.planType === "iv_drip_1_included" && activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && !activeOrder.clinicDate)) && (
             <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">

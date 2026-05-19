@@ -60,6 +60,7 @@ export const authOptions: NextAuthOptions = {
           hasAgreedTerms: user.hasAgreedTerms,
           agencyAgreed,
           staffCode,
+          scheme: user.scheme,
           rememberMe: credentials.rememberMe === "true",
         };
       },
@@ -81,6 +82,7 @@ export const authOptions: NextAuthOptions = {
         token.hasAgreedTerms = (user as any).hasAgreedTerms;
         token.agencyAgreed = (user as any).agencyAgreed;
         token.staffCode = (user as any).staffCode;
+        token.scheme = (user as any).scheme;
       }
       // セッション更新時にDBから最新の同意状態を取得
       if (trigger === "update") {
@@ -111,6 +113,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).hasAgreedTerms = token.hasAgreedTerms;
         (session.user as any).agencyAgreed = token.agencyAgreed;
         (session.user as any).staffCode = token.staffCode;
+        (session.user as any).scheme = token.scheme;
       }
       return session;
     },

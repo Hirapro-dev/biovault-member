@@ -2,7 +2,7 @@ import { requireStaff } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { IPS_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/types";
-import StaffFormUrl from "./StaffFormUrl";
+import StaffReferralUrlPanel from "@/components/staff/StaffReferralUrlPanel";
 import { getIpsTimeline, getCfTimeline } from "@/lib/dashboard-timeline";
 import DashboardTimelineTabs from "@/components/dashboard/DashboardTimelineTabs";
 import TimelineView from "@/components/dashboard/TimelineView";
@@ -41,7 +41,7 @@ export default async function StaffDashboardPage() {
       {/* 月次グラフ */}
       <MonthlyBarChart
         apiPath="/api/staff/analytics/monthly-bar"
-        defaultMetric="totalSales"
+        defaultMetric="registrations"
         metricOptions={[
           { value: "totalSales", label: "累計売上" },
           { value: "staffSales", label: "営業マン売上" },
@@ -51,9 +51,10 @@ export default async function StaffDashboardPage() {
         ]}
       />
 
-      {/* 専用申込フォームURL（iPS適合確認 + 代理店登録） */}
-      <StaffFormUrl staffCode={staffCode} type="ips" />
-      <StaffFormUrl staffCode={staffCode} type="agency" />
+      {/* 専用申込フォームURL（SCPP / MRT スキーム × iPS / 代理店 = 4種） */}
+      <div className="mb-6">
+        <StaffReferralUrlPanel staffCode={staffCode} />
+      </div>
 
       {/* ステータス別顧客数（タイムラインUI） */}
       <h3 className="font-serif-jp text-base font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">

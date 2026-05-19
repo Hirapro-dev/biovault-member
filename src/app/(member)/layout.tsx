@@ -7,6 +7,7 @@ import AccessLogger from "@/components/analytics/AccessLogger";
 import PushRegistrar from "@/components/analytics/PushRegistrar";
 import InstallGuide from "@/components/ui/InstallGuide";
 import TestControlPanel from "@/components/ui/TestControlPanel";
+import { isEmailAllowedToDuplicate } from "@/lib/email-duplicate";
 
 export default async function MemberLayout({
   children,
@@ -17,6 +18,10 @@ export default async function MemberLayout({
 
   // セッション（JWT）から同意状態を取得（DBクエリ不要）
   const hasAgreedTerms = (user as any).hasAgreedTerms !== false;
+
+  // EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみアカウント切替UIを表示
+  // （複数アカウントを保有する運用が想定されているユーザーのみ）
+  const showAccountSwitcher = isEmailAllowedToDuplicate(user.email || "");
 
   // 署名済み書類のタイプを取得（トグルメニュー用）
   const signedDocs = await prisma.document.findMany({
@@ -45,7 +50,7 @@ export default async function MemberLayout({
 
       <div className="flex-1 overflow-y-auto relative w-full">
         {/* ハンバーガーナビ（PC・モバイル共通サブメニュー） */}
-        <MobileNav isAdmin={false} userName={user.name} userRole={user.role} userId={user.id} signedDocTypes={signedDocTypes} showOnAllScreens />
+        <MobileNav isAdmin={false} userName={user.name} userRole={user.role} userId={user.id} signedDocTypes={signedDocTypes} showOnAllScreens showAccountSwitcher={showAccountSwitcher} />
 
         <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
           {children}

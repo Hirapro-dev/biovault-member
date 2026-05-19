@@ -1,14 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { getCompany, getSchemePathPrefix, type SchemeKey } from "@/lib/scheme";
 
-export default function ReferralUrlSection({ agencyCode }: { agencyCode: string }) {
+/**
+ * 管理画面・代理店カルテで表示する紹介URL発行セクション。
+ *
+ * URL は代理店自身のスキーム（SCPP / MRT）に応じて切り替わる:
+ *   - SCPP: /form/app?ref=<agencyCode>
+ *   - MRT : /m/form/app?ref=<agencyCode>
+ */
+export default function ReferralUrlSection({
+  agencyCode,
+  scheme = "SCPP",
+}: {
+  agencyCode: string;
+  scheme?: SchemeKey;
+}) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const schemePrefix = getSchemePathPrefix(scheme);
+  const company = getCompany(scheme);
 
-  // 代理店用URL
-  const agencyUrl = `${baseUrl}/form/app?ref=${agencyCode}`;
+  // 代理店用URL（代理店のスキームに応じてプレフィックスを付与）
+  const agencyUrl = `${baseUrl}${schemePrefix}/form/app?ref=${agencyCode}`;
 
   const handleCopy = async (url: string, label: string) => {
     try {
@@ -35,7 +51,12 @@ export default function ReferralUrlSection({ agencyCode }: { agencyCode: string 
 
       {/* 代理店用URL */}
       <div>
-        <label className="block text-[11px] text-text-muted mb-2">代理店紹介URL</label>
+        <div className="flex items-center gap-2 mb-2">
+          <label className="block text-[11px] text-text-muted">代理店紹介URL</label>
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-sm border ${company.badgeClass}`}>
+            {company.shortName}
+          </span>
+        </div>
         <div className="flex gap-2">
           <input value={agencyUrl} readOnly className="flex-1 px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-[12px] text-text-secondary font-mono outline-none" />
           <button
@@ -46,7 +67,7 @@ export default function ReferralUrlSection({ agencyCode }: { agencyCode: string 
           </button>
         </div>
         <p className="text-[10px] text-text-muted mt-1.5">
-          このURLから申込があった場合、自動的にこの代理店に紐付けされます
+          このURLから申込があった場合、自動的にこの代理店に紐付けされます。契約主体は{company.name}となります。
         </p>
       </div>
     </div>

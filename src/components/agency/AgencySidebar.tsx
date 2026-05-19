@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { getCompany } from "@/lib/scheme";
 
 const nav = [
   { href: "/agency", label: "ダッシュボード", icon: "◈" },
@@ -15,6 +17,9 @@ const nav = [
 
 export default function AgencySidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  // 代理店自身のスキームに応じてコピーライト会社名を切り替える
+  const copyrightCompany = `${getCompany((session?.user as { scheme?: string } | undefined)?.scheme).shortName} Inc.`;
   return (
     <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
       <Link href="/agency" className="block px-6 py-7 border-b border-border hover:opacity-80 transition-opacity">
@@ -34,7 +39,7 @@ export default function AgencySidebar() {
           );
         })}
       </nav>
-      <div className="px-5 py-4 border-t border-border text-[10px] text-text-muted tracking-wider">&copy; 2025 SCPP Inc.</div>
+      <div className="px-5 py-4 border-t border-border text-[10px] text-text-muted tracking-wider">&copy; 2025 {copyrightCompany}</div>
     </div>
   );
 }

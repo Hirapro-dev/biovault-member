@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import GoldDivider from "@/components/ui/GoldDivider";
+import { detectSchemeFromPath, getCompany } from "@/lib/scheme";
 
 export default function ApplyPageWrapper() {
   return (
@@ -14,9 +15,13 @@ export default function ApplyPageWrapper() {
 
 function ApplyPage() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const refCode = searchParams.get("ref") || "";
   const staffCode = searchParams.get("staff") || "";
   const repName = searchParams.get("rep") || "";
+  // 流入スキーム判定（/m/ 配下 → MRT、それ以外 → SCPP）
+  const scheme = detectSchemeFromPath(pathname);
+  const company = getCompany(scheme);
 
   const [step, setStepRaw] = useState(1);
   const setStep = (s: number) => {
@@ -79,7 +84,7 @@ function ApplyPage() {
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName }),
+        body: JSON.stringify({ ...form, referredByAgency: refCode, staffCode, salesRepName: repName, scheme }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -471,7 +476,7 @@ function ConfirmRow({ label, value }: { label: string; value: string }) {
 }
 
 // ── 利用規約スクロール同意ステップ ──
-function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void }) {
+function TermsStep({ onBack, onNext, companyName = "株式会社SCPP" }: { onBack: () => void; onNext: () => void; companyName?: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -496,7 +501,7 @@ function TermsStep({ onBack, onNext }: { onBack: () => void; onNext: () => void 
       <div ref={scrollRef} className="max-h-[50vh] overflow-y-auto bg-bg-elevated border border-border rounded-md p-4 sm:p-5 mb-4">
         <article className="text-xs text-text-secondary leading-[2] space-y-4">
           <TermsSection title="第1条（目的）">
-            <p>本規約は、株式会社SCPP（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p>
+            <p>本規約は、{companyName}（以下「当社」という。）が運営する「BioVault」に関し、会員に適用される利用条件、会員資格、運営上の取扱いその他必要事項を定めるものです。</p>
           </TermsSection>
           <TermsSection title="第2条（定義）">
             <p>「本サービス」とは、当社が「BioVault」の名称で運営するBioVaultメンバーシップサービスおよびこれに付随する一切のサービスをいいます。</p>

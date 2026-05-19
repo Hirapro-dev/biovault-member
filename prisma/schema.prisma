@@ -62,6 +62,10 @@ model User {
   referredByAgency String?                  // 紹介元エージェントコード
   referredByStaff  String?                  // 担当従業員コード (ST-0001形式)
 
+  // 流入スキーム（契約主体の会社識別）
+  // SCPP = 株式会社SCPP（既存）, MRT = 株式会社MRT（/m/ 配下からの流入）
+  scheme        Scheme    @default(SCPP)
+
   membership    Membership?
   notes         AdminNote[]
   documents     Document[]
@@ -82,6 +86,12 @@ enum Role {
   STAFF
   OPERATOR      // 処理者（ステータス更新・日付入力のみ）
   VIEWER        // 閲覧者（閲覧のみ）
+}
+
+// 流入スキーム（契約主体の会社識別）
+enum Scheme {
+  SCPP          // 株式会社SCPP（既存）
+  MRT           // 株式会社MRT（/m/ 配下からの流入）
 }
 
 // ────────────────────────────────────────
@@ -437,6 +447,9 @@ model Application {
   applicationDate   DateTime  @default(now())             // 申込日
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+
+  // 流入スキーム（契約主体の会社識別）
+  scheme            Scheme    @default(SCPP)
 }
 
 enum ApplicationStatus {
@@ -472,6 +485,9 @@ model AgencyProfile {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   commissions         AgencyCommission[]
+
+  // 流入スキーム（契約主体の会社識別）
+  scheme              Scheme    @default(SCPP)
 }
 
 // ────────────────────────────────────────
@@ -530,6 +546,9 @@ model AgencyApplication {
   adminNote           String?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
+
+  // 流入スキーム（契約主体の会社識別）
+  scheme              Scheme            @default(SCPP)
 }
 
 // ────────────────────────────────────────
@@ -631,10 +650,13 @@ model BankAccount {
   accountType   String   @default("普通")     // 口座種別（普通/当座）
   accountNumber String                        // 口座番号
   accountName   String                        // 口座名義
-  isDefault     Boolean  @default(false)      // デフォルト振込先
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // 使用スキーム（どちらの契約主体の振込先か）
+  // SCPP = 株式会社SCPPスキーム会員専用 / MRT = 株式会社MRTスキーム会員専用
+  scheme        Scheme   @default(SCPP)
 }
 
 // ────────────────────────────────────────
@@ -711,6 +733,10 @@ model CultureFluidOrder {
   // 施術回数管理（複数回施術プラン対応）
   completedSessions Int @default(0)               // 完了済み施術回数（合計回数はプランタイプから算出）
   sessionDates    String?                         // 各回の施術完了日（JSON配列: ["2026-05-28","2026-07-15",...]）
+
+  // クリニック予約申込日（会員が ClinicBookingButton を押した日時）
+  // status が CLINIC_BOOKING のまま再申込されないように、申込済みフラグとして利用する。
+  clinicBookingRequestedAt DateTime?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

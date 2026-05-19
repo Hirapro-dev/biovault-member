@@ -1,5 +1,9 @@
 import { requireAgency } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
+
+// 顧客カルテはステータス変更が頻繁に発生するため、毎回最新データでサーバーレンダリングする
+export const dynamic = "force-dynamic";
+
 import {
   IPS_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -110,7 +114,7 @@ export default async function AgencyCustomerKartePage({
           <AdminStatusTimeline userId={user.id} currentStatus={membership.ipsStatus} paymentStatus={membership.paymentStatus} signedDocTypes={user.documents.filter(d => d.status === "SIGNED").map(d => d.type)} hasAgreedTerms={user.hasAgreedTerms} isIdIssued={user.isIdIssued} currentLoginId={user.loginId} nameKana={user.nameKana || ""} clinicDate={membership.clinicDate ? membership.clinicDate.toISOString() : null} clinicName={membership.clinicName || null} clinicAddress={membership.clinicAddress || null} contractSignedAt={membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null} readOnly={true} />
         ) : <div className="text-text-muted text-sm py-4 text-center">会員権情報なし</div>}
         cultureFluidTab={
-          <CultureFluidStatusManager userId={user.id} orders={user.cultureFluidOrders.map(o => ({ id: o.id, planType: o.planType, planLabel: o.planLabel, totalAmount: o.totalAmount, status: o.status, paymentStatus: o.paymentStatus, paidAt: o.paidAt ? o.paidAt.toISOString() : null, producedAt: o.producedAt ? o.producedAt.toISOString() : null, expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null, clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null, clinicName: o.clinicName, clinicAddress: o.clinicAddress, clinicPhone: o.clinicPhone, cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null, informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null, completedAt: o.completedAt ? o.completedAt.toISOString() : null, completedSessions: o.completedSessions ?? 0, requestedSessionCount: o.requestedSessionCount ?? 1, sessionDates: o.sessionDates ?? null, createdAt: o.createdAt.toISOString() }))} readOnly={true} />
+          <CultureFluidStatusManager userId={user.id} orders={user.cultureFluidOrders.map(o => ({ id: o.id, planType: o.planType, planLabel: o.planLabel, totalAmount: o.totalAmount, status: o.status, paymentStatus: o.paymentStatus, paidAt: o.paidAt ? o.paidAt.toISOString() : null, producedAt: o.producedAt ? o.producedAt.toISOString() : null, expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null, clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null, clinicName: o.clinicName, clinicAddress: o.clinicAddress, clinicPhone: o.clinicPhone, cautionAgreedAt: o.cautionAgreedAt ? o.cautionAgreedAt.toISOString() : null, informedAgreedAt: o.informedAgreedAt ? o.informedAgreedAt.toISOString() : null, completedAt: o.completedAt ? o.completedAt.toISOString() : null, completedSessions: o.completedSessions ?? 0, requestedSessionCount: o.requestedSessionCount ?? 1, sessionDates: o.sessionDates ?? null, clinicBookingRequestedAt: o.clinicBookingRequestedAt ? o.clinicBookingRequestedAt.toISOString() : null, createdAt: o.createdAt.toISOString() }))} readOnly={true} />
         }
       />
 

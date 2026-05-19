@@ -14,6 +14,7 @@ type MemberSource = {
   isIdIssued: boolean;
   hasAgreedTerms: boolean;
   createdAt: Date;
+  scheme?: "SCPP" | "MRT" | null;
   membership: {
     memberNumber: string;
     ipsStatus: string;
@@ -109,6 +110,7 @@ export function buildMemberRow(member: MemberSource, assignedName: string): Memb
     name: member.name,
     memberNumber: member.membership?.memberNumber ?? null,
     assignedName,
+    scheme: (member.scheme === "MRT" ? "MRT" : "SCPP"),
     ipsStepKey,
     ipsCompleted,
     ipsExpired,

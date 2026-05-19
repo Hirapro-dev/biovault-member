@@ -65,6 +65,8 @@ interface Props {
     completedSessions: number;
     requestedSessionCount: number;
     sessionDates: string | null;
+    /** 会員が「クリニックの予約をする」ボタンを押した日時（申込済みフラグ） */
+    clinicBookingRequestedAt: string | null;
     createdAt: string;
   }[];
   /** 閲覧専用モード（従業員・代理店ページから利用される） */
@@ -127,7 +129,10 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
   }
 
   // フェーズ1のステップ完了判定
+  // 基本パック付属（iv_drip_1_included）の場合は iPS細胞作製と同時に培養上清液も作られるため、
+  // フェーズ1（申込→入金→精製→保管）は最初から全て完了済みとして扱う。
   const isPhase1StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
+    if (order.planType === "iv_drip_1_included") return true;
     switch (stepKey) {
       case "APPLIED":
         return true;
@@ -146,16 +151,33 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
   };
 
   // フェーズ2のステップ完了判定
-  // 施術完了後に残回数がある場合は status が CLINIC_BOOKING に戻るため、
-  // その場合はフェーズ2のすべてのステップが未完了として扱う
+  // 各ステップは “対応するフィールドに値がセットされたら完了” として判定する。
+  // この方式により、status の進行とフィールド更新タイミングのズレに依存せず、
+  // 「実際に何が起きたか」を直接表現できる。
+  //
+  //   - CLINIC_BOOKING:       clinicBookingRequestedAt がセット済み（会員が予約申込）
+  //   - INFORMED_AGREED:      informedAgreedAt がセット済み（会員が事前説明同意）
+  //   - RESERVATION_CONFIRMED: clinicDate がセット済み（管理者が予約日入力）
+  //   - COMPLETED:            completedAt がセット済み（管理者が施術完了入力）
+  //
+  // 施術完了後に残回数がある場合、上記フィールドは null にリセットされるため、
+  // 次サイクルではフェーズ2のすべてのステップが未完了として扱われる。
   const isPhase2StepDone = (order: Props["orders"][number], stepKey: string): boolean => {
     const isPhase1Complete = isPhase1StepDone(order, "STORAGE");
     if (!isPhase1Complete) return false;
 
-    const statusIdx = PHASE2_DB_ORDER.indexOf(order.status);
-    if (statusIdx === -1) return false;
-    const stepIdx = PHASE2_DB_ORDER.indexOf(stepKey);
-    return stepIdx !== -1 && statusIdx >= stepIdx;
+    switch (stepKey) {
+      case "CLINIC_BOOKING":
+        return !!order.clinicBookingRequestedAt;
+      case "INFORMED_AGREED":
+        return !!order.informedAgreedAt;
+      case "RESERVATION_CONFIRMED":
+        return !!order.clinicDate;
+      case "COMPLETED":
+        return !!order.completedAt || order.status === "COMPLETED";
+      default:
+        return false;
+    }
   };
 
   // PATCH APIを呼び出す共通関数

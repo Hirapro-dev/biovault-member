@@ -8,10 +8,10 @@ import MemberSearch from "./MemberSearch";
 export default async function AdminMembersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; scheme?: string }>;
 }) {
   await requireAdmin();
-  const { q, status } = await searchParams;
+  const { q, status, scheme } = await searchParams;
 
   const where: Record<string, unknown> = { role: "MEMBER" as const };
 
@@ -21,6 +21,11 @@ export default async function AdminMembersPage({
       { email: { contains: q } },
       { membership: { memberNumber: { contains: q } } },
     ];
+  }
+
+  // スキームでの絞り込み（SCPP / MRT）
+  if (scheme === "SCPP" || scheme === "MRT") {
+    where.scheme = scheme;
   }
 
   const members = await prisma.user.findMany({
@@ -75,7 +80,48 @@ export default async function AdminMembersPage({
         </div>
       </div>
 
+      {/* スキームフィルタ（SCPP / MRT） */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-[11px] text-text-muted mr-1">スキーム:</span>
+        <SchemeFilterLink current={scheme} value="" label="全て" q={q} status={status} />
+        <SchemeFilterLink current={scheme} value="SCPP" label="SCPPのみ" q={q} status={status} />
+        <SchemeFilterLink current={scheme} value="MRT" label="MRTのみ" q={q} status={status} />
+      </div>
+
       <MembersTable rows={rows} hrefPrefix="/admin/members" />
     </div>
+  );
+}
+
+function SchemeFilterLink({
+  current,
+  value,
+  label,
+  q,
+  status,
+}: {
+  current: string | undefined;
+  value: string;
+  label: string;
+  q: string | undefined;
+  status: string | undefined;
+}) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (status) params.set("status", status);
+  if (value) params.set("scheme", value);
+  const href = `/admin/members${params.toString() ? `?${params.toString()}` : ""}`;
+  const active = (current || "") === value;
+  return (
+    <Link
+      href={href}
+      className={`text-[11px] px-2.5 py-1 rounded-sm border transition-colors ${
+        active
+          ? "bg-gold/20 text-gold border-gold/60"
+          : "bg-bg-secondary text-text-muted border-border hover:border-gold/40"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
