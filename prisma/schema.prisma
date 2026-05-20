@@ -712,7 +712,8 @@ model CultureFluidOrder {
 
   // 精製・管理
   producedAt      DateTime?                       // 精製完了日
-  expiresAt       DateTime?                       // 管理期限（精製日+8ヶ月）
+  storageStartedAt DateTime?                      // 管理保管開始日（管理者が「管理保管」ステップで入力）
+  expiresAt       DateTime?                       // 管理期限（精製日+8ヶ月、storageStartedAt 入力時に確定）
 
   // クリニック情報
   clinicDate      DateTime?

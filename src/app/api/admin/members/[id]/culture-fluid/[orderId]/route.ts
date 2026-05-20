@@ -39,14 +39,31 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  // 精製完了日 → 管理期限自動算出（+8ヶ月）
+  // 精製完了日 → status を PRODUCING にする
+  // 管理期限（expiresAt）は「管理保管」ステップで保管開始日を入れた時に確定するため
+  // ここでは設定しない。「精製」と「管理保管」を別アクションとして分離する。
   if (body.producedAt) {
     const produced = new Date(body.producedAt);
-    const expires = new Date(produced);
-    expires.setMonth(expires.getMonth() + 8);
     updateData.producedAt = produced;
-    updateData.expiresAt = expires;
     updateData.status = "PRODUCING";
+  }
+
+  // 管理保管開始日 → expiresAt（精製日+8ヶ月）を確定
+  // 精製完了済み（producedAt あり）が前提。status は PRODUCING のまま維持し、
+  // フェーズ2解放は storageStartedAt の存在で判定する。
+  if (body.storageStartedAt) {
+    const producedAt = order.producedAt ? new Date(order.producedAt) : null;
+    if (!producedAt) {
+      return NextResponse.json(
+        { error: "精製完了日が未設定のため、管理保管開始日を入力できません" },
+        { status: 400 },
+      );
+    }
+    const storageStarted = new Date(body.storageStartedAt);
+    const expires = new Date(producedAt);
+    expires.setMonth(expires.getMonth() + 8);
+    updateData.storageStartedAt = storageStarted;
+    updateData.expiresAt = expires;
   }
 
   // クリニック情報

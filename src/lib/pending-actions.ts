@@ -154,7 +154,16 @@ export async function getPendingActions(
       if (cfOrder.status === "APPLIED") {
         cfActionItems.push({ ...base, action: "入金確認待ち", icon: "💰", color: "text-status-warning" });
       } else if (cfOrder.status === "PRODUCING") {
-        cfActionItems.push({ ...base, action: "精製・管理保管 手配中", icon: "⚗️", color: "text-gold" });
+        // 精製完了済み（producedAt あり）かつ保管未開始 → 「管理保管 開始入力待ち」
+        // 精製未完了 → 「精製 手配中」
+        if (cfOrder.producedAt && !cfOrder.storageStartedAt) {
+          cfActionItems.push({ ...base, action: "管理保管 開始入力待ち", icon: "🏛️", color: "text-status-warning" });
+        } else if (cfOrder.producedAt && cfOrder.storageStartedAt) {
+          // 保管完了済みだが status が PRODUCING のままは通常ないが、念のため
+          cfActionItems.push({ ...base, action: "管理保管 完了", icon: "🏛️", color: "text-gold" });
+        } else {
+          cfActionItems.push({ ...base, action: "精製 手配中", icon: "⚗️", color: "text-gold" });
+        }
       } else if (cfOrder.status === "CLINIC_BOOKING") {
         cfActionItems.push({ ...base, action: "クリニック予約手配", icon: "📅", color: "text-gold" });
       }

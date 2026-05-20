@@ -31,6 +31,7 @@ type MemberSource = {
   cultureFluidOrders: {
     status: string;
     producedAt: Date | null;
+    storageStartedAt: Date | null;
     expiresAt: Date | null;
     totalAmount: number;
     paymentStatus: string;
@@ -80,7 +81,7 @@ export function buildMemberRow(member: MemberSource, assignedName: string): Memb
   let cfCompleted = false;
   let cfExpired = false;
   if (latestCf) {
-    cfStepKey = latestCf.status === "PRODUCING" && latestCf.producedAt ? "CF_STORAGE" : latestCf.status;
+    cfStepKey = latestCf.status === "PRODUCING" && latestCf.storageStartedAt ? "CF_STORAGE" : latestCf.status;
     cfCompleted = latestCf.status === "COMPLETED";
     // 保管期限切れ判定：expiresAt を経過（保管中/施術完了に関わらず）
     if (latestCf.expiresAt && latestCf.expiresAt < now) {
@@ -134,6 +135,7 @@ export const MEMBER_INCLUDE = {
     select: {
       status: true,
       producedAt: true,
+      storageStartedAt: true,
       expiresAt: true,
       totalAmount: true,
       paymentStatus: true,

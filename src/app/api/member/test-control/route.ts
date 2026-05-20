@@ -133,7 +133,8 @@ export async function POST(req: Request) {
         if (incl && !incl.producedAt) {
           const pa = new Date(now); pa.setMonth(pa.getMonth() + 1);
           const ea = new Date(pa); ea.setMonth(ea.getMonth() + 8);
-          await prisma.cultureFluidOrder.update({ where: { id: incl.id }, data: { status: "PAYMENT_CONFIRMED", producedAt: pa, expiresAt: ea } });
+          // 付属分は精製と同時に保管も完了扱いとするため storageStartedAt も入れる
+          await prisma.cultureFluidOrder.update({ where: { id: incl.id }, data: { status: "PAYMENT_CONFIRMED", producedAt: pa, storageStartedAt: pa, expiresAt: ea } });
         }
         return NextResponse.json({ success: true, message: "iPS細胞保管 → 完了" });
     }
@@ -150,9 +151,18 @@ export async function POST(req: Request) {
         await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { paymentStatus: "COMPLETED", paidAt: now, status: "PAYMENT_CONFIRMED" } });
         return NextResponse.json({ success: true, message: "入金確認 → 完了" });
       case "CF_PRODUCING": {
-        const pa = new Date(now); const ea = new Date(pa); ea.setMonth(ea.getMonth() + 8);
-        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { producedAt: pa, expiresAt: ea, status: "PRODUCING" } });
+        // 精製のみ完了させる（管理保管は別ステップで進める仕様）
+        const pa = new Date(now);
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { producedAt: pa, status: "PRODUCING" } });
         return NextResponse.json({ success: true, message: "精製完了" });
+      }
+      case "CF_STORAGE": {
+        // 管理保管開始（精製済みが前提）
+        if (!order.producedAt) return NextResponse.json({ error: "先に精製完了が必要です" }, { status: 400 });
+        const ss = new Date(now);
+        const ea = new Date(order.producedAt); ea.setMonth(ea.getMonth() + 8);
+        await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { storageStartedAt: ss, expiresAt: ea } });
+        return NextResponse.json({ success: true, message: "管理保管開始" });
       }
       case "CF_CLINIC":
         await prisma.cultureFluidOrder.update({ where: { id: order.id }, data: { status: "CLINIC_BOOKING" } });
@@ -241,7 +251,7 @@ export async function POST(req: Request) {
         case "STORAGE_ACTIVE":
           await prisma.membership.update({ where: { userId }, data: { ipsStatus: "IPS_CREATING", storageStartAt: null } });
           const inclOrder = await prisma.cultureFluidOrder.findFirst({ where: { userId, planType: "iv_drip_1_included" } });
-          if (inclOrder) await prisma.cultureFluidOrder.update({ where: { id: inclOrder.id }, data: { status: "APPLIED", producedAt: null, expiresAt: null } });
+          if (inclOrder) await prisma.cultureFluidOrder.update({ where: { id: inclOrder.id }, data: { status: "APPLIED", producedAt: null, storageStartedAt: null, expiresAt: null } });
           break;
       }
       return NextResponse.json({ success: true, message: `「${lastDone.label}」を取消` });
@@ -259,8 +269,9 @@ export async function POST(req: Request) {
       const rollback: Record<string, unknown> = { status: prevStatus };
 
       if (prevStatus === "APPLIED") { rollback.paymentStatus = "PENDING"; rollback.paidAt = null; }
-      if (prevStatus === "PAYMENT_CONFIRMED") { rollback.producedAt = null; rollback.expiresAt = null; }
-      if (prevStatus === "PRODUCING") { /* CLINIC_BOOKING → PRODUCING */ }
+      if (prevStatus === "PAYMENT_CONFIRMED") { rollback.producedAt = null; rollback.storageStartedAt = null; rollback.expiresAt = null; }
+      // PRODUCING に戻る = 保管前の状態に戻すため storageStartedAt と expiresAt をクリア
+      if (prevStatus === "PRODUCING") { rollback.storageStartedAt = null; rollback.expiresAt = null; }
       if (prevStatus === "CLINIC_BOOKING") { rollback.informedAgreedAt = null; }
       if (prevStatus === "INFORMED_AGREED") { rollback.clinicDate = null; rollback.clinicName = null; rollback.clinicAddress = null; rollback.clinicPhone = null; }
 
@@ -280,7 +291,7 @@ async function buildSteps(userId: string) {
       hasAgreedTerms: true, isIdIssued: true,
       membership: { select: { ipsStatus: true, paymentStatus: true, contractSignedAt: true, clinicDate: true } },
       documents: { select: { type: true, status: true } },
-      cultureFluidOrders: { orderBy: { createdAt: "desc" as const }, take: 1, select: { status: true, paymentStatus: true, producedAt: true, expiresAt: true, clinicDate: true, informedAgreedAt: true, completedSessions: true, planType: true } },
+      cultureFluidOrders: { orderBy: { createdAt: "desc" as const }, take: 1, select: { status: true, paymentStatus: true, producedAt: true, storageStartedAt: true, expiresAt: true, clinicDate: true, informedAgreedAt: true, completedSessions: true, planType: true } },
     },
   });
 
@@ -310,6 +321,7 @@ async function buildSteps(userId: string) {
     { key: "CF_APPLIED", label: "追加購入申込", actor: "member" as const, done: true },
     { key: "CF_PAYMENT", label: "入金確認", actor: "admin" as const, done: order.paymentStatus === "COMPLETED" },
     { key: "CF_PRODUCING", label: "精製完了", actor: "admin" as const, done: !!order.producedAt },
+    { key: "CF_STORAGE", label: "管理保管開始", actor: "admin" as const, done: !!order.storageStartedAt },
     { key: "CF_CLINIC", label: "クリニック予約", actor: "member" as const, done: ["CLINIC_BOOKING", "INFORMED_AGREED", "RESERVATION_CONFIRMED", "COMPLETED"].includes(order.status) },
     { key: "CF_INFORMED", label: "事前説明・同意", actor: "member" as const, done: !!order.informedAgreedAt },
     { key: "CF_RESERVATION", label: "予約確定", actor: "admin" as const, done: ["RESERVATION_CONFIRMED", "COMPLETED"].includes(order.status) },

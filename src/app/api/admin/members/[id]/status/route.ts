@@ -134,6 +134,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           data: {
             status: "CLINIC_BOOKING",
             producedAt,
+            // 付属分は精製と同時に保管も完了扱いとするため storageStartedAt も入れる
+            storageStartedAt: producedAt,
             expiresAt,
           },
         })

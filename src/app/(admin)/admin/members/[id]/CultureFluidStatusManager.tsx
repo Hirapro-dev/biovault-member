@@ -18,7 +18,7 @@ const PHASE1_STEPS = [
   { key: "APPLIED", label: "追加購入申込み", adminToggle: false },
   { key: "PAYMENT_CONFIRMED", label: "入金確認", adminToggle: true },
   { key: "PRODUCING", label: "iPS培養上清液の精製", adminToggle: true },
-  { key: "STORAGE", label: "iPS培養上清液の管理保管", adminToggle: false },
+  { key: "STORAGE", label: "iPS培養上清液の管理保管", adminToggle: true },
 ] as const;
 
 // フェーズ2：施術まで（4ステップ）
@@ -54,6 +54,7 @@ interface Props {
     paymentStatus: string;
     paidAt: string | null;
     producedAt: string | null;
+    storageStartedAt: string | null;
     expiresAt: string | null;
     clinicDate: string | null;
     clinicName: string | null;
@@ -86,6 +87,11 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
   const [showProducedPopup, setShowProducedPopup] = useState<string | null>(null);
   const [inputProducedDate, setInputProducedDate] = useState("");
   const [producedLoading, setProducedLoading] = useState(false);
+
+  // 管理保管開始日入力ポップアップ
+  const [showStoragePopup, setShowStoragePopup] = useState<string | null>(null);
+  const [inputStorageDate, setInputStorageDate] = useState("");
+  const [storageLoading, setStorageLoading] = useState(false);
 
   // クリニック予約ポップアップ
   const [showClinicPopup, setShowClinicPopup] = useState<string | null>(null);
@@ -143,8 +149,10 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         // （予定日が未来でも、管理側で設定した時点で「精製完了予定」として完了表示）
         return !!order.producedAt;
       case "STORAGE":
-        // 精製完了日 かつ 管理期限が設定済み
-        return !!order.producedAt && !!order.expiresAt;
+        // 管理保管開始日が設定済みなら完了扱い
+        // 「精製完了」と「管理保管開始」を別アクションとして分離するため、
+        // producedAt だけで自動進行はしない（管理者の明示操作が必要）
+        return !!order.storageStartedAt;
       default:
         return false;
     }
@@ -208,6 +216,14 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
       case "PRODUCING": {
         setInputProducedDate(new Date().toISOString().split("T")[0]);
         setShowProducedPopup(order.id);
+        break;
+      }
+      case "STORAGE": {
+        // 管理保管開始日（デフォルト: 本日 or 精製完了日のいずれか遅い方）
+        const today = new Date().toISOString().split("T")[0];
+        const producedDate = order.producedAt ? order.producedAt.split("T")[0] : "";
+        setInputStorageDate(producedDate && producedDate > today ? producedDate : today);
+        setShowStoragePopup(order.id);
         break;
       }
       case "CLINIC_BOOKING": {
@@ -305,7 +321,7 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         </span>
 
         {/* 会員操作ヒント（非admin切替ステップ） */}
-        {!step.adminToggle && !done && step.key !== "APPLIED" && step.key !== "STORAGE" && (
+        {!step.adminToggle && !done && step.key !== "APPLIED" && (
           <span className="text-[10px] text-text-muted ml-auto">会員本人が操作</span>
         )}
 
@@ -323,10 +339,11 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
           </span>
         )}
 
-        {/* 管理期限の表示 */}
-        {step.key === "STORAGE" && order.expiresAt && (
+        {/* 管理保管開始日・管理期限の表示 */}
+        {step.key === "STORAGE" && order.storageStartedAt && (
           <span className="text-[10px] text-text-muted ml-auto font-mono">
-            期限: {formatDate(order.expiresAt)}
+            開始: {formatDate(order.storageStartedAt)}
+            {order.expiresAt && <> ／ 期限: {formatDate(order.expiresAt)}</>}
           </span>
         )}
 
@@ -470,8 +487,8 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowProducedPopup(null)}>
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">精製・管理保管</h3>
-            <p className="text-xs text-text-muted mb-5">精製日を入力してください。有効期限はサーバー側で自動計算されます。</p>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">iPS培養上清液の精製</h3>
+            <p className="text-xs text-text-muted mb-5">精製完了日を入力してください。管理保管は次のステップで個別に操作します。</p>
 
             <div className="space-y-4">
               <div>
@@ -514,6 +531,85 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                 </button>
               </div>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 管理保管開始日入力ポップアップ */}
+      {showStoragePopup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={() => setShowStoragePopup(null)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative bg-bg-secondary border border-border-gold rounded-xl p-6 sm:p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif-jp text-base text-gold tracking-wider mb-2">iPS培養上清液の管理保管</h3>
+            <p className="text-xs text-text-muted mb-5">管理保管を開始した日を入力してください。管理期限（精製完了日+8ヶ月）は自動計算されます。</p>
+
+            {(() => {
+              const popupOrder = orders.find(o => o.id === showStoragePopup);
+              const producedDateStr = popupOrder?.producedAt?.split("T")[0] || "";
+              // 期限プレビュー（精製完了日+8ヶ月）
+              const previewExpires = popupOrder?.producedAt
+                ? (() => {
+                    const d = new Date(popupOrder.producedAt as string);
+                    d.setMonth(d.getMonth() + 8);
+                    return d.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
+                  })()
+                : null;
+
+              return (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-text-secondary mb-1">管理保管開始日</label>
+                    <input
+                      type="date"
+                      value={inputStorageDate}
+                      onChange={(e) => setInputStorageDate(e.target.value)}
+                      min={producedDateStr}
+                      className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm font-mono outline-none"
+                    />
+                    {producedDateStr && (
+                      <p className="text-[10px] text-text-muted mt-1">精製完了日：{formatDate(producedDateStr)} 以降を指定してください</p>
+                    )}
+                  </div>
+                  {previewExpires && (
+                    <div className="bg-bg-elevated border border-border rounded-md p-3">
+                      <div className="text-[11px] text-text-muted mb-1">管理期限（自動計算）</div>
+                      <div className="font-mono text-sm text-gold">{previewExpires}</div>
+                      <div className="text-[10px] text-text-muted mt-0.5">精製完了日より8ヶ月</div>
+                    </div>
+                  )}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => setShowStoragePopup(null)}
+                      className="px-4 py-2.5 border border-border text-text-secondary rounded-sm text-sm cursor-pointer hover:border-border-gold transition-all"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!inputStorageDate || !showStoragePopup) return;
+                        setStorageLoading(true);
+                        try {
+                          await patchOrder(showStoragePopup, {
+                            storageStartedAt: new Date(inputStorageDate).toISOString(),
+                          });
+                          setShowStoragePopup(null);
+                          router.refresh();
+                        } catch {
+                          // エラーは静かに処理
+                        } finally {
+                          setStorageLoading(false);
+                        }
+                      }}
+                      disabled={storageLoading || !inputStorageDate}
+                      className="flex-1 py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50"
+                    >
+                      {storageLoading ? "更新中..." : "保管開始を確定する"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>,
         document.body

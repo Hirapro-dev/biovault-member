@@ -76,7 +76,8 @@ export default async function CultureFluidPage() {
 
   // フェーズ1のステップ完了判定
   // - PRODUCING（精製）: producedAt が設定されており、かつ精製完了日を過ぎている場合に完了
-  // - STORAGE（管理保管）: 精製完了済み かつ expiresAt が設定されていれば完了
+  // - STORAGE（管理保管）: 管理者が storageStartedAt を入力した時点で完了
+  //   （producedAt セット時に自動進行しない。「精製」と「管理保管」は別アクション）
   //
   // 基本パック付属（iv_drip_1_included）は iPS細胞作製と同時に培養上清液も作られるため、
   // フェーズ1（申込→入金→精製→保管）は最初から全て完了済みとして扱う。
@@ -94,8 +95,8 @@ export default async function CultureFluidPage() {
         // 精製完了日が設定済み かつ 現在日時を過ぎている
         return !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now;
       case "STORAGE":
-        // 精製完了済み かつ 管理期限が設定済み
-        return !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now && !!activeOrder.expiresAt;
+        // 管理者が保管開始日を入力した時点で完了
+        return !!activeOrder.storageStartedAt;
       default:
         return false;
     }
@@ -502,9 +503,11 @@ export default async function CultureFluidPage() {
                       精製完了：{formatDate(activeOrder.producedAt)}
                     </div>
                   )}
-                  {step.key === "STORAGE" && activeOrder?.expiresAt && (
+                  {step.key === "STORAGE" && (activeOrder?.storageStartedAt || activeOrder?.expiresAt) && (
                     <div className="text-[10px] text-text-muted font-mono mt-0.5">
-                      管理期限：{formatDate(activeOrder.expiresAt)}
+                      {activeOrder?.storageStartedAt && <>保管開始：{formatDate(activeOrder.storageStartedAt)}</>}
+                      {activeOrder?.storageStartedAt && activeOrder?.expiresAt && " ／ "}
+                      {activeOrder?.expiresAt && <>管理期限：{formatDate(activeOrder.expiresAt)}</>}
                     </div>
                   )}
                 </div>

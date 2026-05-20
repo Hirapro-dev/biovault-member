@@ -203,6 +203,7 @@ export async function getCfTimeline(
         select: {
           id: true, status: true, planType: true, planLabel: true, totalAmount: true,
           clinicDate: true, clinicName: true, updatedAt: true, producedAt: true,
+          storageStartedAt: true,
         },
       },
     },
@@ -221,12 +222,15 @@ export async function getCfTimeline(
       // 仮想的に CF_STORAGE 扱いとし、ダッシュボード上ではフェーズ2準備中（保管）として表示する。
       const isIncluded = order.planType === "iv_drip_1_included";
       const PHASE1_STATUSES = ["APPLIED", "PAYMENT_CONFIRMED", "PRODUCING"];
-      // PRODUCINGステータスで精製完了済み（producedAt有）→ CF_STORAGE に振り分け
+      // CF_STORAGE 振り分けは「保管開始済み」を基準にする。
+      // - PRODUCING かつ storageStartedAt あり → CF_STORAGE（保管中・管理者対応待ち）
+      // - PRODUCING かつ producedAt あり・storageStartedAt なし → PRODUCING のまま
+      //   （管理者が保管開始日を入力する操作が次の対応）
       let stepKey: string;
       if (isIncluded && PHASE1_STATUSES.includes(order.status)) {
         stepKey = "CF_STORAGE";
       } else {
-        stepKey = (order.status === "PRODUCING" && order.producedAt) ? "CF_STORAGE" : order.status;
+        stepKey = (order.status === "PRODUCING" && order.storageStartedAt) ? "CF_STORAGE" : order.status;
       }
       if (stepMap[stepKey]) {
         stepMap[stepKey].push({

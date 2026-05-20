@@ -246,6 +246,7 @@ export default async function MemberKartePage({
                 paymentStatus: o.paymentStatus,
                 paidAt: o.paidAt ? o.paidAt.toISOString() : null,
                 producedAt: o.producedAt ? o.producedAt.toISOString() : null,
+                storageStartedAt: o.storageStartedAt ? o.storageStartedAt.toISOString() : null,
                 expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
                 clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
                 clinicName: o.clinicName,
