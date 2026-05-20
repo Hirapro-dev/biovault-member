@@ -256,20 +256,6 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
     }
   };
 
-  // 「次の予約をする」アクション
-  const handleNextSession = async (orderId: string) => {
-    if (loadingOrder) return;
-    setLoadingOrder(orderId);
-    try {
-      await patchOrder(orderId, { action: "next_session" });
-      router.refresh();
-    } catch {
-      // エラーは静かに処理
-    } finally {
-      setLoadingOrder(null);
-    }
-  };
-
   // 金額フォーマット
   const formatAmount = (amount: number) =>
     new Intl.NumberFormat("ja-JP").format(amount);
@@ -379,16 +365,6 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
           const currentSession = Math.min((order.completedSessions ?? 0) + 1, totalSessions);
           const isPhase1Complete = isPhase1StepDone(order, "STORAGE");
           const allCompleted = isAllSessionsCompleted(order.planType, order.completedSessions ?? 0);
-          // 「次の予約をする」ボタン表示条件:
-          // - 全体は未完了（残回数あり）
-          // - status が CLINIC_BOOKING に戻っている
-          // - かつ 2回目以降（= completedSessions >= 1）
-          const showNextSessionButton =
-            !allCompleted &&
-            order.status === "CLINIC_BOOKING" &&
-            (order.completedSessions ?? 0) >= 1 &&
-            !order.clinicDate &&
-            !order.informedAgreedAt;
 
           return (
             <div key={order.id} className="bg-bg-secondary border border-border rounded-md overflow-hidden">
@@ -455,21 +431,6 @@ export default function CultureFluidStatusManager({ userId, orders, readOnly = f
                 {isPhase1Complete ? (
                   <>
                     {PHASE2_STEPS.map((step) => renderStep(order, step, 2, isLoading))}
-                    {/* 「次の予約をする」ボタン（2回目以降かつ未着手時） */}
-                    {showNextSessionButton && !readOnly && (
-                      <div className="pt-3 mt-2 border-t border-border">
-                        <button
-                          onClick={() => handleNextSession(order.id)}
-                          disabled={isLoading}
-                          className="w-full py-2.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-[13px] font-semibold tracking-wider cursor-pointer disabled:opacity-50 hover:opacity-90 transition-all"
-                        >
-                          {isLoading ? "処理中..." : `次の予約をする（${currentSession}回目）`}
-                        </button>
-                        <p className="text-[10px] text-text-muted mt-2 text-center">
-                          前回の施術が完了しました。次回の施術サイクルを開始します。
-                        </p>
-                      </div>
-                    )}
                   </>
                 ) : (
                   <div className="py-4 text-center text-xs text-text-muted">
