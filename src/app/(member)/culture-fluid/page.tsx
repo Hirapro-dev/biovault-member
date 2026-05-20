@@ -498,11 +498,6 @@ export default async function CultureFluidPage() {
                       {step.label}
                     </div>
                   )}
-                  {step.key === "PRODUCING" && activeOrder?.producedAt && (
-                    <div className="text-[10px] text-text-muted font-mono mt-0.5">
-                      精製完了：{formatDate(activeOrder.producedAt)}
-                    </div>
-                  )}
                   {step.key === "STORAGE" && (activeOrder?.storageStartedAt || activeOrder?.expiresAt) && (
                     <div className="text-[10px] text-text-muted font-mono mt-0.5">
                       {activeOrder?.storageStartedAt && <>保管開始：{formatDate(activeOrder.storageStartedAt)}</>}
