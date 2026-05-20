@@ -152,6 +152,15 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
         if (!step) continue;
         const willBeChecked = !isOriginallyDone(key);
 
+        // PAYMENT_CONFIRMED は通知より先に paidAmount を更新する必要がある
+        // （通知メール内の入金額表示が ¥0 → ¥8,800,000 に正しく出るようにするため）
+        if (key === "PAYMENT_CONFIRMED" && willBeChecked) {
+          await fetch(`/api/admin/members/${userId}`, {
+            method: "PATCH", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ membership: { paymentStatus: "COMPLETED", paidAmount: 8800000 } }),
+          });
+        }
+
         if (step.dbStatus && willBeChecked) {
           // dbStatusがあるステップ → status APIを呼ぶ（通知はAPI内で送信される）
           await fetch(`/api/admin/members/${userId}/status`, {
@@ -163,12 +172,6 @@ export default function AdminStatusTimeline({ userId, currentStatus, paymentStat
           await fetch(`/api/admin/members/${userId}/notify`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ stepLabel: step.label, stepKey: key }),
-          });
-        }
-        if (key === "PAYMENT_CONFIRMED" && willBeChecked) {
-          await fetch(`/api/admin/members/${userId}`, {
-            method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ membership: { paymentStatus: "COMPLETED", paidAmount: 8800000 } }),
           });
         }
       }
