@@ -111,6 +111,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       updateData.informedAgreedAt = null;
       // 会員側で再度「クリニックの予約をする」ボタンを表示するためにリセット
       updateData.clinicBookingRequestedAt = null;
+      // 「施術完了」ステップを未チェック状態に戻す（次サイクルでチェック可能にする）
+      // 履歴は sessionDates 配列に保存済みのためデータは失われない
+      updateData.completedAt = null;
     }
   }
 
