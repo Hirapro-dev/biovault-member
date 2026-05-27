@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
+// 申込者宛ての自動返信メール(applicationReceivedEmail / sendEmail)は要件により停止
 import { notifyIpsStatusChange } from "@/lib/status-notification";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
 import { normalizeScheme } from "@/lib/scheme";
@@ -218,13 +218,9 @@ export async function POST(req: Request) {
     data: { status: "REGISTERED", convertedUserId: user.id },
   });
 
-  // 7. 自動返信メール送信
-  try {
-    const emailContent = applicationReceivedEmail(body.name, scheme);
-    await sendEmail({ to: body.email, ...emailContent });
-  } catch (e) {
-    console.error("Auto-reply email failed:", e);
-  }
+  // 7. (旧)申込者宛ての自動返信メール送信
+  //    要件変更により、申込時点での自動返信メールは停止しました。
+  //    申込内容の DB 登録および管理者通知は引き続き実行されます。
 
   // 8. 管理者・担当従業員・担当代理店へ新規申込通知
   try {
