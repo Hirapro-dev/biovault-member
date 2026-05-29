@@ -13,10 +13,9 @@
 
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense, Fragment } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import V2Wrapper from "@/components/form-v2/V2Wrapper";
-import HeroSection from "@/components/form-v2/HeroSection";
 import V2Button from "@/components/form-v2/V2Button";
 import ThanksContent from "@/components/form-v2/ThanksContent";
 import { detectSchemeFromPath } from "@/lib/scheme";
@@ -211,7 +210,18 @@ function FormV2PreviewPage() {
   // ──────────────────────────────────────────────
   if (done) {
     return (
-      <V2Wrapper scheme={scheme}>
+      <V2Wrapper
+        scheme={scheme}
+        headerWide
+        title={
+          <>
+            <span className="v2-banner-title-line">iPS細胞作製の</span>
+            <span className="v2-banner-title-line">適合確認申込を</span>
+            <br className="v2-banner-title-br-pc" />
+            <span className="v2-banner-title-line">受け付けました</span>
+          </>
+        }
+      >
         <ThanksContent scheme={scheme} />
       </V2Wrapper>
     );
@@ -221,19 +231,27 @@ function FormV2PreviewPage() {
   // 申込フォーム本体
   // ──────────────────────────────────────────────
   return (
-    <V2Wrapper scheme={scheme}>
-      <HeroSection
-        title="iPS細胞作製の適合確認申込"
-        description="本申込みはBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。"
-        compact={step !== 1}
-      />
-
+    <V2Wrapper
+      scheme={scheme}
+      title={
+        <>
+          iPS細胞作製
+          <br />
+          適合確認申込
+        </>
+      }
+      heroImageSrc="/nagashima01.png"
+      compact={step !== 1}
+    >
       <div className="v2-form-container" style={{ paddingBottom: 48 }}>
         {error && <div className="v2-error">{error}</div>}
 
         {/* ──────────────── Step 1: 申込者情報 ──────────────── */}
         {step === 1 && (
-          <section className="v2-section">
+          <section className="v2-section v2-card-connected">
+            <p className="v2-section-lead">
+              本申込みはBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。
+            </p>
             <StepIndicator current={1} />
             <h2 className="v2-section-title">1. 申込者情報</h2>
 
@@ -387,7 +405,7 @@ function FormV2PreviewPage() {
 
         {/* ──────────────── Step 2: 事前確認事項(健康状態) ──────────────── */}
         {step === 2 && (
-          <section className="v2-section">
+          <section className="v2-section v2-card-connected">
             <StepIndicator current={2} />
             <h2 className="v2-section-title">2. 事前確認事項</h2>
 
@@ -476,7 +494,7 @@ function FormV2PreviewPage() {
 
         {/* ──────────────── Step 3: 申込情報取扱いに関する同意 ──────────────── */}
         {step === 3 && (
-          <section className="v2-section">
+          <section className="v2-section v2-card-connected">
             <StepIndicator current={3} />
             <h2 className="v2-section-title">3. 申込情報取扱いに関する同意</h2>
 
@@ -510,7 +528,7 @@ function FormV2PreviewPage() {
 
         {/* ──────────────── Step 4: 入力内容の確認 ──────────────── */}
         {step === 4 && (
-          <section className="v2-section">
+          <section className="v2-section v2-card-connected">
             <StepIndicator current={4} />
             <h2 className="v2-section-title">入力内容の確認</h2>
 
@@ -566,7 +584,7 @@ function StepIndicator({ current }: { current: number }) {
   return (
     <div className="v2-steps">
       {[1, 2, 3, 4].map((n, i) => (
-        <div key={n} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Fragment key={n}>
           <div
             className={`v2-step-dot ${
               current === n ? "is-active" : current > n ? "is-done" : ""
@@ -577,7 +595,7 @@ function StepIndicator({ current }: { current: number }) {
           {i < 3 && (
             <div className={`v2-step-line ${current > n ? "is-done" : ""}`} />
           )}
-        </div>
+        </Fragment>
       ))}
     </div>
   );

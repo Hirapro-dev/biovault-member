@@ -31,7 +31,18 @@ function Inner() {
   const pathname = usePathname();
   const scheme = detectSchemeFromPath(pathname);
   return (
-    <V2Wrapper scheme={scheme}>
+    <V2Wrapper
+      scheme={scheme}
+      headerWide
+      title={
+        <>
+          <span className="v2-banner-title-line">iPS細胞作製の</span>
+          <span className="v2-banner-title-line">適合確認申込を</span>
+          <br className="v2-banner-title-br-pc" />
+          <span className="v2-banner-title-line">受け付けました</span>
+        </>
+      }
+    >
       <ThanksContent scheme={scheme} />
     </V2Wrapper>
   );

@@ -61,8 +61,9 @@
   --v2-radius-sm: 4px;
   --v2-radius-md: 6px;
   --v2-radius-lg: 12px;
-  --v2-max-width: 960px;          /* PCコンテンツ最大幅(ヒーロー・フォーム共通) */
-  --v2-form-max-width: 960px;     /* フォーム部分の最大幅(ヒーローと揃える) */
+  --v2-max-width: 960px;          /* PCコンテンツ最大幅(バナー全体・サンクス等) */
+  --v2-form-max-width: 960px;     /* (旧)フォーム部分の最大幅 */
+  --v2-content-width: 640px;      /* バナー内容・導入文・フォームの最大幅(細め) */
 
   /* ── 基本適用(スコープ内のみ) ─────────────────── */
   background-color: var(--v2-bg-base);
@@ -88,7 +89,7 @@
  *  - SP: 画面幅に対して20pxの最小パディング
  */
 .v2-scope .v2-form-container {
-  max-width: var(--v2-form-max-width);
+  max-width: var(--v2-content-width);
   margin-inline: auto;
   padding-inline: 20px;
 }
@@ -99,42 +100,133 @@
   }
 }
 
-/* ヘッダー(黒帯 + ゴールド下線 / 2行ブランドロックアップ) */
+/* バナーヘッダー
+ *  - form-header-bg のダークなウェーブ背景を全幅に敷く(PC/SP で画像切替)
+ *  - 左上: ブランドロックアップ / 中央左: タイトル + 区切り線 / 右: 人物画像
+ */
 .v2-scope .v2-header {
-  background-color: var(--v2-bg-dark);
+  position: relative;
+  background-color: #0a1733;
+  background-image: url("/form-header-bg-sp.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: var(--v2-text-on-dark);
-  padding: 16px 32px;
-  border-bottom: 1px solid;
-  border-image: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--v2-gold-dark) 15%,
-      var(--v2-gold-light) 50%,
-      var(--v2-gold-dark) 85%,
-      transparent 100%
-    )
-    1;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .v2-scope .v2-header {
-    padding: 16px 100px;
+    background-image: url("/form-header-bg.png");
   }
 }
 
+/* バナー背景動画(全面カバー・最背面。poster/背景PNGがフォールバック)
+ *  - 彩度を上げ、中央基準で拡大して鮮やかに見せる */
+.v2-scope .v2-header-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.92;
+  /* 中央寄せで拡大(SPは大きめ / PCは控えめ) / 彩度・コントラストを上げて鮮やかに */
+  transform: scale(1.8);
+  transform-origin: center;
+  filter: saturate(1.6) contrast(1.14);
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-video {
+    transform: scale(1);
+  }
+}
+
+/* ページ配色(パープル→ネイビー→シアン)に合わせたやんわりグラデーションの
+ *  オーバーレイ。動画を抑えつつ白文字の可読性も確保
+ *  (動画より前面 / コンテンツより背面) */
+.v2-scope .v2-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    rgba(91, 0, 255, 0.65) 0%,
+    rgba(67, 60, 220, 0.55) 48%,
+    rgba(92, 225, 230, 0.55) 100%
+  );
+}
+
 .v2-scope .v2-header-inner {
-  max-width: var(--v2-max-width);
+  position: relative;
+  z-index: 2;
+  max-width: var(--v2-content-width);
   margin-inline: auto;
+  padding: 22px 20px 24px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-inner {
+    padding: 32px 20px 36px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .v2-scope .v2-header-inner {
+    padding-inline: 0;
+  }
+}
+
+/* バナー内容を広め(--v2-max-width)にする(サンクス画面など本文が広いページ用) */
+.v2-scope .v2-header.is-wide .v2-header-inner {
+  max-width: var(--v2-max-width);
+}
+
+/* 人物画像がある場合はバナーの高さを確保 */
+.v2-scope .v2-header.has-hero .v2-header-inner {
+  min-height: 215px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header.has-hero .v2-header-inner {
+    min-height: 350px;
+  }
+}
+
+/* 人物画像と重ならないようテキスト幅を制限 */
+.v2-scope .v2-header.has-hero .v2-header-text {
+  max-width: 62%;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header.has-hero .v2-header-text {
+    max-width: 64%;
+  }
+}
+
+.v2-scope .v2-header-logo {
+  margin-bottom: 14px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-logo {
+    margin-bottom: 22px;
+  }
 }
 
 .v2-scope .v2-header-brand {
   font-family: "Cormorant Garamond", "Noto Serif JP", serif;
-  font-size: 28px;
-  line-height: 1;
+  font-size: 22px;
+  line-height: 1.1;
   letter-spacing: 0.04em;
   font-weight: 500;
   color: var(--v2-text-on-dark);
@@ -142,169 +234,154 @@
 
 @media (min-width: 768px) {
   .v2-scope .v2-header-brand {
-    font-size: 40px;
+    font-size: 32px;
   }
 }
 
 .v2-scope .v2-header-tagline {
   font-family: "Cormorant Garamond", "Noto Serif JP", serif;
-  font-size: 16px;
-  letter-spacing: 0.2em;
+  font-size: 13px;
+  letter-spacing: 0.18em;
   font-weight: 400;
   color: var(--v2-text-on-dark);
   text-transform: none;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 @media (min-width: 768px) {
   .v2-scope .v2-header-tagline {
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 0.2em;
   }
 }
 
-/* ヒーローセクション
- *  - コンテンツ最大幅 1080px(添付デザインに準拠)
- *  - PCではテキストエリアに対し、人物画像をヒーロー右端の絶対配置で重ねる
- *  - 画像はヘッダー直下から食い込み配置(添付デザインに忠実)
- *  - モバイルは縦積み・中央配置
- */
-.v2-scope .v2-hero {
-  /* main の背景画像(bg.png)を透かすため背景色は指定しない */
-  padding: 32px 20px 0;
+/* バナー内ページタイトル(白・太ゴシック) */
+.v2-scope .v2-banner-title {
+  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  font-size: 30px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin: 0;
+  /* 鮮やかな動画上でも白文字が沈まないよう軽い影 */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 
-.v2-scope .v2-hero-grid {
-  max-width: var(--v2-max-width);
-  margin-inline: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  align-items: start;
-  position: relative;
-}
-
-@media (min-width: 768px) {
-  .v2-scope .v2-hero {
-    padding: 56px 0 24px;
-  }
-  .v2-scope .v2-hero-grid {
-    grid-template-columns: 1fr;
-    gap: 0;
-    padding-inline: 40px;
-    min-height: 360px;
-  }
-}
-
-@media (min-width: 1120px) {
-  .v2-scope .v2-hero-grid {
-    padding-inline: 0;
-  }
-}
-
-.v2-scope .v2-hero-title {
-  font-family: "Noto Serif JP", serif;
+/* 長い見出し(サンクス等・span複数行)は小さめ + 字間を詰めて行に収める */
+.v2-scope .v2-banner-title:has(.v2-banner-title-line) {
   font-size: 24px;
-  line-height: 1.5;
-  font-weight: 600;
-  color: #F08301;
-  letter-spacing: 0.05em;
-  margin-top: 16px;
-  margin-bottom: 20px;
-  text-align: center;
+  letter-spacing: 0.01em;
 }
 
 @media (min-width: 768px) {
-  .v2-scope .v2-hero-title {
-    font-size: 42px;
-    text-align: left;
-    line-height: 1.45;
-    margin-top: 32px;
-    max-width: 620px;   /* 画像と重ならない範囲で改行 */
+  .v2-scope .v2-banner-title {
+    font-size: 46px;
+    line-height: 1.22;
+  }
+  /* 長い見出し(サンクス等・span複数行)はPCで少し小さめ */
+  .v2-scope .v2-banner-title:has(.v2-banner-title-line) {
+    font-size: 36px;
   }
 }
 
-.v2-scope .v2-hero-desc {
-  font-size: 16px;
-  line-height: 1.95;
-  color: var(--v2-text-primary);
+/* バナータイトルの改行制御(長い見出し用)
+ *  - span は inline、PC/SP とも br で2行に揃える */
+.v2-scope .v2-banner-title-line {
+  display: inline;
 }
 
-@media (min-width: 768px) {
-  .v2-scope .v2-hero-desc {
-    font-size: 16px;
-    max-width: 620px;   /* 右側の人物画像と重ならない幅で確保 */
-  }
+.v2-scope .v2-banner-title-br-pc {
+  display: inline;
 }
 
-/* ヒーロー画像
- *  - PC: ヒーローの右端からヘッダー直下まで上げて配置
- *        画像下端はフォームBoxの上部に食い込ませる
- *  - SP: 縦積みで中央配置
- *  - z-index: -1 でフォームBoxの背後に潜らせず、Boxが上に重なる見た目
- */
-.v2-scope .v2-hero-image-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-@media (min-width: 768px) {
-  .v2-scope .v2-hero-image-wrap {
-    position: absolute;
-    top: -56px;       /* ヒーローの padding-top と相殺してヘッダー直下まで上げる */
-    right: 0;
-    bottom: -80px;    /* 画像下端をフォームBoxの上に食い込ませる */
-    align-items: flex-start;
-    z-index: 0;       /* フォームBoxよりは下、ヒーローテキストとは同階層 */
-    pointer-events: none;  /* 装飾画像のため下のクリックを通す */
-  }
-}
-
-@media (min-width: 1120px) {
-  .v2-scope .v2-hero-image-wrap {
-    right: 0;
-  }
-}
-
-.v2-scope .v2-hero-image {
+/* タイトル下の区切り線 */
+.v2-scope .v2-banner-line {
+  display: block;
+  height: 1px;
   width: 100%;
-  max-width: 300px;
-  height: auto;
-  object-fit: contain;
-  object-position: top center;
+  max-width: 280px;
+  margin-top: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.12)
+  );
 }
 
 @media (min-width: 768px) {
-  .v2-scope .v2-hero-image {
-    max-width: 320px;
-    height: 100%;
-    object-fit: contain;
-    object-position: top right;
+  .v2-scope .v2-banner-line {
+    max-width: 440px;
+    margin-top: 22px;
   }
 }
 
-/* ヒーロー簡略表示モード(.is-compact)
- *  - モバイル幅では、タイトルだけ残し説明文・人物画像を非表示にして
- *    フォーム本体をすぐに見せる(Step2以降のような場面で使用)
- *  - PC幅(>=768px)では無視され、常にフル表示
- *  - 画像を消すと最初のフォームBoxの食い込み(-180px)が悪さするので、
- *    :has() で兄弟のヒーローが is-compact のときだけ食い込みを 0 に上書き
- */
-@media (max-width: 767px) {
-  .v2-scope .v2-hero.is-compact {
-    padding: 16px 20px 8px;
+/* バナー右の人物画像(絶対配置・下端揃え) */
+.v2-scope .v2-header-image {
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  width: 180px;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-image {
+    right: 12px;
+    width: 300px;
   }
-  .v2-scope .v2-hero.is-compact .v2-hero-desc,
-  .v2-scope .v2-hero.is-compact .v2-hero-image-wrap {
+}
+
+.v2-scope .v2-header-image img {
+  display: block;
+}
+
+/* compact(モバイルのみ): ロゴだけの低いバナーへ簡略化 */
+@media (max-width: 767px) {
+  .v2-scope .v2-header.is-compact .v2-banner-title,
+  .v2-scope .v2-header.is-compact .v2-banner-line,
+  .v2-scope .v2-header.is-compact .v2-header-image {
     display: none;
   }
-  .v2-scope .v2-hero.is-compact .v2-hero-title {
-    margin-top: 8px;
-    margin-bottom: 8px;
+  .v2-scope .v2-header.is-compact .v2-header-logo {
+    margin-bottom: 0;
   }
-  .v2-scope:has(.v2-hero.is-compact) .v2-form-container > .v2-section:first-child {
-    margin-top: 0;
+  .v2-scope .v2-header.is-compact.has-hero .v2-header-inner {
+    min-height: 0;
+  }
+  .v2-scope .v2-header.is-compact .v2-header-inner {
+    padding: 16px 20px;
+  }
+}
+
+/* バナー下の導入説明文(白地)
+ *  - 左端をバナーのロゴ・フォームカードと揃える
+ */
+.v2-scope .v2-intro {
+  max-width: var(--v2-content-width);
+  margin-inline: auto;
+  padding: 28px 20px 4px;
+}
+
+.v2-scope .v2-intro-desc {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--v2-text-primary);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-intro {
+    padding: 36px 20px 4px;
+  }
+  .v2-scope .v2-intro-desc {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .v2-scope .v2-intro {
+    padding-inline: 0;
   }
 }
 
@@ -322,32 +399,56 @@
  */
 .v2-scope .v2-section {
   background-color: var(--v2-bg-card);
-  border: 1px solid var(--v2-gold-border);
-  padding: 24px 20px;
+  border-radius: 0 0 16px 16px;
+  padding: 24px 20px 40px;
   margin-bottom: 20px;
-  box-shadow: var(--v2-shadow-soft);
-}
-
-.v2-scope .v2-section:first-child {
-  margin-top: -180px;
+  box-shadow:
+    0px 30px 60px -30px rgba(58, 52, 255, 0.1),
+    0px 40px 30px -15px rgba(58, 52, 255, 0.07),
+    0px 20px 15px -8px rgba(58, 52, 255, 0.05),
+    0px 10px 8px -4px rgba(58, 52, 255, 0.04),
+    0px 5px 4px -2px rgba(58, 52, 255, 0.03),
+    0px 2px 2px -1px rgba(58, 52, 255, 0.02);
 }
 
 @media (min-width: 768px) {
   .v2-scope .v2-section {
-    padding: 32px 28px;
+    padding: 32px 28px 40px;
   }
-  .v2-scope .v2-section:first-child {
-    margin-top: -80px;
+}
+
+/* バナー直下に重ねて一体化させるカード(上端をバナー下端に少し食い込ませる) */
+.v2-scope .v2-card-connected {
+  margin-top: 0px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-card-connected {
+    margin-top: 0px;
+  }
+}
+
+/* カード冒頭のリード文(旧 .v2-intro をカード内に取り込んだもの) */
+.v2-scope .v2-section-lead {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--v2-text-primary);
+  margin: 0 0 20px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-section-lead {
+    font-size: 16px;
   }
 }
 
 .v2-scope .v2-section-title {
-  font-family: "Noto Serif JP", serif;
+  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--v2-text-primary);
-  border-bottom: 2px solid var(--v2-border-strong);
-  padding-bottom: 8px;
+  border-bottom: 1px solid var(--v2-border);
+  padding-bottom: 12px;
   margin-bottom: 20px;
   letter-spacing: 0.04em;
 }
@@ -427,23 +528,42 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 14px 24px;
-  background: linear-gradient(135deg, var(--v2-gold) 0%, var(--v2-gold-light) 100%);
+  padding: 16px 0;
+  margin: auto;
+  background: linear-gradient(90deg, #5800FF 0%, #5CE1E6 100%);
   color: var(--v2-text-on-gold);
   border: none;
-  border-radius: var(--v2-radius-sm);
+  border-radius: 999px;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease;
-  box-shadow: var(--v2-shadow-button);
+  transition: opacity 0.5s ease, transform 0.05s ease, box-shadow 0.5s ease;
+  box-shadow:
+  0px 40px 30px -30px rgba(0, 0, 0, 0.08),
+  0px 30px 30px -15px rgba(0, 0, 0, 0.06),
+  0px 20px 15px -8px rgba(0, 0, 0, 0.04),
+  0px 10px 8px -4px rgba(0, 0, 0, 0.03),
+  0px 0px 4px -2px rgba(0, 0, 0, 0.02),
+  0px 2px 2px -1px rgba(0, 0, 0, 0.01);
   font-family: inherit;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-btn-primary {
+    width: 60%;
+  }
 }
 
 .v2-scope .v2-btn-primary:hover:not(:disabled) {
   opacity: 0.92;
-  box-shadow: 0 4px 8px rgba(240, 131, 1, 0.35);
+  box-shadow:
+  0px 30px 30px -30px rgba(0, 0, 0, 0.08),
+  0px 20px 30px -15px rgba(0, 0, 0, 0.06),
+  0px 10px 15px -8px rgba(0, 0, 0, 0.04),
+  0px 0px 8px -4px rgba(0, 0, 0, 0.03),
+  0px 0px 4px -2px rgba(0, 0, 0, 0.02),
+  0px 2px 2px -1px rgba(0, 0, 0, 0.01);
 }
 
 .v2-scope .v2-btn-primary:active:not(:disabled) {
@@ -460,11 +580,11 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 14px 24px;
+  padding: 16px 24px;
   background-color: transparent;
   color: var(--v2-text-secondary);
   border: 1px solid var(--v2-border);
-  border-radius: var(--v2-radius-sm);
+  border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -548,56 +668,64 @@
   margin-bottom: 16px;
 }
 
-/* ステップインジケーター */
 /* ステップインジケーター
- *  - フォームBoxの内側・最上段に配置する想定
- *  - .v2-section の最初の子要素として使う
- *  - 下にうっすら区切り線を入れてセクションタイトルとの境界を明示
+ *  - フォームカードの外・白地に独立配置(説明文とカードの間)
+ *  - 円を均等に配置し、間の線を flex で伸ばして横幅いっぱいに広げる
+ *  - アクティブ円はバナーと調和するネイビー
  */
 .v2-scope .v2-steps {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin: -4px -4px 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--v2-border-soft);
+  gap: 0;
+  width: 100%;
+  max-width: 420px;
+  margin: 25px auto 30px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-steps {
+    width: 100%;
+    margin: 30px auto 30px;
+  }
 }
 
 .v2-scope .v2-step-dot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   font-family: "DM Mono", monospace;
-  background-color: var(--v2-bg-elevated);
-  color: var(--v2-text-muted);
+  background-color: #ededed;
+  color: #9aa0a6;
   transition: all 0.3s ease;
 }
 
 .v2-scope .v2-step-dot.is-active {
-  background: linear-gradient(135deg, var(--v2-gold) 0%, var(--v2-gold-light) 100%);
-  color: var(--v2-text-on-gold);
-  box-shadow: var(--v2-shadow-button);
+  background: linear-gradient(90deg, #5800FF 0%, #5CE1E6 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(88, 0, 255, 0.3);
 }
 
 .v2-scope .v2-step-dot.is-done {
-  background-color: rgba(240, 131, 1, 0.2);
-  color: var(--v2-gold-dark);
+  background-color: rgba(28, 61, 119, 0.14);
+  color: #27518f;
 }
 
 .v2-scope .v2-step-line {
-  width: 24px;
+  flex: 1;
+  min-width: 16px;
   height: 2px;
   background-color: var(--v2-border);
 }
 
 .v2-scope .v2-step-line.is-done {
-  background-color: rgba(240, 131, 1, 0.4);
+  background-color: rgba(28, 61, 119, 0.35);
 }
 
 /* チェックボックス */
@@ -760,13 +888,54 @@
   border: none;
 }
 
-/* main 領域(ヒーロー・フォーム本体を内包)
- *  - 背景は /bg.png をタイル状に繰り返し
- *  - フォーム/サンクス画面のカード(.v2-section)はその上に白で乗る
+/* main 領域(導入文・フォーム本体・サンクス画面を内包)
+ *  - 背景は白基調 + main-bg.mp4 を透過・明度を落として控えめに敷く
  */
 .v2-scope .v2-main {
-  background-image: url("/bg.png");
-  background-repeat: repeat;
+  position: relative;
+  background-color: var(--v2-bg-base);
+}
+
+/* 背景動画層(自前で overflow:hidden してクリップ。
+ *  main 自体はクリップしないのでフォームカードの影は欠けない) */
+.v2-scope .v2-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* main 背景動画(全面カバー / そのままの色味で表示) */
+.v2-scope .v2-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* 上から白のグラデーションを重ね、上部は白・ページ下部ほど動画が見えるように
+ *  (動画より前面 / フォーム等コンテンツより背面) */
+.v2-scope .v2-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--v2-bg-base) 0%,
+    var(--v2-bg-base) 62%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* main 直下コンテンツを背景動画より前面へ(.v2-form-container は別途 z-index:1) */
+.v2-scope .v2-intro,
+.v2-scope .v2-thanks {
+  position: relative;
+  z-index: 1;
 }
 
 /* ──────────────────────────────────────────────
@@ -794,54 +963,15 @@
   }
 }
 
-/* タイトル
- *  - モバイル: span.v2-thanks-title-line を display:block にして3行
- *  - PC     : span は inline に戻し、中央の <br class="...-br-pc"> で2行
- */
-.v2-scope .v2-thanks-title {
-  font-family: "Noto Serif JP", serif;
-  font-size: 26px;
-  line-height: 1.55;
-  font-weight: 700;
-  color: var(--v2-gold);
-  letter-spacing: 0.04em;
-  margin: 0 0 24px;
-  /* モバイルでは中央寄せ、PC では左寄せに戻す(下記 @media で上書き) */
-  text-align: center;
-}
-
-.v2-scope .v2-thanks-title-line {
-  display: block;
-}
-
-/* モバイル時は PC専用の改行を非表示にする */
-.v2-scope .v2-thanks-title-br-pc {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .v2-scope .v2-thanks-title {
-    font-size: 32px;
-    line-height: 1.5;
-    text-align: left;
-  }
-  .v2-scope .v2-thanks-title-line {
-    display: inline;
-  }
-  .v2-scope .v2-thanks-title-br-pc {
-    display: inline;
-  }
-}
-
 .v2-scope .v2-thanks-desc {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.95;
   color: var(--v2-text-primary);
   margin: 0 0 18px;
 }
 
 .v2-scope .v2-thanks-note {
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.85;
   color: var(--v2-text-muted);
   margin: 20px 0 0;
@@ -854,12 +984,19 @@
  */
 .v2-scope .v2-contact-card {
   background-color: var(--v2-bg-card);
-  border: 1px solid var(--v2-border);
-  border-radius: var(--v2-radius-sm);
-  padding: 20px;
+  border-radius: 14px;
+  padding: 22px 20px;
   margin-top: -100px;
   position: relative;
   z-index: 2;
+  /* フォームページのカード(.v2-section)と同じ青みの多層シャドウ */
+  box-shadow:
+    0px 30px 60px -30px rgba(58, 52, 255, 0.1),
+    0px 40px 30px -15px rgba(58, 52, 255, 0.07),
+    0px 20px 15px -8px rgba(58, 52, 255, 0.05),
+    0px 10px 8px -4px rgba(58, 52, 255, 0.04),
+    0px 5px 4px -2px rgba(58, 52, 255, 0.03),
+    0px 2px 2px -1px rgba(58, 52, 255, 0.02);
 }
 
 @media (min-width: 768px) {
@@ -877,13 +1014,14 @@
 }
 
 .v2-scope .v2-contact-card-desc {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.8;
   color: var(--v2-text-secondary);
   margin: 0 0 16px;
 }
 
-/* a タグでも v2-btn-primary を使えるようにするための補助スタイル */
+/* a タグでも v2-btn-primary を使えるようにするための補助スタイル
+ *  (ボタンは v2-btn-primary のグラデーションをそのまま使用) */
 .v2-scope .v2-contact-card-btn {
   text-decoration: none;
   max-width: 300px;
@@ -914,7 +1052,7 @@
     margin-top: 0;
   }
   .v2-scope .v2-thanks-image {
-    max-width: 360px;
+    max-width: 300px;
     object-position: top right;
   }
 }

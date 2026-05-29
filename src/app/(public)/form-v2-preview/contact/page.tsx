@@ -64,18 +64,12 @@ function ContactPage() {
   };
 
   return (
-    <V2Wrapper scheme={scheme}>
-      {/* ヒーロー(画像なし、タイトル+説明文のみ) */}
-      <section className="v2-hero">
-        <div className="v2-hero-grid">
-          <div>
-            <h1 className="v2-hero-title">お問い合わせ</h1>
-            <p className="v2-hero-desc">
-              BioVaultメンバーシップサイトに関するご質問・ご相談等は、下記フォームよりお気軽にお問い合わせください。担当者より順次ご連絡させていただきます。
-            </p>
-          </div>
-        </div>
-      </section>
+    <V2Wrapper scheme={scheme} title="お問い合わせ">
+      <div className="v2-intro">
+        <p className="v2-intro-desc">
+          BioVaultメンバーシップサイトに関するご質問・ご相談等は、下記フォームよりお気軽にお問い合わせください。担当者より順次ご連絡させていただきます。
+        </p>
+      </div>
 
       <div className="v2-form-container" style={{ paddingBottom: 48 }}>
         {error && <div className="v2-error">{error}</div>}
