@@ -25,10 +25,10 @@
   --v2-bg-dark: #0A0A0A;          /* ヘッダー等の黒帯(既存トーン継承) */
 
   /* ── アクセントカラー(オレンジ系・MRT版) ─────────── */
-  --v2-gold: #F08301;             /* メインオレンジ(指定色) */
-  --v2-gold-light: #F9A94A;       /* ライト(明色) */
-  --v2-gold-dark: #C26800;        /* ダーク(ボタンホバー・強調文字) */
-  --v2-gold-border: #F5A04A;      /* フォーム枠用(やや薄め) */
+  --v2-gold: #1A15BB;             /* メインアクセント(ブランドブルー) */
+  --v2-gold-light: #4A44D6;       /* ライト(明色) */
+  --v2-gold-dark: #130F8C;        /* ダーク(強調文字) */
+  --v2-gold-border: #6E68E0;      /* フォーム枠用(やや薄め) */
 
   /* ── テキスト ───────────────────────────────────── */
   --v2-text-primary: #1A1A1A;     /* 本文(濃いブラック) */
@@ -55,7 +55,7 @@
   /* ── 影 ─────────────────────────────────────────── */
   --v2-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   --v2-shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.08);
-  --v2-shadow-button: 0 2px 4px rgba(240, 131, 1, 0.25);
+  --v2-shadow-button: 0 2px 4px rgba(26, 21, 187, 0.25);
 
   /* ── 配置 ───────────────────────────────────────── */
   --v2-radius-sm: 4px;
@@ -491,7 +491,7 @@
 .v2-scope .v2-input:focus,
 .v2-scope .v2-select:focus {
   border-color: var(--v2-gold);
-  box-shadow: 0 0 0 3px rgba(240, 131, 1, 0.15);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
 }
 
 .v2-scope .v2-input::placeholder {
@@ -514,7 +514,7 @@
 
 /* 注意書きボックス */
 .v2-scope .v2-notice {
-  background-color: var(--v2-bg-elevated);
+  background-color: rgba(28, 61, 119, 0.05);
   padding: 12px 16px;
   font-size: 14px;
   line-height: 1.7;
@@ -606,15 +606,14 @@
 
 /* 確認画面用のグループ表示 */
 .v2-scope .v2-confirm-group {
-  background-color: var(--v2-bg-elevated);
-  border-radius: var(--v2-radius-sm);
+  background-color: rgba(28, 61, 119, 0.05);
   padding: 16px 20px;
   margin-bottom: 16px;
 }
 
 .v2-scope .v2-confirm-group-title {
   font-size: 14px;
-  color: #F08301;
+  color: #1A15BB;
   font-weight: 700;
   margin-bottom: 10px;
   letter-spacing: 0.04em;
@@ -657,7 +656,7 @@
 .v2-scope .v2-subhead {
   font-size: 15px;
   font-weight: 600;
-  color: #F08301;
+  color: #1A15BB;
   margin-bottom: 8px;
 }
 
@@ -764,7 +763,7 @@
 .v2-scope .v2-checkbox-row input[type="checkbox"]:focus-visible {
   outline: none;
   border-color: var(--v2-gold);
-  box-shadow: 0 0 0 3px rgba(240, 131, 1, 0.15);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
 }
 
 .v2-scope .v2-checkbox-row input[type="checkbox"]:checked {
@@ -833,7 +832,7 @@
 .v2-scope .v2-radio-row input[type="radio"]:focus-visible {
   outline: none;
   border-color: var(--v2-gold);
-  box-shadow: 0 0 0 3px rgba(240, 131, 1, 0.15);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
 }
 
 .v2-scope .v2-radio-row input[type="radio"]:checked {
