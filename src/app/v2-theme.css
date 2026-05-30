@@ -257,10 +257,11 @@
 
 /* バナー内ページタイトル(白・太ゴシック) */
 .v2-scope .v2-banner-title {
-  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif;
   font-size: 30px;
   line-height: 1.25;
-  font-weight: 800;
+  font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.04em;
   margin: 0;
