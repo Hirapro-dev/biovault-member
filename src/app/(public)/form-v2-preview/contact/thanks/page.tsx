@@ -90,7 +90,7 @@ function ContactThanksPage() {
                 letterSpacing: "0.04em",
               }}
             >
-              申込フォームへ戻る
+              申請フォームへ戻る
             </Link>
           </div>
         </section>

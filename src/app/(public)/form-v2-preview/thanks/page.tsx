@@ -1,7 +1,7 @@
 /**
  * /form-v2-preview/thanks
  *
- * 申込完了サンクス画面のプレビュー用独立ルート。
+ * 申請完了サンクス画面のプレビュー用独立ルート。
  *
  * 本番のフォーム送信フローでは /form-v2-preview の done state が立ち
  * 同じ ThanksContent を表示するが、デザイン確認のため独立した URL でも
@@ -37,7 +37,7 @@ function Inner() {
       title={
         <>
           <span className="v2-banner-title-line">iPS細胞作製の</span>
-          <span className="v2-banner-title-line">適合確認申込を</span>
+          <span className="v2-banner-title-line">適合確認申請を</span>
           <br className="v2-banner-title-br-pc" />
           <span className="v2-banner-title-line">受け付けました</span>
         </>

@@ -1,7 +1,7 @@
 /**
  * ThanksContent
  *
- * デザイン刷新版(v2)の申込完了サンクス画面のコンテンツ部分。
+ * デザイン刷新版(v2)の申請完了サンクス画面のコンテンツ部分。
  *
  * 見出しはバナー(header)側に移動し(V2Wrapper の title)、本文はフォームページと
  * 同様にバナー直下へ連結する白カード(.v2-section.v2-card-connected)内へ収める。
@@ -35,7 +35,7 @@ export default function ThanksContent({ scheme = "SCPP" }: ThanksContentProps) {
       <div className="v2-thanks-grid">
         <div className="v2-thanks-text">
           <p className="v2-thanks-desc">
-            お申し込みいただいた内容をもとに、本部にてiPS細胞作製適合確認を行います。
+            ご申請いただいた内容をもとに、本部にてiPS細胞作製適合確認を行います。
           </p>
           <p className="v2-thanks-desc">
             3営業日以内に、担当スタッフよりご連絡させていただきます。

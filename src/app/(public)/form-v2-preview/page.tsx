@@ -1,7 +1,7 @@
 /**
  * /form-v2-preview
  *
- * デザイン刷新版(v2)の申込フォーム。
+ * デザイン刷新版(v2)の申請フォーム。
  *
  * - 本番フォーム /form/app/page.tsx の機能ロジック(state管理・バリデーション・
  *   住所検索・メール重複チェック・送信処理・サンクス画面・テスター用リダイレクト等)
@@ -55,7 +55,7 @@ function FormV2PreviewPage() {
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
-    // 1. 申込者情報
+    // 1. 申請者情報
     name: "",
     nameKana: "",
     dateOfBirth: "1980-01-01",
@@ -216,7 +216,7 @@ function FormV2PreviewPage() {
         title={
           <>
             <span className="v2-banner-title-line">iPS細胞作製の</span>
-            <span className="v2-banner-title-line">適合確認申込を</span>
+            <span className="v2-banner-title-line">適合確認申請を</span>
             <br className="v2-banner-title-br-pc" />
             <span className="v2-banner-title-line">受け付けました</span>
           </>
@@ -228,7 +228,7 @@ function FormV2PreviewPage() {
   }
 
   // ──────────────────────────────────────────────
-  // 申込フォーム本体
+  // 申請フォーム本体
   // ──────────────────────────────────────────────
   return (
     <V2Wrapper
@@ -237,7 +237,7 @@ function FormV2PreviewPage() {
         <>
           iPS細胞作製
           <br />
-          適合確認申込
+          適合確認申請
         </>
       }
       heroImageSrc="/nagashima01.png"
@@ -246,14 +246,14 @@ function FormV2PreviewPage() {
       <div className="v2-form-container" style={{ paddingBottom: 48 }}>
         {error && <div className="v2-error">{error}</div>}
 
-        {/* ──────────────── Step 1: 申込者情報 ──────────────── */}
+        {/* ──────────────── Step 1: 申請者情報 ──────────────── */}
         {step === 1 && (
           <section className="v2-section v2-card-connected">
             <p className="v2-section-lead">
-              本申込みはBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。
+              本申請はBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。
             </p>
             <StepIndicator current={1} />
-            <h2 className="v2-section-title">1. 申込者情報</h2>
+            <h2 className="v2-section-title">1. 申請者情報</h2>
 
             <div className="v2-field">
               <label className="v2-label">
@@ -415,7 +415,7 @@ function FormV2PreviewPage() {
                 ※ 以下は、提携医療機関等による問診・適格確認の参考情報として確認するものです。
               </p>
               <p>
-                ※ 申込時点での自己申告であり、最終的な導入可否・採血可否・作製可否は提携医療機関または提携先の判断によります。
+                ※ 申請時点での自己申告であり、最終的な導入可否・採血可否・作製可否は提携医療機関または提携先の判断によります。
               </p>
             </div>
 
@@ -492,14 +492,14 @@ function FormV2PreviewPage() {
           </section>
         )}
 
-        {/* ──────────────── Step 3: 申込情報取扱いに関する同意 ──────────────── */}
+        {/* ──────────────── Step 3: 申請情報取扱いに関する同意 ──────────────── */}
         {step === 3 && (
           <section className="v2-section v2-card-connected">
             <StepIndicator current={3} />
-            <h2 className="v2-section-title">3. 申込情報取扱いに関する同意</h2>
+            <h2 className="v2-section-title">3. 申請情報取扱いに関する同意</h2>
 
             <div className="v2-notice">
-              本申込書に記載した内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
+              本申請書に記載した内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
             </div>
 
             <label className="v2-checkbox-row">
@@ -533,7 +533,7 @@ function FormV2PreviewPage() {
             <h2 className="v2-section-title">入力内容の確認</h2>
 
             <div className="v2-confirm-group">
-              <div className="v2-confirm-group-title">申込者情報</div>
+              <div className="v2-confirm-group-title">申請者情報</div>
               <ConfirmRow label="氏名" value={form.name || "---"} />
               <ConfirmRow label="フリガナ" value={form.nameKana || "---"} />
               <ConfirmRow label="生年月日" value={form.dateOfBirth || "---"} />
@@ -559,7 +559,7 @@ function FormV2PreviewPage() {
               <br />
               各事項を確認・理解のうえ、
               <br />
-              iPS細胞作製の適合確認に申し込みます。
+              iPS細胞作製の適合確認を申請します。
             </p>
 
             <div className="v2-btn-row">
@@ -567,7 +567,7 @@ function FormV2PreviewPage() {
                 戻る
               </V2Button>
               <V2Button variant="primary" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "送信中..." : "お申し込み"}
+                {submitting ? "送信中..." : "申請する"}
               </V2Button>
             </div>
           </section>

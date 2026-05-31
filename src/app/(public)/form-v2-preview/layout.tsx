@@ -6,7 +6,7 @@
  */
 
 export const metadata = {
-  title: "iPS細胞作製の適合確認申込 - デザインプレビュー",
+  title: "iPS細胞作製の適合確認申請 - デザインプレビュー",
   robots: {
     index: false,
     follow: false,
