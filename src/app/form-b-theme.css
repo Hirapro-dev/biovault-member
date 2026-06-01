@@ -1,0 +1,506 @@
+/**
+ * form-b-theme.css
+ *
+ * フォームUIデザイン案B(黒×ゴールドのラグジュアリー)専用テーマ。
+ * /form-preview-b の単一ページ(ペラ)でのみ使用する想定。
+ *
+ * - 既存の v2-theme.css / globals.css には一切影響しません。
+ * - 全スタイルは `.fb-scope` 配下にスコープしています。
+ * - UI比較用のデザインモックアップ(送信処理なし)。
+ */
+
+.fb-scope {
+  /* ── ベース配色: 黒基調 ───────────────────────── */
+  --fb-bg: #000000;
+  --fb-bg-banner: #050505;
+  --fb-bg-card: #0c0c0c;
+  --fb-bg-elevated: #141414;
+
+  /* ── ゴールド ───────────────────────────────── */
+  --fb-gold: #c9a24b;
+  --fb-gold-light: #e6c77a;
+  --fb-gold-dark: #9a7b2e;
+
+  /* ── テキスト ───────────────────────────────── */
+  --fb-text: #ffffff;
+  --fb-text-secondary: #cfccc4;
+  --fb-text-muted: #8a8a8a;
+
+  /* ── 入力欄(白地・黒文字) ─────────────────── */
+  --fb-input-bg: #ffffff;
+  --fb-input-text: #1a1a1a;
+  --fb-input-placeholder: #9a9a9a;
+
+  /* ── 罫線 ───────────────────────────────────── */
+  --fb-border: rgba(201, 162, 75, 0.45);
+  --fb-border-soft: rgba(201, 162, 75, 0.18);
+
+  --fb-required: #e5736a;
+
+  --fb-content-width: 640px;
+  --fb-max-width: 960px;
+
+  /* ── ゴールドグラデーション(ボタン・アクティブ) ── */
+  --fb-gold-grad: linear-gradient(135deg, #a9852f 0%, #e6c66e 50%, #b58a35 100%);
+
+  background-color: var(--fb-bg);
+  color: var(--fb-text);
+  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.fb-scope * {
+  box-sizing: border-box;
+}
+
+/* ──────────────────────────────────────────────
+ * バナー(黒地・ゴールド下線 / ロゴ+見出し+人物)
+ * ────────────────────────────────────────────── */
+.fb-scope .fb-banner {
+  position: relative;
+  background-color: var(--fb-bg-banner);
+  overflow: hidden;
+  border-bottom: 1px solid;
+  border-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--fb-gold-dark) 18%,
+      var(--fb-gold-light) 50%,
+      var(--fb-gold-dark) 82%,
+      transparent 100%
+    )
+    1;
+}
+
+/* バナー背景動画(モノクロ・暗め / 黒地に極薄で重ねる) */
+.fb-scope .fb-banner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.12;
+  /* モノクロ化 + 暗く落として、黒地にうっすら馴染ませる */
+  filter: grayscale(1) brightness(0.55) contrast(1.05);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.fb-scope .fb-banner-inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--fb-content-width);
+  margin-inline: auto;
+  padding: 22px 20px 26px;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-banner-inner {
+    padding: 32px 20px 36px;
+    min-height: 320px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .fb-scope .fb-banner-inner {
+    padding-inline: 0;
+  }
+}
+
+/* 人物と重ならないようテキスト幅を制限 */
+.fb-scope .fb-banner-text {
+  max-width: 64%;
+}
+
+.fb-scope .fb-logo {
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-logo {
+    margin-bottom: 24px;
+  }
+}
+
+.fb-scope .fb-logo-brand {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  color: var(--fb-text);
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-logo-brand {
+    font-size: 32px;
+  }
+}
+
+.fb-scope .fb-logo-tagline {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--fb-gold-light);
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-logo-tagline {
+    font-size: 16px;
+  }
+}
+
+.fb-scope .fb-banner-title {
+  font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif;
+  font-size: 30px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--fb-text);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-banner-title {
+    font-size: 44px;
+  }
+}
+
+.fb-scope .fb-banner-line {
+  display: block;
+  height: 1px;
+  width: 100%;
+  max-width: 260px;
+  margin-top: 18px;
+  background: linear-gradient(
+    90deg,
+    var(--fb-gold-light),
+    rgba(201, 162, 75, 0.1)
+  );
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-banner-line {
+    max-width: 420px;
+    margin-top: 22px;
+  }
+}
+
+.fb-scope .fb-banner-image {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  width: 180px;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-banner-image {
+    right: 8px;
+    width: 290px;
+  }
+}
+
+.fb-scope .fb-banner-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ──────────────────────────────────────────────
+ * 本文(導入文 + フォームカード)
+ * ────────────────────────────────────────────── */
+.fb-scope .fb-main {
+  flex: 1;
+  background-color: var(--fb-bg);
+}
+
+.fb-scope .fb-container {
+  max-width: var(--fb-content-width);
+  margin-inline: auto;
+  padding: 28px 20px 56px;
+}
+
+@media (min-width: 1120px) {
+  .fb-scope .fb-container {
+    padding-inline: 0;
+  }
+}
+
+.fb-scope .fb-intro {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--fb-text-secondary);
+  margin: 0 0 28px;
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-intro {
+    font-size: 16px;
+  }
+}
+
+/* フォームカード(黒地・ゴールド細枠) */
+.fb-scope .fb-card {
+  background-color: var(--fb-bg-card);
+  border: 1px solid var(--fb-border);
+  border-radius: 14px;
+  padding: 24px 20px 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(201, 162, 75, 0.08);
+}
+
+@media (min-width: 768px) {
+  .fb-scope .fb-card {
+    padding: 32px 28px 40px;
+  }
+}
+
+/* セクション見出し */
+.fb-scope .fb-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fb-text);
+  letter-spacing: 0.04em;
+  padding-bottom: 12px;
+  margin: 0 0 22px;
+  border-bottom: 1px solid var(--fb-border);
+}
+
+.fb-scope .fb-section-title:not(:first-child) {
+  margin-top: 40px;
+}
+
+.fb-scope .fb-subhead {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fb-gold-light);
+  margin: 0 0 8px;
+}
+
+.fb-scope .fb-subnote {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fb-text-muted);
+  margin: 0 0 18px;
+}
+
+/* フィールド */
+.fb-scope .fb-field {
+  margin-bottom: 18px;
+}
+
+.fb-scope .fb-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fb-text);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.fb-scope .fb-req {
+  color: var(--fb-required);
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.fb-scope .fb-input,
+.fb-scope .fb-select {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: var(--fb-input-bg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--fb-input-text);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fb-scope .fb-input::placeholder {
+  color: var(--fb-input-placeholder);
+}
+
+.fb-scope .fb-input:focus,
+.fb-scope .fb-select:focus {
+  border-color: var(--fb-gold);
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.25);
+}
+
+.fb-scope .fb-help {
+  font-size: 14px;
+  color: var(--fb-text-muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.fb-scope .fb-date-row {
+  display: flex;
+  gap: 8px;
+}
+
+.fb-scope .fb-date-row .fb-select {
+  flex: 1;
+}
+
+/* ラジオ(なし/あり) */
+.fb-scope .fb-health {
+  margin-bottom: 16px;
+}
+
+.fb-scope .fb-health-label {
+  font-size: 15px;
+  color: var(--fb-text);
+  margin-bottom: 8px;
+}
+
+.fb-scope .fb-radio-group {
+  display: flex;
+  gap: 18px;
+}
+
+.fb-scope .fb-radio {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--fb-text-secondary);
+  cursor: pointer;
+}
+
+.fb-scope .fb-radio input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #000;
+  border: 1.5px solid var(--fb-gold-dark);
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+.fb-scope .fb-radio input[type="radio"]:checked {
+  border-color: var(--fb-gold);
+}
+
+.fb-scope .fb-radio input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fb-gold-grad);
+  transform: translate(-50%, -50%);
+}
+
+/* チェックボックス(同意) */
+.fb-scope .fb-notice {
+  background-color: var(--fb-bg-elevated);
+  border: 1px solid var(--fb-border-soft);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fb-text-secondary);
+  margin-bottom: 18px;
+}
+
+.fb-scope .fb-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.fb-scope .fb-check-row input[type="checkbox"] {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #000;
+  border: 1.5px solid var(--fb-gold-dark);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.fb-scope .fb-check-row input[type="checkbox"]:checked {
+  background: var(--fb-gold-grad);
+  border-color: var(--fb-gold);
+}
+
+.fb-scope .fb-check-row input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border-right: 2.5px solid #000;
+  border-bottom: 2.5px solid #000;
+  transform: rotate(45deg);
+}
+
+.fb-scope .fb-check-label {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--fb-text-secondary);
+}
+
+/* ゴールドボタン */
+.fb-scope .fb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 32px;
+  padding: 16px 24px;
+  background: var(--fb-gold-grad);
+  color: #1a1208;
+  border: none;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 8px 20px rgba(201, 162, 75, 0.28);
+  transition: opacity 0.2s ease, transform 0.05s ease;
+}
+
+.fb-scope .fb-btn:hover {
+  opacity: 0.93;
+}
+
+.fb-scope .fb-btn:active {
+  transform: translateY(1px);
+}
+
+/* フッター */
+.fb-scope .fb-footer {
+  width: 100%;
+  padding: 24px 20px;
+  border-top: 1px solid var(--fb-border-soft);
+  text-align: center;
+  font-size: 12px;
+  color: var(--fb-text-muted);
+  letter-spacing: 0.04em;
+}
