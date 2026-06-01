@@ -199,14 +199,14 @@
   position: absolute;
   right: 4px;
   bottom: 0;
-  width: 180px;
+  width: 170px;
   pointer-events: none;
 }
 
 @media (min-width: 768px) {
   .fb-scope .fb-banner-image {
     right: 8px;
-    width: 290px;
+    width: 245px;
   }
 }
 
