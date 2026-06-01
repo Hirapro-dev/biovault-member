@@ -11,6 +11,7 @@
 
 "use client";
 
+import { Fragment } from "react";
 import Image from "next/image";
 import "@/app/form-b-theme.css";
 
@@ -60,6 +61,16 @@ export default function FormPreviewBPage() {
           <p className="fb-intro">
             本申請はBioVaultメンバーシップ内で提供するiPSサービス契約の確約ではなく、ご利用検討者様のiPS細胞の作製適合確認、ならびにBioVaultメンバーサイトへのアクセス権を提供するための手続きとなります。
           </p>
+
+          {/* ステップインジケーター(装飾) */}
+          <div className="fb-steps">
+            {[1, 2, 3, 4].map((n, i) => (
+              <Fragment key={n}>
+                <div className={`fb-step-dot${n === 1 ? " is-active" : ""}`}>{n}</div>
+                {i < 3 && <div className="fb-step-line" />}
+              </Fragment>
+            ))}
+          </div>
 
           <div className="fb-card">
             {/* 申請者情報 */}

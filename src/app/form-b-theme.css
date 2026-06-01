@@ -249,6 +249,46 @@
   }
 }
 
+/* ステップインジケーター(1アクティブ=ゴールド / 他=グレー / 線で連結) */
+.fb-scope .fb-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 4px auto 28px;
+}
+
+.fb-scope .fb-step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+  background-color: #4a4a4a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.fb-scope .fb-step-dot.is-active {
+  background: var(--fb-gold-grad);
+  color: #1a1208;
+  border-color: var(--fb-gold-light);
+  box-shadow: 0 0 14px rgba(201, 162, 75, 0.4);
+}
+
+.fb-scope .fb-step-line {
+  flex: 1;
+  min-width: 16px;
+  height: 2px;
+  background-color: #333333;
+}
+
 /* フォームカード(黒地・ゴールド細枠) */
 .fb-scope .fb-card {
   background-color: var(--fb-bg-card);
