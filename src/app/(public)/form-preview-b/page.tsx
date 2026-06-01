@@ -197,16 +197,6 @@ export default function FormPreviewBPage() {
               </select>
             </div>
 
-            {/* 同意 */}
-            <h2 className="fb-section-title">申請情報取扱いに関する同意</h2>
-            <div className="fb-notice">
-              本申請書に記載した内容は、メンバーシップ契約手続き、提携医療機関等による問診・適格確認、細胞作製・保管に関する各種手続きの参考資料として利用されます。
-            </div>
-            <label className="fb-check-row">
-              <input type="checkbox" />
-              <span className="fb-check-label">上記の内容を理解し、承諾します</span>
-            </label>
-
             <button
               type="button"
               className="fb-btn"
