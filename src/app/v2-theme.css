@@ -1024,6 +1024,8 @@
  *  (ボタンは v2-btn-primary のグラデーションをそのまま使用) */
 .v2-scope .v2-contact-card-btn {
   text-decoration: none;
+  /* 基底の inline-flex を flex に上書きして margin auto を効かせ、中央寄せに */
+  display: flex;
   max-width: 300px;
   margin-inline: auto;
 }
