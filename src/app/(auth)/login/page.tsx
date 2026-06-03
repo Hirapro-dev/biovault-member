@@ -3,8 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import GoldParticles from "@/components/login/GoldParticles";
-import GoldDivider from "@/components/ui/GoldDivider";
 
 export default function LoginPageWrapper() {
   return (
@@ -71,24 +69,96 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center relative overflow-hidden">
-      <GoldParticles />
-      <div className="relative z-10 w-[90%] max-w-[420px] animate-fade-in">
-        {/* ロゴ */}
-        <div className="text-center mb-10">
-          <div className="text-[12px] tracking-[5px] text-gold-dark mb-4 font-light">
-            Special Member&apos;s
-          </div>
+    <div className="min-h-screen relative overflow-hidden bg-[#0c47a0]">
+      {/* 背景: ブランドのパープル→シアン グラデーション + 動画(うっすらDNA) */}
+      <div
+        className="absolute inset-0 z-0"
+        aria-hidden="true"
+        style={{
+          background:
+            "linear-gradient(125deg, #5800FF 0%, #2f44d4 45%, #2f8fd8 72%, #5CE1E6 100%)",
+        }}
+      />
+      <video
+        className="absolute inset-0 w-full h-full object-cover z-0 opacity-30 mix-blend-screen"
+        src="/header-bg.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      />
+
+      {/* コンテンツ: 最大1120pxのラッパー(コピー+カード=左 / 人物=ラッパー右端) */}
+      <div className="relative z-20 px-6">
+        <div className="relative w-full max-w-[1120px] mx-auto min-h-screen">
+          {/* 人物(lg以上・ラッパー右端に配置)
+              ▼サイズ調整: 高さ h-[86vh] / 横幅上限 max-w-[48%] を変更 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
-            alt="BioVault"
-            className="h-14 w-auto mx-auto"
+            src="/nagashima_login.png"
+            alt=""
+            aria-hidden="true"
+            className="hidden lg:block absolute bottom-0 right-0 h-[86vh] w-auto max-w-[48%] object-contain object-bottom z-10 pointer-events-none select-none"
           />
-          <GoldDivider width={150} className="mx-auto mt-6" />
-        </div>
+          {/* 人物(SP: 右上に配置・背景レイヤー / フォームは前面・ファーストビュー内)
+              ▼サイズ調整: 高さ h-[46vh] / 位置 top-[14%] right-[-6%] を変更 */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/nagashima_login.png"
+            alt=""
+            aria-hidden="true"
+            className="lg:hidden absolute top-[5%] right-[-6%] h-[46vh] w-auto object-contain object-top z-0 opacity-95 pointer-events-none select-none"
+          />
+          {/* ロゴ(上 / SPは小さめ) */}
+          <div
+            className="absolute top-6 lg:top-8 left-0 z-20"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            <div
+              className="text-white font-medium leading-none text-[22px] lg:text-[34px]"
+              style={{ letterSpacing: "0.04em" }}
+            >
+              BioVault
+            </div>
+            <div
+              className="text-white mt-1 lg:mt-1.5 text-[10px] lg:text-[14px]"
+              style={{ letterSpacing: "0.18em" }}
+            >
+              Membership Service
+            </div>
+          </div>
 
-        {/* フォーム */}
+          {/* メインコピー + カード(SPはロゴ下から / PCは上下中央) */}
+          <div className="relative z-20 min-h-screen flex items-start lg:items-center justify-center lg:justify-start pt-[76px] lg:pt-0 pb-12 lg:pb-0">
+            <div className="w-full max-w-[500px] animate-fade-in">
+              {/* メインコピー(SPは幅を制限して折返し&人物と干渉回避 / 影で可読性確保) */}
+              <div
+                className="mb-6 lg:mb-10 text-left max-w-[290px] sm:max-w-[440px] lg:max-w-none"
+                style={{ textShadow: "0 2px 14px rgba(0,0,0,0.45)" }}
+              >
+                <h1
+                  className="text-white font-medium leading-[1.35] whitespace-nowrap text-[24px] lg:text-[48px]"
+                  style={{
+                    fontFamily: "var(--font-serif-jp)",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  あなた自身の細胞を
+                  <br />
+                  資産化する時代。
+                </h1>
+                <p className="text-white/90 mt-4 leading-[1.9] text-[14px] lg:text-[16px]">
+                  自分由来のiPS細胞を作製し
+                  <br className="lg:hidden" />
+                  「細胞資産」として保有する、
+                  <br />
+                  次世代ウェルネスサービス。
+                </p>
+              </div>
+              {/* カード */}
+              <div className="w-full max-w-[440px] mx-auto lg:mx-0">
+                {/* フォーム */}
         <form
           onSubmit={handleSubmit}
           className="bg-bg-secondary border border-border-gold rounded px-6 py-8 sm:px-5 sm:py-10"
@@ -164,6 +234,15 @@ function LoginPage() {
             担当者までご連絡ください
           </p>
         </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* コピーライト(ページ下部・中央) */}
+      <div className="absolute bottom-5 inset-x-0 z-20 text-center text-[11px] tracking-wider text-white/70 pointer-events-none">
+        &copy; 2025 SCPP Inc. All Rights Reserved.
       </div>
     </div>
   );

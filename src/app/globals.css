@@ -1,31 +1,38 @@
 @import "tailwindcss";
 
+/*
+ * 配色トークン(白ベースリニューアル / 第一歩)
+ *  - フォーム(v2)のテイストに合わせ、ダーク→白ベース+ブランドブルーへ一括リマップ。
+ *  - 旧「gold」系トークン名はそのまま流用し、値だけブルー(#1A15BB系)に差し替え。
+ *  - 各ページに残るハードコード色(text-white / bg-black 等)は本トークン変更では
+ *    切り替わらないため、別途の個別対応で順次解消する。
+ */
 :root {
-  /* Base — カード背景を少し明るくしてコントラスト向上 */
-  --color-bg-primary: #070709;
-  --color-bg-secondary: #111116;
-  --color-bg-tertiary: #1A1A22;
-  --color-bg-elevated: #222230;
+  /* Base — 白ベース(ページ=淡グレー / カード=白) */
+  --color-bg-primary: #F5F6F8;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #EEF0F5;
+  --color-bg-elevated: #FFFFFF;
 
-  /* Gold Accent — ロゴのリッチゴールドに準拠 */
-  --color-gold-primary: #BFA04B;
-  --color-gold-light: #D4BC6A;
-  --color-gold-dark: #8C6E2A;
+  /* Accent — フォームのブランドブルー(旧ゴールド枠を踏襲) */
+  --color-gold-primary: #1A15BB;
+  --color-gold-light: #4A44D6;
+  --color-gold-dark: #130F8C;
 
-  /* Text — 高コントラスト（シニア対応・視認性向上） */
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #DDDDE6;
-  --color-text-muted: #B0B0C0;
+  /* Text — 濃色(白地で高コントラスト) */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4A4A4A;
+  --color-text-muted: #888888;
 
-  /* Border — やや明るくして視認性向上 */
-  --color-border: #2A2A38;
-  --color-border-gold: rgba(191, 160, 75, 0.3);
+  /* Border — 淡いグレー */
+  --color-border: #E5E5EA;
+  --color-border-gold: rgba(26, 21, 187, 0.25);
 
-  /* Status */
-  --color-status-active: #34D399;
-  --color-status-warning: #FBBF24;
-  --color-status-danger: #F87171;
-  --color-status-info: #60A5FA;
+  /* Status — 白地で読みやすい彩度に調整 */
+  --color-status-active: #2E9E6B;
+  --color-status-warning: #D97706;
+  --color-status-danger: #E53E3E;
+  --color-status-info: #2563EB;
 }
 
 @theme inline {
@@ -108,13 +115,13 @@ body {
   line-height: 1.2 !important;
 }
 
-/* ゴールドパルスアニメーション */
+/* アクセントパルスアニメーション(ブルー) */
 @keyframes pulse-gold {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(191, 160, 75, 0.3);
+    box-shadow: 0 0 20px rgba(88, 0, 255, 0.25);
   }
   50% {
-    box-shadow: 0 0 30px rgba(191, 160, 75, 0.5), 0 0 60px rgba(191, 160, 75, 0.15);
+    box-shadow: 0 0 30px rgba(88, 0, 255, 0.4), 0 0 60px rgba(88, 0, 255, 0.12);
   }
 }
 
@@ -150,21 +157,22 @@ body {
   animation: glow 3s ease-in-out infinite;
 }
 
-/* ゴールドグラデーションテキスト — ロゴ準拠 */
+/* アクセントグラデーションテキスト(ブランドブルー)
+ *  - 白地で読めるよう、明るすぎるシアンは使わずブルー〜パープルで構成 */
 .text-gold-gradient {
-  background: linear-gradient(135deg, #8C6E2A 0%, #BFA04B 30%, #D4BC6A 50%, #BFA04B 70%, #8C6E2A 100%);
+  background: linear-gradient(135deg, #1A15BB 0%, #5800FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ゴールドグラデーションボタン — ロゴ準拠 */
+/* アクセントグラデーションボタン(パープル→シアン / フォームのCTAに準拠) */
 .bg-gold-gradient {
-  background: linear-gradient(135deg, #8C6E2A, #BFA04B);
+  background: linear-gradient(90deg, #5800FF, #5CE1E6);
 }
 
 .bg-gold-gradient:hover {
-  background: linear-gradient(135deg, #BFA04B, #D4BC6A);
+  background: linear-gradient(90deg, #4a00d6, #49c9ce);
 }
 
 /* date/select inputのスマホ対応 */
@@ -180,10 +188,9 @@ select {
 }
 
 
-/* date inputのカレンダーアイコンを白色に */
+/* date inputのカレンダーアイコン(白地ではダークのまま表示) */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
   cursor: pointer;
 }
 
