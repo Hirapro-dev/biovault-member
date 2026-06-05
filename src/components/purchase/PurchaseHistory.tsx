@@ -28,9 +28,23 @@ const fmtAmount = (n: number) => `¥${n.toLocaleString()}`;
 
 interface Props {
   userId: string;
+  /**
+   * true の場合、iPSサービス未申込（serviceAppliedAt 未設定かつステータスが
+   * SERVICE_APPLIED 未満）の会員には基本パッケージ契約を購入履歴に表示しない。
+   * 会員側の購入履歴で、申込前に「未入金 ¥8,800,000」が出る違和感を防ぐ用途。
+   */
+  hideContractBeforeApply?: boolean;
 }
 
-export default async function PurchaseHistory({ userId }: Props) {
+// iPSサービス申込済み（= 基本パッケージを購入とみなせる）状態か判定
+const APPLIED_STATUSES = new Set([
+  "SERVICE_APPLIED", "SCHEDULE_ARRANGED", "BLOOD_COLLECTED",
+  "IPS_CREATING", "STORAGE_ACTIVE", "STORAGE_EXPIRED",
+  // 旧enum互換
+  "CONTRACT_SIGNED", "CLINIC_RESERVED", "IPS_COMPLETED",
+]);
+
+export default async function PurchaseHistory({ userId, hideContractBeforeApply = false }: Props) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -63,8 +77,12 @@ export default async function PurchaseHistory({ userId }: Props) {
 
   const items: TimelineItem[] = [];
 
-  // 基本契約
-  if (membership) {
+  // 基本契約（iPSサービス申込前は、会員側では非表示にできる）
+  const hasAppliedService =
+    !!membership &&
+    (!!membership.serviceAppliedAt || APPLIED_STATUSES.has(membership.ipsStatus));
+  const showContract = !!membership && (!hideContractBeforeApply || hasAppliedService);
+  if (membership && showContract) {
     items.push({
       date: membership.contractDate,
       type: "contract",
