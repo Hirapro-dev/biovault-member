@@ -6,6 +6,59 @@ import { getTotalSessions } from "@/lib/culture-fluid-plans";
 import { notifyCultureFluidStatusChange } from "@/lib/status-notification";
 import { autoCreateCommissionForCf } from "@/lib/commission-auto";
 
+// 培養上清液注文の自由編集（SUPER_ADMIN専用）
+// ワークフローに依らず、全フィールドを直接上書きする。
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!session?.user || role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "権限がありません（全権限者専用）" }, { status: 403 });
+  }
+
+  const { id, orderId } = await params;
+  const body = await req.json();
+
+  const order = await prisma.cultureFluidOrder.findFirst({ where: { id: orderId, userId: id } });
+  if (!order) return NextResponse.json({ error: "注文が見つかりません" }, { status: 404 });
+
+  const toDate = (v: unknown) => (v ? new Date(v as string) : null);
+  const data: Record<string, unknown> = {};
+  if (body.planType !== undefined) data.planType = String(body.planType);
+  if (body.planLabel !== undefined) data.planLabel = String(body.planLabel);
+  if (body.totalAmount !== undefined) data.totalAmount = Number(body.totalAmount) || 0;
+  if (body.paymentStatus !== undefined) data.paymentStatus = body.paymentStatus;
+  if (body.status !== undefined) data.status = body.status;
+  if (body.completedSessions !== undefined) data.completedSessions = Number(body.completedSessions) || 0;
+  if (body.sessionDates !== undefined) data.sessionDates = Array.isArray(body.sessionDates) ? JSON.stringify(body.sessionDates) : null;
+  if (body.createdAt !== undefined) data.createdAt = body.createdAt ? new Date(body.createdAt) : order.createdAt;
+  if (body.paidAt !== undefined) data.paidAt = toDate(body.paidAt);
+  if (body.producedAt !== undefined) data.producedAt = toDate(body.producedAt);
+  if (body.storageStartedAt !== undefined) data.storageStartedAt = toDate(body.storageStartedAt);
+  if (body.expiresAt !== undefined) data.expiresAt = toDate(body.expiresAt);
+  if (body.completedAt !== undefined) data.completedAt = toDate(body.completedAt);
+  if (body.clinicDate !== undefined) data.clinicDate = toDate(body.clinicDate);
+  if (body.clinicName !== undefined) data.clinicName = body.clinicName || null;
+
+  const updated = await prisma.cultureFluidOrder.update({ where: { id: orderId }, data });
+  return NextResponse.json(updated);
+}
+
+// 培養上清液注文の削除（SUPER_ADMIN専用）
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!session?.user || role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "権限がありません（全権限者専用）" }, { status: 403 });
+  }
+
+  const { id, orderId } = await params;
+  const order = await prisma.cultureFluidOrder.findFirst({ where: { id: orderId, userId: id } });
+  if (!order) return NextResponse.json({ error: "注文が見つかりません" }, { status: 404 });
+
+  await prisma.cultureFluidOrder.delete({ where: { id: orderId } });
+  return NextResponse.json({ success: true });
+}
+
 // 培養上清液注文ステータス更新
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string; orderId: string }> }) {
   const session = await getServerSession(authOptions);

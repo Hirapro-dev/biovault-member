@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
+import { normalizeScheme } from "@/lib/scheme";
 
 // 会員詳細取得
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -81,6 +82,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (body.salesRepName !== undefined) userData.salesRepName = body.salesRepName || null;
     if (body.paymentMethod !== undefined) userData.paymentMethod = body.paymentMethod || null;
     if (body.paymentDate !== undefined) userData.paymentDate = body.paymentDate ? new Date(body.paymentDate) : null;
+    // 流入スキーム（SCPP / MRT）の切替
+    if (body.scheme !== undefined) userData.scheme = normalizeScheme(body.scheme);
   }
 
   if (Object.keys(userData).length > 0) {

@@ -20,6 +20,8 @@ import DeleteAccount from "./DeleteAccount";
 import CultureFluidStatusManager from "./CultureFluidStatusManager";
 import StatusTabs from "./StatusTabs";
 import SuperAdminEditSection from "./SuperAdminEditSection";
+import StatusHistoryEditor from "./StatusHistoryEditor";
+import CultureFluidFreeEditor from "./CultureFluidFreeEditor";
 import PurchaseHistory from "@/components/purchase/PurchaseHistory";
 
 export default async function MemberKartePage({
@@ -171,6 +173,7 @@ export default async function MemberKartePage({
             referredByAgency: user.referredByAgency || null,
             salesRepName: user.salesRepName || null,
             paymentMethod: user.paymentMethod || null,
+            scheme: user.scheme === "MRT" ? "MRT" : "SCPP",
           }}
           membership={membership ? {
             memberNumber: membership.memberNumber,
@@ -182,8 +185,52 @@ export default async function MemberKartePage({
             storageYears: membership.storageYears,
             clinicDate: membership.clinicDate ? membership.clinicDate.toISOString() : null,
             clinicName: membership.clinicName || null,
+            serviceAppliedAt: membership.serviceAppliedAt ? membership.serviceAppliedAt.toISOString() : null,
+            consentSignedAt: membership.consentSignedAt ? membership.consentSignedAt.toISOString() : null,
+            contractSignedAt: membership.contractSignedAt ? membership.contractSignedAt.toISOString() : null,
+            ipsCompletedAt: membership.ipsCompletedAt ? membership.ipsCompletedAt.toISOString() : null,
+            storageStartAt: membership.storageStartAt ? membership.storageStartAt.toISOString() : null,
           } : null}
         />
+      )}
+
+      {/* ステータス履歴・培養上清液の直接編集 — SUPER_ADMINのみ */}
+      {adminUser.role === "SUPER_ADMIN" && (
+        <div className="mt-3 flex flex-wrap gap-3">
+          <StatusHistoryEditor
+            userId={user.id}
+            entries={[...user.statusHistory]
+              .sort((a, b) => a.changedAt.getTime() - b.changedAt.getTime())
+              .map((h) => ({
+                fromStatus: h.fromStatus,
+                toStatus: h.toStatus,
+                note: h.note,
+                changedBy: h.changedBy,
+                changedAt: h.changedAt.toISOString(),
+              }))}
+          />
+          <CultureFluidFreeEditor
+            userId={user.id}
+            orders={user.cultureFluidOrders.map((o) => ({
+              id: o.id,
+              planType: o.planType,
+              planLabel: o.planLabel,
+              totalAmount: o.totalAmount,
+              paymentStatus: o.paymentStatus,
+              status: o.status,
+              completedSessions: o.completedSessions,
+              sessionDates: o.sessionDates,
+              createdAt: o.createdAt.toISOString(),
+              paidAt: o.paidAt ? o.paidAt.toISOString() : null,
+              producedAt: o.producedAt ? o.producedAt.toISOString() : null,
+              storageStartedAt: o.storageStartedAt ? o.storageStartedAt.toISOString() : null,
+              expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
+              completedAt: o.completedAt ? o.completedAt.toISOString() : null,
+              clinicDate: o.clinicDate ? o.clinicDate.toISOString() : null,
+              clinicName: o.clinicName,
+            }))}
+          />
+        </div>
       )}
 
       {/* 購入履歴 */}

@@ -38,6 +38,7 @@ interface Props {
     referredByAgency: string | null;
     salesRepName: string | null;
     paymentMethod: string | null;
+    scheme: "SCPP" | "MRT";
   };
   membership: {
     memberNumber: string;
@@ -49,6 +50,11 @@ interface Props {
     storageYears: number;
     clinicDate: string | null;
     clinicName: string | null;
+    serviceAppliedAt: string | null;
+    consentSignedAt: string | null;
+    contractSignedAt: string | null;
+    ipsCompletedAt: string | null;
+    storageStartAt: string | null;
   } | null;
 }
 
@@ -77,6 +83,7 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
     referredByAgency: user.referredByAgency || "",
     salesRepName: user.salesRepName || "",
     paymentMethod: user.paymentMethod || "bank_transfer",
+    scheme: user.scheme,
   });
 
   // 契約情報フォーム
@@ -88,6 +95,12 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
     ipsStatus: membership?.ipsStatus || "REGISTERED",
     contractDate: membership?.contractDate?.split("T")[0] || "",
     storageYears: membership?.storageYears || 10,
+    serviceAppliedAt: membership?.serviceAppliedAt?.split("T")[0] || "",
+    consentSignedAt: membership?.consentSignedAt?.split("T")[0] || "",
+    contractSignedAt: membership?.contractSignedAt?.split("T")[0] || "",
+    clinicDate: membership?.clinicDate?.split("T")[0] || "",
+    ipsCompletedAt: membership?.ipsCompletedAt?.split("T")[0] || "",
+    storageStartAt: membership?.storageStartAt?.split("T")[0] || "",
   });
 
   const handleSave = async () => {
@@ -113,6 +126,7 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
         payload.referredByAgency = userForm.referredByAgency || null;
         payload.salesRepName = userForm.salesRepName || null;
         payload.paymentMethod = userForm.paymentMethod || null;
+        payload.scheme = userForm.scheme;
       } else {
         payload.membership = {
           memberNumber: contractForm.memberNumber,
@@ -122,6 +136,12 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
           ipsStatus: contractForm.ipsStatus,
           contractDate: contractForm.contractDate || null,
           storageYears: Number(contractForm.storageYears),
+          serviceAppliedAt: contractForm.serviceAppliedAt || null,
+          consentSignedAt: contractForm.consentSignedAt || null,
+          contractSignedAt: contractForm.contractSignedAt || null,
+          clinicDate: contractForm.clinicDate || null,
+          ipsCompletedAt: contractForm.ipsCompletedAt || null,
+          storageStartAt: contractForm.storageStartAt || null,
         };
       }
 
@@ -253,6 +273,14 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
                   <label className="block text-[10px] text-text-muted mb-1">担当営業者名</label>
                   <input value={userForm.salesRepName} onChange={(e) => setUserForm(f => ({ ...f, salesRepName: e.target.value }))} className={ic} />
                 </div>
+                <div>
+                  <label className="block text-[10px] text-text-muted mb-1">流入スキーム（契約主体）</label>
+                  <select value={userForm.scheme} onChange={(e) => setUserForm(f => ({ ...f, scheme: e.target.value as "SCPP" | "MRT" }))} className={ic + " cursor-pointer"}>
+                    <option value="SCPP">SCPP（株式会社SCPP）</option>
+                    <option value="MRT">MRT（株式会社MRT）</option>
+                  </select>
+                  <p className="text-[9px] text-text-muted mt-1">会員一覧の流入バッジ・絞り込み、同意書/特商法表記の会社名に反映されます。</p>
+                </div>
                 <div className="flex items-center gap-2 py-1">
                   <input type="checkbox" id="agreedTerms" checked={userForm.hasAgreedTerms} onChange={(e) => setUserForm(f => ({ ...f, hasAgreedTerms: e.target.checked }))} className="cursor-pointer" />
                   <label htmlFor="agreedTerms" className="text-xs text-text-secondary cursor-pointer">重要事項説明に同意済み</label>
@@ -300,6 +328,37 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
                   <div>
                     <label className="block text-[10px] text-text-muted mb-1">保管年数</label>
                     <input type="number" value={contractForm.storageYears} onChange={(e) => setContractForm(f => ({ ...f, storageYears: Number(e.target.value) }))} min={1} className={ic + " font-mono"} />
+                  </div>
+                </div>
+
+                {/* 会員の歩み（各種日付）— 空欄で未設定（クリア） */}
+                <div className="pt-3 mt-1 border-t border-border">
+                  <p className="text-[10px] text-gold mb-2 tracking-wider">会員の歩み（日付）</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">iPSサービス申込日</label>
+                      <input type="date" value={contractForm.serviceAppliedAt} onChange={(e) => setContractForm(f => ({ ...f, serviceAppliedAt: e.target.value }))} className={ic} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">同意書署名日</label>
+                      <input type="date" value={contractForm.consentSignedAt} onChange={(e) => setContractForm(f => ({ ...f, consentSignedAt: e.target.value }))} className={ic} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">契約署名日</label>
+                      <input type="date" value={contractForm.contractSignedAt} onChange={(e) => setContractForm(f => ({ ...f, contractSignedAt: e.target.value }))} className={ic} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">採血日（クリニック）</label>
+                      <input type="date" value={contractForm.clinicDate} onChange={(e) => setContractForm(f => ({ ...f, clinicDate: e.target.value }))} className={ic} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">iPS細胞 完成日</label>
+                      <input type="date" value={contractForm.ipsCompletedAt} onChange={(e) => setContractForm(f => ({ ...f, ipsCompletedAt: e.target.value }))} className={ic} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">保管開始日</label>
+                      <input type="date" value={contractForm.storageStartAt} onChange={(e) => setContractForm(f => ({ ...f, storageStartAt: e.target.value }))} className={ic} />
+                    </div>
                   </div>
                 </div>
               </div>
