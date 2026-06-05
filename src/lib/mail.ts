@@ -620,43 +620,98 @@ TEL: ${company.phone}
 MAIL: ${company.supportEmail}
 ──────────────────`;
 
+  // 白ベース + ブランドグラデのHTMLメール(スマホ最適化 / テーブル+インラインCSS)
+  //  - グラデは対応クライアントのみ表示。非対応(Outlook等)は background-color にフォールバック
+  //  - ID/パスワードは画像でなくテキスト(画像ブロック時も確実に読める)
   const bodyHtml = `
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#070709;color:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <img src="https://member.biovault.jp/logo.png" alt="BioVault" style="height:40px;width:auto;" />
-      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#BFA04B,transparent);margin:12px auto;"></div>
-    </div>
-    <div style="background:#111116;border:1px solid #2A2A38;border-radius:8px;padding:32px 24px;">
-      <p style="font-size:16px;color:#ffffff;margin:0 0 8px;">${name} 様</p>
-      <p style="font-size:14px;color:#D5D5DE;line-height:1.8;margin:0 0 24px;">
-        BioVault メンバーシップへようこそ。<br>
-        会員アカウントが発行されました。
-      </p>
-      <div style="background:#1A1A22;border:1px solid #2A2A38;border-radius:6px;padding:20px;margin-bottom:24px;">
-        <div style="font-size:11px;color:#A0A0B0;margin-bottom:4px;">ログインID</div>
-        <div style="font-size:18px;color:#BFA04B;font-family:monospace;letter-spacing:2px;margin-bottom:16px;">${loginId}</div>
-        <div style="font-size:11px;color:#A0A0B0;margin-bottom:4px;">パスワード</div>
-        <div style="font-size:14px;color:#BFA04B;font-family:monospace;letter-spacing:1px;">${password}</div>
-      </div>
-      <div style="text-align:center;margin:24px 0;">
-        <a href="https://member.biovault.jp/login" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#BFA04B,#8F7A3E);color:#070709;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:2px;border-radius:4px;">ログインページへ</a>
-      </div>
-      <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        ※ 初回ログイン後、パスワードの変更をお願いいたします。<br>
-        ※ ログイン情報は第三者に知られないよう大切に管理してください。
-      </p>
-    </div>
-    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A38;text-align:center;">
-      <p style="font-size:12px;color:#A0A0B0;line-height:1.8;margin:0;">
-        BioVault（${company.name}）<br>
-        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
-      </p>
-    </div>
-  </div>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${subject}</title>
+  <style>
+    body { margin:0; padding:0; width:100% !important; }
+    a { text-decoration:none; }
+    @media only screen and (max-width:600px) {
+      .fb-container { width:100% !important; }
+      .fb-pad { padding-left:18px !important; padding-right:18px !important; }
+      .fb-box-col { max-width:100% !important; margin-right:0 !important; }
+      .fb-cred { margin-bottom:34px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6f8;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <div class="fb-container" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(26,21,187,0.08);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <!-- バナー(ブランドグラデ + テキストロゴ / 左寄せ・低め) -->
+          <tr>
+            <td align="left" style="background-color:#4f1ee6;background-image:linear-gradient(120deg,#5800FF 0%,#3a44d4 50%,#5CE1E6 100%);padding:22px 26px;text-align:left;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:500;color:#ffffff;letter-spacing:1px;line-height:1.1;">BioVault</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;color:#ffffff;opacity:0.9;margin-top:6px;">Membership Service</div>
+            </td>
+          </tr>
+          <!-- 本文 -->
+          <tr>
+            <td class="fb-pad" style="padding:32px 28px 8px;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;">
+              <p style="font-size:17px;color:#1a1a1a;margin:0 0 10px;font-weight:600;">${name} 様</p>
+              <p style="font-size:14px;color:#4a4a4a;line-height:1.9;margin:0 0 24px;">
+                BioVault メンバーシップへようこそ。<br>
+                会員アカウントが発行されました。以下の情報でログインしてください。
+              </p>
+              <!-- ID/パスワード(テキスト) + 人物 / フルイドハイブリッド + direction:rtl:
+                   PC=ID/パス左・人物右、SP=人物が上(中央)→ID/パスが下 に並ぶ。
+                   DOMは人物→ボックスの順。direction:rtl でPCは右→左に並べ替え、
+                   SPは縦積みで DOM順(人物が上) になる。 -->
+              <div class="fb-cred" style="font-size:0;text-align:center;direction:rtl;margin:0;">
+                <div style="display:inline-block;width:100%;max-width:200px;vertical-align:middle;direction:ltr;text-align:center;">
+                  <img src="https://member.biovault.jp/nagashima02-mail.png" alt="" width="180" style="display:block;width:200px;max-width:100%;height:auto;margin:0 auto -20px;" />
+                </div><div class="fb-box-col" style="display:inline-block;width:100%;max-width:280px;vertical-align:middle;direction:ltr;text-align:left;margin-right: 40px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f5fb;border:1px solid #e6e7f2;border-radius:10px;">
+                    <tr>
+                      <td style="padding:22px 20px;">
+                        <div style="font-size:11px;color:#888888;letter-spacing:1px;margin-bottom:5px;">ログインID</div>
+                        <div style="font-size:19px;color:#1A15BB;font-family:'Courier New',monospace;letter-spacing:2px;font-weight:700;margin-bottom:18px;">${loginId}</div>
+                        <div style="font-size:11px;color:#888888;letter-spacing:1px;margin-bottom:5px;">パスワード</div>
+                        <div style="font-size:16px;color:#1A15BB;font-family:'Courier New',monospace;letter-spacing:1px;font-weight:700;">${password}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <!-- ボタン(ブランドグラデ) -->
+              <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td align="center" style="background-color:#5800FF;background-image:linear-gradient(90deg,#5800FF,#5CE1E6);border-radius:999px;">
+                    <a href="https://member.biovault.jp/login" style="display:inline-block;padding:14px 40px;color:#ffffff;font-size:14px;font-weight:700;letter-spacing:2px;">ログインページへ</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:12px;color:#888888;line-height:1.9;margin:0 0 24px;">
+                ※ 初回ログイン後、パスワードの変更をお願いいたします。<br>
+                ※ ログイン情報は第三者に知られないよう大切に管理してください。
+              </p>
+            </td>
+          </tr>
+          <!-- フッター -->
+          <tr>
+            <td class="fb-pad" style="padding:22px 28px 30px;border-top:1px solid #eeeef3;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;text-align:center;">
+              <p style="font-size:12px;color:#888888;line-height:1.9;margin:0;">
+                BioVault（${company.name}）<br>
+                TEL: ${company.phone} ／ MAIL: ${company.supportEmail}
+              </p>
+              <p style="font-size:11px;color:#b0b0b8;letter-spacing:1px;margin:14px 0 0;">&copy; 2025 ${company.shortName} Inc. All Rights Reserved.</p>
+            </td>
+          </tr>
+        </table>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 

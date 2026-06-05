@@ -322,14 +322,14 @@
   position: absolute;
   right: 8px;
   bottom: 0;
-  width: 180px;
+  width: 155px;
   pointer-events: none;
 }
 
 @media (min-width: 768px) {
   .v2-scope .v2-header-image {
     right: 12px;
-    width: 300px;
+    width: 250px;
   }
 }
 
@@ -986,7 +986,7 @@
   background-color: var(--v2-bg-card);
   border-radius: 14px;
   padding: 22px 20px;
-  margin-top: -100px;
+  margin-top: -30px;
   position: relative;
   z-index: 2;
   /* フォームページのカード(.v2-section)と同じ青みの多層シャドウ */
