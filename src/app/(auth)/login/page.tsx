@@ -108,7 +108,7 @@ function LoginPage() {
             src="/nagashima_login.png"
             alt=""
             aria-hidden="true"
-            className="lg:hidden absolute top-[5%] right-[-6%] h-[46vh] w-auto object-contain object-top z-0 opacity-95 pointer-events-none select-none"
+            className="lg:hidden absolute top-[2%] right-[-4%] w-[50%] max-w-[230px] h-auto object-contain object-top z-0 opacity-95 pointer-events-none select-none"
           />
           {/* ロゴ(上 / SPは小さめ) */}
           <div
@@ -130,7 +130,7 @@ function LoginPage() {
           </div>
 
           {/* メインコピー + カード(SPはロゴ下から / PCは上下中央) */}
-          <div className="relative z-20 min-h-screen flex items-start lg:items-center justify-center lg:justify-start pt-[76px] lg:pt-0 pb-12 lg:pb-0">
+          <div className="relative z-20 min-h-screen flex items-start lg:items-center justify-center lg:justify-start pt-[80px] lg:pt-0 pb-12 lg:pb-0">
             <div className="w-full max-w-[500px] animate-fade-in">
               {/* メインコピー(SPは幅を制限して折返し&人物と干渉回避 / 影で可読性確保) */}
               <div
@@ -138,7 +138,7 @@ function LoginPage() {
                 style={{ textShadow: "0 2px 14px rgba(0,0,0,0.45)" }}
               >
                 <h1
-                  className="text-white font-medium leading-[1.35] whitespace-nowrap text-[24px] lg:text-[48px]"
+                  className="text-white font-bold leading-[1.35] whitespace-nowrap text-[24px] lg:text-[48px]"
                   style={{
                     fontFamily: "var(--font-serif-jp)",
                     letterSpacing: "0.03em",
@@ -148,7 +148,7 @@ function LoginPage() {
                   <br />
                   資産化する時代。
                 </h1>
-                <p className="text-white/90 mt-4 leading-[1.9] text-[14px] lg:text-[16px]">
+                <p className="text-white/90 mt-2 leading-[1.9] text-[14px] lg:text-[16px]">
                   自分由来のiPS細胞を作製し
                   <br className="lg:hidden" />
                   「細胞資産」として保有する、
@@ -240,10 +240,6 @@ function LoginPage() {
         </div>
       </div>
 
-      {/* コピーライト(ページ下部・中央) */}
-      <div className="absolute bottom-5 inset-x-0 z-20 text-center text-[11px] tracking-wider text-white/70 pointer-events-none">
-        &copy; 2025 SCPP Inc. All Rights Reserved.
-      </div>
     </div>
   );
 }
