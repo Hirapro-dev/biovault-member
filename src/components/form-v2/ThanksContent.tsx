@@ -17,16 +17,18 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { getCompany, type SchemeKey } from "@/lib/scheme";
+import { getSchemePathPrefix, type SchemeKey } from "@/lib/scheme";
 
 type ThanksContentProps = {
-  /** SCPP / MRT。お問い合わせカードの文言などで利用する余地を持たせる(現状は未使用) */
+  /** SCPP / MRT。お問い合わせフォームへのリンク先(/ または /m 配下)を切り替える */
   scheme?: SchemeKey;
 };
 
 export default function ThanksContent({ scheme = "SCPP" }: ThanksContentProps) {
-  // 将来お問い合わせカードに会社名や連絡先を出す可能性に備えて取得
-  void getCompany(scheme);
+  // スキームに応じてお問い合わせフォームのパスを切り替える
+  //  - SCPP: /form/contact
+  //  - MRT : /m/form/contact
+  const contactHref = `${getSchemePathPrefix(scheme)}/form/contact`;
 
   return (
     <div className="v2-thanks">
@@ -64,7 +66,7 @@ export default function ThanksContent({ scheme = "SCPP" }: ThanksContentProps) {
               ご不明点などございましたら、以下お問合せフォームよりお気軽にお問合せくださいませ。
             </p>
             <Link
-              href="/form-v2-preview/contact"
+              href={contactHref}
               className="v2-btn-primary v2-contact-card-btn"
             >
               お問い合わせはこちら
