@@ -488,3 +488,167 @@ MAIL: ${company.supportEmail}
 
   return { subject, bodyText, bodyHtml };
 }
+
+export function contactInquiryAdminEmail(
+  name: string,
+  email: string,
+  message: string,
+  scheme?: SchemeKey,
+  sentAt: Date = new Date()
+) {
+  const company = getCompany(scheme);
+  const subject = `【BioVaultメンバーシップ】お問合せを承りました。${name}様`;
+  const sentAtStr = sentAt.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+
+  const bodyText = `BioVault メンバーシップサイトよりお問い合わせを受け付けました。
+
+──────────────────
+■ 送信日時
+${sentAtStr}
+
+■ スキーム
+${company.shortName}(${company.name})
+
+■ お名前
+${name} 様
+
+■ メールアドレス
+${email}
+
+■ お問い合わせ内容
+${message}
+──────────────────
+
+※ このメールは自動送信されています。`;
+
+  const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
+    <h1 style="font-size:18px;color:#1A1A1A;margin:0 0 24px;border-bottom:2px solid #F08301;padding-bottom:8px;">
+      お問い合わせを受け付けました
+    </h1>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#1A1A1A;">
+      <tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;width:140px;border-bottom:1px solid #E5E0D5;">送信日時</th>
+        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${sentAtStr}</td>
+      </tr>
+      <tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">スキーム</th>
+        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${company.shortName}(${company.name})</td>
+      </tr>
+      <tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">お名前</th>
+        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(name)} 様</td>
+      </tr>
+      <tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">メール</th>
+        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(email)}</td>
+      </tr>
+      <tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;vertical-align:top;">お問い合わせ内容</th>
+        <td style="padding:10px 12px;white-space:pre-wrap;">${escapeHtml(message)}</td>
+      </tr>
+    </table>
+    <p style="font-size:11px;color:#888888;margin-top:24px;text-align:center;">
+      ※ このメールは自動送信されています。
+    </p>
+  </div>
+</body>
+</html>`;
+
+  return { subject, bodyText, bodyHtml };
+}
+
+/**
+ * お問い合わせ送信者(顧客)向け自動返信メール
+ *  - 宛先: 入力されたメールアドレス
+ *  - 件名: 【BioVault】お問合せを承りました。
+ */
+export function contactInquiryCustomerEmail(name: string, message: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
+  const subject = "【BioVault】お問合せを承りました。";
+
+  const bodyText = `${name} 様
+
+この度はBioVaultメンバーシップサイトへ
+お問い合わせいただき、誠にありがとうございます。
+
+下記の内容にてお問い合わせを承りました。
+内容を確認の上、担当者より改めてご連絡させていただきます。
+
+──────────────────
+■ お問い合わせ内容
+${message}
+──────────────────
+
+ご返信までしばらくお時間をいただく場合がございます。
+何卒よろしくお願い申し上げます。
+
+
+──────────────────
+BioVault(${company.name})
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
+〒${company.postalCode} ${company.address}
+──────────────────
+
+※ このメールは自動送信されています。
+※ このメールに心当たりがない場合は、お手数ですが上記連絡先までご連絡ください。`;
+
+  const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:'Cormorant Garamond','Noto Serif JP',serif;font-size:28px;color:#1A1A1A;letter-spacing:0.04em;">BioVault</div>
+      <div style="font-family:'Cormorant Garamond','Noto Serif JP',serif;font-size:14px;color:#888888;letter-spacing:0.2em;margin-top:4px;">Membership Service</div>
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#F08301,transparent);margin:12px auto;"></div>
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #F5A04A;border-radius:6px;padding:28px 24px;">
+      <p style="font-size:16px;color:#1A1A1A;margin:0 0 20px;">${escapeHtml(name)} 様</p>
+      <p style="font-size:14px;color:#4A4A4A;line-height:1.9;margin:0 0 16px;">
+        この度はBioVaultメンバーシップサイトへお問い合わせいただき、誠にありがとうございます。
+      </p>
+      <p style="font-size:14px;color:#4A4A4A;line-height:1.9;margin:0 0 16px;">
+        下記の内容にてお問い合わせを承りました。<br>
+        内容を確認の上、担当者より改めてご連絡させていただきます。
+      </p>
+      <div style="background:#F5F0E6;border-left:3px solid #F08301;padding:14px 16px;margin:20px 0;">
+        <div style="font-size:12px;color:#C26800;font-weight:700;margin-bottom:6px;">■ お問い合わせ内容</div>
+        <div style="font-size:14px;color:#1A1A1A;line-height:1.8;white-space:pre-wrap;">${escapeHtml(message)}</div>
+      </div>
+      <p style="font-size:13px;color:#4A4A4A;line-height:1.8;margin:0;">
+        ご返信までしばらくお時間をいただく場合がございます。何卒よろしくお願い申し上げます。
+      </p>
+    </div>
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid #EFEAE0;text-align:center;">
+      <p style="font-size:12px;color:#888888;line-height:1.8;margin:0;">
+        BioVault(${company.name})<br>
+        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}<br>
+        〒${company.postalCode} ${company.address}
+      </p>
+      <p style="font-size:10px;color:#A0A0A0;margin-top:16px;">
+        ※ このメールは自動送信されています。
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return { subject, bodyText, bodyHtml };
+}
+
+/** HTMLメール本文に入力値を埋め込む際の最低限のエスケープ */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}

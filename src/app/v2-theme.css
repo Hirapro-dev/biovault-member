@@ -1,0 +1,1096 @@
+/**
+ * v2-theme.css
+ *
+ * デザイン刷新版(v2)専用のテーマ定義。
+ * 本番デザイン(globals.css)への影響を完全に避けるため、
+ * 全てのスタイルは `.v2-scope` クラス配下にスコープされています。
+ *
+ * 使い方:
+ *   1) 新規ルートのレイアウト/ページで本ファイルを import する
+ *   2) 最外側の要素に className="v2-scope" を付与する
+ *   3) 配下では v2- プレフィックスのユーティリティが使用可能
+ *
+ * デザイン方針:
+ *   - 黒×ゴールド(高級感) → 白ベース+ゴールド差し色(カジュアル+快活)
+ *   - 長嶋一茂氏のベージュジャケットと調和するウォームトーン
+ *   - 既存のゴールド資産は活かしつつ、明度を上げて親しみやすく
+ */
+
+.v2-scope {
+  /* ── ベース配色: 白基調 ────────────────────────────── */
+  --v2-bg-base: #FFFFFF;          /* メインの背景(オフホワイト寄り) */
+  --v2-bg-soft: #FAF8F4;          /* セクション背景(ほんのりウォーム) */
+  --v2-bg-card: #FFFFFF;          /* カード/フォーム枠の背景 */
+  --v2-bg-elevated: #F5F0E6;      /* 強調エリア(ベージュ寄り) */
+  --v2-bg-dark: #0A0A0A;          /* ヘッダー等の黒帯(既存トーン継承) */
+
+  /* ── アクセントカラー(オレンジ系・MRT版) ─────────── */
+  --v2-gold: #1A15BB;             /* メインアクセント(ブランドブルー) */
+  --v2-gold-light: #4A44D6;       /* ライト(明色) */
+  --v2-gold-dark: #130F8C;        /* ダーク(強調文字) */
+  --v2-gold-border: #6E68E0;      /* フォーム枠用(やや薄め) */
+
+  /* ── テキスト ───────────────────────────────────── */
+  --v2-text-primary: #1A1A1A;     /* 本文(濃いブラック) */
+  --v2-text-secondary: #4A4A4A;   /* セカンダリ */
+  --v2-text-muted: #888888;       /* 補足テキスト */
+  --v2-text-on-dark: #FFFFFF;     /* 黒帯上の白文字 */
+  --v2-text-on-gold: #FFFFFF;     /* ゴールドボタン上の白文字 */
+
+  /* ── 区切り線・ボーダー ─────────────────────────── */
+  --v2-border: #E5E0D5;           /* 通常のボーダー */
+  --v2-border-soft: #EFEAE0;      /* やわらかい区切り */
+  --v2-border-strong: #1A1A1A;    /* 見出し下線 */
+
+  /* ── ステータス ─────────────────────────────────── */
+  --v2-required: #E53E3E;         /* 必須マーク */
+  --v2-success: #2E7D5B;          /* 成功(深めグリーン) */
+  --v2-warning: #D97706;          /* 警告(オレンジ) */
+  --v2-info: #2563EB;             /* 情報(青) */
+
+  /* ── アクセントカラー(快活な印象を演出) ──────────── */
+  --v2-accent-warm: #F5EFE6;      /* ウォームベージュ(画像背景の溶け込み用) */
+  --v2-accent-fresh: #4AA1A8;     /* フレッシュなターコイズ(差し色) */
+
+  /* ── 影 ─────────────────────────────────────────── */
+  --v2-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --v2-shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --v2-shadow-button: 0 2px 4px rgba(26, 21, 187, 0.25);
+
+  /* ── 配置 ───────────────────────────────────────── */
+  --v2-radius-sm: 4px;
+  --v2-radius-md: 6px;
+  --v2-radius-lg: 12px;
+  --v2-max-width: 960px;          /* PCコンテンツ最大幅(バナー全体・サンクス等) */
+  --v2-form-max-width: 960px;     /* (旧)フォーム部分の最大幅 */
+  --v2-content-width: 640px;      /* バナー内容・導入文・フォームの最大幅(細め) */
+
+  /* ── 基本適用(スコープ内のみ) ─────────────────── */
+  background-color: var(--v2-bg-base);
+  color: var(--v2-text-primary);
+  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ───────────────────────────────────────────────────
+ * v2 専用ユーティリティクラス
+ * (Tailwind に依存せず、生CSS で完結させる)
+ * ─────────────────────────────────────────────────── */
+
+/* レイアウト */
+.v2-scope .v2-container {
+  max-width: var(--v2-max-width);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+/* フォームコンテナ
+ *  - PC: 1080pxの幅をBoxがそのまま使う(左右パディングなし、外側余白は不要)
+ *  - SP: 画面幅に対して20pxの最小パディング
+ */
+.v2-scope .v2-form-container {
+  max-width: var(--v2-content-width);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+@media (min-width: 1120px) {
+  .v2-scope .v2-form-container {
+    padding-inline: 0;
+  }
+}
+
+/* バナーヘッダー
+ *  - form-header-bg のダークなウェーブ背景を全幅に敷く(PC/SP で画像切替)
+ *  - 左上: ブランドロックアップ / 中央左: タイトル + 区切り線 / 右: 人物画像
+ */
+.v2-scope .v2-header {
+  position: relative;
+  background-color: #0a1733;
+  background-image: url("/form-header-bg-sp.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--v2-text-on-dark);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header {
+    background-image: url("/form-header-bg.png");
+  }
+}
+
+/* バナー背景動画(全面カバー・最背面。poster/背景PNGがフォールバック)
+ *  - 彩度を上げ、中央基準で拡大して鮮やかに見せる */
+.v2-scope .v2-header-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.92;
+  /* 中央寄せで拡大(SPは大きめ / PCは控えめ) / 彩度・コントラストを上げて鮮やかに */
+  transform: scale(1.8);
+  transform-origin: center;
+  filter: saturate(1.6) contrast(1.14);
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-video {
+    transform: scale(1);
+  }
+}
+
+/* ページ配色(パープル→ネイビー→シアン)に合わせたやんわりグラデーションの
+ *  オーバーレイ。動画を抑えつつ白文字の可読性も確保
+ *  (動画より前面 / コンテンツより背面) */
+.v2-scope .v2-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    rgba(91, 0, 255, 0.65) 0%,
+    rgba(67, 60, 220, 0.55) 48%,
+    rgba(92, 225, 230, 0.55) 100%
+  );
+}
+
+.v2-scope .v2-header-inner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--v2-content-width);
+  margin-inline: auto;
+  padding: 22px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-inner {
+    padding: 32px 20px 36px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .v2-scope .v2-header-inner {
+    padding-inline: 0;
+  }
+}
+
+/* バナー内容を広め(--v2-max-width)にする(サンクス画面など本文が広いページ用) */
+.v2-scope .v2-header.is-wide .v2-header-inner {
+  max-width: var(--v2-max-width);
+}
+
+/* 人物画像がある場合はバナーの高さを確保 */
+.v2-scope .v2-header.has-hero .v2-header-inner {
+  min-height: 215px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header.has-hero .v2-header-inner {
+    min-height: 350px;
+  }
+}
+
+/* 人物画像と重ならないようテキスト幅を制限 */
+.v2-scope .v2-header.has-hero .v2-header-text {
+  max-width: 62%;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header.has-hero .v2-header-text {
+    max-width: 64%;
+  }
+}
+
+.v2-scope .v2-header-logo {
+  margin-bottom: 14px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-logo {
+    margin-bottom: 22px;
+  }
+}
+
+.v2-scope .v2-header-brand {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  color: var(--v2-text-on-dark);
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-brand {
+    font-size: 32px;
+  }
+}
+
+.v2-scope .v2-header-tagline {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  font-weight: 400;
+  color: var(--v2-text-on-dark);
+  text-transform: none;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-tagline {
+    font-size: 16px;
+    letter-spacing: 0.2em;
+  }
+}
+
+/* バナー内ページタイトル(白・太ゴシック) */
+.v2-scope .v2-banner-title {
+  font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif;
+  font-size: 30px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin: 0;
+  /* 鮮やかな動画上でも白文字が沈まないよう軽い影 */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* 長い見出し(サンクス等・span複数行)は小さめ + 字間を詰めて行に収める */
+.v2-scope .v2-banner-title:has(.v2-banner-title-line) {
+  font-size: 24px;
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-banner-title {
+    font-size: 46px;
+    line-height: 1.22;
+  }
+  /* 長い見出し(サンクス等・span複数行)はPCで少し小さめ */
+  .v2-scope .v2-banner-title:has(.v2-banner-title-line) {
+    font-size: 36px;
+  }
+}
+
+/* バナータイトルの改行制御(長い見出し用)
+ *  - span は inline、PC/SP とも br で2行に揃える */
+.v2-scope .v2-banner-title-line {
+  display: inline;
+}
+
+.v2-scope .v2-banner-title-br-pc {
+  display: inline;
+}
+
+/* タイトル下の区切り線 */
+.v2-scope .v2-banner-line {
+  display: block;
+  height: 1px;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.12)
+  );
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-banner-line {
+    max-width: 440px;
+    margin-top: 22px;
+  }
+}
+
+/* バナー右の人物画像(絶対配置・下端揃え) */
+.v2-scope .v2-header-image {
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  width: 155px;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header-image {
+    right: 12px;
+    width: 250px;
+  }
+}
+
+.v2-scope .v2-header-image img {
+  display: block;
+}
+
+/* compact(モバイルのみ): ロゴだけの低いバナーへ簡略化 */
+@media (max-width: 767px) {
+  .v2-scope .v2-header.is-compact .v2-banner-title,
+  .v2-scope .v2-header.is-compact .v2-banner-line,
+  .v2-scope .v2-header.is-compact .v2-header-image {
+    display: none;
+  }
+  .v2-scope .v2-header.is-compact .v2-header-logo {
+    margin-bottom: 0;
+  }
+  .v2-scope .v2-header.is-compact.has-hero .v2-header-inner {
+    min-height: 0;
+  }
+  .v2-scope .v2-header.is-compact .v2-header-inner {
+    padding: 16px 20px;
+  }
+}
+
+/* バナー下の導入説明文(白地)
+ *  - 左端をバナーのロゴ・フォームカードと揃える
+ */
+.v2-scope .v2-intro {
+  max-width: var(--v2-content-width);
+  margin-inline: auto;
+  padding: 28px 20px 4px;
+}
+
+.v2-scope .v2-intro-desc {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--v2-text-primary);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-intro {
+    padding: 36px 20px 4px;
+  }
+  .v2-scope .v2-intro-desc {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .v2-scope .v2-intro {
+    padding-inline: 0;
+  }
+}
+
+/* フォームコンテナをヒーロー画像より前面に持ち上げる
+ *  - PCで画像下端がフォームBoxに食い込んでも、Boxが上に重なって見えるように
+ */
+.v2-scope .v2-form-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* セクション(フォーム枠)
+ *  - 2つ目以降のBoxは通常の余白
+ *  - 最初のBoxだけヒーロー画像に被せるためマイナスマージンを適用(:first-child)
+ */
+.v2-scope .v2-section {
+  background-color: var(--v2-bg-card);
+  border-radius: 0 0 16px 16px;
+  padding: 24px 20px 40px;
+  margin-bottom: 20px;
+  box-shadow:
+    0px 30px 60px -30px rgba(58, 52, 255, 0.1),
+    0px 40px 30px -15px rgba(58, 52, 255, 0.07),
+    0px 20px 15px -8px rgba(58, 52, 255, 0.05),
+    0px 10px 8px -4px rgba(58, 52, 255, 0.04),
+    0px 5px 4px -2px rgba(58, 52, 255, 0.03),
+    0px 2px 2px -1px rgba(58, 52, 255, 0.02);
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-section {
+    padding: 32px 28px 40px;
+  }
+}
+
+/* バナー直下に重ねて一体化させるカード(上端をバナー下端に少し食い込ませる) */
+.v2-scope .v2-card-connected {
+  margin-top: 0px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-card-connected {
+    margin-top: 0px;
+  }
+}
+
+/* カード冒頭のリード文(旧 .v2-intro をカード内に取り込んだもの) */
+.v2-scope .v2-section-lead {
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--v2-text-primary);
+  margin: 0 0 20px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-section-lead {
+    font-size: 16px;
+  }
+}
+
+.v2-scope .v2-section-title {
+  font-family: "Noto Sans JP", "Helvetica Neue", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--v2-text-primary);
+  border-bottom: 1px solid var(--v2-border);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  letter-spacing: 0.04em;
+}
+
+/* フィールド */
+.v2-scope .v2-field {
+  margin-bottom: 18px;
+}
+
+.v2-scope .v2-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--v2-text-primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.v2-scope .v2-required-mark {
+  color: var(--v2-required);
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.v2-scope .v2-input,
+.v2-scope .v2-select {
+  width: 100%;
+  padding: 11px 14px;
+  background-color: var(--v2-bg-card);
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius-sm);
+  color: var(--v2-text-primary);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.v2-scope .v2-input:focus,
+.v2-scope .v2-select:focus {
+  border-color: var(--v2-gold);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
+}
+
+.v2-scope .v2-input::placeholder {
+  color: var(--v2-text-muted);
+}
+
+/* textarea(.v2-input と併用) */
+.v2-scope .v2-textarea {
+  min-height: 160px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.v2-scope .v2-help {
+  font-size: 14px;
+  color: var(--v2-text-muted);
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* 注意書きボックス */
+.v2-scope .v2-notice {
+  background-color: rgba(28, 61, 119, 0.05);
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--v2-text-secondary);
+  margin-bottom: 16px;
+}
+
+/* ボタン */
+.v2-scope .v2-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0;
+  margin: auto;
+  background: linear-gradient(90deg, #5800FF 0%, #5CE1E6 100%);
+  color: var(--v2-text-on-gold);
+  border: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.05s ease, box-shadow 0.5s ease;
+  box-shadow:
+  0px 40px 30px -30px rgba(0, 0, 0, 0.08),
+  0px 30px 30px -15px rgba(0, 0, 0, 0.06),
+  0px 20px 15px -8px rgba(0, 0, 0, 0.04),
+  0px 10px 8px -4px rgba(0, 0, 0, 0.03),
+  0px 0px 4px -2px rgba(0, 0, 0, 0.02),
+  0px 2px 2px -1px rgba(0, 0, 0, 0.01);
+  font-family: inherit;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-btn-primary {
+    width: 60%;
+  }
+}
+
+.v2-scope .v2-btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow:
+  0px 30px 30px -30px rgba(0, 0, 0, 0.08),
+  0px 20px 30px -15px rgba(0, 0, 0, 0.06),
+  0px 10px 15px -8px rgba(0, 0, 0, 0.04),
+  0px 0px 8px -4px rgba(0, 0, 0, 0.03),
+  0px 0px 4px -2px rgba(0, 0, 0, 0.02),
+  0px 2px 2px -1px rgba(0, 0, 0, 0.01);
+}
+
+.v2-scope .v2-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.v2-scope .v2-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.v2-scope .v2-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 24px;
+  background-color: transparent;
+  color: var(--v2-text-secondary);
+  border: 1px solid var(--v2-border);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  font-family: inherit;
+}
+
+.v2-scope .v2-btn-secondary:hover {
+  border-color: var(--v2-gold);
+  color: var(--v2-text-primary);
+}
+
+.v2-scope .v2-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* 確認画面用のグループ表示 */
+.v2-scope .v2-confirm-group {
+  background-color: rgba(28, 61, 119, 0.05);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.v2-scope .v2-confirm-group-title {
+  font-size: 14px;
+  color: #1A15BB;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+.v2-scope .v2-confirm-row {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--v2-border-soft);
+}
+
+.v2-scope .v2-confirm-row:last-child {
+  border-bottom: none;
+}
+
+.v2-scope .v2-confirm-label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--v2-text-muted);
+}
+
+
+@media (min-width: 768px) {
+  .v2-scope .v2-confirm-label {
+    width: 120px;
+  }
+  .v2-scope .v2-confirm-value {
+    font-size: 16px;
+  }
+}
+.v2-scope .v2-confirm-value {
+  font-size: 14px;
+  color: var(--v2-text-primary);
+  flex: 1;
+  word-break: break-all;
+}
+
+/* 健康状態のセクション内見出し */
+.v2-scope .v2-subhead {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A15BB;
+  margin-bottom: 8px;
+}
+
+.v2-scope .v2-subnote {
+  font-size: 13px;
+  color: var(--v2-text-muted);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+/* ステップインジケーター
+ *  - フォームカードの外・白地に独立配置(説明文とカードの間)
+ *  - 円を均等に配置し、間の線を flex で伸ばして横幅いっぱいに広げる
+ *  - アクティブ円はバナーと調和するネイビー
+ */
+.v2-scope .v2-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 420px;
+  margin: 25px auto 30px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-steps {
+    width: 100%;
+    margin: 30px auto 30px;
+  }
+}
+
+.v2-scope .v2-step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: "DM Mono", monospace;
+  background-color: #ededed;
+  color: #9aa0a6;
+  transition: all 0.3s ease;
+}
+
+.v2-scope .v2-step-dot.is-active {
+  background: linear-gradient(90deg, #5800FF 0%, #5CE1E6 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(88, 0, 255, 0.3);
+}
+
+.v2-scope .v2-step-dot.is-done {
+  background-color: rgba(28, 61, 119, 0.14);
+  color: #27518f;
+}
+
+.v2-scope .v2-step-line {
+  flex: 1;
+  min-width: 16px;
+  height: 2px;
+  background-color: var(--v2-border);
+}
+
+.v2-scope .v2-step-line.is-done {
+  background-color: rgba(28, 61, 119, 0.35);
+}
+
+/* チェックボックス */
+.v2-scope .v2-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+/* チェックボックス
+ *  - 未チェック: 白背景 + グレーボーダー
+ *  - チェック  : 白背景 + オレンジボーダー + オレンジの ✓
+ *  - ブラウザ既定の黒背景を消すため appearance:none で自前描画
+ */
+.v2-scope .v2-checkbox-row input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--v2-border);
+  border-radius: 3px;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.v2-scope .v2-checkbox-row input[type="checkbox"]:hover {
+  border-color: var(--v2-gold-light);
+}
+
+.v2-scope .v2-checkbox-row input[type="checkbox"]:focus-visible {
+  outline: none;
+  border-color: var(--v2-gold);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
+}
+
+.v2-scope .v2-checkbox-row input[type="checkbox"]:checked {
+  background-color: var(--v2-gold);
+  border-color: var(--v2-gold);
+}
+
+.v2-scope .v2-checkbox-row input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 6px;
+  height: 11px;
+  border-right: 2.5px solid #FFFFFF;
+  border-bottom: 2.5px solid #FFFFFF;
+  transform: rotate(45deg);
+}
+
+.v2-scope .v2-checkbox-label {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--v2-text-secondary);
+}
+
+/* ラジオボタン横並び */
+.v2-scope .v2-radio-group {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.v2-scope .v2-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--v2-text-secondary);
+  cursor: pointer;
+}
+
+/* ラジオボタン
+ *  - 未チェック: 白背景 + グレーボーダー
+ *  - チェック  : 白背景 + オレンジボーダー + 中央にオレンジの●
+ *  - ブラウザ既定の黒背景を消すため appearance:none で自前描画
+ */
+.v2-scope .v2-radio-row input[type="radio"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #FFFFFF;
+  border: 1.5px solid var(--v2-border);
+  border-radius: 50%;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.v2-scope .v2-radio-row input[type="radio"]:hover {
+  border-color: var(--v2-gold-light);
+}
+
+.v2-scope .v2-radio-row input[type="radio"]:focus-visible {
+  outline: none;
+  border-color: var(--v2-gold);
+  box-shadow: 0 0 0 3px rgba(26, 21, 187, 0.15);
+}
+
+.v2-scope .v2-radio-row input[type="radio"]:checked {
+  border-color: var(--v2-gold);
+}
+
+.v2-scope .v2-radio-row input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--v2-gold);
+  transform: translate(-50%, -50%);
+}
+
+/* 日付3分割 */
+.v2-scope .v2-date-row {
+  display: flex;
+  gap: 8px;
+}
+
+.v2-scope .v2-date-row .v2-select {
+  flex: 1;
+}
+
+/* エラー表示 */
+.v2-scope .v2-error {
+  background-color: #FFF5F5;
+  border: 1px solid rgba(229, 62, 62, 0.3);
+  color: var(--v2-required);
+  padding: 12px 16px;
+  border-radius: var(--v2-radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* キャプション */
+.v2-scope .v2-caption {
+  font-size: 12px;
+  color: var(--v2-text-muted);
+  line-height: 1.7;
+}
+
+/* セパレーター(ゴールド細線) */
+.v2-scope .v2-divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--v2-gold), transparent);
+  margin-block: 16px;
+  border: none;
+}
+
+/* main 領域(導入文・フォーム本体・サンクス画面を内包)
+ *  - 背景は白基調 + main-bg.mp4 を透過・明度を落として控えめに敷く
+ */
+.v2-scope .v2-main {
+  position: relative;
+  background-color: var(--v2-bg-base);
+}
+
+/* 背景動画層(自前で overflow:hidden してクリップ。
+ *  main 自体はクリップしないのでフォームカードの影は欠けない) */
+.v2-scope .v2-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* main 背景動画(全面カバー / そのままの色味で表示) */
+.v2-scope .v2-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* 上から白のグラデーションを重ね、上部は白・ページ下部ほど動画が見えるように
+ *  (動画より前面 / フォーム等コンテンツより背面) */
+.v2-scope .v2-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    var(--v2-bg-base) 0%,
+    var(--v2-bg-base) 62%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* main 直下コンテンツを背景動画より前面へ(.v2-form-container は別途 z-index:1) */
+.v2-scope .v2-intro,
+.v2-scope .v2-thanks {
+  position: relative;
+  z-index: 1;
+}
+
+/* ──────────────────────────────────────────────
+ * サンクス画面(申込完了)
+ *  - PC(>=768px) : 左テキスト + 右画像の2カラム / タイトル2行
+ *  - モバイル     : 縦積み(タイトル → 説明 → 注意 → 画像 → お問い合わせカード) / タイトル3行
+ * ────────────────────────────────────────────── */
+.v2-scope .v2-thanks {
+  max-width: var(--v2-max-width);
+  margin-inline: auto;
+  padding: 40px 20px 48px;
+}
+
+.v2-scope .v2-thanks-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-thanks-grid {
+    grid-template-columns: 1.4fr 1fr;
+    gap: 40px;
+  }
+}
+
+.v2-scope .v2-thanks-desc {
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--v2-text-primary);
+  margin: 0 0 18px;
+}
+
+.v2-scope .v2-thanks-note {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--v2-text-muted);
+  margin: 20px 0 0;
+}
+
+/* お問い合わせカード(サンクス画面内)
+ *  - モバイル: 上の画像に -80px で食い込ませる(画像下部とカード上部を重ねる演出)
+ *  - PC     : 通常の余白(下記 @media で上書き)
+ *  - 重ねたカードがクリックできるよう z-index で前面に
+ */
+.v2-scope .v2-contact-card {
+  background-color: var(--v2-bg-card);
+  border-radius: 14px;
+  padding: 22px 20px;
+  margin-top: -30px;
+  position: relative;
+  z-index: 2;
+  /* フォームページのカード(.v2-section)と同じ青みの多層シャドウ */
+  box-shadow:
+    0px 30px 60px -30px rgba(58, 52, 255, 0.1),
+    0px 40px 30px -15px rgba(58, 52, 255, 0.07),
+    0px 20px 15px -8px rgba(58, 52, 255, 0.05),
+    0px 10px 8px -4px rgba(58, 52, 255, 0.04),
+    0px 5px 4px -2px rgba(58, 52, 255, 0.03),
+    0px 2px 2px -1px rgba(58, 52, 255, 0.02);
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-contact-card {
+    margin-top: 24px;
+  }
+}
+
+.v2-scope .v2-contact-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--v2-text-primary);
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+.v2-scope .v2-contact-card-desc {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--v2-text-secondary);
+  margin: 0 0 16px;
+}
+
+/* a タグでも v2-btn-primary を使えるようにするための補助スタイル
+ *  (ボタンは v2-btn-primary のグラデーションをそのまま使用) */
+.v2-scope .v2-contact-card-btn {
+  text-decoration: none;
+  /* 基底の inline-flex を flex に上書きして margin auto を効かせ、中央寄せに */
+  display: flex;
+  max-width: 300px;
+  margin-inline: auto;
+}
+
+/* サンクス画面の画像
+ *  - モバイル: 注意書きとお問い合わせカードの間に縦並びで挿入
+ *  - PC     : 右カラム固定
+ */
+.v2-scope .v2-thanks-image-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 5px;
+}
+
+.v2-scope .v2-thanks-image {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  object-fit: contain;
+  object-position: top center;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-thanks-image-wrap {
+    margin-top: 0;
+  }
+  .v2-scope .v2-thanks-image {
+    max-width: 300px;
+    object-position: top right;
+  }
+}
+
+/* モバイル/PC の出し分けユーティリティ(サンクス画面の画像で使用) */
+.v2-scope .is-mobile-only {
+  display: flex;
+}
+
+.v2-scope .is-pc-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .is-mobile-only {
+    display: none;
+  }
+  .v2-scope .is-pc-only {
+    display: flex;
+  }
+}
+
+/* フッター(コピーライト表示) */
+.v2-scope .v2-footer {
+  width: 100%;
+  padding: 24px 20px;
+  border-top: 1px solid var(--v2-border-soft);
+  background-color: var(--v2-bg-base);
+}
+
+.v2-scope .v2-footer-inner {
+  max-width: var(--v2-max-width);
+  margin-inline: auto;
+  text-align: center;
+  font-size: 12px;
+  color: var(--v2-text-muted);
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
