@@ -521,41 +521,77 @@ ${message}
 
 ※ このメールは自動送信されています。`;
 
+  // 白ベース + ブランドグラデの管理者通知メール(顧客向け自動返信とデザイン統一)
   const bodyHtml = `
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-    <h1 style="font-size:18px;color:#1A1A1A;margin:0 0 24px;border-bottom:2px solid #F08301;padding-bottom:8px;">
-      お問い合わせを受け付けました
-    </h1>
-    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#1A1A1A;">
-      <tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;width:140px;border-bottom:1px solid #E5E0D5;">送信日時</th>
-        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${sentAtStr}</td>
-      </tr>
-      <tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">スキーム</th>
-        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${company.shortName}(${company.name})</td>
-      </tr>
-      <tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">お名前</th>
-        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(name)} 様</td>
-      </tr>
-      <tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;border-bottom:1px solid #E5E0D5;">メール</th>
-        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(email)}</td>
-      </tr>
-      <tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;vertical-align:top;">お問い合わせ内容</th>
-        <td style="padding:10px 12px;white-space:pre-wrap;">${escapeHtml(message)}</td>
-      </tr>
-    </table>
-    <p style="font-size:11px;color:#888888;margin-top:24px;text-align:center;">
-      ※ このメールは自動送信されています。
-    </p>
-  </div>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${subject}</title>
+  <style>
+    body { margin:0; padding:0; width:100% !important; }
+    a { text-decoration:none; }
+    @media only screen and (max-width:600px) {
+      .fb-container { width:100% !important; }
+      .fb-pad { padding-left:18px !important; padding-right:18px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6f8;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <div class="fb-container" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(26,21,187,0.08);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <!-- バナー(ブランドグラデ + テキストロゴ) -->
+          <tr>
+            <td align="left" style="background-color:#4f1ee6;background-image:linear-gradient(120deg,#5800FF 0%,#3a44d4 50%,#5CE1E6 100%);padding:22px 26px;text-align:left;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:500;color:#ffffff;letter-spacing:1px;line-height:1.1;">BioVault</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;color:#ffffff;opacity:0.9;margin-top:6px;">Membership Service</div>
+            </td>
+          </tr>
+          <!-- 本文 -->
+          <tr>
+            <td class="fb-pad" style="padding:30px 28px 8px;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;">
+              <p style="font-size:16px;color:#1a1a1a;margin:0 0 6px;font-weight:700;">お問い合わせを受け付けました</p>
+              <p style="font-size:13px;color:#888888;margin:0 0 22px;line-height:1.8;">メンバーシップサイトのお問い合わせフォームより、新しいお問い合わせが届きました。</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e6e7f2;border-radius:10px;overflow:hidden;font-size:14px;color:#1a1a1a;">
+                <tr>
+                  <td style="width:120px;padding:12px 16px;background:#f4f5fb;color:#555555;font-size:12px;font-weight:700;border-bottom:1px solid #e6e7f2;vertical-align:top;">送信日時</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e6e7f2;">${sentAtStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;background:#f4f5fb;color:#555555;font-size:12px;font-weight:700;border-bottom:1px solid #e6e7f2;vertical-align:top;">スキーム</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e6e7f2;">${company.shortName}（${company.name}）</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;background:#f4f5fb;color:#555555;font-size:12px;font-weight:700;border-bottom:1px solid #e6e7f2;vertical-align:top;">お名前</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e6e7f2;">${escapeHtml(name)} 様</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;background:#f4f5fb;color:#555555;font-size:12px;font-weight:700;border-bottom:1px solid #e6e7f2;vertical-align:top;">メール</td>
+                  <td style="padding:12px 16px;border-bottom:1px solid #e6e7f2;"><a href="mailto:${escapeHtml(email)}" style="color:#1A15BB;">${escapeHtml(email)}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px;background:#f4f5fb;color:#555555;font-size:12px;font-weight:700;vertical-align:top;">お問い合わせ内容</td>
+                  <td style="padding:12px 16px;white-space:pre-wrap;line-height:1.85;">${escapeHtml(message)}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- フッター -->
+          <tr>
+            <td class="fb-pad" style="padding:22px 28px 30px;border-top:1px solid #eeeef3;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;text-align:center;">
+              <p style="font-size:11px;color:#b0b0b8;letter-spacing:1px;margin:0;">※ このメールは自動送信されています。</p>
+            </td>
+          </tr>
+        </table>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 
