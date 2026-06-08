@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sendEmail, applicationReceivedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange } from "@/lib/status-notification";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
 import { normalizeScheme } from "@/lib/scheme";
@@ -218,13 +217,7 @@ export async function POST(req: Request) {
     data: { status: "REGISTERED", convertedUserId: user.id },
   });
 
-  // 7. 自動返信メール送信
-  try {
-    const emailContent = applicationReceivedEmail(body.name, scheme);
-    await sendEmail({ to: body.email, ...emailContent });
-  } catch (e) {
-    console.error("Auto-reply email failed:", e);
-  }
+  // 7. 申込者への自動返信メール（申込受付メール）は運用方針により送信しない
 
   // 8. 管理者・担当従業員・担当代理店へ新規申込通知
   try {
