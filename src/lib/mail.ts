@@ -598,45 +598,81 @@ MAIL: ${company.supportEmail}
 ※ このメールは自動送信されています。
 ※ このメールに心当たりがない場合は、お手数ですが上記連絡先までご連絡ください。`;
 
+  // 白ベース + ブランドグラデのHTMLメール(accountCreatedEmail と統一したデザイン)
+  //  - バナーはブランドグラデ(非対応クライアントは background-color へフォールバック)
+  //  - お問い合わせ内容はライトパープルのボックスで表示
   const bodyHtml = `
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;padding:40px 24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="font-family:'Cormorant Garamond','Noto Serif JP',serif;font-size:28px;color:#1A1A1A;letter-spacing:0.04em;">BioVault</div>
-      <div style="font-family:'Cormorant Garamond','Noto Serif JP',serif;font-size:14px;color:#888888;letter-spacing:0.2em;margin-top:4px;">Membership Service</div>
-      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#F08301,transparent);margin:12px auto;"></div>
-    </div>
-    <div style="background:#FFFFFF;border:1px solid #F5A04A;border-radius:6px;padding:28px 24px;">
-      <p style="font-size:16px;color:#1A1A1A;margin:0 0 20px;">${escapeHtml(name)} 様</p>
-      <p style="font-size:14px;color:#4A4A4A;line-height:1.9;margin:0 0 16px;">
-        この度はBioVaultメンバーシップサイトへお問い合わせいただき、誠にありがとうございます。
-      </p>
-      <p style="font-size:14px;color:#4A4A4A;line-height:1.9;margin:0 0 16px;">
-        下記の内容にてお問い合わせを承りました。<br>
-        内容を確認の上、担当者より改めてご連絡させていただきます。
-      </p>
-      <div style="background:#F5F0E6;border-left:3px solid #F08301;padding:14px 16px;margin:20px 0;">
-        <div style="font-size:12px;color:#C26800;font-weight:700;margin-bottom:6px;">■ お問い合わせ内容</div>
-        <div style="font-size:14px;color:#1A1A1A;line-height:1.8;white-space:pre-wrap;">${escapeHtml(message)}</div>
-      </div>
-      <p style="font-size:13px;color:#4A4A4A;line-height:1.8;margin:0;">
-        ご返信までしばらくお時間をいただく場合がございます。何卒よろしくお願い申し上げます。
-      </p>
-    </div>
-    <div style="margin-top:24px;padding-top:20px;border-top:1px solid #EFEAE0;text-align:center;">
-      <p style="font-size:12px;color:#888888;line-height:1.8;margin:0;">
-        BioVault(${company.name})<br>
-        TEL: ${company.phone} ／ MAIL: ${company.supportEmail}<br>
-        〒${company.postalCode} ${company.address}
-      </p>
-      <p style="font-size:10px;color:#A0A0A0;margin-top:16px;">
-        ※ このメールは自動送信されています。
-      </p>
-    </div>
-  </div>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>${subject}</title>
+  <style>
+    body { margin:0; padding:0; width:100% !important; }
+    a { text-decoration:none; }
+    @media only screen and (max-width:600px) {
+      .fb-container { width:100% !important; }
+      .fb-pad { padding-left:18px !important; padding-right:18px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6f8;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <div class="fb-container" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(26,21,187,0.08);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <!-- バナー(ブランドグラデ + テキストロゴ) -->
+          <tr>
+            <td align="left" style="background-color:#4f1ee6;background-image:linear-gradient(120deg,#5800FF 0%,#3a44d4 50%,#5CE1E6 100%);padding:22px 26px;text-align:left;">
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:500;color:#ffffff;letter-spacing:1px;line-height:1.1;">BioVault</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:3px;color:#ffffff;opacity:0.9;margin-top:6px;">Membership Service</div>
+            </td>
+          </tr>
+          <!-- 本文 -->
+          <tr>
+            <td class="fb-pad" style="padding:32px 28px 8px;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;">
+              <p style="font-size:17px;color:#1a1a1a;margin:0 0 10px;font-weight:600;">${escapeHtml(name)} 様</p>
+              <p style="font-size:14px;color:#4a4a4a;line-height:1.9;margin:0 0 16px;">
+                この度はBioVaultメンバーシップサイトへお問い合わせいただき、誠にありがとうございます。
+              </p>
+              <p style="font-size:14px;color:#4a4a4a;line-height:1.9;margin:0 0 22px;">
+                下記の内容にてお問い合わせを承りました。<br>
+                内容を確認の上、担当者より改めてご連絡させていただきます。
+              </p>
+              <!-- お問い合わせ内容ボックス -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f5fb;border:1px solid #e6e7f2;border-radius:10px;margin:0 0 22px;">
+                <tr>
+                  <td style="padding:20px 22px;">
+                    <div style="font-size:11px;color:#1A15BB;letter-spacing:1px;font-weight:700;margin-bottom:8px;">お問い合わせ内容</div>
+                    <div style="font-size:14px;color:#1a1a1a;line-height:1.85;white-space:pre-wrap;">${escapeHtml(message)}</div>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:12px;color:#888888;line-height:1.9;margin:0 0 24px;">
+                ※ ご返信までしばらくお時間をいただく場合がございます。何卒よろしくお願い申し上げます。<br>
+                ※ このメールに心当たりがない場合は、お手数ですが下記までご連絡ください。
+              </p>
+            </td>
+          </tr>
+          <!-- フッター -->
+          <tr>
+            <td class="fb-pad" style="padding:22px 28px 30px;border-top:1px solid #eeeef3;font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;text-align:center;">
+              <p style="font-size:12px;color:#888888;line-height:1.9;margin:0;">
+                BioVault（${company.name}）<br>
+                TEL: ${company.phone} ／ MAIL: ${company.supportEmail}<br>
+                〒${company.postalCode} ${company.address}
+              </p>
+              <p style="font-size:11px;color:#b0b0b8;letter-spacing:1px;margin:14px 0 0;">&copy; 2025 ${company.shortName} Inc. All Rights Reserved.</p>
+            </td>
+          </tr>
+        </table>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 
