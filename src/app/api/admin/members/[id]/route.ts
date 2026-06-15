@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { checkEmailDuplicate } from "@/lib/email-duplicate";
 import { normalizeScheme } from "@/lib/scheme";
+import bcrypt from "bcryptjs";
+
+const VALID_ROLES = ["MEMBER", "ADMIN", "SUPER_ADMIN", "AGENCY", "STAFF", "OPERATOR", "VIEWER"];
 
 // 会員詳細取得
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -84,6 +87,37 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (body.paymentDate !== undefined) userData.paymentDate = body.paymentDate ? new Date(body.paymentDate) : null;
     // 流入スキーム（SCPP / MRT）の切替
     if (body.scheme !== undefined) userData.scheme = normalizeScheme(body.scheme);
+
+    // 権限ロール
+    if (body.role !== undefined && VALID_ROLES.includes(body.role)) userData.role = body.role;
+    // アカウント有効/無効・パスワード関連フラグ
+    if (body.isActive !== undefined) userData.isActive = body.isActive;
+    if (body.mustChangePassword !== undefined) userData.mustChangePassword = body.mustChangePassword;
+    if (body.hasAgreedPamphlet !== undefined) {
+      userData.hasAgreedPamphlet = body.hasAgreedPamphlet;
+      userData.agreedPamphletAt = body.hasAgreedPamphlet ? new Date() : null;
+    }
+    // パスワード再設定（入力があった場合のみハッシュ化して更新）
+    if (body.newPassword) {
+      userData.passwordHash = await bcrypt.hash(String(body.newPassword), 10);
+    }
+
+    // 健康状態（事前確認事項）
+    if (body.currentIllness !== undefined) userData.currentIllness = body.currentIllness;
+    if (body.currentIllnessDetail !== undefined) userData.currentIllnessDetail = body.currentIllnessDetail || null;
+    if (body.pastIllness !== undefined) userData.pastIllness = body.pastIllness;
+    if (body.pastIllnessDetail !== undefined) userData.pastIllnessDetail = body.pastIllnessDetail || null;
+    if (body.currentMedication !== undefined) userData.currentMedication = body.currentMedication;
+    if (body.currentMedicationDetail !== undefined) userData.currentMedicationDetail = body.currentMedicationDetail || null;
+    if (body.chronicDisease !== undefined) userData.chronicDisease = body.chronicDisease;
+    if (body.chronicDiseaseDetail !== undefined) userData.chronicDiseaseDetail = body.chronicDiseaseDetail || null;
+    if (body.infectiousDisease !== undefined) userData.infectiousDisease = body.infectiousDisease;
+    if (body.infectiousDiseaseDetail !== undefined) userData.infectiousDiseaseDetail = body.infectiousDiseaseDetail || null;
+    if (body.pregnancy !== undefined) userData.pregnancy = body.pregnancy;
+    if (body.allergy !== undefined) userData.allergy = body.allergy;
+    if (body.allergyDetail !== undefined) userData.allergyDetail = body.allergyDetail || null;
+    if (body.otherHealth !== undefined) userData.otherHealth = body.otherHealth;
+    if (body.otherHealthDetail !== undefined) userData.otherHealthDetail = body.otherHealthDetail || null;
   }
 
   if (Object.keys(userData).length > 0) {
@@ -122,6 +156,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (body.membership.serviceAppliedAt !== undefined) membershipData.serviceAppliedAt = body.membership.serviceAppliedAt ? new Date(body.membership.serviceAppliedAt) : null;
       if (body.membership.consentSignedAt !== undefined) membershipData.consentSignedAt = body.membership.consentSignedAt ? new Date(body.membership.consentSignedAt) : null;
       if (body.membership.deathWish !== undefined) membershipData.deathWish = body.membership.deathWish || null;
+      if (body.membership.contractFormat !== undefined) membershipData.contractFormat = body.membership.contractFormat || null;
     }
 
     if (Object.keys(membershipData).length > 0) {

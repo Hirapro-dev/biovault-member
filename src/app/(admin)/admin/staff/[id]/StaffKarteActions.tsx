@@ -5,22 +5,28 @@ import { useRouter } from "next/navigation";
 
 export default function StaffKarteActions({
   staffId,
+  currentStaffCode,
   currentName,
   currentNameKana,
   currentEmail,
   currentNote,
   isActive,
+  isSuperAdmin = false,
 }: {
   staffId: string;
+  currentStaffCode: string;
   currentName: string;
   currentNameKana: string;
   currentEmail: string;
   currentNote: string;
   isActive: boolean;
+  isSuperAdmin?: boolean;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [staffCode, setStaffCode] = useState(currentStaffCode);
   const [name, setName] = useState(currentName);
   const [nameKana, setNameKana] = useState(currentNameKana);
   const [email, setEmail] = useState(currentEmail);
@@ -29,14 +35,31 @@ export default function StaffKarteActions({
   const handleSave = async () => {
     if (!name.trim()) return;
     setSaving(true);
+    setError("");
     try {
-      await fetch(`/api/admin/staff/${staffId}`, {
+      const payload: Record<string, unknown> = {
+        name: name.trim(),
+        nameKana: nameKana.trim(),
+        email: email.trim(),
+        note: note.trim(),
+      };
+      // 従業員コードの変更は SUPER_ADMIN のみ送信
+      if (isSuperAdmin) payload.staffCode = staffCode.trim();
+
+      const res = await fetch(`/api/admin/staff/${staffId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), nameKana: nameKana.trim(), email: email.trim(), note: note.trim() }),
+        body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error || "更新に失敗しました");
+        return;
+      }
       setEditing(false);
       router.refresh();
+    } catch {
+      setError("エラーが発生しました");
     } finally {
       setSaving(false);
     }
@@ -85,6 +108,23 @@ export default function StaffKarteActions({
 
       {editing ? (
         <div className="space-y-3">
+          {error && (
+            <div className="p-2 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-[11px]">{error}</div>
+          )}
+          {isSuperAdmin && (
+            <div>
+              <label className="block text-[11px] text-text-muted mb-1">
+                従業員コード <span className="text-[9px] px-1 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/20">全権限者のみ</span>
+              </label>
+              <input
+                value={staffCode}
+                onChange={(e) => setStaffCode(e.target.value.toUpperCase())}
+                placeholder="ST-0001"
+                className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-sm text-sm text-text-primary font-mono outline-none focus:border-border-gold"
+              />
+              <p className="text-[9px] text-text-muted mt-1">空き番号への変更可。変更すると、この従業員を担当に持つ会員・代理店の参照も自動で追従します。</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] text-text-muted mb-1">氏名 <span className="text-status-danger">*</span></label>
