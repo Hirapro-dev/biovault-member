@@ -39,6 +39,25 @@ interface Props {
     salesRepName: string | null;
     paymentMethod: string | null;
     scheme: "SCPP" | "MRT";
+    role: string;
+    isActive: boolean;
+    mustChangePassword: boolean;
+    hasAgreedPamphlet: boolean;
+    currentIllness: boolean;
+    currentIllnessDetail: string | null;
+    pastIllness: boolean;
+    pastIllnessDetail: string | null;
+    currentMedication: boolean;
+    currentMedicationDetail: string | null;
+    chronicDisease: boolean;
+    chronicDiseaseDetail: string | null;
+    infectiousDisease: boolean;
+    infectiousDiseaseDetail: string | null;
+    pregnancy: boolean;
+    allergy: boolean;
+    allergyDetail: string | null;
+    otherHealth: boolean;
+    otherHealthDetail: string | null;
   };
   membership: {
     memberNumber: string;
@@ -50,18 +69,33 @@ interface Props {
     storageYears: number;
     clinicDate: string | null;
     clinicName: string | null;
+    clinicAddress: string | null;
+    clinicPhone: string | null;
     serviceAppliedAt: string | null;
     consentSignedAt: string | null;
     contractSignedAt: string | null;
     ipsCompletedAt: string | null;
     storageStartAt: string | null;
+    contractFormat: string | null;
+    deathWish: string | null;
+    referrerName: string | null;
   } | null;
 }
+
+const ROLE_OPTIONS = [
+  { value: "MEMBER", label: "会員（MEMBER）" },
+  { value: "ADMIN", label: "管理者（ADMIN）" },
+  { value: "SUPER_ADMIN", label: "全権限者（SUPER_ADMIN）" },
+  { value: "AGENCY", label: "代理店（AGENCY）" },
+  { value: "STAFF", label: "従業員（STAFF）" },
+  { value: "OPERATOR", label: "処理者（OPERATOR）" },
+  { value: "VIEWER", label: "閲覧者（VIEWER）" },
+];
 
 export default function SuperAdminEditSection({ userId, user, membership }: Props) {
   const router = useRouter();
   const [showPopup, setShowPopup] = useState(false);
-  const [tab, setTab] = useState<"user" | "contract">("user");
+  const [tab, setTab] = useState<"user" | "contract" | "account" | "health">("user");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -86,6 +120,34 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
     scheme: user.scheme,
   });
 
+  // アカウント・権限フォーム
+  const [accountForm, setAccountForm] = useState({
+    role: user.role,
+    isActive: user.isActive,
+    mustChangePassword: user.mustChangePassword,
+    hasAgreedPamphlet: user.hasAgreedPamphlet,
+    newPassword: "",
+  });
+
+  // 健康状態フォーム
+  const [healthForm, setHealthForm] = useState({
+    currentIllness: user.currentIllness,
+    currentIllnessDetail: user.currentIllnessDetail || "",
+    pastIllness: user.pastIllness,
+    pastIllnessDetail: user.pastIllnessDetail || "",
+    currentMedication: user.currentMedication,
+    currentMedicationDetail: user.currentMedicationDetail || "",
+    chronicDisease: user.chronicDisease,
+    chronicDiseaseDetail: user.chronicDiseaseDetail || "",
+    infectiousDisease: user.infectiousDisease,
+    infectiousDiseaseDetail: user.infectiousDiseaseDetail || "",
+    pregnancy: user.pregnancy,
+    allergy: user.allergy,
+    allergyDetail: user.allergyDetail || "",
+    otherHealth: user.otherHealth,
+    otherHealthDetail: user.otherHealthDetail || "",
+  });
+
   // 契約情報フォーム
   const [contractForm, setContractForm] = useState({
     memberNumber: membership?.memberNumber || "",
@@ -101,6 +163,12 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
     clinicDate: membership?.clinicDate?.split("T")[0] || "",
     ipsCompletedAt: membership?.ipsCompletedAt?.split("T")[0] || "",
     storageStartAt: membership?.storageStartAt?.split("T")[0] || "",
+    clinicName: membership?.clinicName || "",
+    clinicAddress: membership?.clinicAddress || "",
+    clinicPhone: membership?.clinicPhone || "",
+    contractFormat: membership?.contractFormat || "",
+    deathWish: membership?.deathWish || "",
+    referrerName: membership?.referrerName || "",
   });
 
   const handleSave = async () => {
@@ -127,6 +195,28 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
         payload.salesRepName = userForm.salesRepName || null;
         payload.paymentMethod = userForm.paymentMethod || null;
         payload.scheme = userForm.scheme;
+      } else if (tab === "account") {
+        payload.role = accountForm.role;
+        payload.isActive = accountForm.isActive;
+        payload.mustChangePassword = accountForm.mustChangePassword;
+        payload.hasAgreedPamphlet = accountForm.hasAgreedPamphlet;
+        if (accountForm.newPassword) payload.newPassword = accountForm.newPassword;
+      } else if (tab === "health") {
+        payload.currentIllness = healthForm.currentIllness;
+        payload.currentIllnessDetail = healthForm.currentIllnessDetail;
+        payload.pastIllness = healthForm.pastIllness;
+        payload.pastIllnessDetail = healthForm.pastIllnessDetail;
+        payload.currentMedication = healthForm.currentMedication;
+        payload.currentMedicationDetail = healthForm.currentMedicationDetail;
+        payload.chronicDisease = healthForm.chronicDisease;
+        payload.chronicDiseaseDetail = healthForm.chronicDiseaseDetail;
+        payload.infectiousDisease = healthForm.infectiousDisease;
+        payload.infectiousDiseaseDetail = healthForm.infectiousDiseaseDetail;
+        payload.pregnancy = healthForm.pregnancy;
+        payload.allergy = healthForm.allergy;
+        payload.allergyDetail = healthForm.allergyDetail;
+        payload.otherHealth = healthForm.otherHealth;
+        payload.otherHealthDetail = healthForm.otherHealthDetail;
       } else {
         payload.membership = {
           memberNumber: contractForm.memberNumber,
@@ -142,6 +232,12 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
           clinicDate: contractForm.clinicDate || null,
           ipsCompletedAt: contractForm.ipsCompletedAt || null,
           storageStartAt: contractForm.storageStartAt || null,
+          clinicName: contractForm.clinicName || null,
+          clinicAddress: contractForm.clinicAddress || null,
+          clinicPhone: contractForm.clinicPhone || null,
+          contractFormat: contractForm.contractFormat || null,
+          deathWish: contractForm.deathWish || null,
+          referrerName: contractForm.referrerName || null,
         };
       }
 
@@ -196,9 +292,11 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
             {error && <div className="mb-3 p-2 bg-status-danger/10 border border-status-danger/20 rounded text-status-danger text-[11px]">{error}</div>}
 
             {/* タブ */}
-            <div className="flex border-b border-border mb-4">
-              <button onClick={() => setTab("user")} className={`px-4 py-2 text-sm cursor-pointer ${tab === "user" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>基本情報</button>
-              <button onClick={() => setTab("contract")} className={`px-4 py-2 text-sm cursor-pointer ${tab === "contract" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>契約情報</button>
+            <div className="flex flex-wrap border-b border-border mb-4">
+              <button onClick={() => setTab("user")} className={`px-3 py-2 text-sm cursor-pointer ${tab === "user" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>基本情報</button>
+              <button onClick={() => setTab("contract")} className={`px-3 py-2 text-sm cursor-pointer ${tab === "contract" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>契約情報</button>
+              <button onClick={() => setTab("account")} className={`px-3 py-2 text-sm cursor-pointer ${tab === "account" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>アカウント・権限</button>
+              <button onClick={() => setTab("health")} className={`px-3 py-2 text-sm cursor-pointer ${tab === "health" ? "text-gold border-b-2 border-gold" : "text-text-muted"}`}>健康状態</button>
             </div>
 
             {tab === "user" ? (
@@ -286,6 +384,49 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
                   <label htmlFor="agreedTerms" className="text-xs text-text-secondary cursor-pointer">重要事項説明に同意済み</label>
                 </div>
               </div>
+            ) : tab === "account" ? (
+              <div className="space-y-3">
+                <div className="p-2 bg-red-500/5 border border-red-500/20 rounded text-[10px] text-red-300">
+                  権限ロールの変更・パスワード再設定は影響が大きい操作です。慎重に変更してください。
+                </div>
+                <div>
+                  <label className="block text-[10px] text-text-muted mb-1">権限ロール</label>
+                  <select value={accountForm.role} onChange={(e) => setAccountForm(f => ({ ...f, role: e.target.value }))} className={ic + " cursor-pointer"}>
+                    {ROLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-text-muted mb-1">パスワード再設定（入力時のみ変更）</label>
+                  <input type="text" value={accountForm.newPassword} onChange={(e) => setAccountForm(f => ({ ...f, newPassword: e.target.value }))} placeholder="新しいパスワード" className={ic + " font-mono"} />
+                  <p className="text-[9px] text-text-muted mt-1">空欄のままなら変更されません。設定すると会員に新パスワードでログインしてもらえます。</p>
+                </div>
+                <div className="flex items-center gap-2 py-1">
+                  <input type="checkbox" id="isActive" checked={accountForm.isActive} onChange={(e) => setAccountForm(f => ({ ...f, isActive: e.target.checked }))} className="cursor-pointer" />
+                  <label htmlFor="isActive" className="text-xs text-text-secondary cursor-pointer">アカウント有効（オフにすると無効化・ログイン不可）</label>
+                </div>
+                <div className="flex items-center gap-2 py-1">
+                  <input type="checkbox" id="mustChangePassword" checked={accountForm.mustChangePassword} onChange={(e) => setAccountForm(f => ({ ...f, mustChangePassword: e.target.checked }))} className="cursor-pointer" />
+                  <label htmlFor="mustChangePassword" className="text-xs text-text-secondary cursor-pointer">次回ログイン時にパスワード変更を要求</label>
+                </div>
+                <div className="flex items-center gap-2 py-1">
+                  <input type="checkbox" id="hasAgreedPamphlet" checked={accountForm.hasAgreedPamphlet} onChange={(e) => setAccountForm(f => ({ ...f, hasAgreedPamphlet: e.target.checked }))} className="cursor-pointer" />
+                  <label htmlFor="hasAgreedPamphlet" className="text-xs text-text-secondary cursor-pointer">パンフレット免責事項に同意済み</label>
+                </div>
+              </div>
+            ) : tab === "health" ? (
+              <div className="space-y-2">
+                <HealthEdit label="現在治療中の病気" has={healthForm.currentIllness} detail={healthForm.currentIllnessDetail} onHas={(v) => setHealthForm(f => ({ ...f, currentIllness: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, currentIllnessDetail: v }))} ic={ic} />
+                <HealthEdit label="過去の大きな病気・手術歴" has={healthForm.pastIllness} detail={healthForm.pastIllnessDetail} onHas={(v) => setHealthForm(f => ({ ...f, pastIllness: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, pastIllnessDetail: v }))} ic={ic} />
+                <HealthEdit label="現在使用中の薬" has={healthForm.currentMedication} detail={healthForm.currentMedicationDetail} onHas={(v) => setHealthForm(f => ({ ...f, currentMedication: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, currentMedicationDetail: v }))} ic={ic} />
+                <HealthEdit label="持病" has={healthForm.chronicDisease} detail={healthForm.chronicDiseaseDetail} onHas={(v) => setHealthForm(f => ({ ...f, chronicDisease: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, chronicDiseaseDetail: v }))} ic={ic} />
+                <HealthEdit label="感染症の罹患・既往" has={healthForm.infectiousDisease} detail={healthForm.infectiousDiseaseDetail} onHas={(v) => setHealthForm(f => ({ ...f, infectiousDisease: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, infectiousDiseaseDetail: v }))} ic={ic} />
+                <HealthEdit label="アレルギー" has={healthForm.allergy} detail={healthForm.allergyDetail} onHas={(v) => setHealthForm(f => ({ ...f, allergy: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, allergyDetail: v }))} ic={ic} />
+                <HealthEdit label="その他健康上の事項" has={healthForm.otherHealth} detail={healthForm.otherHealthDetail} onHas={(v) => setHealthForm(f => ({ ...f, otherHealth: v }))} onDetail={(v) => setHealthForm(f => ({ ...f, otherHealthDetail: v }))} ic={ic} />
+                <div className="flex items-center gap-2 py-1 pt-2 border-t border-border">
+                  <input type="checkbox" id="pregnancy" checked={healthForm.pregnancy} onChange={(e) => setHealthForm(f => ({ ...f, pregnancy: e.target.checked }))} className="cursor-pointer" />
+                  <label htmlFor="pregnancy" className="text-xs text-text-secondary cursor-pointer">妊娠中または妊娠の可能性あり</label>
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
@@ -361,6 +502,54 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
                     </div>
                   </div>
                 </div>
+
+                {/* クリニック情報 */}
+                <div className="pt-3 mt-1 border-t border-border">
+                  <p className="text-[10px] text-gold mb-2 tracking-wider">クリニック情報</p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">クリニック名</label>
+                      <input value={contractForm.clinicName} onChange={(e) => setContractForm(f => ({ ...f, clinicName: e.target.value }))} className={ic} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-text-muted mb-1">クリニック住所</label>
+                        <input value={contractForm.clinicAddress} onChange={(e) => setContractForm(f => ({ ...f, clinicAddress: e.target.value }))} className={ic} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-text-muted mb-1">クリニック電話</label>
+                        <input value={contractForm.clinicPhone} onChange={(e) => setContractForm(f => ({ ...f, clinicPhone: e.target.value }))} className={ic + " font-mono"} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 契約その他 */}
+                <div className="pt-3 mt-1 border-t border-border">
+                  <p className="text-[10px] text-gold mb-2 tracking-wider">契約その他</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">契約書形式</label>
+                      <select value={contractForm.contractFormat} onChange={(e) => setContractForm(f => ({ ...f, contractFormat: e.target.value }))} className={ic + " cursor-pointer"}>
+                        <option value="">未設定</option>
+                        <option value="electronic">電子署名</option>
+                        <option value="paper">書面契約</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-text-muted mb-1">死亡時意思表示</label>
+                      <select value={contractForm.deathWish} onChange={(e) => setContractForm(f => ({ ...f, deathWish: e.target.value }))} className={ic + " cursor-pointer"}>
+                        <option value="">未設定</option>
+                        <option value="donate">寄贈</option>
+                        <option value="dispose">廃棄</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="block text-[10px] text-text-muted mb-1">紹介者名</label>
+                    <input value={contractForm.referrerName} onChange={(e) => setContractForm(f => ({ ...f, referrerName: e.target.value }))} className={ic} />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -375,5 +564,41 @@ export default function SuperAdminEditSection({ userId, user, membership }: Prop
         document.body
       )}
     </>
+  );
+}
+
+// 健康状態の1項目（なし/あり + 詳細入力）
+function HealthEdit({
+  label,
+  has,
+  detail,
+  onHas,
+  onDetail,
+  ic,
+}: {
+  label: string;
+  has: boolean;
+  detail: string;
+  onHas: (v: boolean) => void;
+  onDetail: (v: string) => void;
+  ic: string;
+}) {
+  return (
+    <div className="py-1.5 border-b border-border last:border-b-0">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-text-secondary">{label}</span>
+        <div className="flex gap-3 shrink-0">
+          <label className="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+            <input type="radio" checked={!has} onChange={() => onHas(false)} className="cursor-pointer" /> なし
+          </label>
+          <label className="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+            <input type="radio" checked={has} onChange={() => onHas(true)} className="cursor-pointer" /> あり
+          </label>
+        </div>
+      </div>
+      {has && (
+        <input value={detail} onChange={(e) => onDetail(e.target.value)} placeholder="詳細・内容" className={ic + " mt-2"} />
+      )}
+    </div>
   );
 }

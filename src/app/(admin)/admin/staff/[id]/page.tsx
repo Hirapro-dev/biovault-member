@@ -12,7 +12,7 @@ import CommissionSummaryCards from "@/components/commission/CommissionSummaryCar
 import { calcSummaryForStaff } from "@/lib/commission-summary-from-data";
 
 export default async function StaffKartePage({ params }: { params: Promise<{ id: string }> }) {
-  await requireAdmin();
+  const adminUser = await requireAdmin();
   const { id } = await params;
 
   const staff = await prisma.staff.findUnique({
@@ -112,11 +112,13 @@ export default async function StaffKartePage({ params }: { params: Promise<{ id:
       {/* 基本情報編集 */}
       <StaffKarteActions
         staffId={staff.id}
+        currentStaffCode={staff.staffCode}
         currentName={staff.name}
         currentNameKana={staff.nameKana || ""}
         currentEmail={staff.email || ""}
         currentNote={staff.note || ""}
         isActive={staff.isActive}
+        isSuperAdmin={adminUser.role === "SUPER_ADMIN"}
       />
 
       {/* ログインアカウント */}
