@@ -62,8 +62,7 @@ export default function CellConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✓</div>
-        <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">同意が完了しました</h2>
+        <h2 className="font-serif-jp text-xl text-gold font-bold tracking-wider mb-4">同意が完了しました</h2>
         <div className="text-sm text-text-secondary leading-relaxed space-y-3 mb-8">
           <p>細胞提供・保管同意書へのご同意ありがとうございます。</p>
           <p>
@@ -86,7 +85,7 @@ export default function CellConsentPage() {
         <span className="text-text-secondary">細胞提供・保管同意書</span>
       </div>
 
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-2">
         BioVault細胞提供・保管同意書
       </h2>
       <p className="text-xs text-text-muted mb-5">※ こちらの同意がないと、問診・採血に進めません</p>
@@ -236,7 +235,7 @@ export default function CellConsentPage() {
 
           {/* 死亡時意思表示欄 */}
           <div className={`mb-5 bg-bg-secondary border border-border rounded-md p-5 ${scrolledToBottom ? "" : "opacity-40 pointer-events-none"}`}>
-            <h3 className="text-sm text-text-primary font-medium mb-3">死亡時意思表示欄</h3>
+            <h3 className="text-sm text-[#000] font-semibold mb-3">死亡時意思表示欄</h3>
             <p className="text-xs text-text-secondary leading-relaxed mb-4">
               私は、私の死亡時における本細胞等の取扱いについて、以下のとおり意思表示します。
             </p>
@@ -286,7 +285,7 @@ export default function CellConsentPage() {
         <div className="mt-6 bg-bg-secondary border border-status-warning/30 rounded-md p-5 sm:p-7">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">⚠️</span>
-            <h3 className="text-sm text-status-warning font-medium">予約に関する注意事項</h3>
+            <h3 className="text-sm text-status-warning font-bold">予約に関する注意事項</h3>
           </div>
           <p className="text-sm text-text-secondary leading-relaxed mb-5">
             クリニックの予約を行った以降の、<span className="text-status-warning font-medium">変更・キャンセルはできかねます。</span>
@@ -302,7 +301,7 @@ export default function CellConsentPage() {
               戻る
             </button>
             <button onClick={handleFinalAgree} disabled={!cancelChecked || loading} className="flex-1 py-3.5 bg-gold-gradient border-none rounded-sm text-bg-primary text-sm font-semibold tracking-wider cursor-pointer transition-all hover:opacity-90 disabled:opacity-30">
-              {loading ? "処理中..." : "同意して日程調整を申請する"}
+              {loading ? "処理中..." : "申請する"}
             </button>
           </div>
         </div>
@@ -314,7 +313,7 @@ export default function CellConsentPage() {
 function Sec({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-2">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-2">{t}</h4>
       <div className="space-y-2">{children}</div>
     </section>
   );

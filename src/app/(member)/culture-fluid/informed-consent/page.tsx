@@ -87,8 +87,7 @@ export default function CultureFluidInformedConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✓</div>
-        <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">
+        <h2 className="font-serif-jp text-lg text-gold font-bold tracking-wider mb-3">
           同意が完了しました
         </h2>
         <p className="text-sm text-text-secondary mb-6">

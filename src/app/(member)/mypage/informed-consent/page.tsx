@@ -48,8 +48,7 @@ export default function InformedConsentPage() {
   if (done) {
     return (
       <div className="max-w-[700px] mx-auto text-center py-12">
-        <div className="text-5xl mb-6">✓</div>
-        <h2 className="font-serif-jp text-lg text-gold tracking-wider mb-3">同意が完了しました</h2>
+        <h2 className="font-serif-jp text-lg text-gold font-bold tracking-wider mb-3">同意が完了しました</h2>
         <p className="text-sm text-text-secondary mb-6">iPS細胞作製における事前説明・同意へのご同意ありがとうございます。</p>
         <button onClick={() => router.push("/mypage")} className="px-8 py-3 bg-gold-gradient text-bg-primary text-sm font-medium rounded tracking-wider hover:opacity-90 transition-opacity cursor-pointer">
           マイページに戻る
@@ -66,7 +65,7 @@ export default function InformedConsentPage() {
         <span className="text-text-secondary">自家iPS細胞作製に関する説明書兼同意書</span>
       </div>
 
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-2">
         自家iPS細胞作製に関する説明書兼同意書
       </h2>
       <p className="text-xs text-text-muted mb-5">※ こちらの同意がないと、問診・採血に進めません</p>
@@ -169,7 +168,7 @@ export default function InformedConsentPage() {
 function Sec({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-2">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-2">{t}</h4>
       <div className="space-y-2">{children}</div>
     </section>
   );

@@ -84,7 +84,7 @@ export default function BottomNav() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center gap-1 w-full h-full transition-colors text-text-muted"
+                className="flex flex-col items-center justify-center gap-1 w-full h-full transition-colors text-[#666]"
               >
                 <item.Icon active={false} />
                 <span className="text-[9px] tracking-wide">{item.label}</span>
@@ -97,7 +97,7 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-                isActive ? "text-gold" : "text-text-muted"
+                isActive ? "text-gold" : "text-[#666]"
               }`}
             >
               <item.Icon active={isActive} />

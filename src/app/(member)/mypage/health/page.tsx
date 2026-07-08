@@ -37,7 +37,7 @@ export default async function HealthPage() {
         <span className="text-text-secondary">健康状態確認</span>
       </div>
 
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-5 sm:mb-7">
         健康状態確認
       </h2>
 

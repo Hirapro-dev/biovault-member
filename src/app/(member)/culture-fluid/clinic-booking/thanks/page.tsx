@@ -8,8 +8,7 @@ export default async function ClinicBookingThanksPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-bg-secondary border border-border-gold rounded-md p-8 sm:p-12 text-center">
-        <div className="text-5xl mb-6">✓</div>
-        <h2 className="font-serif-jp text-xl text-gold tracking-wider mb-4">
+        <h2 className="font-serif-jp text-xl text-gold font-bold tracking-wider mb-4">
           クリニックの予約を申し込みました
         </h2>
         <GoldDivider />
