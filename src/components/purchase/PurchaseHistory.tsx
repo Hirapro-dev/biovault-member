@@ -134,7 +134,7 @@ export default async function PurchaseHistory({ userId }: Props) {
   if (items.length === 0) {
     return (
       <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-        <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+        <h3 className="font-serif-jp text-sm font-bold text-gold tracking-wider mb-4 pb-3 border-b border-border">
           購入履歴
         </h3>
         <div className="text-text-muted text-sm py-4 text-center">購入履歴はありません</div>
@@ -144,7 +144,7 @@ export default async function PurchaseHistory({ userId }: Props) {
 
   return (
     <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
-      <h3 className="font-serif-jp text-sm font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+      <h3 className="font-serif-jp text-sm font-bold text-gold tracking-wider mb-4 pb-3 border-b border-border">
         購入履歴 ({items.length}件)
       </h3>
 
@@ -166,7 +166,7 @@ export default async function PurchaseHistory({ userId }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-text-primary">{item.label}</div>
+                <div className="text-sm text-text-primary font-bold">{item.label}</div>
                 <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
                   {item.details.map((d, j) => (
                     <span key={j} className="text-[10px] text-text-muted">{d}</span>
@@ -176,7 +176,7 @@ export default async function PurchaseHistory({ userId }: Props) {
               <div className="text-right shrink-0">
                 <div className="text-[10px] text-text-muted">{fmtDate(item.date)}</div>
                 {item.amount !== null && item.amount > 0 && (
-                  <div className="font-mono text-sm text-gold">{fmtAmount(item.amount)}</div>
+                  <div className="font-mono text-sm text-gold font-bold">{fmtAmount(item.amount)}</div>
                 )}
               </div>
             </div>

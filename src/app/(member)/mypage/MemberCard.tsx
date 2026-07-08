@@ -72,11 +72,11 @@ export default function MemberCard({
           <div
             className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
             style={{
-              background: "#0A0A0C",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
+              background: "#0A1A33",
+              boxShadow: "0 12px 34px rgba(0,0,0,0.30), 0 3px 10px rgba(0,0,0,0.20)",
             }}
           >
-            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_blue.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
             <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
@@ -88,14 +88,14 @@ export default function MemberCard({
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]">
+              <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-white/90">
                 {memberNumber}
               </div>
             </div>
             <div className="relative z-10 flex items-end justify-between">
               <div>
                 <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">CARD HOLDER</div>
-                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase">{holderName}</div>
+                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase text-white/90">{holderName}</div>
               </div>
               <div className="text-right">
                 <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">MEMBER SINCE</div>
@@ -112,10 +112,13 @@ export default function MemberCard({
           <div
             className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
             style={{
-              background: "linear-gradient(145deg, #0E0E12 0%, #0A0A0C 40%, #0C0C10 100%)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)",
+              background: "#0A1A33",
+              boxShadow: "0 12px 34px rgba(0,0,0,0.30), 0 3px 10px rgba(0,0,0,0.20)",
             }}
           >
+            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_blue.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
+            {/* データ可読性のため、画像の上に薄い暗幕を重ねる */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(145deg, rgba(10,26,51,0.55) 0%, rgba(10,26,51,0.35) 100%)" }} />
             <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(200deg, rgba(191,160,75,0.03) 0%, transparent 30%, transparent 70%, rgba(191,160,75,0.02) 100%)" }} />
             <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(191,160,75,0.15) 50%, transparent 90%)" }} />
 

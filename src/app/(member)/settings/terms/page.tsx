@@ -13,7 +13,7 @@ export default async function TermsPage() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
+        <h1 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-[2px] mb-2">
           BioVaultメンバーシップ規約
         </h1>
         <GoldDivider width={60} className="mx-auto" />
@@ -160,7 +160,7 @@ export default async function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-sm text-text-primary font-medium mb-2">{title}</h2>
+      <h2 className="text-sm text-[#000] font-semibold mb-2">{title}</h2>
       {children}
     </section>
   );

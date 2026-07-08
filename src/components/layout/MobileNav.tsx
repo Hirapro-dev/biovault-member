@@ -88,22 +88,25 @@ export default function MobileNav({
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  // 会員側のみネイビー×ゴールドの chrome を適用（管理者は白ベース維持）
+  const navy = !isAdmin;
   // 流入スキームに応じてコピーライト会社名を切り替える（管理画面はSCPP固定）
   const copyrightCompany = isAdmin ? "SCPP Inc." : `${getCompany((session?.user as { scheme?: string } | undefined)?.scheme).shortName} Inc.`;
 
   return (
     <>
       {/* ヘッダーバー */}
-      <div className={`sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-bg-secondary border-b border-border ${showOnAllScreens ? "" : "lg:hidden"}`}>
+      <div className={`sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 h-16 relative ${navy ? "mhead" : "bg-bg-secondary border-b border-border"} ${showOnAllScreens ? "" : "lg:hidden"}`}>
+        {/* ロゴ（ヘッダー左） */}
         <Link href="/mypage" className="hover:opacity-80 transition-opacity">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
+          <img src={navy ? "/logo_white.png" : "/logo.png"} alt="BioVault" className="h-9 sm:h-10 w-auto" />
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-text-muted">{userName} 様</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={`text-[11px] ${navy ? "mhead-muted" : "text-text-muted"}`}>{userName} 様</span>
           <button
             onClick={() => setOpen(!open)}
-            className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text-secondary"
+            className={`w-10 h-10 flex flex-col items-center justify-center gap-1.5 ${navy ? "text-[#EAF1FB]" : "text-text-secondary"}`}
             aria-label="メニュー"
           >
           <span
@@ -123,6 +126,8 @@ export default function MobileNav({
           />
           </button>
         </div>
+        {/* ヘッダー下端のゴールド極細ライン（会員のみ・カードのゴールドと呼応） */}
+        {navy && <div className="mhead-hairline absolute bottom-0 left-0 right-0" />}
       </div>
 
       {/* オーバーレイ */}
@@ -135,22 +140,22 @@ export default function MobileNav({
 
       {/* ドロワーメニュー */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-[280px] bg-bg-secondary border-l border-border transform transition-transform duration-300 ease-out ${showOnAllScreens ? "" : "lg:hidden"} ${
+        className={`fixed top-0 right-0 z-50 h-full w-[280px] border-l transform transition-transform duration-300 ease-out ${navy ? "mside border-[#DCE0E7]" : "bg-bg-secondary border-border"} ${showOnAllScreens ? "" : "lg:hidden"} ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* ドロワーヘッダー */}
-          <div className="px-5 py-5 border-b border-border flex items-center justify-between">
+          <div className={`px-5 py-5 border-b flex items-center justify-between ${navy ? "mside-divider" : "border-border"}`}>
             <div>
-              <div className="text-xs text-text-secondary">{userName} 様</div>
-              <div className="text-[9px] text-text-muted mt-0.5">
+              <div className={`text-xs ${navy ? "text-[#1F2937]" : "text-text-secondary"}`}>{userName} 様</div>
+              <div className={`text-[9px] mt-0.5 ${navy ? "mside-faint" : "text-text-muted"}`}>
                 {isAdmin ? "ADMIN CONSOLE" : "MEMBER'S PORTAL"}
               </div>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
+              className={`w-8 h-8 flex items-center justify-center transition-colors ${navy ? "mside-faint hover:text-[#1F2937]" : "text-text-muted hover:text-text-primary"}`}
               aria-label="閉じる"
             >
               ✕
@@ -203,10 +208,10 @@ export default function MobileNav({
               MEMBER_NAV_GROUPS.map((group, gIdx) => (
                 <div
                   key={`group-${gIdx}`}
-                  className={gIdx === 0 ? "" : "mt-5 pt-4 border-t border-border"}
+                  className={gIdx === 0 ? "" : "mt-5 pt-4 border-t mside-divider"}
                 >
                   {group.heading && (
-                    <div className="text-[10px] text-text-muted tracking-[2px] px-4 mb-2 uppercase">
+                    <div className="text-[10px] mside-faint tracking-[2px] px-4 mb-2 uppercase">
                       {group.heading}
                     </div>
                   )}
@@ -219,9 +224,7 @@ export default function MobileNav({
                         href={item.href}
                         onClick={() => setOpen(false)}
                         className={`flex items-center gap-3 w-full px-4 py-3.5 mb-0.5 rounded transition-all duration-200 text-[13px] leading-snug ${
-                          active
-                            ? "bg-bg-tertiary border border-border-gold text-gold"
-                            : "border border-transparent text-text-secondary active:bg-bg-elevated"
+                          active ? "mside-item-active" : "mside-item"
                         }`}
                       >
                         <span className={`text-base shrink-0 ${active ? "opacity-100" : "opacity-50"}`}>
@@ -238,8 +241,8 @@ export default function MobileNav({
             {/* アカウント切替（EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみ、
                 「パスワード変更」の下のセクションに追加で表示する） */}
             {showAccountSwitcher && userId && userRole && (
-              <div className="mt-5 pt-4 border-t border-border">
-                <div className="text-[10px] text-text-muted tracking-[2px] px-4 mb-2 uppercase">
+              <div className={`mt-5 pt-4 border-t ${navy ? "mside-divider" : "border-border"}`}>
+                <div className={`text-[10px] tracking-[2px] px-4 mb-2 uppercase ${navy ? "mside-faint" : "text-text-muted"}`}>
                   アカウント切り替え
                 </div>
                 <div className="px-4">
@@ -255,7 +258,7 @@ export default function MobileNav({
           </nav>
 
           {/* ログアウト */}
-          <div className="p-4 border-t border-border">
+          <div className={`p-4 border-t ${navy ? "mside-divider" : "border-border"}`}>
             <button
               onClick={async () => {
                 // サブCookieも全てクリア（全アカウントを完全ログアウト）
@@ -268,11 +271,11 @@ export default function MobileNav({
                 } catch {}
                 signOut({ callbackUrl: "/login" });
               }}
-              className="w-full py-3 bg-transparent border border-border text-text-secondary rounded text-xs hover:border-border-gold hover:text-gold transition-all cursor-pointer"
+              className={`w-full py-3 rounded text-xs transition-all cursor-pointer ${navy ? "mside-btn" : "bg-transparent border border-border text-text-secondary hover:border-border-gold hover:text-gold"}`}
             >
               ログアウト
             </button>
-            <div className="text-center text-[9px] text-text-muted mt-3 tracking-wider">
+            <div className={`text-center text-[9px] mt-3 tracking-wider ${navy ? "mside-faint" : "text-text-muted"}`}>
               &copy; 2025 {copyrightCompany}
             </div>
           </div>

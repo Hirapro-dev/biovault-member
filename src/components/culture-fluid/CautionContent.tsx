@@ -13,7 +13,7 @@ export default function CautionContent() {
   return (
     <>
       <section>
-        <h4 className="text-sm text-text-primary font-medium mb-1">文書目的</h4>
+        <h4 className="text-sm text-[#000] font-semibold mb-1">文書目的</h4>
         <div className="space-y-1.5">
           <p>
             本書は、BioVaultメンバーシップ契約者がiPS培養上清液の追加購入を申し込むにあたり、当該追加購入品の性質、提供条件、施術実施条件、品質管理上の取扱い、並びに表示上及び利用上の留意事項を確認し、理解することを目的とする。
@@ -139,7 +139,7 @@ export default function CautionContent() {
 function Sec({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-1">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-1">{t}</h4>
       <div className="space-y-1.5">{children}</div>
     </section>
   );

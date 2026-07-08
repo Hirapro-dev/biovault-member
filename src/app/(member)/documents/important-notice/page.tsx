@@ -29,7 +29,7 @@ export default async function ImportantNoticeViewPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">重要事項説明書兼確認書</h2>
+        <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px]">重要事項説明書兼確認書</h2>
         {isSigned && <Badge variant="success">同意済</Badge>}
       </div>
 
@@ -123,7 +123,7 @@ export default async function ImportantNoticeViewPage() {
 function S({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm text-text-primary font-medium mb-2">{t}</h3>
+      <h3 className="text-sm text-[#000] font-semibold mb-2">{t}</h3>
       <div className="space-y-2">{children}</div>
     </section>
   );

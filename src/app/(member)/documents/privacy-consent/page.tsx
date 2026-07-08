@@ -29,7 +29,7 @@ export default async function PrivacyConsentViewPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
+        <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px]">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
         {isSigned && <Badge variant="success">同意済</Badge>}
       </div>
 
@@ -116,7 +116,7 @@ export default async function PrivacyConsentViewPage() {
 function S({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm text-text-primary font-medium mb-2">{t}</h3>
+      <h3 className="text-sm text-[#000] font-semibold mb-2">{t}</h3>
       <div className="space-y-2">{children}</div>
     </section>
   );

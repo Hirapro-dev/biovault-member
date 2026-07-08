@@ -36,7 +36,7 @@ export default async function CultureFluidDocumentsPage() {
         <span className="text-text-secondary">契約書類</span>
       </div>
 
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-5 sm:mb-7">
         iPS培養上清液 契約・同意事項書類一覧
       </h2>
 
@@ -44,11 +44,11 @@ export default async function CultureFluidDocumentsPage() {
         {/* 001: iPS培養上清液に関する留意事項 */}
         <div className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono font-bold shrink-0">
               001
             </div>
             <div className="min-w-0">
-              <div className="text-sm sm:text-base text-text-primary leading-snug">
+              <div className="text-sm sm:text-base text-text-primary font-bold leading-snug">
                 iPS培養上清液に関する留意事項
               </div>
               {cautionAgreedAt && (
@@ -77,11 +77,11 @@ export default async function CultureFluidDocumentsPage() {
         {/* 002: 自家iPS培養上清液に関する説明書兼同意書 */}
         <div className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors duration-300 hover:border-border-gold">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono font-bold shrink-0">
               002
             </div>
             <div className="min-w-0">
-              <div className="text-sm sm:text-base text-text-primary leading-snug">
+              <div className="text-sm sm:text-base text-text-primary font-bold leading-snug">
                 自家iPS培養上清液に関する説明書兼同意書
               </div>
               {informedAgreedAt && (
@@ -109,7 +109,7 @@ export default async function CultureFluidDocumentsPage() {
       </div>
 
       {/* 購入プラン記録 */}
-      <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+      <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
         購入プラン記録
       </h3>
       {orders.length === 0 ? (
@@ -124,13 +124,13 @@ export default async function CultureFluidDocumentsPage() {
               className="bg-bg-secondary border border-border rounded-md px-4 py-4 sm:px-7 sm:py-5"
             >
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono shrink-0">
+                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded bg-bg-elevated flex items-center justify-center text-[10px] sm:text-xs text-gold font-mono font-bold shrink-0">
                   {String(orders.length - i).padStart(3, "0")}
                 </span>
-                <span className="text-sm sm:text-base text-text-primary font-medium">
+                <span className="text-sm sm:text-base text-text-primary font-bold">
                   {order.planLabel}
                 </span>
-                <span className="text-sm text-gold font-mono">
+                <span className="text-sm text-gold font-mono font-bold">
                   ¥{formatAmount(order.totalAmount)}
                 </span>
                 {order.status === "COMPLETED" ? (

@@ -13,7 +13,7 @@ export default async function LegalPage() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
+        <h1 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-[2px] mb-2">
           特定商取引法に基づく表記
         </h1>
         <GoldDivider width={60} className="mx-auto" />
@@ -24,7 +24,7 @@ export default async function LegalPage() {
 
           {/* 事業者情報 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">事業者情報</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">事業者情報</h2>
             <div className="space-y-0">
               <LegalRow label="販売事業者名" value={company.name} />
               <LegalRow label="運営責任者" value={company.representative || "代表取締役"} />
@@ -36,7 +36,7 @@ export default async function LegalPage() {
 
           {/* 役務の名称・内容 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">役務の名称・内容</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">役務の名称・内容</h2>
             <div className="space-y-0">
               <LegalRow label="役務の名称" value="BioVaultメンバーシップサービス" />
               <LegalRow label="役務の内容" value="本サービスは、会員本人に由来する血液その他の試料に関し、提携医療機関、提携加工施設、提携保管施設その他提携先における自家iPS細胞の作製、加工、保管その他関連手続について、案内、申込管理、日程調整、情報提供および運営上の連携を受けることができるサービスです。" />
@@ -49,7 +49,7 @@ export default async function LegalPage() {
 
           {/* 販売価格・費用 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">販売価格・費用</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">販売価格・費用</h2>
             <div className="space-y-0">
               <LegalRow label="会員価格" value="8,800,000円（税込）" />
               <LegalRow label="お支払い方法" value="銀行振込（当社指定口座）" />
@@ -57,7 +57,7 @@ export default async function LegalPage() {
               <LegalRow label="振込手数料" value="申込者負担" />
             </div>
             <div className="mt-4">
-              <h3 className="text-xs text-text-primary font-medium mb-2">商品代金以外の必要料金</h3>
+              <h3 className="text-xs text-[#000] font-semibold mb-2">商品代金以外の必要料金</h3>
               <ul className="text-xs text-text-muted space-y-1.5 list-none">
                 <li>・銀行振込手数料</li>
                 <li>・提携医療機関への来院交通費、宿泊費その他移動費用</li>
@@ -70,7 +70,7 @@ export default async function LegalPage() {
 
           {/* 役務の提供時期 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">役務の提供時期</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">役務の提供時期</h2>
             <div className="text-xs text-text-muted space-y-2">
               <p>契約締結および所定の手続き完了後、順次提供を開始します。</p>
               <p>ただし、採血、細胞作製、細胞加工、細胞保管、施術その他個別サービスの実施時期は、提携医療機関または提携先との調整、問診、診察、検査結果、健康状態、試料状態、技術的条件その他の事情により変動します。</p>
@@ -81,7 +81,7 @@ export default async function LegalPage() {
 
           {/* 申込みの成立時期 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">申込みの成立時期</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">申込みの成立時期</h2>
             <div className="text-xs text-text-muted space-y-2">
               <p>当社が申込み内容を確認し、所定の承諾手続きを完了した時点で成立します。</p>
               <p>ただし、会員資格の成立は、採血、細胞作製、細胞保管その他個別サービスの実施確定を意味するものではありません。</p>
@@ -96,7 +96,7 @@ export default async function LegalPage() {
             </div>
             <div className="text-xs text-text-secondary space-y-4">
               <div className="bg-bg-primary/50 border border-border rounded-md p-4">
-                <h3 className="text-text-primary font-bold mb-2">【通信販売の場合】</h3>
+                <h3 className="text-[#000] font-semibold mb-2">【通信販売の場合】</h3>
                 <p>通信販売には、電話勧誘販売や訪問販売のような法定クーリング・オフ制度は通常ありません。返品・解約の可否や条件は、事業者が表示した特約に従うことになります。</p>
               </div>
               <div className="bg-status-warning/10 border border-status-warning/20 rounded-md p-4">
@@ -106,12 +106,12 @@ export default async function LegalPage() {
                 <p>なお、法定書面の不交付または重要事項の記載不備がある場合、クーリング・オフ期間の起算に影響する可能性があります。</p>
               </div>
               <div className="bg-bg-primary/50 border border-border rounded-md p-4">
-                <h3 className="text-text-primary font-bold mb-2">【クーリング・オフ期間経過後の解約・解除】</h3>
+                <h3 className="text-[#000] font-semibold mb-2">【クーリング・オフ期間経過後の解約・解除】</h3>
                 <p className="mb-2">クーリング・オフ期間経過後の解約または解除については、会員契約書、重要事項説明書兼確認書および申込確認書に定める返金・精算条件に従います。</p>
                 <p>返金または精算の有無およびその範囲は、解除申出時点における進行段階、既発生費用、既提供済みサービス、提携先に対する支払確定額その他の事情を踏まえて定められます。</p>
               </div>
               <div className="bg-bg-primary/50 border border-border rounded-md p-4">
-                <h3 className="text-text-primary font-bold mb-2">【中途解約・返金の一般的な考え方】</h3>
+                <h3 className="text-[#000] font-semibold mb-2">【中途解約・返金の一般的な考え方】</h3>
                 <ul className="space-y-1 list-none mb-2">
                   <li>・採血予約前</li>
                   <li>・採血予約後かつ採血前</li>
@@ -126,19 +126,19 @@ export default async function LegalPage() {
 
           {/* 個人情報の取扱い */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">個人情報の取扱い</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">個人情報の取扱い</h2>
             <p className="text-xs text-text-muted">本サービスの提供にあたり、個人情報、要配慮個人情報、個人遺伝情報、検査結果、試料識別情報その他必要な情報が取得、利用、保管および提携先へ提供される場合があります。詳細は、別紙「個人情報・個人遺伝情報等の取扱いに関する同意書」に定めます。</p>
           </section>
 
           {/* 不良品・役務の不適合 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">不良品・役務の不適合について</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">不良品・役務の不適合について</h2>
             <p className="text-xs text-text-muted">本サービスはメンバーシップサービスであり、採血、細胞作製、保管その他の実施可否については、提携医療機関または提携先による判断が介在します。{company.name}は、本サービスに関連して、会員契約書その他適用文書に定める範囲で責任を負います。</p>
           </section>
 
           {/* 表現および役務提供に関する重要事項 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">表現および役務提供に関する重要事項</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">表現および役務提供に関する重要事項</h2>
             <ul className="text-xs text-text-muted space-y-1.5 list-none">
               <li>・{company.name}は医療行為の実施主体ではありません。</li>
               <li>・診察、採血、医学的判断等は提携医療機関等が行います。</li>
@@ -153,7 +153,7 @@ export default async function LegalPage() {
 
           {/* 適用文書 */}
           <section>
-            <h2 className="text-sm text-text-primary font-medium mb-4">適用文書</h2>
+            <h2 className="text-sm text-[#000] font-semibold mb-4">適用文書</h2>
             <p className="text-xs text-text-muted mb-2">本サービスには、次の文書が一体として適用されます。</p>
             <ul className="text-xs text-text-muted space-y-1 list-none">
               <li>・BioVault会員契約書</li>
@@ -193,7 +193,7 @@ export default async function LegalPage() {
 function LegalRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col sm:flex-row py-3 border-b border-border last:border-b-0">
-      <div className="w-full sm:w-40 text-[11px] text-text-muted mb-1 sm:mb-0 shrink-0">{label}</div>
+      <div className="w-full sm:w-40 text-[11px] text-[#333] font-bold mb-1 sm:mb-0 shrink-0">{label}</div>
       <div className="text-[13px] text-text-secondary leading-relaxed">{value}</div>
     </div>
   );

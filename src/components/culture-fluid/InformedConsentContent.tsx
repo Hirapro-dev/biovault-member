@@ -130,7 +130,7 @@ export default function InformedConsentContent({ companyName = "{companyName}" }
 function Sec({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-2">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-2">{t}</h4>
       <div className="space-y-2">{children}</div>
     </section>
   );

@@ -45,22 +45,21 @@ export default async function InfoPage() {
 
   return (
     <div>
-      <h2 className="font-serif-jp text-lg font-normal text-text-primary tracking-wider mb-5">
+      <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-wider mb-5">
         サービス詳細
       </h2>
 
-      {/* iPSサービス利用申込（目立つカード） */}
+      {/* iPSサービス利用申込（目立つカード = 次のアクション扱い / step-card） */}
       <Link
         href={menuItems[0].href}
-        className="block mb-4 rounded-xl border border-border-gold overflow-hidden group hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all"
-        style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.10) 0%, rgba(191,160,75,0.02) 100%)" }}
+        className="block mb-4 rounded-[2px] step-card overflow-hidden group transition-all"
       >
         <div className="flex items-center gap-4 px-5 py-5">
-          <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.20) 0%, rgba(191,160,75,0.08) 100%)", border: "1px solid rgba(191,160,75,0.25)" }}>
+          <div className="w-11 h-11 rounded-[2px] flex items-center justify-center text-xl shrink-0" style={{ background: "linear-gradient(135deg, rgba(20,102,168,0.14) 0%, rgba(20,102,168,0.05) 100%)", border: "1px solid rgba(20,102,168,0.22)" }}>
             {menuItems[0].icon}
           </div>
           <div className="flex-1">
-            <div className="text-sm text-gold font-semibold tracking-wide">
+            <div className="text-sm text-gold font-bold tracking-wide">
               {menuItems[0].label}
             </div>
             <div className="text-[11px] text-text-muted mt-0.5">
@@ -72,7 +71,7 @@ export default async function InfoPage() {
       </Link>
 
       {/* その他のメニュー */}
-      <div className="bg-bg-secondary border border-border rounded-md overflow-hidden">
+      <div className="bg-bg-secondary border border-border rounded-[2px] overflow-hidden">
         {menuItems.slice(1).map((item, i) => (
           <Link
             key={item.href}
@@ -81,7 +80,7 @@ export default async function InfoPage() {
               i < menuItems.length - 2 ? "border-b border-border" : ""
             }`}
           >
-            <div className="w-10 h-10 rounded-lg bg-bg-elevated flex items-center justify-center text-lg shrink-0">
+            <div className="w-10 h-10 rounded-[2px] bg-bg-elevated flex items-center justify-center text-lg shrink-0">
               {item.icon}
             </div>
             <div className="flex-1">

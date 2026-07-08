@@ -99,18 +99,18 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
   const copyrightCompany = isAdmin ? "SCPP Inc." : `${getCompany((session?.user as { scheme?: string } | undefined)?.scheme).shortName} Inc.`;
 
   return (
-    <div className="w-68 bg-bg-secondary border-r border-border flex flex-col shrink-0 h-screen sticky top-0">
-      {/* ロゴ */}
-      <Link href={isAdmin ? "/admin" : "/mypage"} className="block px-6 py-7 border-b border-border hover:opacity-80 transition-opacity">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
-        <div className="text-[9px] tracking-[3px] text-text-muted mt-2">
-          {isAdmin ? "ADMIN CONSOLE" : "MEMBER Site"}
-        </div>
-      </Link>
+    <div className={`w-68 flex flex-col shrink-0 ${isAdmin ? "h-screen sticky top-0 bg-bg-secondary border-r border-border" : "sticky top-16 h-[calc(100vh-4rem)] mside border-r border-[#DCE0E7]"}`}>
+      {/* ロゴ（管理者のみ。会員は全幅ヘッダー左にロゴを表示） */}
+      {isAdmin && (
+        <Link href="/admin" className="block px-6 py-7 border-b border-border hover:opacity-80 transition-opacity">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="BioVault" className="h-10 w-auto" />
+          <div className="text-[9px] tracking-[3px] mt-2 text-text-muted">ADMIN CONSOLE</div>
+        </Link>
+      )}
 
       {/* ナビゲーション */}
-      <nav className="flex-1 p-3 overflow-y-auto">
+      <nav className={`flex-1 p-3 overflow-y-auto ${isAdmin ? "" : "pt-5"}`}>
         {isAdmin ? (
           <>
             {adminNav.map((item) => {
@@ -157,9 +157,9 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide border border-transparent text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                  className="flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide mside-item"
                 >
-                  <span className="opacity-50"><item.Icon /></span>
+                  <span className="opacity-60"><item.Icon /></span>
                   {item.label}
                 </a>
               );
@@ -170,12 +170,10 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 w-full px-3.5 py-3 mb-0.5 rounded transition-all duration-200 text-[13px] tracking-wide ${
-                  active
-                    ? "bg-bg-tertiary border border-border-gold text-gold"
-                    : "border border-transparent text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                  active ? "mside-item-active" : "mside-item"
                 }`}
               >
-                <span className={`${active ? "opacity-100" : "opacity-50"}`}><item.Icon /></span>
+                <span className={`${active ? "opacity-100" : "opacity-60"}`}><item.Icon /></span>
                 {item.label}
               </Link>
             );
@@ -184,7 +182,7 @@ export default function Sidebar({ isAdmin, userRole }: { isAdmin: boolean; userR
       </nav>
 
       {/* フッター */}
-      <div className="px-5 py-4 border-t border-border text-[10px] text-text-muted tracking-wider">
+      <div className={`px-5 py-4 border-t text-[10px] tracking-wider ${isAdmin ? "border-border text-text-muted" : "mside-divider mside-faint"}`}>
         &copy; 2025 {copyrightCompany}
       </div>
     </div>

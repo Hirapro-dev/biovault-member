@@ -31,7 +31,7 @@ export default async function CellConsentViewPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">BioVault細胞提供・保管同意書</h2>
+        <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px]">BioVault細胞提供・保管同意書</h2>
         {isSigned && <Badge variant="success">同意済</Badge>}
       </div>
       {doc?.signedAt && (
@@ -180,7 +180,7 @@ export default async function CellConsentViewPage() {
       {/* 死亡時意思表示の選択内容 */}
       {isSigned && deathWish && (
         <div className="mt-5 bg-bg-secondary border border-border rounded-md p-5 sm:p-7">
-          <h3 className="text-sm text-text-primary font-medium mb-3">死亡時意思表示</h3>
+          <h3 className="text-sm text-[#000] font-semibold mb-3">死亡時意思表示</h3>
           <p className="text-xs text-text-muted mb-4">同意時にご選択いただいた内容</p>
           <div className="space-y-2.5">
             <div className="flex items-center gap-3">
@@ -213,7 +213,7 @@ export default async function CellConsentViewPage() {
 function S({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm text-text-primary font-medium mb-2">{t}</h3>
+      <h3 className="text-sm text-[#000] font-semibold mb-2">{t}</h3>
       <div className="space-y-2">{children}</div>
     </section>
   );

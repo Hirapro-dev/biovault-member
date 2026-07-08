@@ -30,7 +30,7 @@ export default async function CultureFluidInformedConsentViewPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">自家iPS培養上清液に関する説明書兼同意書</h2>
+        <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px]">自家iPS培養上清液に関する説明書兼同意書</h2>
         {isAgreed && <Badge variant="success">同意済</Badge>}
       </div>
       {latestOrder?.informedAgreedAt && (

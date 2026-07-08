@@ -123,7 +123,7 @@ export default function CultureFluidInformedConsentPage() {
         </span>
       </div>
 
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-2">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-2">
         自家iPS培養上清液に関する説明書兼同意書
       </h2>
       <p className="text-xs text-text-muted mb-5">
@@ -358,7 +358,7 @@ export default function CultureFluidInformedConsentPage() {
 function Sec({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-2">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-2">{t}</h4>
       <div className="space-y-2">{children}</div>
     </section>
   );

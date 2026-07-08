@@ -42,34 +42,37 @@ export default async function MemberLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-bg-primary text-text-primary font-sans">
-      {/* PC: サイドバー */}
-      <div className="hidden lg:block">
-        <Sidebar isAdmin={false} />
-      </div>
+    <div className="min-h-screen member-bg text-text-primary font-sans flex flex-col">
+      {/* 全幅ヘッダー（最前面レイヤー・ロゴ左・カード同系ネイビーグラデ）
+          + ハンバーガー（PC・モバイル共通サブメニュー） */}
+      <MobileNav isAdmin={false} userName={user.name} userRole={user.role} userId={user.id} signedDocTypes={signedDocTypes} showOnAllScreens showAccountSwitcher={showAccountSwitcher} />
 
-      <div className="flex-1 overflow-y-auto relative w-full">
-        {/* ハンバーガーナビ（PC・モバイル共通サブメニュー） */}
-        <MobileNav isAdmin={false} userName={user.name} userRole={user.role} userId={user.id} signedDocTypes={signedDocTypes} showOnAllScreens showAccountSwitcher={showAccountSwitcher} />
+      <div className="flex flex-1 min-h-0">
+        {/* PC: グレーサイドバー（ヘッダーの下に配置） */}
+        <div className="hidden lg:block">
+          <Sidebar isAdmin={false} />
+        </div>
 
-        <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
-          {children}
-        </main>
+        <div className="flex-1 relative w-full">
+          <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-8 pb-24 lg:pb-8 max-w-[1200px] mx-auto animate-fade-in">
+            {children}
+          </main>
 
-        {/* モバイル: 下部固定ナビ */}
-        <BottomNav />
+          {/* モバイル: 下部固定ナビ */}
+          <BottomNav />
 
-        {/* アクセスログ自動記録 */}
-        <AccessLogger />
+          {/* アクセスログ自動記録 */}
+          <AccessLogger />
 
-        {/* プッシュ通知登録 */}
-        <PushRegistrar />
+          {/* プッシュ通知登録 */}
+          <PushRegistrar />
 
-        {/* ホーム画面追加ガイド */}
-        <InstallGuide />
+          {/* ホーム画面追加ガイド */}
+          <InstallGuide />
 
-        {/* テスト操作パネル（テスターアカウントのみ表示） */}
-        <TestControlPanel />
+          {/* テスト操作パネル（テスターアカウントのみ表示） */}
+          <TestControlPanel />
+        </div>
       </div>
     </div>
   );

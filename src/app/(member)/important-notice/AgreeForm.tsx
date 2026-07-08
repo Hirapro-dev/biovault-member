@@ -75,7 +75,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
         <div className="text-center mb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="BioVault" className="h-7 w-auto mx-auto mb-4" />
-          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
+          <h1 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <GoldDivider width={60} className="mx-auto mb-3" />
           <p className="text-xs text-text-secondary leading-relaxed">
             サービスのご利用にあたり、<br />以下の2つの書類をそれぞれお読みいただき、ご同意ください。
@@ -85,7 +85,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 
       {isAgreed && (
         <div className="mb-6">
-          <h1 className="font-serif-jp text-lg text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
+          <h1 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <div className="flex items-center gap-2 text-xs">
             <span className="text-status-active">✓ 同意済み</span>
             {agreedAt && <span className="text-text-muted">({new Date(agreedAt).toLocaleDateString("ja-JP")})</span>}
@@ -95,7 +95,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 
       {/* 重要事項説明書兼確認書 */}
       <div className="mb-8">
-        <h2 className="text-sm text-text-primary font-medium mb-3">重要事項説明書兼確認書</h2>
+        <h2 className="text-sm text-[#000] font-semibold mb-3">重要事項説明書兼確認書</h2>
 
         <div
           ref={scroll1Ref}
@@ -131,7 +131,7 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
 
       {/* 個人情報同意書 */}
       <div className="mb-6">
-        <h2 className="text-sm text-text-primary font-medium mb-3">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
+        <h2 className="text-sm text-[#000] font-semibold mb-3">個人情報・個人遺伝情報等の取扱いに関する同意書</h2>
 
         <div
           ref={scroll2Ref}
@@ -416,7 +416,7 @@ function PrivacyConsentContent({ company }: { company: CompanyInfo }) {
 function S({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm text-text-primary font-medium mb-2">{t}</h3>
+      <h3 className="text-sm text-[#000] font-semibold mb-2">{t}</h3>
       <div className="space-y-2">{children}</div>
     </section>
   );

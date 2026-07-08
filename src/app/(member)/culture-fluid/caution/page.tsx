@@ -45,7 +45,7 @@ export default async function CultureFluidCautionPage({
         </div>
 
         <div className="mb-8">
-          <h2 className="font-serif-jp text-lg sm:text-xl text-text-primary tracking-[2px] mb-4">
+          <h2 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-[2px] mb-4">
             iPS培養上清液に関する留意事項
           </h2>
           <p className="text-xs text-text-muted leading-relaxed">
@@ -72,7 +72,7 @@ export default async function CultureFluidCautionPage({
       </div>
 
       <div className="flex items-center gap-3 mb-5">
-        <h2 className="font-serif-jp text-lg text-text-primary tracking-[2px]">iPS培養上清液に関する留意事項</h2>
+        <h2 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px]">iPS培養上清液に関する留意事項</h2>
         {isAgreed && <Badge variant="success">同意済</Badge>}
       </div>
       {latestOrder?.cautionAgreedAt && (

@@ -194,13 +194,13 @@ export default async function MyPage() {
       {/* ── 2. 次のステップ（カードの下・ステータスの上） ── */}
       {membership && (
         <div className="mb-6">
-          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+          <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4 mt-2">
             次のステップ
           </h3>
 
           {membership.ipsStatus === "REGISTERED" && (
             <Link href="/important-notice" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="relative overflow-hidden rounded-[2px] step-card">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📋</span>
@@ -208,7 +208,7 @@ export default async function MyPage() {
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製適合確認</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、適合審査にお進みください。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                  <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     確認へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ export default async function MyPage() {
 
           {membership.ipsStatus === "TERMS_AGREED" && (
             <Link href="/apply-service" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="relative overflow-hidden rounded-[2px] step-card">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">✍️</span>
@@ -226,7 +226,7 @@ export default async function MyPage() {
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用申込</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">{user.name}様よりご入力いただいた健康状態を確認し、iPS細胞作製適合確認を行いました。<span className="text-gold font-bold text-sm">iPS細胞の作製は可能</span>です。以下よりiPSサービスへのお申込みに進めます。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                  <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export default async function MyPage() {
 
           {/* 契約書署名カード（申込済み & 契約書未署名） */}
           {membership.ipsStatus === "SERVICE_APPLIED" && !membership.contractSignedAt && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">📝</span>
@@ -258,7 +258,7 @@ export default async function MyPage() {
 
           {/* 契約締結・入金確認カード（契約書署名済み & 未入金） */}
           {membership.ipsStatus === "SERVICE_APPLIED" && !!membership.contractSignedAt && membership.paymentStatus !== "COMPLETED" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">💰</span>
@@ -291,7 +291,7 @@ export default async function MyPage() {
           {/* 日程調整カード（契約署名済み & 入金済み） */}
           {membership.ipsStatus === "SERVICE_APPLIED" && !!membership.contractSignedAt && membership.paymentStatus === "COMPLETED" && (
             <Link href="/mypage/cell-consent" className="block group">
-              <div className="relative overflow-hidden rounded-xl border border-border-gold" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="relative overflow-hidden rounded-[2px] step-card">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📅</span>
@@ -299,7 +299,7 @@ export default async function MyPage() {
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製におけるクリニックの日程調整</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">契約締結・入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                  <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     クリニックの日程調整へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>
@@ -310,7 +310,7 @@ export default async function MyPage() {
           {membership.ipsStatus === "SCHEDULE_ARRANGED" && (
             <div className="space-y-4">
               {/* 日程確定カード（問診・採血完了まで表示） */}
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="rounded-[2px] step-card overflow-hidden">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🏥</span>
@@ -348,7 +348,7 @@ export default async function MyPage() {
               {/* iPS細胞作製における事前説明・同意（日程確定後のみ表示） */}
               {membership.clinicDate && !isStepDone("DOC_INFORMED") && (
                 <Link href="/mypage/informed-consent" className="block group">
-                  <div className="relative overflow-hidden rounded-xl border border-status-warning/30" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
+                  <div className="relative overflow-hidden rounded-[2px] step-card-warn">
                     <div className="p-5 sm:p-6">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-2xl">📄</span>
@@ -357,7 +357,7 @@ export default async function MyPage() {
                       <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
                       <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
                       <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
-                      <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                      <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                         同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
                       </div>
                     </div>
@@ -381,10 +381,10 @@ export default async function MyPage() {
             const fmtMonth = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月頃`;
 
             return (
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="rounded-[2px] step-card overflow-hidden">
                 <div className="p-5 sm:p-6 text-center">
                   <div className="text-4xl mb-3">🧬</div>
-                  <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞を作製中</div>
+                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞を作製中</div>
                   <div className="text-xs text-text-muted leading-relaxed">{user.name}様のiPS細胞の作製に進んでおります。<br />今しばらくお待ちください。</div>
                   {estimateFrom && estimateTo && (
                     <div className="mt-4 bg-bg-elevated border border-border rounded-md p-4">
@@ -402,13 +402,23 @@ export default async function MyPage() {
           })()}
 
           {membership.ipsStatus === "STORAGE_ACTIVE" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🏛️</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-active/15 text-status-active border border-status-active/20">保管中</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-3">iPS細胞保管中</div>
+                <div
+                  className="inline-block text-base sm:text-lg font-bold mb-3"
+                  style={{
+                    background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  iPS細胞保管中
+                </div>
                 <div className="bg-bg-elevated border border-border rounded-md p-4">
                   <div className="text-[11px] text-text-muted mb-1">保管期限</div>
                   <div className="font-mono text-lg text-gold">
@@ -424,15 +434,15 @@ export default async function MyPage() {
 
           {/* 培養上清液サービスへ申込カード（保管中の場合に表示） */}
           {membership.ipsStatus === "STORAGE_ACTIVE" && (
-            <Link href="/culture-fluid" className="block mt-4 rounded-xl border border-border-gold overflow-hidden group" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <Link href="/culture-fluid" className="block mt-4 rounded-[2px] step-card overflow-hidden group">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🧪</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEW</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">培養上清液サービスへ申込</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">培養上清液サービスへ申込</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">iPS細胞から培養上清液を生成するサービスにお申込みいただけます。</div>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                   申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
@@ -442,11 +452,11 @@ export default async function MyPage() {
       )}
 
       {/* ── 3. ステータス（縦タイムライン） ── */}
-      <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+      <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4 mt-2">
         ステータス
       </h3>
 
-      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+      <div className="bg-bg-secondary border border-border rounded-[2px] p-4 sm:p-6">
         <div className="relative">
           {TIMELINE_STEPS.map((step, i) => {
             const done = isStepDone(step.key);
@@ -463,7 +473,7 @@ export default async function MyPage() {
                 {!isLast && (
                   <div
                     className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
-                    style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }}
+                    style={{ background: done && nextDone ? "#1F3144" : done && !nextDone ? "linear-gradient(to bottom, #1F3144, var(--color-border))" : "var(--color-border)" }}
                   />
                 )}
                 {/* ノード */}
@@ -477,7 +487,7 @@ export default async function MyPage() {
                   } ${active ? "animate-pulse-gold" : ""}`}
                   style={{
                     background: done
-                      ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))"
+                      ? "linear-gradient(135deg, #0C1620 0%, #1F3144 50%, #0C1624 100%)"
                       : active
                       ? "var(--color-bg-primary)"
                       : "var(--color-bg-elevated)",
@@ -504,7 +514,7 @@ export default async function MyPage() {
                     };
                     const pageUrl = stepDocPages[step.key];
                     const pdfUrl = stepPdfMap[step.key] || null;
-                    const labelClass = `text-[13px] sm:text-sm ${done ? "text-gold" : active ? "text-gold-light font-semibold" : "text-text-secondary"}`;
+                    const labelClass = `text-[13px] sm:text-sm ${done ? "status-label-done" : active ? "status-label-todo font-semibold" : "status-label-todo"}`;
 
                     if (pageUrl && done) {
                       // モーダルまたはPDFで表示（ページ遷移しない）
@@ -563,7 +573,7 @@ export default async function MyPage() {
       <div className="mt-4">
         <Link
           href="/documents"
-          className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-4 hover:border-border-gold transition-all group"
+          className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-4 hover:border-border-gold transition-all group"
         >
           <div className="w-10 h-10 rounded-full bg-bg-elevated flex items-center justify-center text-lg shrink-0">◇</div>
           <div className="flex-1">
@@ -579,10 +589,10 @@ export default async function MyPage() {
       {/* ── 健康状態確認 ── */}
       {fullUser && (
         <div className="mt-8">
-          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 pb-3 border-b border-border">
+          <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4">
             健康状態確認
           </h3>
-          <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-6">
+          <div className="bg-bg-secondary border border-border rounded-[2px] p-5 sm:p-6">
             <div className="space-y-3">
               <HealthItem label="現在治療中の病気" active={fullUser.currentIllness} detail={fullUser.currentIllnessDetail} />
               <HealthItem label="過去の病気・手術歴" active={fullUser.pastIllness} detail={fullUser.pastIllnessDetail} />
@@ -611,10 +621,12 @@ function HealthItem({ label, active, detail }: { label: string; active: boolean;
       <div className="text-[13px] text-text-primary mb-2">{label}</div>
       <div className="flex gap-4 mb-1">
         <label className="flex items-center gap-2 text-xs text-text-secondary">
-          <input type="radio" checked={!active} readOnly className="accent-gold pointer-events-none" /> なし
+          <input type="radio" checked={!active} readOnly className="sr-only" />
+          <span className={`radio-grad ${!active ? "is-on" : ""}`} aria-hidden="true" /> なし
         </label>
         <label className="flex items-center gap-2 text-xs text-text-secondary">
-          <input type="radio" checked={active} readOnly className="accent-gold pointer-events-none" /> あり
+          <input type="radio" checked={active} readOnly className="sr-only" />
+          <span className={`radio-grad ${active ? "is-on" : ""}`} aria-hidden="true" /> あり
         </label>
       </div>
       {active && detail && (

@@ -13,7 +13,7 @@ export default async function ProductDefinitionPage() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-2">
+        <h1 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-[2px] mb-2">
           商品定義書
         </h1>
         <GoldDivider width={60} className="mx-auto" />
@@ -21,7 +21,7 @@ export default async function ProductDefinitionPage() {
 
       {/* 文書目的 */}
       <div className="bg-bg-secondary border border-border rounded-md p-5 sm:p-8 mb-6">
-        <h2 className="text-sm text-gold font-medium mb-3">文書目的</h2>
+        <h2 className="text-sm text-gold font-bold mb-3">文書目的</h2>
         <p className="text-[13px] text-text-secondary leading-[2]">
           本書は、BioVault Membership Serviceの内容、提供範囲、提供条件、顧客提供プロセス、関連役務との関係、表示上の留意事項その他の基本条件を社内外で統一的に整理することを目的とする。本書は、営業資料、契約書、重要事項説明書、FAQ、申込導線、審査資料その他関連文書の作成及び整合確認の基礎資料として用いる。
         </p>
@@ -175,7 +175,7 @@ export default async function ProductDefinitionPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-sm text-text-primary font-medium mb-3 pb-2 border-b border-border">{title}</h2>
+      <h2 className="text-sm text-[#000] font-semibold mb-3 pb-2 border-b border-border">{title}</h2>
       <div className="text-[13px] text-text-secondary leading-[2] space-y-3">
         {children}
       </div>

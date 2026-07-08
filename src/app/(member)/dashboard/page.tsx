@@ -24,14 +24,14 @@ export default async function ContentPage() {
 
   return (
     <div>
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-6">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-6">
         コンテンツ
       </h2>
 
       {/* ── 動画セクション ── */}
       {youtubeId && (
         <div className="mb-8">
-          <div className="aspect-video rounded-lg overflow-hidden bg-black">
+          <div className="aspect-video rounded-[2px] overflow-hidden bg-black">
             <iframe
               src={`https://www.youtube.com/embed/${youtubeId}`}
               title={latestVideo?.title || "iPS細胞について"}
@@ -53,8 +53,8 @@ export default async function ContentPage() {
 
       {/* ── iPSとは？ / 歴史 / 用語集 ── */}
       <div className="space-y-3">
-        <Link href="/about-ips/what-is-ips" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
-          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">🧬</div>
+        <Link href="/about-ips/what-is-ips" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-[2px] bg-bg-elevated flex items-center justify-center text-2xl shrink-0">🧬</div>
           <div className="flex-1">
             <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">iPS細胞とは？</h3>
             <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">人工多能性幹細胞の仕組みと可能性、再生医療・創薬への応用について</p>
@@ -62,8 +62,8 @@ export default async function ContentPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
 
-        <Link href="/about-ips/history" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
-          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">📜</div>
+        <Link href="/about-ips/history" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-[2px] bg-bg-elevated flex items-center justify-center text-2xl shrink-0">📜</div>
           <div className="flex-1">
             <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">iPS細胞の歴史</h3>
             <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">1962年の核移植実験から2026年の世界初承認まで、60年以上の軌跡</p>
@@ -71,8 +71,8 @@ export default async function ContentPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
 
-        <Link href="/about-ips/culture-fluid" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
-          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">🧪</div>
+        <Link href="/about-ips/culture-fluid" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-[2px] bg-bg-elevated flex items-center justify-center text-2xl shrink-0">🧪</div>
           <div className="flex-1">
             <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">iPS培養上清液に関する基礎知識</h3>
             <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">培養上清液の成分、期待される働き、研究結果について</p>
@@ -80,8 +80,8 @@ export default async function ContentPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
 
-        <Link href="/about-ips/nano-liposome" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
-          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">💊</div>
+        <Link href="/about-ips/nano-liposome" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-[2px] bg-bg-elevated flex items-center justify-center text-2xl shrink-0">💊</div>
           <div className="flex-1">
             <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">ハイブリッド・ナノリポソーム化に関する基礎知識</h3>
             <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">送達技術の仕組み、期待される利点、iPS培養上清液との組み合わせ</p>
@@ -89,8 +89,8 @@ export default async function ContentPage() {
           <span className="text-text-muted group-hover:text-gold transition-colors">→</span>
         </Link>
 
-        <Link href="/about-ips/glossary" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-md p-5 transition-all duration-300 hover:border-border-gold group">
-          <div className="w-14 h-14 rounded-lg bg-bg-elevated flex items-center justify-center text-2xl shrink-0">📖</div>
+        <Link href="/about-ips/glossary" className="flex items-center gap-4 bg-bg-secondary border border-border rounded-[2px] p-5 transition-all duration-300 hover:border-border-gold group">
+          <div className="w-14 h-14 rounded-[2px] bg-bg-elevated flex items-center justify-center text-2xl shrink-0">📖</div>
           <div className="flex-1">
             <h3 className="text-sm text-text-primary group-hover:text-gold transition-colors font-medium">用語集</h3>
             <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">iPS細胞・再生医療に関する専門用語をわかりやすく解説</p>

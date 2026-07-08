@@ -131,18 +131,18 @@ export default async function CultureFluidPage() {
 
   return (
     <div>
-      <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px] mb-5 sm:mb-7">
+      <h2 className="font-serif-jp text-lg sm:text-[22px] font-extrabold text-text-primary tracking-[2px] mb-5 sm:mb-7">
         培養上清液サービス詳細
       </h2>
 
       {/* ── 1. 保有状況カード ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-bg-secondary border border-border rounded-md p-5">
+        <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
           <div className="text-[10px] text-text-muted tracking-wider mb-1">点滴施術完了回数</div>
           <div className="font-mono text-2xl text-gold">{completedCount}<span className="text-sm text-text-muted ml-1">回</span></div>
           <div className="text-[10px] text-text-muted mt-1">累計完了済み</div>
         </div>
-        <div className="bg-bg-secondary border border-border rounded-md p-5">
+        <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
           <div className="text-[10px] text-text-muted tracking-wider mb-1">残り点滴施術回数</div>
           {activeOrder ? (
             <>
@@ -156,7 +156,7 @@ export default async function CultureFluidPage() {
             <div className="text-sm text-text-muted">---</div>
           )}
         </div>
-        <div className="bg-bg-secondary border border-border rounded-md p-5">
+        <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
           <div className="text-[10px] text-text-muted tracking-wider mb-1">培養上清液管理期限</div>
           {activeOrder?.expiresAt ? (
             <>
@@ -172,11 +172,10 @@ export default async function CultureFluidPage() {
       {/* ── 2. 追加申込ボタン ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <Link href="/culture-fluid/apply" className="block group">
-          <div className="rounded-xl border border-border-gold overflow-hidden hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all h-full"
-               style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.10) 0%, rgba(191,160,75,0.02) 100%)" }}>
+          <div className="rounded-[2px] step-card overflow-hidden transition-all h-full">
             <div className="flex items-center gap-4 px-5 py-5">
-              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0"
-                   style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.20) 0%, rgba(191,160,75,0.08) 100%)", border: "1px solid rgba(191,160,75,0.25)" }}>
+              <div className="w-11 h-11 rounded-[2px] flex items-center justify-center text-xl shrink-0"
+                   style={{ background: "linear-gradient(135deg, rgba(20,102,168,0.14) 0%, rgba(20,102,168,0.05) 100%)", border: "1px solid rgba(20,102,168,0.22)" }}>
                 🧪
               </div>
               <div className="flex-1">
@@ -188,9 +187,9 @@ export default async function CultureFluidPage() {
           </div>
         </Link>
         <Link href="/culture-fluid/documents" className="block group">
-          <div className="rounded-xl border border-border overflow-hidden hover:border-border-gold hover:shadow-[0_0_20px_rgba(191,160,75,0.1)] transition-all h-full bg-bg-secondary">
+          <div className="rounded-[2px] border border-border overflow-hidden hover:border-border-gold transition-all h-full bg-bg-secondary">
             <div className="flex items-center gap-4 px-5 py-5">
-              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0 bg-bg-elevated border border-border">
+              <div className="w-11 h-11 rounded-[2px] flex items-center justify-center text-xl shrink-0 bg-bg-elevated border border-border">
                 📋
               </div>
               <div className="flex-1">
@@ -206,7 +205,7 @@ export default async function CultureFluidPage() {
       {/* ── 3. 次のステップ ── */}
       {activeOrder && (
         <div className="mb-6">
-          <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider mb-4 mt-2 pb-3 border-b border-border">
+          <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4 mt-2">
             次のステップ
           </h3>
 
@@ -216,10 +215,10 @@ export default async function CultureFluidPage() {
               ただし iPS が保管中になるまでは「クリニック予約は不可」のため、
               iPS未保管なら「iPS作製完了待ち」のカードを表示する。 */}
           {activeOrder.planType === "iv_drip_1_included" && !isIpsStorageActive && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">🧬</div>
-                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
                 <div className="text-xs text-text-muted leading-relaxed">iPS細胞が保管状態になりましたら、<br />クリニック予約に進むことができます。</div>
               </div>
             </div>
@@ -227,7 +226,7 @@ export default async function CultureFluidPage() {
 
           {/* 入金待ち（付属分以外） */}
           {activeOrder.status === "APPLIED" && activeOrder.planType !== "iv_drip_1_included" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">💰</span>
@@ -235,7 +234,7 @@ export default async function CultureFluidPage() {
                 </div>
                 <div className="text-base sm:text-lg text-text-primary font-medium mb-2">指定振込先へのご入金</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">お申込みありがとうございます。入金の確認が取れ次第、精製工程に進みます。</div>
-                <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                <div className="bg-bg-elevated border border-border rounded-[2px] p-4 space-y-3">
                   <div>
                     <div className="text-[11px] text-text-muted mb-1">お支払い金額</div>
                     <div className="font-mono text-lg text-gold">¥{activeOrder.totalAmount.toLocaleString()}</div>
@@ -264,10 +263,10 @@ export default async function CultureFluidPage() {
 
           {/* 精製中（精製完了日がまだ来ていない場合、付属分は上の専用カードで表示） */}
           {activeOrder.status === "PAYMENT_CONFIRMED" && activeOrder.planType !== "iv_drip_1_included" && !(activeOrder.producedAt && new Date(activeOrder.producedAt) <= now) && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">⚗️</div>
-                <div className="text-base sm:text-lg text-gold font-medium mb-2">iPS培養上清液を精製中</div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS培養上清液を精製中</div>
                 <div className="text-xs text-text-muted leading-relaxed">入金確認が完了しました。精製が完了次第、次のステップへ進みます。<br />通常は約1ヶ月を目安に精製手続きが進行します。</div>
               </div>
             </div>
@@ -286,7 +285,7 @@ export default async function CultureFluidPage() {
             (activeOrder.status === "PAYMENT_CONFIRMED" && !!activeOrder.producedAt && new Date(activeOrder.producedAt) <= now) ||
             (activeOrder.status === "CLINIC_BOOKING" && completedSessions >= 1 && !activeOrder.informedAgreedAt && !activeOrder.clinicDate) ||
             (activeOrder.planType === "iv_drip_1_included" && activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && !activeOrder.clinicDate)) && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">📅</span>
@@ -311,7 +310,7 @@ export default async function CultureFluidPage() {
                   )}
                 </div>
                 {activeOrder.expiresAt && (
-                  <div className="bg-bg-elevated border border-border rounded-md p-3">
+                  <div className="bg-bg-elevated border border-border rounded-[2px] p-3">
                     <div className="text-[11px] text-text-muted mb-1">管理期限</div>
                     <div className="font-mono text-sm text-gold">{formatDate(activeOrder.expiresAt)}</div>
                     <div className="text-[10px] text-text-muted mt-0.5">※ 精製日より約8ヶ月。期限内にご利用ください。</div>
@@ -321,8 +320,8 @@ export default async function CultureFluidPage() {
                   <div className="mt-4">
                     <Link
                       href={`/culture-fluid/caution?orderId=${activeOrder.id}&fromBooking=1`}
-                      className="block w-full py-3.5 rounded-lg text-sm font-bold tracking-wider text-center transition-all hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}
+                      className="block w-full py-3.5 rounded-[2px] text-sm font-bold tracking-wider text-center transition-all hover:opacity-90"
+                      style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}
                     >
                       クリニックの予約をする →
                     </Link>
@@ -340,7 +339,7 @@ export default async function CultureFluidPage() {
           {/* 事前説明・同意（フェーズ1完了後かつ未同意時） */}
           {isPhase1Complete && activeOrder.status === "CLINIC_BOOKING" && !activeOrder.informedAgreedAt && (
             <Link href={`/culture-fluid/informed-consent?orderId=${activeOrder.id}`} className="block group">
-              <div className="rounded-xl border border-status-warning/30 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}>
+              <div className="rounded-[2px] step-card-warn overflow-hidden">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">📄</span>
@@ -353,7 +352,7 @@ export default async function CultureFluidPage() {
                   </div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS培養上清液のご利用に関する事前説明・同意</div>
                   <div className="text-xs text-status-warning leading-relaxed mb-1">※ 施術前にご同意が必要です</div>
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all mt-3" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                  <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all mt-3" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </div>
@@ -367,7 +366,7 @@ export default async function CultureFluidPage() {
           {isPhase1Complete && !activeOrder.clinicDate &&
             (activeOrder.status === "INFORMED_AGREED" ||
               (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
-              <div className="rounded-xl border border-border overflow-hidden bg-bg-secondary">
+              <div className="rounded-[2px] border border-border overflow-hidden bg-bg-secondary">
                 <div className="p-5 sm:p-6 text-left">
                   <div className="text-3xl mb-3">📅</div>
                   <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
@@ -392,7 +391,7 @@ export default async function CultureFluidPage() {
             (activeOrder.status === "RESERVATION_CONFIRMED" ||
               activeOrder.status === "INFORMED_AGREED" ||
               (activeOrder.status === "CLINIC_BOOKING" && activeOrder.informedAgreedAt)) && (
-              <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+              <div className="rounded-[2px] step-card overflow-hidden">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🏥</span>
@@ -417,7 +416,7 @@ export default async function CultureFluidPage() {
                       下記の予定で施術予約を進めております。最終確定後、改めてご案内いたします。
                     </p>
                   )}
-                  <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
+                  <div className="bg-bg-elevated border border-border rounded-[2px] p-4 space-y-3">
                     <div>
                       <div className="text-[11px] text-text-muted mb-1">予定日</div>
                       <div className="font-mono text-lg text-gold">{new Date(activeOrder.clinicDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}</div>
@@ -437,15 +436,15 @@ export default async function CultureFluidPage() {
 
           {/* 施術完了（全回数完了時） */}
           {activeOrder.status === "COMPLETED" && (
-            <div className="rounded-xl border border-border-gold overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(191,160,75,0.08) 0%, rgba(191,160,75,0.02) 100%)" }}>
+            <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">✓</div>
-                <div className="text-base sm:text-lg text-gold font-medium mb-2">全ての施術が完了しました</div>
+                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">全ての施術が完了しました</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
                   {totalSessions}回分の施術がすべて完了しました。<br />
                   次回の施術をご希望の場合は、追加購入からお申込みください。
                 </div>
-                <Link href="/culture-fluid/apply" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, #BFA04B, #D4B856)", color: "#070709" }}>
+                <Link href="/culture-fluid/apply" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                   追加購入のお申込みへ →
                 </Link>
               </div>
@@ -456,12 +455,12 @@ export default async function CultureFluidPage() {
 
       {/* ── 4-A. フェーズ1：精製ステータス ──
           注文がなくても常に表示し、注文前は第1ステップ「申込み」がアクティブ点滅 */}
-      <div className="flex items-center gap-2 mb-4 mt-2 pb-3 border-b border-border">
-        <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider">
+      <div className="flex items-center gap-2 mb-4 mt-2">
+        <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider">
           フェーズ1：精製ステータス
         </h3>
       </div>
-      <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6">
+      <div className="bg-bg-secondary border border-border rounded-[2px] p-4 sm:p-6 mb-6">
         <div className="relative">
           {PHASE1_STEPS.map((step, i) => {
             const done = isPhase1StepDone(step.key);
@@ -476,12 +475,12 @@ export default async function CultureFluidPage() {
               <div key={step.key} className={`flex items-start gap-4 relative ${isLast ? "" : "pb-6"}`}>
                 {!isLast && (
                   <div className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
-                       style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }} />
+                       style={{ background: done && nextDone ? "#1F3144" : done && !nextDone ? "linear-gradient(to bottom, #1F3144, var(--color-border))" : "var(--color-border)" }} />
                 )}
                 <div className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
                   done ? "text-bg-primary font-bold" : isActive ? "border-2 border-gold text-gold animate-pulse-gold" : "border border-border text-text-muted"
                 }`} style={{
-                  background: done ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
+                  background: done ? "linear-gradient(135deg, #0C1620 0%, #1F3144 50%, #0C1624 100%)" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
                 }}>
                   {done ? "✓" : step.icon}
                 </div>
@@ -494,7 +493,7 @@ export default async function CultureFluidPage() {
                       done={true}
                     />
                   ) : (
-                    <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                    <div className={`text-[13px] sm:text-sm ${done ? "status-label-done" : isActive ? "status-label-todo font-semibold" : "status-label-todo"}`}>
                       {step.label}
                     </div>
                   )}
@@ -516,8 +515,8 @@ export default async function CultureFluidPage() {
           フェーズ1完了後に表示。複数回施術プランの場合は毎施術サイクルで使い回す */}
       {activeOrder && (
         <>
-          <div className="flex items-center gap-2 mb-4 mt-2 pb-3 border-b border-border">
-            <h3 className="font-serif-jp text-base sm:text-lg font-normal text-text-primary tracking-wider">
+          <div className="flex items-center gap-2 mb-4 mt-2">
+            <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider">
               フェーズ2：施術ステータス
             </h3>
             {totalSessions > 1 && isPhase1Complete && activeOrder.status !== "COMPLETED" && (
@@ -527,7 +526,7 @@ export default async function CultureFluidPage() {
             )}
           </div>
           {isPhase1Complete ? (
-            <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6 mb-6">
+            <div className="bg-bg-secondary border border-border rounded-[2px] p-4 sm:p-6 mb-6">
               <div className="relative">
                 {PHASE2_STEPS.map((step, i) => {
                   const done = isPhase2StepDone(step.key);
@@ -539,12 +538,12 @@ export default async function CultureFluidPage() {
                     <div key={step.key} className={`flex items-start gap-4 relative ${isLast ? "" : "pb-6"}`}>
                       {!isLast && (
                         <div className="absolute left-[15px] top-[32px] bottom-0 w-[2px] z-[1]"
-                             style={{ background: done && nextDone ? "var(--color-gold-primary)" : done && !nextDone ? "linear-gradient(to bottom, var(--color-gold-primary), var(--color-border))" : "var(--color-border)" }} />
+                             style={{ background: done && nextDone ? "#1F3144" : done && !nextDone ? "linear-gradient(to bottom, #1F3144, var(--color-border))" : "var(--color-border)" }} />
                       )}
                       <div className={`relative z-[2] w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-sm transition-all duration-500 ${
                         done ? "text-bg-primary font-bold" : isActive ? "border-2 border-gold text-gold animate-pulse-gold" : "border border-border text-text-muted"
                       }`} style={{
-                        background: done ? "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
+                        background: done ? "linear-gradient(135deg, #0C1620 0%, #1F3144 50%, #0C1624 100%)" : isActive ? "var(--color-bg-primary)" : "var(--color-bg-elevated)",
                       }}>
                         {done ? "✓" : step.icon}
                       </div>
@@ -557,7 +556,7 @@ export default async function CultureFluidPage() {
                             done={true}
                           />
                         ) : (
-                          <div className={`text-[13px] sm:text-sm ${done ? "text-gold" : isActive ? "text-gold-light font-semibold" : "text-text-muted"}`}>
+                          <div className={`text-[13px] sm:text-sm ${done ? "status-label-done" : isActive ? "status-label-todo font-semibold" : "status-label-todo"}`}>
                             {step.label}
                           </div>
                         )}
@@ -574,7 +573,7 @@ export default async function CultureFluidPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-bg-secondary border border-border rounded-md p-6 sm:p-8 text-center mb-6">
+            <div className="bg-bg-secondary border border-border rounded-[2px] p-6 sm:p-8 text-center mb-6">
               <div className="text-3xl mb-3 opacity-40">🏥</div>
               <div className="text-sm text-text-muted">フェーズ1の完了後に表示されます</div>
               <div className="text-[11px] text-text-muted mt-1">保管完了後、施術の予約手続きに進めます</div>
@@ -585,7 +584,7 @@ export default async function CultureFluidPage() {
 
       {/* ── 5. 注文がない場合 ── */}
       {!activeOrder && orders.length === 0 && (
-        <div className="bg-bg-secondary border border-border rounded-md p-8 text-center mb-6">
+        <div className="bg-bg-secondary border border-border rounded-[2px] p-8 text-center mb-6">
           <div className="text-3xl mb-3">🧪</div>
           <div className="text-sm text-text-muted">まだ培養上清液のご注文がありません</div>
           <div className="text-xs text-text-muted mt-1">上のボタンから追加購入をお申込みください</div>
@@ -594,7 +593,7 @@ export default async function CultureFluidPage() {
 
       {/* ── 6. 注文履歴 ── */}
       {orders.length >= 1 && (
-        <div className="bg-bg-secondary border border-border rounded-md p-4 sm:p-6">
+        <div className="bg-bg-secondary border border-border rounded-[2px] p-4 sm:p-6">
           <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">注文履歴</h3>
           <div className="divide-y divide-border">
             {orders.map((o) => {

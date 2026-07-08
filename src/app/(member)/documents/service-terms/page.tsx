@@ -16,7 +16,7 @@ export default async function ServiceTermsPage() {
         <span className="text-text-secondary">iPSサービスご利用規約</span>
       </div>
 
-      <h1 className="font-serif-jp text-lg sm:text-xl font-normal text-text-primary tracking-[2px] mb-6">
+      <h1 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-[2px] mb-6">
         BioVault iPSサービスご利用規約
       </h1>
 
@@ -187,7 +187,7 @@ function ServiceTermsContent({ companyName }: { companyName: string }) {
 function TS({ t, children }: { t: string; children: React.ReactNode }) {
   return (
     <section>
-      <h4 className="text-sm text-text-primary font-medium mb-1">{t}</h4>
+      <h4 className="text-sm text-[#000] font-semibold mb-1">{t}</h4>
       <div className="space-y-1.5">{children}</div>
     </section>
   );

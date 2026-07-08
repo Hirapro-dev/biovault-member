@@ -116,7 +116,7 @@ export default function DocumentModal({
     }
   };
 
-  if (!done) return <span className="text-[13px] sm:text-sm text-text-muted">{label}</span>;
+  if (!done) return <span className="text-[13px] sm:text-sm status-label-todo">{label}</span>;
 
   const isPdf = !!pdfUrl;
 
@@ -268,13 +268,13 @@ export default function DocumentModal({
             ) : content ? (
               <>
                 <article
-                  className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-text-primary [&_h2]:font-medium [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-text-primary [&_h3]:font-medium [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-text-primary [&_h4]:font-medium [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
+                  className="text-xs sm:text-sm text-text-secondary leading-[2] space-y-5 [&_h2]:text-sm [&_h2]:text-[#000] [&_h2]:font-semibold [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:text-[#000] [&_h3]:font-semibold [&_h3]:mb-2 [&_h4]:text-sm [&_h4]:text-[#000] [&_h4]:font-semibold [&_h4]:mb-2 [&_section]:space-y-2 [&_ul]:space-y-1 [&_ul]:pl-2"
                   dangerouslySetInnerHTML={{ __html: content }}
                 />
                 {/* 死亡時意思表示（CELL_STORAGE_CONSENT専用・選択済みの場合のみ） */}
                 {deathWish && (
                   <div className="mt-5 bg-bg-elevated border border-border rounded-md p-4 sm:p-5">
-                    <h3 className="text-sm text-text-primary font-medium mb-2">死亡時意思表示</h3>
+                    <h3 className="text-sm text-[#000] font-semibold mb-2">死亡時意思表示</h3>
                     <p className="text-[11px] text-text-muted mb-3">同意時にご選択いただいた内容</p>
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-3">
@@ -332,17 +332,18 @@ export default function DocumentModal({
       {variant === "button" ? (
         <button
           onClick={handleClick}
-          className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs hover:border-border-gold hover:text-gold transition-all duration-300 cursor-pointer"
+          className="px-3 py-1.5 bg-transparent border border-border text-text-secondary rounded-sm text-xs font-bold hover:border-border-gold hover:text-gold transition-all duration-300 cursor-pointer"
         >
           {buttonText}
         </button>
       ) : (
         <button
           onClick={handleClick}
-          className="text-[13px] sm:text-sm text-gold underline underline-offset-2 decoration-gold/40 hover:decoration-gold text-left cursor-pointer bg-transparent border-none p-0 m-0 font-normal transition-all"
+          className="text-[13px] sm:text-sm status-label-done underline underline-offset-2 decoration-[#1F3144]/30 hover:decoration-[#1F3144]/60 text-left cursor-pointer bg-transparent border-none p-0 m-0 transition-all"
         >
           {buttonText}
-          <span className="text-[10px] ml-1 opacity-60">{isPdf ? "📎" : "📄"}</span>
+          {/* 親のグラデ文字(text-fill:transparent)が絵文字にも継承されるため、アイコンは色をリセットして表示 */}
+          <span className="text-[10px] ml-1 opacity-60 [-webkit-text-fill-color:initial]">{isPdf ? "📎" : "📄"}</span>
         </button>
       )}
       {modalContent}
