@@ -135,7 +135,7 @@ export default function CultureFluidApplyPage() {
         <div className="text-[10px] tracking-[4px] text-gold mb-2">
           CULTURE FLUID ORDER
         </div>
-        <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
+        <h2 className="font-serif-jp text-xl sm:text-2xl font-extrabold text-text-primary tracking-wider mb-4">
           iPS培養上清液の追加購入申込
         </h2>
         <GoldDivider />
@@ -172,7 +172,7 @@ export default function CultureFluidApplyPage() {
         <div className="space-y-6">
           {/* プラン選択 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-gold mb-3">プランの選択</h3>
+            <h3 className="text-sm text-gold font-bold mb-3">プランの選択</h3>
             <div className="space-y-3">
               {PLANS.map((plan) => (
                 <label
@@ -188,8 +188,8 @@ export default function CultureFluidApplyPage() {
                     className="accent-gold mt-0.5 shrink-0"
                   />
                   <div className="flex-1">
-                    <div className="text-sm text-text-primary">{plan.label}</div>
-                    <div className="font-mono text-gold text-lg mt-1">
+                    <div className="text-sm text-text-primary font-bold">{plan.label}</div>
+                    <div className="font-mono text-gold text-lg font-bold mt-1">
                       {plan.priceLabel}
                       <span className="text-xs text-text-muted ml-1">（税込）</span>
                     </div>
@@ -204,7 +204,7 @@ export default function CultureFluidApplyPage() {
 
           {/* 支払方法・支払予定日 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">お支払い方法</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">お支払い方法</h3>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -215,7 +215,7 @@ export default function CultureFluidApplyPage() {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="accent-gold"
                 />
-                <span className="text-sm text-text-secondary">銀行振込</span>
+                <span className="text-sm text-text-secondary font-bold">銀行振込</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -226,7 +226,7 @@ export default function CultureFluidApplyPage() {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="accent-gold"
                 />
-                <span className="text-sm text-text-secondary">その他</span>
+                <span className="text-sm text-text-secondary font-bold">その他</span>
               </label>
             </div>
 
@@ -271,7 +271,7 @@ export default function CultureFluidApplyPage() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">
               iPS培養上清液に関する留意事項
             </h3>
             <p className="text-xs text-text-muted mb-3">
@@ -345,7 +345,7 @@ export default function CultureFluidApplyPage() {
       {step === 3 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">
               お申込み内容の確認
             </h3>
 

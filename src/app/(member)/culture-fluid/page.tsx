@@ -138,15 +138,15 @@ export default async function CultureFluidPage() {
       {/* ── 1. 保有状況カード ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">点滴施術完了回数</div>
-          <div className="font-mono text-2xl text-gold">{completedCount}<span className="text-sm text-text-muted ml-1">回</span></div>
+          <div className="text-[10px] text-text-muted tracking-wider font-bold mb-1">点滴施術完了回数</div>
+          <div className="font-mono text-2xl text-gold font-bold">{completedCount}<span className="text-sm text-text-muted ml-1">回</span></div>
           <div className="text-[10px] text-text-muted mt-1">累計完了済み</div>
         </div>
         <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">残り点滴施術回数</div>
+          <div className="text-[10px] text-text-muted tracking-wider font-bold mb-1">残り点滴施術回数</div>
           {activeOrder ? (
             <>
-              <div className="font-mono text-2xl text-gold">
+              <div className="font-mono text-2xl text-gold font-bold">
                 {remainingSessions}
                 <span className="text-sm text-text-muted ml-1">／ {totalSessions} 回</span>
               </div>
@@ -157,10 +157,10 @@ export default async function CultureFluidPage() {
           )}
         </div>
         <div className="bg-bg-secondary border border-border rounded-[2px] p-5">
-          <div className="text-[10px] text-text-muted tracking-wider mb-1">培養上清液管理期限</div>
+          <div className="text-[10px] text-text-muted tracking-wider font-bold mb-1">培養上清液管理期限</div>
           {activeOrder?.expiresAt ? (
             <>
-              <div className="font-mono text-lg text-gold">{formatDate(activeOrder.expiresAt)}</div>
+              <div className="font-mono text-lg text-gold font-bold">{formatDate(activeOrder.expiresAt)}</div>
               <div className="text-[10px] text-text-muted mt-1">精製日より約8ヶ月</div>
             </>
           ) : (
@@ -172,7 +172,7 @@ export default async function CultureFluidPage() {
       {/* ── 2. 追加申込ボタン ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <Link href="/culture-fluid/apply" className="block group">
-          <div className="rounded-[2px] step-card overflow-hidden transition-all h-full">
+          <div className="rounded-[2px] step-card-outline overflow-hidden transition-all h-full">
             <div className="flex items-center gap-4 px-5 py-5">
               <div className="w-11 h-11 rounded-[2px] flex items-center justify-center text-xl shrink-0"
                    style={{ background: "linear-gradient(135deg, rgba(20,102,168,0.14) 0%, rgba(20,102,168,0.05) 100%)", border: "1px solid rgba(20,102,168,0.22)" }}>
@@ -204,7 +204,7 @@ export default async function CultureFluidPage() {
 
       {/* ── 3. 次のステップ ── */}
       {activeOrder && (
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <h3 className="font-serif-jp text-base sm:text-lg font-extrabold text-text-primary tracking-wider mb-4 mt-2">
             次のステップ
           </h3>
@@ -218,7 +218,7 @@ export default async function CultureFluidPage() {
             <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">🧬</div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS細胞の作製が完了するまでお楽しみにお待ちください</div>
                 <div className="text-xs text-text-muted leading-relaxed">iPS細胞が保管状態になりましたら、<br />クリニック予約に進むことができます。</div>
               </div>
             </div>
@@ -232,7 +232,7 @@ export default async function CultureFluidPage() {
                   <span className="text-2xl">💰</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">指定振込先へのご入金</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">指定振込先へのご入金</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">お申込みありがとうございます。入金の確認が取れ次第、精製工程に進みます。</div>
                 <div className="bg-bg-elevated border border-border rounded-[2px] p-4 space-y-3">
                   <div>
@@ -266,7 +266,7 @@ export default async function CultureFluidPage() {
             <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">⚗️</div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS培養上清液を精製中</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS培養上清液を精製中</div>
                 <div className="text-xs text-text-muted leading-relaxed">入金確認が完了しました。精製が完了次第、次のステップへ進みます。<br />通常は約1ヶ月を目安に精製手続きが進行します。</div>
               </div>
             </div>
@@ -301,7 +301,7 @@ export default async function CultureFluidPage() {
                     </>
                   )}
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">クリニックの施術予約</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">クリニックの施術予約</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
                   {completedSessions >= 1 ? (
                     <>{completedSessions}回目の施術が完了しました。{currentSession}回目の施術予約に進みましょう。</>
@@ -350,7 +350,7 @@ export default async function CultureFluidPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS培養上清液のご利用に関する事前説明・同意</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS培養上清液のご利用に関する事前説明・同意</div>
                   <div className="text-xs text-status-warning leading-relaxed mb-1">※ 施術前にご同意が必要です</div>
                   <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all mt-3" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     同意書を確認する <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -369,7 +369,7 @@ export default async function CultureFluidPage() {
               <div className="rounded-[2px] border border-border overflow-hidden bg-bg-secondary">
                 <div className="p-5 sm:p-6 text-left">
                   <div className="text-3xl mb-3">📅</div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-3">
                     現在施術日程を調整中です。
                   </div>
                   <div className="text-xs text-text-muted leading-relaxed">
@@ -406,7 +406,7 @@ export default async function CultureFluidPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-3">
                     {activeOrder.status === "RESERVATION_CONFIRMED"
                       ? "施術予約が確定しました"
                       : "施術予約の手配中です"}
@@ -439,7 +439,7 @@ export default async function CultureFluidPage() {
             <div className="rounded-[2px] step-card overflow-hidden">
               <div className="p-5 sm:p-6 text-center">
                 <div className="text-4xl mb-3">✓</div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">全ての施術が完了しました</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">全ての施術が完了しました</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
                   {totalSessions}回分の施術がすべて完了しました。<br />
                   次回の施術をご希望の場合は、追加購入からお申込みください。
@@ -594,7 +594,7 @@ export default async function CultureFluidPage() {
       {/* ── 6. 注文履歴 ── */}
       {orders.length >= 1 && (
         <div className="bg-bg-secondary border border-border rounded-[2px] p-4 sm:p-6">
-          <h3 className="font-serif-jp text-sm text-gold tracking-wider mb-4 pb-3 border-b border-border">注文履歴</h3>
+          <h3 className="font-serif-jp text-sm text-gold font-bold tracking-wider mb-4 pb-3 border-b border-border">注文履歴</h3>
           <div className="divide-y divide-border">
             {orders.map((o) => {
               // sessionDates をパース（JSON配列）
@@ -607,7 +607,7 @@ export default async function CultureFluidPage() {
                 <div key={o.id} className="py-3">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <div className="text-sm text-text-primary">{o.planLabel}</div>
+                      <div className="text-sm text-text-primary font-bold">{o.planLabel}</div>
                       <div className="text-[11px] text-text-muted mt-0.5">{formatDate(o.createdAt)} ・ ¥{o.totalAmount.toLocaleString()}</div>
                     </div>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full border ${o.status === "COMPLETED" ? "bg-status-active/10 text-status-active border-status-active/20" : "bg-gold/10 text-gold border-gold/20"}`}>

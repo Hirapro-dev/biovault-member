@@ -52,7 +52,7 @@ export default async function InfoPage() {
       {/* iPSサービス利用申込（目立つカード = 次のアクション扱い / step-card） */}
       <Link
         href={menuItems[0].href}
-        className="block mb-4 rounded-[2px] step-card overflow-hidden group transition-all"
+        className="block mb-4 rounded-[2px] step-card-outline overflow-hidden group transition-all"
       >
         <div className="flex items-center gap-4 px-5 py-5">
           <div className="w-11 h-11 rounded-[2px] flex items-center justify-center text-xl shrink-0" style={{ background: "linear-gradient(135deg, rgba(20,102,168,0.14) 0%, rgba(20,102,168,0.05) 100%)", border: "1px solid rgba(20,102,168,0.22)" }}>

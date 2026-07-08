@@ -252,6 +252,18 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   background-attachment: fixed, fixed;
 }
 
+/* スマホ(SP: 〜767px)は縦長デバイス向けの専用背景に差し替え
+ *  - 差し替えるのは画像URLのみ（白オーバーレイ・fixed固定・coverは共通）
+ *  - SPはサイドバーが無いため、右上寄せ(PC用)ではなく中央上寄せで全面表示 */
+@media (max-width: 767px) {
+  .member-bg {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.82)),
+      url("/body_bg_sp.png");
+    background-position: center, center top;
+  }
+}
+
 /* iOS など background-attachment: fixed が効かない環境では
  *  スクロール追従になるが、淡い背景のため見た目の破綻はない(フォールバック) */
 
@@ -347,6 +359,22 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .step-card .rounded-md { border-radius: 2px !important; }
 /* 日程・金額など(mono表記)の値は太字で強調 */
 .step-card .font-mono { font-weight: 700 !important; }
+
+/* step-card の派生: 左の太いバーではなく「四方を1pxグラデーションで囲む」版
+ *  - メニュー/導線カード向け（上品な囲み・アクション喚起は控えめ）
+ *  - 白の内側(padding-box) + ブランドブルーのグラデ枠(border-box)で1pxボーダーを表現
+ *  - ::before の左バーは持たない */
+.step-card-outline {
+  position: relative;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #113D77 0%, #19A7E1 100%) border-box;
+  box-shadow:
+    0 6px 20px rgba(20, 102, 168, 0.08),
+    0 1px 4px rgba(20, 102, 168, 0.05);
+}
 
 /* step-card のアンバー版（「要同意」など注意喚起の次ステップカード）
  *  - 構造・角丸・浮き上がりは step-card と共通で「統一感」を担保

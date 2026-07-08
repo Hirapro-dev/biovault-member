@@ -126,12 +126,12 @@ export default async function HistoryPage() {
       {/* ヘッダー */}
       <div className="text-center mb-12">
         <div className="text-4xl mb-4">📜</div>
-        <h1 className="font-serif text-3xl font-light tracking-[3px] text-gold-gradient mb-3">
-          History of iPS Cells
+        <h1 className="font-serif-jp text-lg font-bold text-text-primary mb-3">
+          iPS細胞の歴史
         </h1>
         <GoldDivider width={80} className="mx-auto mb-4" />
-        <p className="font-serif-jp text-lg text-text-primary mb-2">
-          iPS細胞の歴史
+        <p className="font-serif text-sm font-light tracking-[3px] text-gold-gradient mb-3">
+          History of iPS Cells
         </p>
         <p className="text-[13px] text-text-secondary">
           1962年の核移植実験から2026年の世界初承認まで、60年以上にわたる軌跡
@@ -160,15 +160,11 @@ export default async function HistoryPage() {
                     : "border border-border"
                 }`}
                 style={{
-                  background: item.highlight ? "#1A1A22" : "#111116",
+                  background: "linear-gradient(135deg, #113D77 0%, #19A7E1 100%)",
                 }}
               >
                 <span className="text-base">{item.icon}</span>
-                <span
-                  className={`font-mono text-[10px] ${
-                    item.highlight ? "text-gold" : "text-text-muted"
-                  }`}
-                >
+                <span className="font-mono text-[10px] text-white">
                   {item.year}
                 </span>
               </div>
@@ -181,7 +177,7 @@ export default async function HistoryPage() {
               >
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-sm text-gold">{item.year}年</span>
-                  <h3 className="font-serif-jp text-[15px] text-text-primary">
+                  <h3 className="font-serif-jp text-[15px] font-bold text-text-primary">
                     {item.title}
                   </h3>
                 </div>

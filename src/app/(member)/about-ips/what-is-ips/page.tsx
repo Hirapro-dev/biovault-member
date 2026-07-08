@@ -19,11 +19,11 @@ export default async function WhatIsIpsPage() {
       {/* ヘッダー */}
       <div className="text-center mb-10">
         <div className="text-4xl mb-4">🧬</div>
-        <h1 className="font-serif text-3xl font-light tracking-[3px] text-gold-gradient mb-3">
-          What are iPS Cells?
-        </h1>
+        <h1 className="font-serif-jp text-lg font-bold text-text-primary mb-3">iPS細胞とは？</h1>
         <GoldDivider width={80} className="mx-auto mb-4" />
-        <p className="font-serif-jp text-lg text-text-primary">iPS細胞とは？</p>
+        <p className="font-serif text-sm font-light tracking-[3px] text-gold-gradient">
+          What are iPS Cells?
+        </p>
       </div>
 
       {/* 本文 */}
@@ -109,7 +109,7 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="font-serif-jp text-lg font-normal text-gold tracking-wider mb-4 pb-3 border-b border-border">
+      <h2 className="font-serif-jp text-base font-bold text-gold tracking-wider mb-4 pb-3 border-b border-border">
         {title}
       </h2>
       <div className="text-sm text-text-primary leading-[1.9] space-y-4">
@@ -121,8 +121,8 @@ function Section({
 
 function HighlightBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-gold/5 border-l-2 border-gold px-5 py-4 rounded-r-md my-4">
-      <p className="text-[13px] text-text-secondary leading-relaxed">{children}</p>
+    <div className="bg-[#F3F6FA] border-l-2 border-gold px-5 py-4 rounded-r-md my-4">
+      <p className="text-[13px] text-text-primary leading-relaxed">{children}</p>
     </div>
   );
 }
@@ -140,7 +140,7 @@ function DiseaseCard({
     <div className="bg-bg-secondary border border-border rounded-md p-4 flex items-start gap-3">
       <span className="text-xl">{icon}</span>
       <div>
-        <div className="text-[13px] text-text-primary font-medium">{name}</div>
+        <div className="text-[13px] text-text-primary font-bold">{name}</div>
         <div className="text-[11px] text-text-muted mt-0.5">{detail}</div>
       </div>
     </div>

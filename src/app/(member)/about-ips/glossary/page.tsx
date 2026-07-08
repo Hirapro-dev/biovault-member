@@ -46,11 +46,11 @@ export default async function GlossaryPage() {
       {/* ヘッダー */}
       <div className="text-center mb-12">
         <div className="text-4xl mb-4">📖</div>
-        <h1 className="font-serif text-3xl font-light tracking-[3px] text-gold-gradient mb-3">
-          Glossary
-        </h1>
+        <h1 className="font-serif-jp text-lg font-bold text-text-primary mb-3">用語集</h1>
         <GoldDivider width={80} className="mx-auto mb-4" />
-        <p className="font-serif-jp text-lg text-text-primary mb-2">用語集</p>
+        <p className="font-serif text-sm font-light tracking-[3px] text-gold-gradient mb-3">
+          Glossary
+        </p>
         <p className="text-[13px] text-text-secondary">
           iPS細胞・再生医療に関する専門用語をわかりやすく解説します
         </p>
@@ -60,7 +60,7 @@ export default async function GlossaryPage() {
       <div className="space-y-10">
         {sortedCategories.map((cat) => (
           <section key={cat}>
-            <h2 className="font-serif-jp text-base font-normal text-gold tracking-wider mb-5 pb-3 border-b border-border">
+            <h2 className="font-serif-jp text-base font-bold text-gold tracking-wider mb-5 pb-3 border-b border-border">
               {CATEGORY_LABELS[cat] || cat}
             </h2>
             <div className="space-y-4">
@@ -70,7 +70,7 @@ export default async function GlossaryPage() {
                   className="bg-bg-secondary border border-border rounded-md p-5 transition-colors duration-300 hover:border-border-gold"
                 >
                   <div className="mb-2">
-                    <h3 className="text-[15px] text-text-primary font-medium">
+                    <h3 className="text-[15px] text-text-primary font-bold">
                       {item.term}
                     </h3>
                     {item.reading && (

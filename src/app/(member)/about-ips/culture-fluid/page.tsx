@@ -27,7 +27,7 @@ export default async function CultureFluidKnowledgePage() {
       {/* ヒーローヘッダー */}
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-3">BASIC KNOWLEDGE / 01</div>
-        <h1 className="font-serif-jp text-xl sm:text-3xl font-normal text-text-primary tracking-[2px] leading-[1.6] mb-4">
+        <h1 className="font-serif-jp text-xl sm:text-3xl font-bold text-text-primary tracking-[2px] leading-[1.6] mb-4">
           iPS培養上清液に関する<br />基礎知識
         </h1>
         <div className="flex items-center gap-4 mb-5">
@@ -240,7 +240,7 @@ function Section({
           <span className="text-[9px] font-mono text-gold tracking-wider leading-none">{num}</span>
           <span className="text-base leading-none mt-0.5">{icon}</span>
         </div>
-        <h2 className="font-serif-jp text-base sm:text-lg text-text-primary tracking-wider">
+        <h2 className="font-serif-jp text-base font-bold text-text-primary tracking-wider">
           {title}
         </h2>
       </div>
@@ -251,7 +251,7 @@ function Section({
 
 function SubHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[13px] sm:text-sm text-gold font-medium mt-5 mb-2 tracking-wider flex items-center gap-2">
+    <h3 className="text-[13px] sm:text-sm text-gold font-bold mt-5 mb-2 tracking-wider flex items-center gap-2">
       <span className="inline-block w-3 h-[1px] bg-gold" />
       {children}
     </h3>
