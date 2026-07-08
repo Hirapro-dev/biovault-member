@@ -73,8 +73,6 @@ export default function AgreeForm({ isAgreed, agreedAt }: { isAgreed: boolean; a
       {/* ヘッダー */}
       {!isAgreed && (
         <div className="text-center mb-6">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="BioVault" className="h-7 w-auto mx-auto mb-4" />
           <h1 className="font-serif-jp text-lg font-extrabold text-text-primary tracking-[2px] mb-2">重要事項説明・個人情報取扱同意</h1>
           <GoldDivider width={60} className="mx-auto mb-3" />
           <p className="text-xs text-text-secondary leading-relaxed">

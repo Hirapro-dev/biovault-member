@@ -249,7 +249,7 @@ export default function ApplyServicePage() {
       {/* ヘッダー */}
       <div className="mb-8">
         <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
-        <h2 className="font-serif-jp text-xl sm:text-2xl font-normal text-text-primary tracking-wider mb-4">
+        <h2 className="font-serif-jp text-xl sm:text-2xl font-extrabold text-text-primary tracking-wider mb-4">
         iPSサービス利用申込
         </h2>
         <GoldDivider />
@@ -287,14 +287,14 @@ export default function ApplyServicePage() {
           {/* サービス価格表示 */}
           <div className="bg-bg-secondary border border-border-gold rounded-md p-6 text-center">
             <div className="text-xs text-text-muted tracking-wider mb-2">会員価格（税込）</div>
-            <div className="font-mono text-3xl text-gold font-light tracking-wider">
+            <div className="font-mono text-3xl text-gold font-bold tracking-wider">
               ¥8,800,000
             </div>
           </div>
 
           {/* 支払方法 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">お支払い方法</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">お支払い方法</h3>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -305,7 +305,7 @@ export default function ApplyServicePage() {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="accent-gold"
                 />
-                <span className="text-sm text-text-secondary">銀行振込</span>
+                <span className="text-sm text-text-secondary font-bold">銀行振込</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -316,7 +316,7 @@ export default function ApplyServicePage() {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="accent-gold"
                 />
-                <span className="text-sm text-text-secondary">その他</span>
+                <span className="text-sm text-text-secondary font-bold">その他</span>
               </label>
             </div>
 
@@ -334,7 +334,7 @@ export default function ApplyServicePage() {
 
           {/* 健康状態自己申告 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-3">事前確認事項（健康状態）</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-3">事前確認事項（健康状態）</h3>
             <div className="bg-gold/5 border-l-2 border-gold px-4 py-3 rounded-r-md mb-5">
               <p className="text-[12px] sm:text-[13px] text-text-secondary leading-relaxed">
                 iPS細胞作製にあたり、再度、現在の健康状態の確認をさせていただいております。当初の適合確認時より、健康状態に変更がある場合は、その旨ご記載ください。
@@ -406,7 +406,7 @@ export default function ApplyServicePage() {
 
           {/* 確認事項 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">確認事項</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">確認事項</h3>
             <div className="space-y-3">
               <ConfirmItem
                 label="BioVaultメンバーシップは医療行為の直接提供ではないことを理解しました"
@@ -438,7 +438,7 @@ export default function ApplyServicePage() {
 
           {/* 契約書の希望 */}
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">契約書の形式</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">契約書の形式</h3>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="radio" name="contractFormat" value="electronic" checked={contractFormat === "electronic"} onChange={(e) => setContractFormat(e.target.value)} className="accent-gold" />
@@ -469,7 +469,7 @@ export default function ApplyServicePage() {
       {step === 2 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">iPSサービス利用規約</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">iPSサービス利用規約</h3>
             <p className="text-xs text-text-muted mb-3">以下の利用規約をお読みいただき、同意のうえお進みください。</p>
             <div
               ref={termsRef}
@@ -510,12 +510,12 @@ export default function ApplyServicePage() {
       {step === 3 && (
         <div className="space-y-6">
           <div className="bg-bg-secondary border border-border rounded-md p-6">
-            <h3 className="text-sm text-text-primary tracking-wider mb-4">お申込み内容の確認</h3>
+            <h3 className="text-sm text-text-primary font-bold tracking-wider mb-4">お申込み内容の確認</h3>
 
             <div className="space-y-4">
               <div className="border-b border-border pb-3">
                 <div className="text-xs text-text-muted mb-1">会員価格（税込）</div>
-                <div className="font-mono text-lg text-gold">¥8,800,000</div>
+                <div className="font-mono text-lg text-gold font-bold">¥8,800,000</div>
               </div>
 
               <div className="border-b border-border pb-3">

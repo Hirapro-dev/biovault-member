@@ -53,10 +53,10 @@
   --color-status-warning: var(--color-status-warning);
   --color-status-danger: var(--color-status-danger);
   --color-status-info: var(--color-status-info);
-  --font-serif: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
   --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
   --font-mono: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
-  --font-serif-jp: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --font-serif-jp: "Noto Serif JP", serif;
 }
 
 body {
@@ -75,6 +75,23 @@ body {
  * ────────────────────────────────────────────── */
 * {
   font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif !important;
+}
+
+/* 上の全体Hiragino化(トライアル)の【例外】:
+ *  ロゴ(ブランド英字)とヒーローのページタイトルだけは元の明朝/セリフを維持する。
+ *  クラスセレクタ + !important で、上の `* { ... !important }` に打ち勝つ。 */
+.u-brand-serif { font-family: var(--font-serif) !important; }
+.u-title-mincho { font-family: var(--font-serif-jp) !important; }
+
+/* 申込フォーム(.v2-scope)のロゴ・ページタイトルは、本番同様の明朝/セリフを維持する。
+ *  （本文・UI等のゴシックは全体Hiragino化トライアルに従い Hiragino で統一） */
+.v2-scope .v2-header-brand,
+.v2-scope .v2-header-tagline {
+  font-family: "Cormorant Garamond", "Noto Serif JP", serif !important;
+}
+.v2-scope .v2-banner-title {
+  font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif !important;
 }
 
 /*

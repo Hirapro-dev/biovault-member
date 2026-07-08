@@ -116,13 +116,13 @@ function LoginPage() {
             style={{ fontFamily: "var(--font-serif)" }}
           >
             <div
-              className="text-white font-medium leading-none text-[22px] lg:text-[34px]"
+              className="u-brand-serif text-white font-medium leading-none text-[22px] lg:text-[34px]"
               style={{ letterSpacing: "0.04em" }}
             >
               BioVault
             </div>
             <div
-              className="text-white mt-1 lg:mt-1.5 text-[10px] lg:text-[14px]"
+              className="u-brand-serif text-white mt-1 lg:mt-1.5 text-[10px] lg:text-[14px]"
               style={{ letterSpacing: "0.18em" }}
             >
               Membership Service
@@ -138,7 +138,7 @@ function LoginPage() {
                 style={{ textShadow: "0 2px 14px rgba(0,0,0,0.45)" }}
               >
                 <h1
-                  className="text-white font-bold leading-[1.35] whitespace-nowrap text-[24px] lg:text-[48px]"
+                  className="u-title-mincho text-white font-bold leading-[1.35] whitespace-nowrap text-[24px] lg:text-[48px]"
                   style={{
                     fontFamily: "var(--font-serif-jp)",
                     letterSpacing: "0.03em",

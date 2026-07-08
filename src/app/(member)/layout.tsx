@@ -17,7 +17,7 @@ export default async function MemberLayout({
   const user = await requireAuth();
 
   // セッション（JWT）から同意状態を取得（DBクエリ不要）
-  const hasAgreedTerms = (user as any).hasAgreedTerms !== false;
+  const hasAgreedTerms = (user as { hasAgreedTerms?: boolean }).hasAgreedTerms !== false;
 
   // EMAIL_DUPLICATE_ALLOWLIST に含まれるメアドのみアカウント切替UIを表示
   // （複数アカウントを保有する運用が想定されているユーザーのみ）
@@ -30,10 +30,17 @@ export default async function MemberLayout({
   });
   const signedDocTypes = signedDocs.map((d) => d.type);
 
-  // 未同意時はメニューバーを非表示（重要事項説明ページ用）
+  // 未同意時はナビ（ハンバーガー/サイドバー/下部ナビ）を非表示にし、
+  // 同意前に他ページへ遷移させない。ただしブランド提示のためロゴのみのヘッダーは表示する。
   if (!hasAgreedTerms) {
     return (
-      <div className="min-h-screen bg-bg-primary text-text-primary font-sans">
+      <div className="min-h-screen member-bg text-text-primary font-sans">
+        {/* ロゴのみヘッダー（会員ヘッダーと同じネイビー。ナビ・ユーザー名・ハンバーガーは無し） */}
+        <div className="sticky top-0 z-50 flex items-center px-4 sm:px-6 h-16 relative mhead">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_white.png" alt="BioVault" className="h-9 sm:h-10 w-auto" />
+          <div className="mhead-hairline absolute bottom-0 left-0 right-0" />
+        </div>
         <main className="px-4 py-8 sm:py-12 max-w-[800px] mx-auto animate-fade-in">
           {children}
         </main>
