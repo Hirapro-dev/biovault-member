@@ -91,11 +91,11 @@ export default function TestControlPanel() {
   return (
     <>
     <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
-    <div className="fixed top-[60px] right-3 z-[9999] w-80 bg-[#1a1a22] border border-red-500/40 rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden lg:top-4 lg:right-4">
+    <div className="fixed top-[60px] right-3 z-[9999] w-80 bg-[#EEF0F4] border-2 border-red-500 rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.25)] overflow-hidden lg:top-4 lg:right-4">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between px-4 py-3 bg-red-500/15 border-b border-red-500/30">
-        <span className="text-xs font-bold text-red-400 tracking-wider">TEST MODE</span>
-        <button onClick={() => setOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white text-sm cursor-pointer transition-colors">×</button>
+      <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-red-500/40">
+        <span className="text-xs font-bold text-white tracking-wider">TEST MODE</span>
+        <button onClick={() => setOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white text-sm cursor-pointer transition-colors">×</button>
       </div>
 
       {/* タブ */}
@@ -120,14 +120,14 @@ export default function TestControlPanel() {
           <div className="text-center text-sm text-gold py-4 font-medium">全工程完了</div>
         ) : nextStep ? (
           <>
-            <div className="text-xs text-white/40 font-mono">
+            <div className="text-xs text-text-muted font-mono">
               Step {steps.indexOf(nextStep) + 1} / {steps.length}
             </div>
-            <div className="text-base text-white font-medium leading-snug">{nextStep.label}</div>
+            <div className="text-base text-text-primary font-bold leading-snug">{nextStep.label}</div>
             <div className={`text-[11px] px-2.5 py-1 rounded-full inline-block font-medium ${
               nextStep.actor === "admin"
-                ? "bg-blue-500/15 text-blue-300 border border-blue-500/30"
-                : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                ? "bg-blue-500/10 text-blue-700 border border-blue-500/30"
+                : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
             }`}>
               {nextStep.actor === "admin" ? "管理者操作" : "会員操作"}
             </div>
@@ -142,12 +142,12 @@ export default function TestControlPanel() {
               </button>
             ) : (
               <div className="space-y-2.5">
-                <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-lg p-3">
-                  <div className="text-xs text-emerald-300 font-medium">ページ上で実際に操作してください</div>
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+                  <div className="text-xs text-emerald-700 font-medium">ページ上で実際に操作してください</div>
                 </div>
                 <button
                   onClick={() => { fetchStatus(); router.refresh(); setMessage("更新しました"); }}
-                  className="w-full py-3 border border-white/20 text-white/70 text-xs rounded-lg cursor-pointer hover:border-gold hover:text-gold active:scale-[0.98] transition-all"
+                  className="w-full py-3 bg-white border border-[#C6CBD4] text-text-secondary text-xs rounded-lg cursor-pointer hover:border-gold hover:text-gold active:scale-[0.98] transition-all"
                 >
                   操作完了 → 更新
                 </button>
@@ -161,18 +161,18 @@ export default function TestControlPanel() {
           <button
             onClick={() => handleAction("back")}
             disabled={loading}
-            className="w-full py-3 border border-white/15 text-white/50 text-xs rounded-lg cursor-pointer hover:border-gold hover:text-gold active:scale-[0.98] disabled:opacity-40 transition-all"
+            className="w-full py-3 bg-white border border-[#C6CBD4] text-text-secondary text-xs rounded-lg cursor-pointer hover:border-gold hover:text-gold active:scale-[0.98] disabled:opacity-40 transition-all"
           >
             ← 1つ前に戻す
           </button>
         )}
 
-        <div className="border-t border-white/10 pt-3 space-y-2">
+        <div className="border-t border-black/10 pt-3 space-y-2">
           {/* リセット */}
           <button
             onClick={() => { if (confirm("全ステータスをリセットしますか？")) handleAction("reset"); }}
             disabled={loading}
-            className="w-full py-2.5 border border-red-500/30 text-red-400 text-xs rounded-lg cursor-pointer hover:bg-red-500/10 active:scale-[0.98] disabled:opacity-40 transition-all"
+            className="w-full py-2.5 bg-white border border-red-500/40 text-red-600 text-xs rounded-lg cursor-pointer hover:bg-red-500/10 active:scale-[0.98] disabled:opacity-40 transition-all"
           >
             工程をリセット
           </button>
@@ -181,14 +181,14 @@ export default function TestControlPanel() {
           <button
             onClick={() => { if (confirm("アカウントを削除して申込フォームからやり直しますか？")) handleAction("reset_full"); }}
             disabled={loading}
-            className="w-full py-2.5 border border-red-500/20 text-red-400/60 text-xs rounded-lg cursor-pointer hover:bg-red-500/10 active:scale-[0.98] disabled:opacity-40 transition-all"
+            className="w-full py-2.5 bg-white border border-red-500/30 text-red-500/80 text-xs rounded-lg cursor-pointer hover:bg-red-500/10 active:scale-[0.98] disabled:opacity-40 transition-all"
           >
             申込フォームからやり直す
           </button>
         </div>
 
         {message && (
-          <div className="text-xs text-white/50 text-center py-1">{message}</div>
+          <div className="text-xs text-text-muted text-center py-1">{message}</div>
         )}
       </div>
     </div>
