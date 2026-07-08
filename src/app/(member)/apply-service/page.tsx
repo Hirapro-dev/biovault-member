@@ -248,8 +248,8 @@ export default function ApplyServicePage() {
     <div className="max-w-2xl mx-auto">
       {/* ヘッダー */}
       <div className="mb-8">
-        <div className="text-[10px] tracking-[4px] text-gold mb-2">SERVICE APPLICATION</div>
-        <h2 className="font-serif-jp text-xl sm:text-2xl font-extrabold text-text-primary tracking-wider mb-4">
+        <div className="text-[10px] tracking-[2px] text-gold mb-2">SERVICE APPLICATION</div>
+        <h2 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-wide mb-4">
         iPSサービス利用申込
         </h2>
         <GoldDivider />

@@ -88,7 +88,7 @@ export default function MemberCard({
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              <div className="font-mono text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-white/90">
+              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-white/90">
                 {memberNumber}
               </div>
             </div>

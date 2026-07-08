@@ -82,6 +82,11 @@ body {
  *  クラスセレクタ + !important で、上の `* { ... !important }` に打ち勝つ。 */
 .u-brand-serif { font-family: var(--font-serif) !important; }
 .u-title-mincho { font-family: var(--font-serif-jp) !important; }
+/* 会員カードの会員番号用: DM Mono（等幅・カード番号らしい引き締まった書体） */
+.u-card-number {
+  font-family: var(--font-dm-mono), "DM Mono", ui-monospace, "SFMono-Regular",
+    Menlo, monospace !important;
+}
 
 /* 申込フォーム(.v2-scope)のロゴ・ページタイトルは、本番同様の明朝/セリフを維持する。
  *  （本文・UI等のゴシックは全体Hiragino化トライアルに従い Hiragino で統一） */

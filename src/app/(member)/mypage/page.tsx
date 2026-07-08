@@ -206,7 +206,7 @@ export default async function MyPage() {
                     <span className="text-2xl">📋</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製適合確認</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS細胞作製適合確認</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">健康状態をご確認いただき、適合審査にお進みください。</div>
                   <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     確認へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -224,7 +224,7 @@ export default async function MyPage() {
                     <span className="text-2xl">✍️</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用申込</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPSサービス利用申込</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">{user.name}様よりご入力いただいた健康状態を確認し、iPS細胞作製適合確認を行いました。<span className="text-gold font-bold text-sm">iPS細胞の作製は可能</span>です。以下よりiPSサービスへのお申込みに進めます。</div>
                   <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     申込へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -242,7 +242,7 @@ export default async function MyPage() {
                   <span className="text-2xl">📝</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用契約書署名</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPSサービス利用契約書署名</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
                   担当スタッフより、ご希望の契約方法でのご案内をさせていただきます。
                 </div>
@@ -264,7 +264,7 @@ export default async function MyPage() {
                   <span className="text-2xl">💰</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                 </div>
-                <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPSサービス利用契約締結・入金確認</div>
+                <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPSサービス利用契約締結・入金確認</div>
                 <div className="text-xs text-text-muted leading-relaxed mb-4">
                   契約書の署名が完了しました。入金の確認が取れ次第、次のステップへ進みます。
                 </div>
@@ -297,7 +297,7 @@ export default async function MyPage() {
                     <span className="text-2xl">📅</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">NEXT</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製におけるクリニックの日程調整</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS細胞作製におけるクリニックの日程調整</div>
                   <div className="text-xs text-text-muted leading-relaxed mb-4">契約締結・入金確認が完了しました。同意書の確認後、クリニックの日程調整の申請を行います。</div>
                   <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
                     クリニックの日程調整へ進む <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -316,7 +316,7 @@ export default async function MyPage() {
                     <span className="text-2xl">🏥</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/20">{membership.clinicDate ? "確定" : "調整中"}</span>
                   </div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-3">問診・採血の日程</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-3">問診・採血の日程</div>
                   {membership.clinicDate ? (
                     <div className="bg-bg-elevated border border-border rounded-md p-4 space-y-3">
                       <div>
@@ -354,7 +354,7 @@ export default async function MyPage() {
                         <span className="text-2xl">📄</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-status-warning/15 text-status-warning border border-status-warning/20">要同意</span>
                       </div>
-                      <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞作製における事前説明・同意</div>
+                      <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS細胞作製における事前説明・同意</div>
                       <div className="text-xs text-status-warning leading-relaxed mb-1">※ 問診・採血の前にご同意が必要です</div>
                       <div className="text-xs text-text-muted leading-relaxed mb-4">自家iPS細胞作製に関する説明書をご確認ください。</div>
                       <div className="flex w-full justify-center sm:inline-flex sm:w-auto items-center gap-2 px-5 py-2.5 rounded-[2px] text-sm font-bold tracking-wider group-hover:scale-[1.02] transition-all" style={{ background: "linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light))", color: "#FFFFFF" }}>
@@ -384,7 +384,7 @@ export default async function MyPage() {
               <div className="rounded-[2px] step-card overflow-hidden">
                 <div className="p-5 sm:p-6 text-center">
                   <div className="text-4xl mb-3">🧬</div>
-                  <div className="text-base sm:text-lg text-text-primary font-medium mb-2">iPS細胞を作製中</div>
+                  <div className="text-base sm:text-lg text-text-primary font-bold mb-2">iPS細胞を作製中</div>
                   <div className="text-xs text-text-muted leading-relaxed">{user.name}様のiPS細胞の作製に進んでおります。<br />今しばらくお待ちください。</div>
                   {estimateFrom && estimateTo && (
                     <div className="mt-4 bg-bg-elevated border border-border rounded-md p-4">

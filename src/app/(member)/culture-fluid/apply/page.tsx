@@ -132,10 +132,10 @@ export default function CultureFluidApplyPage() {
     <div className="max-w-2xl mx-auto">
       {/* ヘッダー */}
       <div className="mb-8">
-        <div className="text-[10px] tracking-[4px] text-gold mb-2">
+        <div className="text-[10px] tracking-[2px] text-gold mb-2">
           CULTURE FLUID ORDER
         </div>
-        <h2 className="font-serif-jp text-xl sm:text-2xl font-extrabold text-text-primary tracking-wider mb-4">
+        <h2 className="font-serif-jp text-lg sm:text-xl font-extrabold text-text-primary tracking-wide mb-4">
           iPS培養上清液の追加購入申込
         </h2>
         <GoldDivider />
