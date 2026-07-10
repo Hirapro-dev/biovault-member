@@ -48,6 +48,14 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // ── 紹介協力者エリア ──
+    if (path.startsWith("/affiliate")) {
+      if (token?.role !== "AFFILIATE") {
+        return NextResponse.redirect(new URL("/login", req.url));
+      }
+      return NextResponse.next();
+    }
+
     // ── 会員エリア ──
 
     // 重要事項ページ自体は常にアクセス可能
@@ -63,6 +71,11 @@ export default withAuth(
     // スタッフユーザーが会員ページにアクセスしようとした場合
     if (token?.role === "STAFF") {
       return NextResponse.redirect(new URL("/staff", req.url));
+    }
+
+    // 紹介協力者が会員ページにアクセスしようとした場合
+    if (token?.role === "AFFILIATE") {
+      return NextResponse.redirect(new URL("/affiliate", req.url));
     }
 
     // 重要事項説明に未同意の場合
@@ -93,5 +106,6 @@ export const config = {
     "/important-notice", "/apply-service/:path*", "/favorites/:path*", "/info/:path*", "/pamphlet/:path*",
     "/agency/:path*", "/agency-agree",
     "/staff/:path*",
+    "/affiliate/:path*",
   ],
 };

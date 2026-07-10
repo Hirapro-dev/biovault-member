@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendEmail, accountCreatedEmail, agencyAccountCreatedEmail } from "@/lib/mail";
 import { notifyIpsStatusChange, notifyAgencyIdIssued } from "@/lib/status-notification";
+import { getAffiliateSettings, resolveRewardAmount } from "@/lib/affiliate";
 
 // ID発行（ログインID確定 + パスワード設定 + isIdIssued=true）
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -85,6 +86,42 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await sendEmail({ to: user.email, ...emailContent });
   } catch (e) {
     console.error("Account created email failed:", e);
+  }
+
+  // 紹介協力制度: 第二報酬（本登録）の起票
+  // 初回のID発行時のみ、紹介協力者経由の会員なら PENDING で自動起票する（確定は管理者承認）
+  if (!user.isIdIssued && user.role === "MEMBER" && user.referredByAffiliate) {
+    try {
+      const profile = await prisma.affiliateProfile.findUnique({
+        where: { affiliateCode: user.referredByAffiliate },
+      });
+      if (profile && profile.status === "ACTIVE") {
+        const settings = await getAffiliateSettings();
+        // 金額が未設定(0円)でも起票し、管理画面から金額修正・承認できるようにする
+        const amount = resolveRewardAmount(profile, "CONVERSION", settings);
+        const membership = await prisma.membership.findUnique({
+          where: { userId: id },
+          select: { memberNumber: true },
+        });
+        // @@unique([affiliateProfileId, rewardType, memberUserId]) により重複起票は弾かれる
+        await prisma.affiliateReward.create({
+          data: {
+            affiliateProfileId: profile.id,
+            rewardType: "CONVERSION",
+            memberUserId: id,
+            memberName: user.name,
+            memberNumber: membership?.memberNumber || null,
+            rewardAmount: amount,
+            status: "PENDING",
+          },
+        });
+      }
+    } catch (e: unknown) {
+      // P2002 = 既に起票済み（再発行時など）。それ以外のみログに残す
+      if (!(e && typeof e === "object" && "code" in e && (e as { code: string }).code === "P2002")) {
+        console.error("Affiliate conversion reward failed:", e);
+      }
+    }
   }
 
   // ID発行の通知（ロール別に分岐）

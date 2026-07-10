@@ -1,0 +1,121 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+body {
+  line-height: 1.5;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+h1,h2{
+  font-weight: 800;
+}
+p,ul,li{
+  color: #333;
+  font-size: 18px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+a{
+  color: #005cac;
+  font-size: 18px;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+a:hover{
+  color: #fff000;
+}
+
+@media (max-width: 768px) {
+  p,ul,li{
+    font-size: 16px;
+  }
+  
+  a{
+    font-size: 16px;
+  }
+}
+
+.mincho{
+  font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "ヒラギノ明朝 ProN", "Sawarabi Mincho", "Noto Serif JP", serif;
+}
+
+
+
+.pc{
+  display: block;
+}
+.sp{
+  display: none;
+}
+.flex{
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .pc {
+    display: none;
+  }
+  .sp {
+    display: block;
+  }
+  .flex{
+    display: block;
+  }
+}

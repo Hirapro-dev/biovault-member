@@ -66,6 +66,8 @@ function LoginPage() {
       target = "/agency";
     } else if (role === "STAFF") {
       target = "/staff";
+    } else if (role === "AFFILIATE") {
+      target = "/affiliate";
     }
     window.location.href = target;
   };
