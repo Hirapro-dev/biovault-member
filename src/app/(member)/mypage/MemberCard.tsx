@@ -83,8 +83,29 @@ export default function MemberCard({
             </div>
             <style>{`
               @keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }
-              /* 光の通過は序盤45%(約4秒)。残り55%(約5秒)静止してから次のキラリへ */
-              @keyframes gold-glint { 0% { background-position: 200% center; } 45% { background-position: -200% center; } 100% { background-position: -200% center; } }
+              /*
+               * カード番号のゴールド文字。
+               * 1層目: 白い光の帯(通過時のみ見える) / 2層目: 白を含まないベースの金グラデ(静止時の見た目)
+               * 光の通過は序盤55%(約6秒)、残り45%(約5秒)は白なしのベース表示で静止する。
+               */
+              .u-card-gold {
+                background-image:
+                  linear-gradient(100deg, transparent 0%, transparent 40%, rgba(255,255,255,0.95) 50%, transparent 60%, transparent 100%),
+                  linear-gradient(100deg, #ad8568 0%, #58311b 24%, #f7cf9b 52%, #523a1c 82%, #dbc8b8 100%);
+                background-size: 250% auto, 100% auto;
+                background-position: 250% center, 0 center;
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                color: transparent;
+                animation: gold-glint 11s linear infinite;
+                filter: drop-shadow(0 1px 1px rgba(88,49,27,0.25));
+              }
+              @keyframes gold-glint {
+                0% { background-position: 250% center, 0 center; }
+                55% { background-position: -150% center, 0 center; }
+                100% { background-position: -150% center, 0 center; }
+              }
             `}</style>
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -92,21 +113,8 @@ export default function MemberCard({
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#58311b]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              {/* ゴールドのグラデーション文字（ロゴの金属感を参考にした斜めグラデ + 光が流れる演出） */}
-              <div
-                className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(100deg, #ad8568 0%, #fff 10%, #58311b 24%, #fff 38%, #f7cf9b 52%, #fff 66%, #523a1c 82%, #dbc8b8 100%)",
-                  backgroundSize: "200% auto",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  color: "transparent",
-                  animation: "gold-glint 9s linear infinite",
-                  filter: "drop-shadow(0 1px 1px rgba(88,49,27,0.25))",
-                }}
-              >
+              {/* ゴールドのグラデーション文字（静止時は白なしの金グラデ、白い光の帯が時々通過） */}
+              <div className="u-card-number u-card-gold text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]">
                 {memberNumber}
               </div>
             </div>
