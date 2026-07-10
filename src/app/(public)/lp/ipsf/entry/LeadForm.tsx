@@ -90,6 +90,7 @@ export default function LeadForm({ refCode }: { refCode: string }) {
   return (
     <V2Wrapper
       scheme="MRT"
+      headerClassName="v2-header-entry"
       title={
         <>
           <span className="v2-banner-title-line">無料適合確認の</span>
