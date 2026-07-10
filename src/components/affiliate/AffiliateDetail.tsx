@@ -9,6 +9,7 @@ import {
   AFFILIATE_REWARD_STATUS_LABELS,
   LEAD_CALL_STATUS_LABELS,
 } from "@/lib/affiliate-labels";
+import ApproveModal from "@/components/affiliate/ApproveModal";
 
 type Detail = {
   profile: {
@@ -31,6 +32,7 @@ type Detail = {
       phone: string | null;
       isIdIssued: boolean;
       lastLoginAt: string | null;
+      loginId: string;
     };
     leads: {
       id: string;
@@ -59,6 +61,7 @@ export default function AffiliateDetail({ id }: { id: string }) {
   const [rewardLead, setRewardLead] = useState("");
   const [rewardConv, setRewardConv] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showApprove, setShowApprove] = useState(false);
 
   const load = useCallback(() => {
     fetch(`/api/admin/affiliates/${id}`)
@@ -121,7 +124,7 @@ export default function AffiliateDetail({ id }: { id: string }) {
           <div className="ml-auto flex gap-2">
             {p.status === "PENDING" && (
               <button
-                onClick={() => confirm("承認してログイン情報をメール送付しますか？") && act({ action: "approve" }, "承認しました")}
+                onClick={() => setShowApprove(true)}
                 className="px-3.5 py-1.5 rounded bg-gold/90 text-bg-primary text-[12px] font-bold hover:bg-gold"
               >
                 承認する
@@ -271,6 +274,27 @@ export default function AffiliateDetail({ id }: { id: string }) {
           </div>
         )}
       </section>
+
+      {/* 承認モーダル（ログインID・パスワードを管理者が指定） */}
+      {showApprove && (
+        <ApproveModal
+          targetName={p.user.name}
+          initialLoginId={p.user.loginId}
+          onSubmit={async (loginId, password) => {
+            const res = await fetch(`/api/admin/affiliates/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "approve", loginId, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) return data.error || "承認に失敗しました";
+            setMessage(`承認し、ログイン情報（ID: ${data.loginId}）をメールで送付しました`);
+            load();
+            return null;
+          }}
+          onClose={() => setShowApprove(false)}
+        />
+      )}
     </div>
   );
 }

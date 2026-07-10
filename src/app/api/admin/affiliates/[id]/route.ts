@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { affiliateLpUrl, generatePassword } from "@/lib/affiliate";
+import { affiliateLpUrl } from "@/lib/affiliate";
 import { sendEmail } from "@/lib/mail";
 import { affiliateAccountCreatedEmail } from "@/lib/affiliate-mail";
 
@@ -25,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const profile = await prisma.affiliateProfile.findUnique({
     where: { id },
     include: {
-      user: { select: { id: true, name: true, email: true, phone: true, isIdIssued: true, lastLoginAt: true } },
+      user: { select: { id: true, name: true, email: true, phone: true, isIdIssued: true, lastLoginAt: true, loginId: true } },
       leads: { orderBy: { createdAt: "desc" } },
       rewards: { orderBy: { createdAt: "desc" } },
       _count: { select: { clicks: true } },
@@ -55,17 +55,29 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   try {
-    // ── 承認（PENDING → ACTIVE + ログイン発行 + メール送付） ──
+    // ── 承認（PENDING → ACTIVE + 管理者指定のログインID/パスワードで発行 + メール送付） ──
     if (body.action === "approve") {
       if (profile.status === "ACTIVE") {
         return NextResponse.json({ error: "既に有効化されています" }, { status: 400 });
       }
-      const tempPassword = generatePassword();
-      const passwordHash = await bcrypt.hash(tempPassword, 12);
+      const loginId = (body.loginId || "").trim();
+      const password = (body.password || "").trim();
+      if (!loginId || !password) {
+        return NextResponse.json({ error: "ログインIDとパスワードは必須です" }, { status: 400 });
+      }
+      // ログインIDの重複チェック（本人以外との衝突を防ぐ）
+      const existing = await prisma.user.findFirst({
+        where: { loginId, id: { not: profile.userId } },
+        select: { id: true },
+      });
+      if (existing) {
+        return NextResponse.json({ error: "このログインIDは既に使用されています" }, { status: 400 });
+      }
+      const passwordHash = await bcrypt.hash(password, 12);
       await prisma.$transaction([
         prisma.user.update({
           where: { id: profile.userId },
-          data: { passwordHash, isIdIssued: true, mustChangePassword: true },
+          data: { loginId, passwordHash, isIdIssued: true, mustChangePassword: true },
         }),
         prisma.affiliateProfile.update({
           where: { id },
@@ -75,15 +87,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       try {
         const mail = affiliateAccountCreatedEmail(
           profile.user.name,
-          profile.user.loginId,
-          tempPassword,
+          loginId,
+          password,
           affiliateLpUrl(profile.affiliateCode)
         );
         await sendEmail({ to: profile.user.email, ...mail });
       } catch (e) {
         console.error("Affiliate approval email failed:", e);
       }
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, loginId });
     }
 
     // ── 停止 / 再開 ──
