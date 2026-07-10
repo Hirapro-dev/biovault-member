@@ -59,8 +59,9 @@ model User {
   otherHealth          Boolean  @default(false)
   otherHealthDetail    String?
 
-  referredByAgency String?                  // 紹介元エージェントコード
-  referredByStaff  String?                  // 担当従業員コード (ST-0001形式)
+  referredByAgency    String?               // 紹介元エージェントコード
+  referredByStaff     String?               // 担当従業員コード (ST-0001形式)
+  referredByAffiliate String?               // 紹介協力者コード (AF-0001形式)
 
   // 流入スキーム（契約主体の会社識別）
   // SCPP = 株式会社SCPP（既存）, MRT = 株式会社MRT（/m/ 配下からの流入）
@@ -72,6 +73,7 @@ model User {
   statusHistory StatusHistory[]
   agencyProfile AgencyProfile?
   staffProfile  Staff?
+  affiliateProfile AffiliateProfile?
   favorites           Favorite[]
   consentLogs         ConsentLog[]
   accessLogs          AccessLog[]
@@ -86,6 +88,7 @@ enum Role {
   STAFF
   OPERATOR      // 処理者（ステータス更新・日付入力のみ）
   VIEWER        // 閲覧者（閲覧のみ）
+  AFFILIATE     // 紹介協力者（アフィリエイター）
 }
 
 // 流入スキーム（契約主体の会社識別）
@@ -405,6 +408,8 @@ model Application {
   referrerName      String?                               // 紹介者名／代理店名
   salesRepName      String?                               // 担当営業者名
   staffCode         String?                               // 担当従業員コード
+  referredByAffiliate String?                             // 紹介協力者コード (AF-0001形式)
+  affiliateLeadId   String?                               // 紐付くリードID（AffiliateLead.id）
 
   // 3. 事前確認事項（健康状態）
   currentIllness       Boolean  @default(false)           // 現在治療中の病気
@@ -743,4 +748,133 @@ model CultureFluidOrder {
   updatedAt       DateTime  @updatedAt
 
   @@index([userId])
+}
+
+// ────────────────────────────────────────
+// 紹介協力制度（アフィリエイト）
+// ────────────────────────────────────────
+
+// 流入チャネル
+enum AffiliateChannel {
+  NW       // 人脈繋がり（ネットワーク）
+  KAWARA   // KAWARA版
+}
+
+// 紹介協力者の状態
+enum AffiliateStatus {
+  PENDING    // 承認待ち（手動承認モード時）
+  ACTIVE     // 有効
+  SUSPENDED  // 停止
+}
+
+// リードの架電ステータス
+enum LeadCallStatus {
+  UNCALLED   // 未架電
+  CONNECTED  // 繋がった（適合確認フォーム案内送信）
+  NO_ANSWER  // 不通
+  RECALL     // 再架電予定
+  INVALID    // 無効（連絡先誤り等）
+}
+
+// 報酬種別
+enum AffiliateRewardType {
+  LEAD        // 第一報酬（リード獲得）
+  CONVERSION  // 第二報酬（本登録・ID発行）
+}
+
+// 紹介協力者プロフィール
+model AffiliateProfile {
+  id                     String            @id @default(cuid())
+  userId                 String            @unique
+  user                   User              @relation(fields: [userId], references: [id])
+  affiliateCode          String            @unique            // AF-0001形式
+  channel                AffiliateChannel
+  status                 AffiliateStatus   @default(PENDING)
+  displayName            String?                              // 活動名（SNS名・サイト名等）
+  rewardAmountLead       Int?                                 // 第一報酬の個別上書き額。null=チャネル既定
+  rewardAmountConversion Int?                                 // 第二報酬の個別上書き額。null=チャネル既定
+  bankName               String?
+  bankBranch             String?
+  bankAccountType        String?                              // 普通/当座
+  bankAccountNumber      String?
+  bankAccountName        String?
+  hasAgreedTerms         Boolean           @default(false)    // 紹介協力規約への同意
+  agreedAt               DateTime?
+  scheme                 Scheme            @default(MRT)
+  leads                  AffiliateLead[]
+  rewards                AffiliateReward[]
+  clicks                 AffiliateClick[]
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+}
+
+// LPクリックログ
+model AffiliateClick {
+  id                 String           @id @default(cuid())
+  affiliateProfileId String
+  affiliateProfile   AffiliateProfile @relation(fields: [affiliateProfileId], references: [id])
+  clickedAt          DateTime         @default(now())
+  userAgent          String?
+  referer            String?                                  // 流入元分析用
+  ipHash             String?                                  // 生IPは保存しない（SHA-256ハッシュ）
+
+  @@index([affiliateProfileId, clickedAt])
+}
+
+// リード（LP経由の見込み顧客登録）
+model AffiliateLead {
+  id                 String           @id @default(cuid())
+  affiliateProfileId String
+  affiliateProfile   AffiliateProfile @relation(fields: [affiliateProfileId], references: [id])
+
+  // LP登録フォームの取得項目
+  name               String
+  email              String
+  address            String
+  phone              String
+  occupation         String?                                  // 職業
+  position           String?                                  // 役職
+  income             String?                                  // 年収（プルダウン選択値）
+
+  // 架電管理
+  callStatus         LeadCallStatus   @default(UNCALLED)
+  callNote           String?                                  // 架電メモ
+  calledAt           DateTime?                                // 最終架電日時
+  staffCode          String?                                  // 対応した営業スタッフ
+
+  // 適合確認フォーム連携
+  formToken          String           @unique @default(cuid()) // リード専用URL用トークン
+  formSentAt         DateTime?                                 // 案内メール最終送信日時
+  applicationId      String?          @unique                  // 提出された申込ID
+
+  // 重複管理（同一電話番号/メールの2件目以降は報酬対象外）
+  isDuplicate        Boolean          @default(false)
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([affiliateProfileId])
+  @@index([phone])
+  @@index([email])
+}
+
+// 紹介協力報酬（二段階・管理者承認制）
+model AffiliateReward {
+  id                 String              @id @default(cuid())
+  affiliateProfileId String
+  affiliateProfile   AffiliateProfile    @relation(fields: [affiliateProfileId], references: [id])
+  rewardType         AffiliateRewardType
+  leadId             String?                                  // 第一報酬の対象リード
+  memberUserId       String?                                  // 第二報酬の対象会員
+  memberName         String?
+  memberNumber       String?
+  rewardAmount       Int                                      // 起票時点の適用額を確定保存
+  status             CommissionStatus    @default(PENDING)    // 既存enum流用（PENDING=承認待ち/CONFIRMED=承認済/PAID=支払済/CANCELLED=却下）
+  paidAt             DateTime?
+  note               String?
+  createdAt          DateTime            @default(now())
+
+  @@unique([affiliateProfileId, rewardType, leadId])          // 第一報酬の重複起票防止
+  @@unique([affiliateProfileId, rewardType, memberUserId])    // 第二報酬の重複起票防止
+  @@index([status])
 }

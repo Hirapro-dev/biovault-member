@@ -44,6 +44,14 @@ export async function requireAgency(): Promise<SessionUser> {
   return user;
 }
 
+export async function requireAffiliate(): Promise<SessionUser> {
+  const user = await requireAuth();
+  if (user.role !== "AFFILIATE") {
+    redirect("/login");
+  }
+  return user;
+}
+
 export async function requireStaff(): Promise<SessionUser & { staffCode: string }> {
   const user = await requireAuth();
   if (user.role !== "STAFF") {
