@@ -15,7 +15,7 @@ export async function GET() {
   const profiles = await prisma.affiliateProfile.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      user: { select: { id: true, name: true, email: true, phone: true, isIdIssued: true } },
+      user: { select: { id: true, name: true, email: true, phone: true, isIdIssued: true, loginId: true } },
       _count: { select: { clicks: true, leads: true } },
     },
   });
@@ -47,6 +47,7 @@ export async function GET() {
       name: p.user.name,
       email: p.user.email,
       phone: p.user.phone,
+      loginId: p.user.loginId,
       userId: p.user.id,
       clicks: p._count.clicks,
       leads: p._count.leads,

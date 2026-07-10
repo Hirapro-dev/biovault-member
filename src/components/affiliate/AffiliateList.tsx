@@ -7,6 +7,7 @@ import {
   AFFILIATE_CHANNEL_LABELS,
   AFFILIATE_STATUS_LABELS,
 } from "@/lib/affiliate-labels";
+import ApproveModal from "@/components/affiliate/ApproveModal";
 
 type Row = {
   id: string;
@@ -16,6 +17,7 @@ type Row = {
   displayName: string | null;
   name: string;
   email: string;
+  loginId: string;
   clicks: number;
   leads: number;
   conversions: number;
@@ -50,17 +52,24 @@ export default function AffiliateList() {
     load();
   }, [load]);
 
-  const approve = async (id: string) => {
-    if (!confirm("この協力者を承認し、ログイン情報をメールで送付します。よろしいですか？")) return;
+  // 承認モーダルの対象行（nullで非表示）
+  const [approveTarget, setApproveTarget] = useState<Row | null>(null);
+
+  // 管理者が指定したログインID・パスワードで承認発行
+  const approve = async (id: string, loginId: string, password: string): Promise<string | null> => {
     setMessage("");
     const res = await fetch(`/api/admin/affiliates/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "approve" }),
+      body: JSON.stringify({ action: "approve", loginId, password }),
     });
     const data = await res.json();
-    setMessage(res.ok ? "承認し、ログイン情報を送付しました" : data.error || "承認に失敗しました");
+    if (!res.ok) {
+      return data.error || "承認に失敗しました";
+    }
+    setMessage(`承認し、ログイン情報（ID: ${data.loginId}）をメールで送付しました`);
     await load();
+    return null;
   };
 
   return (
@@ -124,7 +133,7 @@ export default function AffiliateList() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       {r.status === "PENDING" && (
                         <button
-                          onClick={() => approve(r.id)}
+                          onClick={() => setApproveTarget(r)}
                           className="px-3 py-1 rounded bg-gold/90 text-bg-primary text-[12px] font-bold hover:bg-gold transition-colors"
                         >
                           承認
@@ -138,6 +147,16 @@ export default function AffiliateList() {
           </div>
         )}
       </div>
+
+      {/* 承認モーダル（ログインID・パスワードを管理者が指定） */}
+      {approveTarget && (
+        <ApproveModal
+          targetName={approveTarget.name}
+          initialLoginId={approveTarget.loginId}
+          onSubmit={(loginId, password) => approve(approveTarget.id, loginId, password)}
+          onClose={() => setApproveTarget(null)}
+        />
+      )}
     </div>
   );
 }
