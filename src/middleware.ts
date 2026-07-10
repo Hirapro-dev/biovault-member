@@ -65,6 +65,11 @@ export default withAuth(
       return NextResponse.redirect(new URL("/staff", req.url));
     }
 
+    // ご紹介協力者は専用ポータル反映までログインページへ戻す（会員向け同意フロー等への誤流入防止）
+    if (token?.role === "AFFILIATE") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
     // 重要事項説明に未同意の場合
     if (token?.hasAgreedTerms === false) {
       return NextResponse.redirect(new URL("/important-notice", req.url));
