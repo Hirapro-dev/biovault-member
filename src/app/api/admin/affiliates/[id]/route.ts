@@ -107,6 +107,41 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ success: true });
     }
 
+    // ── 基本情報の編集（氏名・メール・電話・活動名・チャネル・口座情報） ──
+    if (body.action === "updateInfo") {
+      const name = (body.name || "").trim();
+      const email = (body.email || "").trim().toLowerCase();
+      const phone = (body.phone || "").trim();
+      if (!name || !email) {
+        return NextResponse.json({ error: "氏名とメールアドレスは必須です" }, { status: 400 });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json({ error: "メールアドレスの形式が正しくありません" }, { status: 400 });
+      }
+      const channel = body.channel === "KAWARA" ? "KAWARA" : body.channel === "NW" ? "NW" : profile.channel;
+      const clean = (v: unknown, max = 100) => (typeof v === "string" ? v.trim().slice(0, max) : "") || null;
+
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: profile.userId },
+          data: { name, email, phone: phone || null },
+        }),
+        prisma.affiliateProfile.update({
+          where: { id },
+          data: {
+            displayName: clean(body.displayName),
+            channel,
+            bankName: clean(body.bankName),
+            bankBranch: clean(body.bankBranch),
+            bankAccountType: body.bankAccountType === "当座" ? "当座" : body.bankAccountType === "普通" ? "普通" : null,
+            bankAccountNumber: clean(body.bankAccountNumber, 20),
+            bankAccountName: clean(body.bankAccountName),
+          },
+        }),
+      ]);
+      return NextResponse.json({ success: true });
+    }
+
     // ── 個別報酬額の設定（null でチャネル既定に戻す） ──
     if (body.action === "setRewards") {
       const parse = (v: unknown) => {
@@ -128,5 +163,46 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   } catch (e) {
     console.error("Affiliate update error:", e);
     return NextResponse.json({ error: "更新に失敗しました" }, { status: 500 });
+  }
+}
+
+// 協力者削除（関連データも全て削除。協力者コードの確認入力が必要）
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(sessionRole(session))) {
+    return NextResponse.json({ error: "権限がありません" }, { status: 403 });
+  }
+  const { id } = await params;
+  const { confirmCode } = await req.json();
+
+  const profile = await prisma.affiliateProfile.findUnique({
+    where: { id },
+    include: { user: { select: { id: true, role: true } } },
+  });
+  if (!profile) {
+    return NextResponse.json({ error: "協力者が見つかりません" }, { status: 404 });
+  }
+
+  // 誤削除防止: 協力者コードの入力一致を必須にする（会員削除のログインID確認と同型）
+  if (confirmCode !== profile.affiliateCode) {
+    return NextResponse.json({ error: "協力者コードが一致しません" }, { status: 400 });
+  }
+  if (profile.user.role !== "AFFILIATE") {
+    return NextResponse.json({ error: "協力者以外のアカウントは削除できません" }, { status: 400 });
+  }
+
+  try {
+    // 関連データ（報酬・リード・クリック）→ プロフィール → ユーザー の順に削除
+    await prisma.$transaction([
+      prisma.affiliateReward.deleteMany({ where: { affiliateProfileId: profile.id } }),
+      prisma.affiliateLead.deleteMany({ where: { affiliateProfileId: profile.id } }),
+      prisma.affiliateClick.deleteMany({ where: { affiliateProfileId: profile.id } }),
+      prisma.affiliateProfile.delete({ where: { id: profile.id } }),
+      prisma.user.delete({ where: { id: profile.userId } }),
+    ]);
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error("Affiliate delete error:", e);
+    return NextResponse.json({ error: "削除に失敗しました" }, { status: 500 });
   }
 }

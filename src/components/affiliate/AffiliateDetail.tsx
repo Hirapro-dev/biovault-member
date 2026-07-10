@@ -62,6 +62,37 @@ export default function AffiliateDetail({ id }: { id: string }) {
   const [rewardConv, setRewardConv] = useState("");
   const [copied, setCopied] = useState(false);
   const [showApprove, setShowApprove] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // 削除（協力者コードの確認入力つき・関連データも全削除）
+  const handleDelete = async (code: string) => {
+    const input = prompt(
+      `この協力者を削除すると、リード・報酬・クリック履歴もすべて削除されます。\n削除するには協力者コード「${code}」を入力してください。`
+    );
+    if (input === null) return;
+    if (input.trim() !== code) {
+      setMessage("協力者コードが一致しないため削除を中止しました");
+      return;
+    }
+    setDeleting(true);
+    setMessage("");
+    try {
+      const res = await fetch(`/api/admin/affiliates/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmCode: input.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.error || "削除に失敗しました");
+        return;
+      }
+      window.location.href = "/admin/affiliates";
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const load = useCallback(() => {
     fetch(`/api/admin/affiliates/${id}`)
@@ -122,6 +153,12 @@ export default function AffiliateDetail({ id }: { id: string }) {
             {AFFILIATE_STATUS_LABELS[p.status]}
           </span>
           <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setShowEdit(true)}
+              className="px-3.5 py-1.5 rounded border border-border text-[12px] text-text-primary hover:border-gold"
+            >
+              編集
+            </button>
             {p.status === "PENDING" && (
               <button
                 onClick={() => setShowApprove(true)}
@@ -275,6 +312,52 @@ export default function AffiliateDetail({ id }: { id: string }) {
         )}
       </section>
 
+      {/* 危険操作: 削除 */}
+      <section className="bg-bg-secondary border border-red-400/20 rounded-md p-5">
+        <h3 className="text-[14px] text-red-400 mb-2">協力者の削除</h3>
+        <p className="text-[12px] text-text-muted mb-3 leading-relaxed">
+          この協力者と、紐づくリード・報酬・クリック履歴をすべて削除します。この操作は取り消せません。
+        </p>
+        <button
+          onClick={() => handleDelete(p.affiliateCode)}
+          disabled={deleting}
+          className="px-4 py-1.5 rounded border border-red-400/40 text-red-400 text-[13px] hover:bg-red-400/10 disabled:opacity-50"
+        >
+          {deleting ? "削除中…" : "この協力者を削除する"}
+        </button>
+      </section>
+
+      {/* 編集モーダル（基本情報・チャネル・口座） */}
+      {showEdit && (
+        <EditModal
+          initial={{
+            name: p.user.name,
+            email: p.user.email,
+            phone: p.user.phone || "",
+            displayName: p.displayName || "",
+            channel: p.channel,
+            bankName: p.bankName || "",
+            bankBranch: p.bankBranch || "",
+            bankAccountType: p.bankAccountType || "",
+            bankAccountNumber: p.bankAccountNumber || "",
+            bankAccountName: p.bankAccountName || "",
+          }}
+          onSubmit={async (values) => {
+            const res = await fetch(`/api/admin/affiliates/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "updateInfo", ...values }),
+            });
+            const data = await res.json();
+            if (!res.ok) return data.error || "更新に失敗しました";
+            setMessage("協力者情報を更新しました");
+            load();
+            return null;
+          }}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
+
       {/* 承認モーダル（ログインID・パスワードを管理者が指定） */}
       {showApprove && (
         <ApproveModal
@@ -313,6 +396,150 @@ function Stat({ label, value }: { label: string; value: number }) {
     <div className="bg-bg-primary border border-border rounded p-3 text-center">
       <div className="text-[11px] text-text-muted mb-1">{label}</div>
       <div className="text-[20px] text-text-primary font-medium">{value.toLocaleString()}</div>
+    </div>
+  );
+}
+
+// 編集モーダル（基本情報・チャネル・口座情報）
+type EditValues = {
+  name: string;
+  email: string;
+  phone: string;
+  displayName: string;
+  channel: string;
+  bankName: string;
+  bankBranch: string;
+  bankAccountType: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+};
+
+function EditModal({
+  initial,
+  onSubmit,
+  onClose,
+}: {
+  initial: EditValues;
+  onSubmit: (values: EditValues) => Promise<string | null>; // 戻り値: エラーメッセージ(成功時null)
+  onClose: () => void;
+}) {
+  const [values, setValues] = useState(initial);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (key: keyof EditValues) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => setValues((v) => ({ ...v, [key]: e.target.value }));
+
+  const submit = async () => {
+    if (!values.name.trim() || !values.email.trim()) {
+      setError("氏名とメールアドレスは必須です");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const err = await onSubmit(values);
+      if (err) {
+        setError(err);
+        return;
+      }
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const input = "w-full bg-bg-primary border border-border rounded px-3 py-2 text-[13px] text-text-primary";
+  const label = "text-[11px] text-text-muted mb-1 block";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-md border border-border bg-bg-secondary p-6 my-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-[15px] text-text-primary mb-4">協力者情報の編集</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div>
+            <span className={label}>氏名 *</span>
+            <input value={values.name} onChange={set("name")} className={input} />
+          </div>
+          <div>
+            <span className={label}>活動名</span>
+            <input value={values.displayName} onChange={set("displayName")} className={input} />
+          </div>
+          <div>
+            <span className={label}>メールアドレス *</span>
+            <input type="email" value={values.email} onChange={set("email")} className={input} />
+          </div>
+          <div>
+            <span className={label}>電話番号</span>
+            <input value={values.phone} onChange={set("phone")} className={input} />
+          </div>
+          <div>
+            <span className={label}>チャネル</span>
+            <select value={values.channel} onChange={set("channel")} className={input}>
+              <option value="NW">人脈繋がり</option>
+              <option value="KAWARA">KAWARA版</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-3 mb-4">
+          <div className="text-[12px] text-text-muted mb-2">振込先口座</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <span className={label}>銀行名</span>
+              <input value={values.bankName} onChange={set("bankName")} className={input} />
+            </div>
+            <div>
+              <span className={label}>支店名</span>
+              <input value={values.bankBranch} onChange={set("bankBranch")} className={input} />
+            </div>
+            <div>
+              <span className={label}>口座種別</span>
+              <select value={values.bankAccountType} onChange={set("bankAccountType")} className={input}>
+                <option value="">未設定</option>
+                <option value="普通">普通</option>
+                <option value="当座">当座</option>
+              </select>
+            </div>
+            <div>
+              <span className={label}>口座番号</span>
+              <input value={values.bankAccountNumber} onChange={set("bankAccountNumber")} className={input} />
+            </div>
+            <div className="sm:col-span-2">
+              <span className={label}>口座名義（カナ）</span>
+              <input value={values.bankAccountName} onChange={set("bankAccountName")} className={input} />
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <p className="mb-3 rounded border border-red-400/30 bg-red-400/10 px-3 py-2 text-[12px] text-red-400">
+            {error}
+          </p>
+        )}
+
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="px-4 py-2 rounded border border-border text-[13px] text-text-primary hover:border-gold disabled:opacity-50"
+          >
+            キャンセル
+          </button>
+          <button
+            onClick={submit}
+            disabled={submitting}
+            className="px-4 py-2 rounded bg-gold/90 text-bg-primary text-[13px] font-bold hover:bg-gold disabled:opacity-50"
+          >
+            {submitting ? "保存中…" : "保存する"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
