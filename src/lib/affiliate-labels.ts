@@ -1,4 +1,4 @@
-// 紹介協力制度: クライアント/サーバー共用のラベル・選択肢定義
+// ご紹介協力制度: クライアント/サーバー共用のラベル・選択肢定義
 // （prisma に依存しないこと — クライアントコンポーネントから import されるため）
 
 export const AFFILIATE_CHANNEL_LABELS: Record<string, string> = {

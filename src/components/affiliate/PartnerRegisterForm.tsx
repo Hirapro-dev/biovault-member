@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 紹介協力者のセルフ登録フォーム（チャネル別ページから利用）
+ * ご紹介協力者のセルフ登録フォーム（チャネル別ページから利用）
  * iPS適合確認フォーム(/form/app・/form/ips-check)と同じ v2 デザインで統一。
  *
  * - ヘッダー背景は introduction-bg.mp4
@@ -70,7 +70,7 @@ export default function PartnerRegisterForm({ channel }: { channel: "NW" | "KAWA
 
   const pageTitle = (
     <>
-      <span className="v2-banner-title-line">紹介協力制度</span>
+      <span className="v2-banner-title-line">ご紹介協力制度</span>
       <br className="v2-banner-title-br-pc" />
       <span className="v2-banner-title-line">ご登録フォーム</span>
     </>
@@ -130,9 +130,7 @@ export default function PartnerRegisterForm({ channel }: { channel: "NW" | "KAWA
         {error && <div className="v2-error">{error}</div>}
 
         <section className="v2-section v2-card-connected">
-          <p className="v2-section-lead">
-            ご登録いただくと、あなた専用のご紹介用URLが発行されます。専用URL経由のお申込み実績に応じて報酬をお支払いします。
-          </p>
+          <p className="v2-section-lead"></p>
 
           <h2 className="v2-section-title">ご登録者情報</h2>
 
@@ -262,7 +260,7 @@ export default function PartnerRegisterForm({ channel }: { channel: "NW" | "KAWA
           />
 
           <div className="v2-notice">
-            紹介協力制度の規約および個人情報の取扱いに同意のうえ、ご登録ください。ご入力いただいた情報は、ご紹介実績の管理および報酬のお支払いのために利用します。
+            ご紹介協力制度の規約および個人情報の取扱いに同意のうえ、ご登録ください。ご入力いただいた情報は、ご紹介実績の管理および報酬のお支払いのために利用します。
           </div>
 
           <label className="v2-checkbox-row">

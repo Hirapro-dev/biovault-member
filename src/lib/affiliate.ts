@@ -3,7 +3,7 @@ import crypto from "crypto";
 import type { AffiliateChannel, AffiliateProfile } from "@prisma/client";
 
 // ────────────────────────────────────────
-// 紹介協力制度（アフィリエイト）共通ロジック
+// ご紹介協力制度（アフィリエイト）共通ロジック
 // ────────────────────────────────────────
 
 // 帰属Cookie（LP閲覧時に発行し、リード登録時に参照）

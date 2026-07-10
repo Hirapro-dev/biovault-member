@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-// 紹介協力者本人の振込先口座の登録・更新
+// ご紹介協力者本人の振込先口座の登録・更新
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
   const sUser = session?.user as { id?: string; role?: string } | undefined;

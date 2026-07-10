@@ -3,7 +3,7 @@ import Link from "next/link";
 import AffiliateList from "@/components/affiliate/AffiliateList";
 import AffiliateSettingsPanel from "@/components/affiliate/AffiliateSettingsPanel";
 
-// 紹介協力管理: 協力者一覧 + 制度設定
+// ご紹介協力管理: 協力者一覧 + 制度設定
 export default async function AdminAffiliatesPage() {
   await requireAdmin();
 
@@ -11,7 +11,7 @@ export default async function AdminAffiliatesPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-7">
         <h2 className="font-serif-jp text-lg sm:text-[22px] font-normal text-text-primary tracking-[2px]">
-          紹介協力管理
+          ご紹介協力管理
         </h2>
         <div className="flex gap-2">
           <Link
