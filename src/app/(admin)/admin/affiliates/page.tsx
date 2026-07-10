@@ -31,10 +31,6 @@ export default async function AdminAffiliatesPage() {
 
       <AffiliateSettingsPanel />
       <AffiliateList />
-
-      <div className="mt-6 text-[11px] text-text-muted leading-relaxed">
-        <p>登録フォーム: 人脈繋がり = /partner/register/nw ／ KAWARA版 = /partner/register/kawara</p>
-      </div>
     </div>
   );
 }

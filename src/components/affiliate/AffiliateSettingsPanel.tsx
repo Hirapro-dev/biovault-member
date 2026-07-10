@@ -1,6 +1,6 @@
 "use client";
 
-// 紹介協力制度の設定パネル（自動承認トグル + チャネル別デフォルト報酬額）
+// 紹介協力制度の設定パネル（自動承認トグル + チャネル別デフォルト報酬額 + 登録フォームURL）
 import { useEffect, useState } from "react";
 
 type Settings = {
@@ -129,7 +129,46 @@ export default function AffiliateSettingsPanel() {
         >
           {saving ? "保存中…" : "設定を保存"}
         </button>
+
+        {/* 協力者登録フォームURL（チャネル別・コピー用） */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="text-[12px] text-text-muted mb-2">協力者登録フォームURL（紹介協力者に案内するURL）</div>
+          <RegisterUrlRow label="人脈繋がり" path="/partner/register/nw" />
+          <RegisterUrlRow label="KAWARA版" path="/partner/register/kawara" />
+        </div>
       </div>
     </details>
+  );
+}
+
+// 登録フォームURLの表示 + コピー行
+function RegisterUrlRow({ label, path }: { label: string; path: string }) {
+  const [copied, setCopied] = useState(false);
+  const [url, setUrl] = useState(path);
+
+  // 環境（プレビュー/本番）に応じたフルURLをクライアント側で組み立てる
+  useEffect(() => {
+    setUrl(`${window.location.origin}${path}`);
+  }, [path]);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 mb-2">
+      <span className="text-[13px] text-text-primary w-24 shrink-0">{label}</span>
+      <code className="flex-1 min-w-[220px] bg-bg-primary border border-border rounded px-2.5 py-1.5 text-[12px] text-gold break-all">
+        {url}
+      </code>
+      <button
+        onClick={copy}
+        className="px-3 py-1.5 rounded border border-border text-[12px] text-text-primary hover:border-gold transition-colors"
+      >
+        {copied ? "コピーしました ✓" : "コピー"}
+      </button>
+    </div>
   );
 }
