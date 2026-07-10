@@ -86,7 +86,7 @@ export default function MemberCard({
               /*
                * カード番号のゴールド文字。
                * 1層目: 白い光の帯(通過時のみ見える) / 2層目: 白を含まないベースの金グラデ(静止時の見た目)
-               * 光の通過は序盤30%(約3秒)、残り70%(約7秒)は白なしのベース表示で静止する。
+               * 光の通過は序盤59%(約10秒)、残り41%(約7秒)は白なしのベース表示で静止する。
                */
               .u-card-gold {
                 background-image:
@@ -98,12 +98,12 @@ export default function MemberCard({
                 background-clip: text;
                 -webkit-text-fill-color: transparent;
                 color: transparent;
-                animation: gold-glint 10s linear infinite;
+                animation: gold-glint 17s linear infinite;
                 filter: drop-shadow(0 1px 1px rgba(88,49,27,0.25));
               }
               @keyframes gold-glint {
                 0% { background-position: 250% center, 0 center; }
-                30% { background-position: -150% center, 0 center; }
+                59% { background-position: -150% center, 0 center; }
                 100% { background-position: -150% center, 0 center; }
               }
             `}</style>
