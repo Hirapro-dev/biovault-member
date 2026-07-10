@@ -39,6 +39,8 @@ type V2WrapperProps = {
   compact?: boolean;
   /** バナー内容の最大幅を広め(--v2-max-width)にする。未指定は通常幅(--v2-content-width)。 */
   headerWide?: boolean;
+  /** バナー背景動画のパス。未指定は既存の /header-bg.mp4。 */
+  headerVideoSrc?: string;
 };
 
 export default function V2Wrapper({
@@ -51,6 +53,7 @@ export default function V2Wrapper({
   heroImageAlt = "イメージキャラクター",
   compact = false,
   headerWide = false,
+  headerVideoSrc = "/header-bg.mp4",
 }: V2WrapperProps) {
   const companyShortName = scheme === "MRT" ? "MRT Inc." : "SCPP Inc.";
   const headerClass = [
@@ -72,7 +75,7 @@ export default function V2Wrapper({
         {/* バナー背景動画(poster の PNG が初期表示・フォールバック) */}
         <video
           className="v2-header-video"
-          src="/header-bg.mp4"
+          src={headerVideoSrc}
           poster="/form-header-bg.png"
           autoPlay
           muted

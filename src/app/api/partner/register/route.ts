@@ -31,10 +31,17 @@ export async function POST(req: Request) {
     const nameKana = (body.nameKana || "").trim();
     const email = (body.email || "").trim().toLowerCase();
     const phone = (body.phone || "").trim();
+    const postalCode = (body.postalCode || "").trim();
+    const address = (body.address || "").trim();
+    const dateOfBirth = (body.dateOfBirth || "").trim();
     const channel = body.channel === "KAWARA" ? "KAWARA" : body.channel === "NW" ? "NW" : null;
 
-    if (!name || !nameKana || !email || !phone || !channel) {
+    if (!name || !nameKana || !email || !phone || !address || !dateOfBirth || !channel) {
       return NextResponse.json({ error: "必須項目が入力されていません" }, { status: 400 });
+    }
+    const birth = new Date(dateOfBirth);
+    if (isNaN(birth.getTime())) {
+      return NextResponse.json({ error: "生年月日の形式が正しくありません" }, { status: 400 });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "メールアドレスの形式が正しくありません" }, { status: 400 });
@@ -65,6 +72,9 @@ export async function POST(req: Request) {
         name,
         nameKana,
         phone,
+        postalCode: postalCode || null,
+        address,
+        dateOfBirth: birth,
         role: "AFFILIATE",
         isIdIssued: autoApprove, // 手動承認モードでは承認時に有効化
         mustChangePassword: true,
