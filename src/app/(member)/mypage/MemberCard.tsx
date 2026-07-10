@@ -81,23 +81,28 @@ export default function MemberCard({
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.18) 46%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.18) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
             </div>
-            <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
+            <style>{`
+              @keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }
+              @keyframes gold-glint { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+            `}</style>
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="BioVault" className="h-6 sm:h-8 w-auto" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
-              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/80">MEMBER</div>
+              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#58311b]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              {/* ゴールドのグラデーション文字（ロゴの金属感を参考にした斜めグラデ・静止） */}
+              {/* ゴールドのグラデーション文字（ロゴの金属感を参考にした斜めグラデ + 光が流れる演出） */}
               <div
                 className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]"
                 style={{
                   backgroundImage:
                     "linear-gradient(100deg, #ad8568 0%, #fff 10%, #58311b 24%, #fff 38%, #f7cf9b 52%, #fff 66%, #523a1c 82%, #dbc8b8 100%)",
+                  backgroundSize: "200% auto",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   color: "transparent",
+                  animation: "gold-glint 8s linear infinite",
                   filter: "drop-shadow(0 1px 1px rgba(88,49,27,0.25))",
                 }}
               >
@@ -106,12 +111,12 @@ export default function MemberCard({
             </div>
             <div className="relative z-10 flex items-end justify-between">
               <div>
-                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#4A3230]/70">CARD HOLDER</div>
-                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase text-[#4A3230]/90">{holderName}</div>
+                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#58311b]/70">CARD HOLDER</div>
+                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase text-[#58311b]/90">{holderName}</div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#4A3230]/70">MEMBER SINCE</div>
-                <div className="font-mono text-[14px] sm:text-xs tracking-wider text-[#4A3230]/80">
+                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#58311b]/70">MEMBER SINCE</div>
+                <div className="font-mono text-[14px] sm:text-xs tracking-wider text-[#58311b]/80">
                   {memberSince}
                 </div>
               </div>
@@ -137,20 +142,20 @@ export default function MemberCard({
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="BioVault" className="h-5 sm:h-6 w-auto opacity-90" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
-              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/50">STATUS</div>
+              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#58311b]/50">STATUS</div>
             </div>
 
             <div className="relative z-10 flex-1 flex flex-col justify-center gap-4 sm:gap-5 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">iPS細胞保管期限</div>
-                  <div className="font-mono text-base sm:text-lg text-[#4A3230]/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#58311b]/60 mb-1.5">iPS細胞保管期限</div>
+                  <div className="font-mono text-base sm:text-lg text-[#58311b]/90">
                     {storageExpiry || "---"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">iPS培養上清液 管理期限</div>
-                  <div className="font-mono text-base sm:text-lg text-[#4A3230]/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#58311b]/60 mb-1.5">iPS培養上清液 管理期限</div>
+                  <div className="font-mono text-base sm:text-lg text-[#58311b]/90">
                     {cultureFluidExpiry || "---"}
                   </div>
                 </div>
@@ -160,24 +165,24 @@ export default function MemberCard({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">残り点滴施術回数</div>
-                  <div className="font-mono text-xl sm:text-2xl text-[#4A3230]/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#58311b]/60 mb-1.5">残り点滴施術回数</div>
+                  <div className="font-mono text-xl sm:text-2xl text-[#58311b]/90">
                     {remainingSessions !== null ? `${remainingSessions}` : "---"}
-                    {remainingSessions !== null && <span className="text-sm sm:text-base text-[#4A3230]/60 ml-1">回</span>}
+                    {remainingSessions !== null && <span className="text-sm sm:text-base text-[#58311b]/60 ml-1">回</span>}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">点滴施術累計完了回数</div>
-                  <div className="font-mono text-xl sm:text-2xl text-[#4A3230]/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#58311b]/60 mb-1.5">点滴施術累計完了回数</div>
+                  <div className="font-mono text-xl sm:text-2xl text-[#58311b]/90">
                     {completedSessions}
-                    <span className="text-sm sm:text-base text-[#4A3230]/60 ml-1">回</span>
+                    <span className="text-sm sm:text-base text-[#58311b]/60 ml-1">回</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="relative z-10">
-              <div className="font-mono text-[11px] sm:text-xs tracking-[4px] text-[#4A3230]/40 text-center">
+              <div className="font-mono text-[11px] sm:text-xs tracking-[4px] text-[#58311b]/40 text-center">
                 {memberNumber}
               </div>
             </div>
