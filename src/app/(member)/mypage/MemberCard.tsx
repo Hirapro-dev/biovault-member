@@ -81,14 +81,31 @@ export default function MemberCard({
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.18) 46%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.18) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
             </div>
-            <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
+            <style>{`
+              @keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }
+              @keyframes gold-glint { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+            `}</style>
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="BioVault" className="h-6 sm:h-8 w-auto" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]" style={{ color: "#B08D3C" }}>
+              {/* ゴールドのグラデーション文字 + 光が流れるアニメーション */}
+              <div
+                className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(105deg, #8C6A1F 0%, #C9A445 18%, #F2DC9B 38%, #FFF6DA 50%, #F2DC9B 62%, #C9A445 82%, #8C6A1F 100%)",
+                  backgroundSize: "200% auto",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
+                  animation: "gold-glint 6s linear infinite",
+                  filter: "drop-shadow(0 1px 1px rgba(140,106,31,0.30))",
+                }}
+              >
                 {memberNumber}
               </div>
             </div>
