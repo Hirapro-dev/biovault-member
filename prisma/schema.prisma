@@ -830,14 +830,14 @@ model AffiliateLead {
   // LP登録フォームの取得項目（iPS適合確認フォーム1ページ目と同一項目）
   name               String
   nameKana           String                                   // フリガナ(カタカナ)
-  dateOfBirth        DateTime                                 // 生年月日
   postalCode         String?                                  // 郵便番号
   email              String
   address            String
   phone              String
   occupation         String?                                  // 職業
+  income             String?                                  // 年収（プルダウン選択値）
+  dateOfBirth        DateTime?                                // 生年月日（LP登録時は未収集。適合確認フォームで取得）
   position           String?                                  // 役職（旧項目・現在は未収集）
-  income             String?                                  // 年収（旧項目・現在は未収集）
 
   // 架電管理
   callStatus         LeadCallStatus   @default(UNCALLED)

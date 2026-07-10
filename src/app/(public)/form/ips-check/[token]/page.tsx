@@ -82,7 +82,7 @@ export default async function IpsCheckPage({
         token={token}
         leadName={lead.name}
         leadNameKana={lead.nameKana}
-        leadDateOfBirth={lead.dateOfBirth.toISOString().slice(0, 10)}
+        leadDateOfBirth={lead.dateOfBirth ? lead.dateOfBirth.toISOString().slice(0, 10) : "1980-01-01"}
         leadPhone={lead.phone}
       />
     </>
