@@ -23,6 +23,8 @@ export default async function IpsCheckPage({
     select: {
       id: true,
       name: true,
+      nameKana: true,
+      dateOfBirth: true,
       phone: true,
       applicationId: true,
       affiliateProfile: { select: { status: true } },
@@ -76,7 +78,13 @@ export default async function IpsCheckPage({
   return (
     <>
       <GaTag />
-      <IpsCheckForm token={token} leadName={lead.name} leadPhone={lead.phone} />
+      <IpsCheckForm
+        token={token}
+        leadName={lead.name}
+        leadNameKana={lead.nameKana}
+        leadDateOfBirth={lead.dateOfBirth.toISOString().slice(0, 10)}
+        leadPhone={lead.phone}
+      />
     </>
   );
 }
