@@ -96,7 +96,7 @@ export default function MemberCard({
                 className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(105deg, #8C6A1F 0%, #C9A445 18%, #F2DC9B 38%, #FFF6DA 50%, #F2DC9B 62%, #C9A445 82%, #8C6A1F 100%)",
+                    "linear-gradient(105deg, #ffffff 0%, #ca9f46 20%, #ffffff 40%, #ca9f46 60%, #795c2b 80%, #fff9c9 100%)",
                   backgroundSize: "200% auto",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
