@@ -17,13 +17,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // 必須チェック
+    // 必須チェック（iPS適合確認フォーム1ページ目と同一項目）
     const name = (body.name || "").trim();
+    const nameKana = (body.nameKana || "").trim();
+    const dateOfBirth = (body.dateOfBirth || "").trim();
     const email = (body.email || "").trim().toLowerCase();
     const address = (body.address || "").trim();
     const phoneRaw = (body.phone || "").trim();
-    if (!name || !email || !address || !phoneRaw) {
+    if (!name || !nameKana || !dateOfBirth || !email || !address || !phoneRaw) {
       return NextResponse.json({ error: "必須項目が入力されていません" }, { status: 400 });
+    }
+    const birth = new Date(dateOfBirth);
+    if (isNaN(birth.getTime())) {
+      return NextResponse.json({ error: "生年月日の形式が正しくありません" }, { status: 400 });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "メールアドレスの形式が正しくありません" }, { status: 400 });
@@ -76,12 +82,13 @@ export async function POST(req: NextRequest) {
       data: {
         affiliateProfileId: profile.id,
         name,
+        nameKana,
+        dateOfBirth: birth,
+        postalCode: (body.postalCode || "").trim() || null,
         email,
         address,
         phone,
         occupation: (body.occupation || "").trim() || null,
-        position: (body.position || "").trim() || null,
-        income: (body.income || "").trim() || null,
         isDuplicate: duplicate,
       },
     });

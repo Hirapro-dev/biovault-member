@@ -15,12 +15,12 @@ import {
 type Lead = {
   id: string;
   name: string;
+  nameKana: string;
+  dateOfBirth: string;
   email: string;
   phone: string;
   address: string;
   occupation: string | null;
-  position: string | null;
-  income: string | null;
   callStatus: string;
   callNote: string | null;
   calledAt: string | null;
@@ -145,11 +145,12 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
                 {expanded === l.id && (
                   <div className="px-4 pb-4 pt-1 bg-bg-primary/30">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-[13px] mb-4">
+                      <InfoRow label="フリガナ" value={l.nameKana} />
+                      <InfoRow label="生年月日" value={new Date(l.dateOfBirth).toLocaleDateString("ja-JP")} />
                       <InfoRow label="電話番号" value={l.phone} mono />
                       <InfoRow label="メール" value={l.email} />
                       <InfoRow label="住所" value={l.address} />
-                      <InfoRow label="職業/役職" value={[l.occupation, l.position].filter(Boolean).join(" / ") || "---"} />
-                      <InfoRow label="年収" value={l.income || "---"} />
+                      <InfoRow label="職業" value={l.occupation || "---"} />
                       <InfoRow
                         label="紹介者"
                         value={`${l.affiliateProfile.user.name}${l.affiliateProfile.displayName ? `（${l.affiliateProfile.displayName}）` : ""}`}

@@ -16,10 +16,14 @@ import V2Button from "@/components/form-v2/V2Button";
 export default function IpsCheckForm({
   token,
   leadName,
+  leadNameKana,
+  leadDateOfBirth,
   leadPhone,
 }: {
   token: string;
   leadName: string;
+  leadNameKana: string;
+  leadDateOfBirth: string;
   leadPhone: string;
 }) {
   const [step, setStepRaw] = useState(1);
@@ -33,8 +37,8 @@ export default function IpsCheckForm({
 
   const [form, setForm] = useState({
     name: leadName,
-    nameKana: "",
-    dateOfBirth: "1980-01-01",
+    nameKana: leadNameKana,
+    dateOfBirth: leadDateOfBirth,
     phone: leadPhone,
     // 健康状態
     currentIllness: false,
