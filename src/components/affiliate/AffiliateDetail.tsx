@@ -145,7 +145,6 @@ export default function AffiliateDetail({ id }: { id: string }) {
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className="font-mono text-[15px] text-gold">{p.affiliateCode}</span>
           <span className="text-[15px] text-text-primary font-medium">{p.user.name}</span>
-          {p.displayName && <span className="text-[12px] text-text-muted">（{p.displayName}）</span>}
           <span className="px-2 py-0.5 rounded text-[11px] border bg-gold/10 text-gold border-gold/20">
             {AFFILIATE_CHANNEL_LABELS[p.channel]}
           </span>
@@ -187,6 +186,7 @@ export default function AffiliateDetail({ id }: { id: string }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-[13px]">
+          <Row label="活動名" value={p.displayName || "---"} />
           <Row label="メール" value={p.user.email} />
           <Row label="電話番号" value={p.user.phone || "---"} />
           <Row label="登録日" value={new Date(p.createdAt).toLocaleDateString("ja-JP")} />
