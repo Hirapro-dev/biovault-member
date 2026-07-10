@@ -23,7 +23,7 @@
 .mainvisual {
   position: relative;
   width: 100%;
-  background: url(images/mv_bg.png) center top / cover no-repeat;
+  background: url(images/mv_bg.webp) center top / cover no-repeat;
   overflow: hidden;
 }
 
@@ -173,7 +173,7 @@ section.cta .cta > a:hover img,
    ========================================= */
 @media (max-width: 768px) {
   .mainvisual {
-    background-image: url(images/mv_bg_sp.png);
+    background-image: url(images/mv_bg_sp.webp);
     background-size: cover;
   }
 
@@ -497,7 +497,7 @@ section.cta .cta > a:hover img,
   position: relative;
   min-height: 500px;
   padding: 64px 0 60px;
-  background: url(images/sec02_bg.png) center center / cover no-repeat;
+  background: url(images/sec02_bg.webp) center center / cover no-repeat;
   overflow: hidden;
   border-top: 2px solid #044180;
   border-bottom: 2px solid #044180;
@@ -545,7 +545,7 @@ section.cta .cta > a:hover img,
 
 #sec02 .left ul li {
   padding-left: 30px;
-  background: url(images/check_sec02.png) no-repeat left center / 23px 22px;
+  background: url(images/check_sec02.webp) no-repeat left center / 23px 22px;
   font-weight: 700;
 }
 
@@ -587,7 +587,7 @@ section.cta .cta > a:hover img,
   #sec02 {
     min-height: 0;
     padding: 40px 0 0;
-    background-image: url(images/sec02_bg_sp.png);
+    background-image: url(images/sec02_bg_sp.webp);
   }
 
   #sec02 .inner {
@@ -652,7 +652,7 @@ section.cta .cta > a:hover img,
 
 #sec03 .ips-overview {
   padding: 66px 0 60px;
-  background: url(images/sec03_bg.png) center top / cover no-repeat;
+  background: url(images/sec03_bg.webp) center top / cover no-repeat;
 }
 
 #sec03 .inner.flex {
@@ -715,7 +715,7 @@ section.cta .cta > a:hover img,
   padding: 48px 20px 38px;
   background:
     linear-gradient(90deg, rgba(1, 23, 61, 0.1) 0%, rgba(2, 35, 81, 0.1) 74%, rgba(1, 24, 60, 0.1) 100%),
-    url(images/sec03_add_bg.png) right bottom /cover;
+    url(images/sec03_add_bg.webp) right bottom /cover;
   text-align: center;
 }
 
@@ -927,32 +927,32 @@ body.is-modal-open {
   background-size: contain;
 }
 
-.research-modal__image--current-1 { background-image: url(images/sec03_research01.png); }
-.research-modal__image--current-2 { background-image: url(images/sec03_research02.png); }
-.research-modal__image--current-3 { background-image: url(images/sec03_research03.png); }
-.research-modal__image--current-4 { background-image: url(images/sec03_research04.png); }
-.research-modal__image--current-5 { background-image: url(images/sec03_research05.png); }
-.research-modal__image--current-6 { background-image: url(images/sec03_research06.png); }
-.research-modal__image--current-7 { background-image: url(images/sec03_research07.png); }
-.research-modal__image--current-8 { background-image: url(images/sec03_research08.png); }
-.research-modal__image--current-9 { background-image: url(images/sec03_research09.png); }
-.research-modal__image--current-10 { background-image: url(images/sec03_research10.png); }
-.research-modal__image--current-11 { background-image: url(images/sec03_research11.png); }
-.research-modal__image--current-12 { background-image: url(images/sec03_research12.png); }
-.research-modal__image--current-13 { background-image: url(images/sec03_research13.png); }
-.research-modal__image--current-14 { background-image: url(images/sec03_research14.png); }
-.research-modal__image--current-15 { background-image: url(images/sec03_research15.png); }
+.research-modal__image--current-1 { background-image: url(images/sec03_research01.webp); }
+.research-modal__image--current-2 { background-image: url(images/sec03_research02.webp); }
+.research-modal__image--current-3 { background-image: url(images/sec03_research03.webp); }
+.research-modal__image--current-4 { background-image: url(images/sec03_research04.webp); }
+.research-modal__image--current-5 { background-image: url(images/sec03_research05.webp); }
+.research-modal__image--current-6 { background-image: url(images/sec03_research06.webp); }
+.research-modal__image--current-7 { background-image: url(images/sec03_research07.webp); }
+.research-modal__image--current-8 { background-image: url(images/sec03_research08.webp); }
+.research-modal__image--current-9 { background-image: url(images/sec03_research09.webp); }
+.research-modal__image--current-10 { background-image: url(images/sec03_research10.webp); }
+.research-modal__image--current-11 { background-image: url(images/sec03_research11.webp); }
+.research-modal__image--current-12 { background-image: url(images/sec03_research12.webp); }
+.research-modal__image--current-13 { background-image: url(images/sec03_research13.webp); }
+.research-modal__image--current-14 { background-image: url(images/sec03_research14.webp); }
+.research-modal__image--current-15 { background-image: url(images/sec03_research15.webp); }
 
-.research-modal__image--future-1 { background-image: url(images/sec03_future01.png); }
-.research-modal__image--future-2 { background-image: url(images/sec03_future02.png); }
-.research-modal__image--future-3 { background-image: url(images/sec03_future03.png); }
-.research-modal__image--future-4 { background-image: url(images/sec03_future04.png); }
-.research-modal__image--future-5 { background-image: url(images/sec03_future05.png); }
-.research-modal__image--future-6 { background-image: url(images/sec03_future06.png); }
-.research-modal__image--future-7 { background-image: url(images/sec03_future07.png); }
-.research-modal__image--future-8 { background-image: url(images/sec03_future08.png); }
-.research-modal__image--future-9 { background-image: url(images/sec03_future09.png); }
-.research-modal__image--future-10 { background-image: url(images/sec03_future10.png); }
+.research-modal__image--future-1 { background-image: url(images/sec03_future01.webp); }
+.research-modal__image--future-2 { background-image: url(images/sec03_future02.webp); }
+.research-modal__image--future-3 { background-image: url(images/sec03_future03.webp); }
+.research-modal__image--future-4 { background-image: url(images/sec03_future04.webp); }
+.research-modal__image--future-5 { background-image: url(images/sec03_future05.webp); }
+.research-modal__image--future-6 { background-image: url(images/sec03_future06.webp); }
+.research-modal__image--future-7 { background-image: url(images/sec03_future07.webp); }
+.research-modal__image--future-8 { background-image: url(images/sec03_future08.webp); }
+.research-modal__image--future-9 { background-image: url(images/sec03_future09.webp); }
+.research-modal__image--future-10 { background-image: url(images/sec03_future10.webp); }
 
 .research-modal__body {
   min-width: 0;
@@ -1080,7 +1080,7 @@ body.is-modal-open {
   /* 【要確認】スマホ版の見本がないため、研究領域は2列、メリットカードは1列で設計 */
   #sec03 .ips-overview {
     padding: 40px 0 34px;
-    background: url(images/sec03_bg_sp.png) center top / cover no-repeat;
+    background: url(images/sec03_bg_sp.webp) center top / cover no-repeat;
   }
 
   #sec03 .inner.flex {
@@ -1121,7 +1121,7 @@ body.is-modal-open {
     padding: 30px 0 26px;
     background:
       linear-gradient(90deg, rgba(1, 23, 61, 0.3) 0%, rgba(2, 35, 81, 0.5) 74%, rgba(1, 24, 60, 0.7) 100%),
-      url(images/sec03_add_bg.png) right bottom /cover;
+      url(images/sec03_add_bg.webp) right bottom /cover;
   }
   #sec03 .research-heading p {
     font-size: 16px;
@@ -1267,7 +1267,7 @@ body.is-modal-open {
    #sec04
    ========================================= */
 #sec04 {
-  background: #050914 url(images/sec04_bg.png) center center / cover no-repeat;
+  background: #050914 url(images/sec04_bg.webp) center center / cover no-repeat;
   padding: 72px 0;
   text-align: center;
 }
@@ -1365,7 +1365,7 @@ body.is-modal-open {
 @media (max-width: 768px) {
   #sec04 {
     padding: 44px 0;
-    background-image: url(images/sec04_bg_sp.png);
+    background-image: url(images/sec04_bg_sp.webp);
   }
 
   #sec04 h1 {
@@ -1402,7 +1402,7 @@ body.is-modal-open {
    #sec05
    ========================================= */
 #sec05 {
-  background: url(images/sec05_bg.png) center center / cover no-repeat;
+  background: url(images/sec05_bg.webp) center center / cover no-repeat;
   padding: 60px 0;
 }
 
@@ -1450,7 +1450,7 @@ body.is-modal-open {
 @media (max-width: 768px) {
   #sec05 {
     padding: 40px 0 30px;
-    background: url(images/sec05_bg_sp.png) center top / cover no-repeat;
+    background: url(images/sec05_bg_sp.webp) center top / cover no-repeat;
   }
 
   #sec05 .inner.flex {
@@ -1488,7 +1488,7 @@ section.cta {
   position: relative;
   z-index: -5;
   padding: 48px 0;
-  background: #0a0f24 url(images/cta_bg.png) center center / cover no-repeat;
+  background: #0a0f24 url(images/cta_bg.webp) center center / cover no-repeat;
 }
 
 section.cta .inner.flex {
@@ -1527,7 +1527,7 @@ section.cta .right img {
 @media (max-width: 768px) {
   section.cta {
     padding: 240px 0 30px;
-    background: #ffffff url(images/cta_bg_sp.png) top center / cover no-repeat;
+    background: #ffffff url(images/cta_bg_sp.webp) top center / cover no-repeat;
   }
 
   section.cta .inner.flex {
@@ -1670,7 +1670,7 @@ section.cta .right img {
   break-inside: avoid;
   margin-bottom: 13px;
   padding: 13px 16px 13px 44px;
-  background: url(images/check_sec06.png) no-repeat 15px center / 25px 24px;
+  background: url(images/check_sec06.webp) no-repeat 15px center / 25px 24px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1681,7 +1681,7 @@ section.cta .right img {
   border-color: #14224a;
   font-weight: 700;
   color: #d2a850;
-  background-image: url(images/check_sec06.png);
+  background-image: url(images/check_sec06.webp);
   background-repeat: no-repeat;
   background-position: 15px center;
   background-size: 25px 24px;
@@ -1753,7 +1753,7 @@ section.cta .right img {
 
   #sec06 .cat-list li {
     padding: 10px 0 10px 30px;
-    background: url(images/check_sec06.png) no-repeat 6px center / 16px 15px;
+    background: url(images/check_sec06.webp) no-repeat 6px center / 16px 15px;
     margin-bottom: 10px;
     font-size: 12px;
   }
@@ -1891,7 +1891,7 @@ section.cta .right img {
    #sec07
    ========================================= */
 #sec07 {
-  background: #0a1428 url(images/sec07_bg.png) center center / cover no-repeat;
+  background: #0a1428 url(images/sec07_bg.webp) center center / cover no-repeat;
   padding: 62px 0 70px;
 }
 
@@ -2072,7 +2072,7 @@ section.cta .right img {
 }
 
 #sec08 .box.jika .box-content li {
-  background-image: url(images/check_jika.png);
+  background-image: url(images/check_jika.webp);
 }
 
 /* 他家（グレー） */
@@ -2092,7 +2092,7 @@ section.cta .right img {
 }
 
 #sec08 .box.taka .box-content li {
-  background-image: url(images/check_taka.png);
+  background-image: url(images/check_taka.webp);
 }
 
 /* SP */
@@ -2177,7 +2177,7 @@ section.cta .right img {
   font-size: 24px;
   margin-bottom: 18px;
   padding: 17px 22px 17px 64px;
-  background: #fff url(images/check_merit.png) no-repeat 20px center / 29px 29px;
+  background: #fff url(images/check_merit.webp) no-repeat 20px center / 29px 29px;
   box-shadow: 0 3px 10px rgba(30, 60, 120, 0.08);
   font-weight: 700;
 }
@@ -2257,7 +2257,7 @@ section.cta .right img {
   #merit .left ul li {
     font-size: 16px;
     padding: 12px 0 12px 40px;
-    background: #fff url(images/check_merit.png) no-repeat 12px center / 16px 16px;
+    background: #fff url(images/check_merit.webp) no-repeat 12px center / 16px 16px;
     margin-bottom: 8px;
   }
 }
@@ -2268,7 +2268,7 @@ section.cta .right img {
 #sec09 {
   margin-top: 0;
   padding: 54px 0 60px;
-  background: #0c2150 url(images/sec09_bg.png) center center / cover no-repeat;
+  background: #0c2150 url(images/sec09_bg.webp) center center / cover no-repeat;
   text-align: center;
 }
 
@@ -2438,7 +2438,7 @@ section.cta .right img {
 #sec11 {
   position: relative;
   padding: 56px 0 60px;
-  background: #fbfdff url(images/sec11_img.png) right bottom / 500px auto no-repeat;
+  background: #fbfdff url(images/sec11_img.webp) right bottom / 500px auto no-repeat;
   overflow: hidden;
 }
 
@@ -2628,7 +2628,7 @@ section.cta .right img {
 #foot_cta {
   position: relative;
   padding: 54px 0 0;
-  background: #fff url(images/foot_bg.png) center center / cover no-repeat;
+  background: #fff url(images/foot_bg.webp) center center / cover no-repeat;
 }
 
 #foot_cta .inner.flex {
@@ -2685,7 +2685,7 @@ section.cta .right img {
 @media (max-width: 768px) {
   #foot_cta {
     padding: 40px 0 24px;
-    background-image: url(images/foot_bg_sp.png);
+    background-image: url(images/foot_bg_sp.webp);
   }
 
   #foot_cta .inner.flex {
