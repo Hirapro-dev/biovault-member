@@ -2,24 +2,26 @@
 
 /**
  * リード登録フォーム（LP経由の見込み顧客）
- * iPS適合確認フォーム(/form/app)の「1. 申請者情報」と全く同じ項目・入力仕様で統一。
- * (氏名/フリガナ自動抽出・生年月日・郵便番号自動住所反映・メール重複チェック・職業選択)
+ * iPS適合確認フォーム(/form/app)の「1. 申請者情報」をベースに、
+ * 生年月日は収集せず、代わりにご年収（プルダウン）を収集する。
+ * (氏名/フリガナ自動抽出・郵便番号自動住所反映・メール重複チェック・職業選択・ご年収)
  */
 
 import { useRef, useState } from "react";
 import V2Wrapper from "@/components/form-v2/V2Wrapper";
 import V2Button from "@/components/form-v2/V2Button";
+import { INCOME_OPTIONS } from "@/lib/affiliate-labels";
 
 export default function LeadForm({ refCode }: { refCode: string }) {
   const [form, setForm] = useState({
     name: "",
     nameKana: "",
-    dateOfBirth: "1980-01-01",
     postalCode: "",
     address: "",
     phone: "",
     email: "",
     occupation: "",
+    income: "",
     website: "", // honeypot（画面には表示しない）
   });
   const [submitting, setSubmitting] = useState(false);
@@ -32,7 +34,6 @@ export default function LeadForm({ refCode }: { refCode: string }) {
   const canSubmit =
     form.name.trim() &&
     form.nameKana.trim() &&
-    form.dateOfBirth &&
     form.address.trim() &&
     form.phone.length >= 10 &&
     form.email.trim();
@@ -149,18 +150,6 @@ export default function LeadForm({ refCode }: { refCode: string }) {
           </div>
 
           <div className="v2-field">
-            <label className="v2-label">
-              生年月日<span className="v2-required-mark">*</span>
-            </label>
-            <DateSelect
-              value={form.dateOfBirth}
-              onChange={(v) => update("dateOfBirth", v)}
-              yearStart={1930}
-              yearEnd={2010}
-            />
-          </div>
-
-          <div className="v2-field">
             <label className="v2-label">郵便番号</label>
             <PostalCodeInput
               value={form.postalCode}
@@ -249,6 +238,21 @@ export default function LeadForm({ refCode }: { refCode: string }) {
                 <option value="無職">無職</option>
                 <option value="その他">その他</option>
               </optgroup>
+            </select>
+          </div>
+
+          <div className="v2-field">
+            <label className="v2-label">ご年収</label>
+            <select
+              value={form.income}
+              onChange={(e) => update("income", e.target.value)}
+              className="v2-select"
+              style={{ cursor: "pointer" }}
+            >
+              <option value="">選択してください</option>
+              {INCOME_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
             </select>
           </div>
 
@@ -416,70 +420,6 @@ function PostalCodeInput({
           検索中...
         </span>
       )}
-    </div>
-  );
-}
-
-// ──────────────────────────────────────────────
-// 年/月/日 プルダウン日付選択（/form/app と同実装）
-// ──────────────────────────────────────────────
-function DateSelect({
-  value,
-  onChange,
-  yearStart = 1930,
-  yearEnd = 2030,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  yearStart?: number;
-  yearEnd?: number;
-}) {
-  const parts = value ? value.split("-") : ["", "", ""];
-  const year = parts[0] || "";
-  const month = parts[1] || "";
-  const day = parts[2] || "";
-
-  const updateDate = (y: string, m: string, d: string) => {
-    if (y && m && d) {
-      onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
-    } else {
-      onChange("");
-    }
-  };
-
-  const years: number[] = [];
-  for (let y = yearStart; y <= yearEnd; y++) years.push(y);
-
-  const daysInMonth = year && month ? new Date(Number(year), Number(month), 0).getDate() : 31;
-
-  return (
-    <div className="v2-date-row">
-      <select value={year} onChange={(e) => updateDate(e.target.value, month, day)} className="v2-select">
-        <option value="">年</option>
-        {years.map((y) => (
-          <option key={y} value={String(y)}>{y}年</option>
-        ))}
-      </select>
-      <select
-        value={month ? String(Number(month)) : ""}
-        onChange={(e) => updateDate(year, e.target.value, day)}
-        className="v2-select"
-      >
-        <option value="">月</option>
-        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-          <option key={m} value={String(m)}>{m}月</option>
-        ))}
-      </select>
-      <select
-        value={day ? String(Number(day)) : ""}
-        onChange={(e) => updateDate(year, month, e.target.value)}
-        className="v2-select"
-      >
-        <option value="">日</option>
-        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
-          <option key={d} value={String(d)}>{d}日</option>
-        ))}
-      </select>
     </div>
   );
 }
