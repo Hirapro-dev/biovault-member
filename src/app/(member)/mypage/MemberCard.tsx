@@ -81,29 +81,24 @@ export default function MemberCard({
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.18) 46%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.18) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
             </div>
-            <style>{`
-              @keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }
-              @keyframes gold-glint { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
-            `}</style>
+            <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="BioVault" className="h-6 sm:h-8 w-auto" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              {/* ゴールドのグラデーション文字 + 光が流れるアニメーション */}
+              {/* ゴールドのグラデーション文字（ロゴの金属感を参考にした斜めグラデ・静止） */}
               <div
                 className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(105deg, #ffffff 0%, #ca9f46 20%, #ffffff 40%, #ca9f46 60%, #795c2b 80%, #fff9c9 100%)",
-                  backgroundSize: "200% auto",
+                    "linear-gradient(100deg, #ad8568 0%, #fff 10%, #58311b 24%, #fff 38%, #f7cf9b 52%, #fff 66%, #523a1c 82%, #dbc8b8 100%)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   color: "transparent",
-                  animation: "gold-glint 6s linear infinite",
-                  filter: "drop-shadow(0 1px 1px rgba(140,106,31,0.30))",
+                  filter: "drop-shadow(0 1px 1px rgba(88,49,27,0.25))",
                 }}
               >
                 {memberNumber}
