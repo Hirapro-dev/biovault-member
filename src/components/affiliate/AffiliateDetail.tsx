@@ -1,6 +1,6 @@
 "use client";
 
-// 紹介協力者 詳細（admin用）: 専用URL・状態操作・個別報酬額・実績
+// ご紹介協力者 詳細（admin用）: 専用URL・状態操作・個別報酬額・実績
 import { useCallback, useEffect, useState } from "react";
 import {
   AFFILIATE_CHANNEL_LABELS,

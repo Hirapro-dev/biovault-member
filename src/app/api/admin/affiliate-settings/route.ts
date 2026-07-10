@@ -7,7 +7,7 @@ import { AFFILIATE_SETTING_KEYS, getAffiliateSettings } from "@/lib/affiliate";
 const READ_ROLES = ["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"];
 const WRITE_ROLES = ["ADMIN", "SUPER_ADMIN"];
 
-// 紹介協力制度の設定取得
+// ご紹介協力制度の設定取得
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user || !READ_ROLES.includes((session.user as { role?: string }).role || "")) {
@@ -31,15 +31,15 @@ export async function PATCH(req: Request) {
   if (body.autoApprove !== undefined) {
     entries.push({
       key: AFFILIATE_SETTING_KEYS.autoApprove,
-      title: "紹介協力: 自動承認",
+      title: "ご紹介協力: 自動承認",
       content: body.autoApprove === true || body.autoApprove === "true" ? "true" : "false",
     });
   }
   const amountEntries: [string, string, unknown][] = [
-    [AFFILIATE_SETTING_KEYS.rewardLeadNw, "紹介協力: 第一報酬(人脈繋がり)", body.rewardLeadNw],
-    [AFFILIATE_SETTING_KEYS.rewardLeadKawara, "紹介協力: 第一報酬(KAWARA版)", body.rewardLeadKawara],
-    [AFFILIATE_SETTING_KEYS.rewardConversionNw, "紹介協力: 第二報酬(人脈繋がり)", body.rewardConversionNw],
-    [AFFILIATE_SETTING_KEYS.rewardConversionKawara, "紹介協力: 第二報酬(KAWARA版)", body.rewardConversionKawara],
+    [AFFILIATE_SETTING_KEYS.rewardLeadNw, "ご紹介協力: 第一報酬(人脈繋がり)", body.rewardLeadNw],
+    [AFFILIATE_SETTING_KEYS.rewardLeadKawara, "ご紹介協力: 第一報酬(KAWARA版)", body.rewardLeadKawara],
+    [AFFILIATE_SETTING_KEYS.rewardConversionNw, "ご紹介協力: 第二報酬(人脈繋がり)", body.rewardConversionNw],
+    [AFFILIATE_SETTING_KEYS.rewardConversionKawara, "ご紹介協力: 第二報酬(KAWARA版)", body.rewardConversionKawara],
   ];
   for (const [key, title, value] of amountEntries) {
     if (value !== undefined) {

@@ -1,6 +1,6 @@
 "use client";
 
-// 紹介協力制度の設定パネル（自動承認トグル + チャネル別デフォルト報酬額 + 登録フォームURL）
+// ご紹介協力制度の設定パネル（自動承認トグル + チャネル別デフォルト報酬額 + 登録フォームURL）
 import { useEffect, useState } from "react";
 
 type Settings = {
@@ -132,7 +132,7 @@ export default function AffiliateSettingsPanel() {
 
         {/* 協力者登録フォームURL（チャネル別・コピー用） */}
         <div className="mt-4 pt-4 border-t border-border">
-          <div className="text-[12px] text-text-muted mb-2">協力者登録フォームURL（紹介協力者に案内するURL）</div>
+          <div className="text-[12px] text-text-muted mb-2">協力者登録フォームURL（ご紹介協力者に案内するURL）</div>
           <RegisterUrlRow label="人脈繋がり" path="/partner/register/nw" />
           <RegisterUrlRow label="KAWARA版" path="/partner/register/kawara" />
         </div>

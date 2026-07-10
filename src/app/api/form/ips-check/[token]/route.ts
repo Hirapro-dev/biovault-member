@@ -57,7 +57,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
       otherHealthDetail: body.otherHealthDetail || null,
       // 同意
       confirmNotMedical: body.confirmNotMedical || false,
-      // 紹介協力制度はMRTスキーム固定
+      // ご紹介協力制度はMRTスキーム固定
       scheme: "MRT",
     };
 

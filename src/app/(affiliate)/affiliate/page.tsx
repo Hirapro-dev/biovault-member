@@ -8,7 +8,7 @@ import {
 } from "@/lib/affiliate-labels";
 import { CopyLpUrl, BankAccountForm, PasswordChangeForm } from "@/components/affiliate/PortalClient";
 
-// 紹介協力者ポータル（ダッシュボード・報酬履歴・設定を1ページに集約）
+// ご紹介協力者ポータル（ダッシュボード・報酬履歴・設定を1ページに集約）
 export default async function AffiliatePortalPage() {
   const user = await requireAffiliate();
 
@@ -54,7 +54,7 @@ export default async function AffiliatePortalPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-serif-jp text-lg sm:text-[22px] font-normal tracking-[2px]">
-          紹介協力ポータル
+          ご紹介協力ポータル
         </h1>
         <p className="text-[12px] text-text-muted mt-1">
           {user.name} 様（{profile.affiliateCode} / {AFFILIATE_CHANNEL_LABELS[profile.channel]}）

@@ -1,6 +1,6 @@
 "use client";
 
-// 紹介協力者一覧（admin用）
+// ご紹介協力者一覧（admin用）
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -74,7 +74,7 @@ export default function AffiliateList() {
         {loading ? (
           <div className="py-12 text-center text-text-muted text-sm">読み込み中…</div>
         ) : rows.length === 0 ? (
-          <div className="py-12 text-center text-text-muted text-sm">紹介協力者はまだいません</div>
+          <div className="py-12 text-center text-text-muted text-sm">ご紹介協力者はまだいません</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-[900px]">

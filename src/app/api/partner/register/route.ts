@@ -15,7 +15,7 @@ import {
   affiliateRegistrationReceivedEmail,
 } from "@/lib/affiliate-mail";
 
-// 紹介協力者のセルフ登録（公開API）
+// ご紹介協力者のセルフ登録（公開API）
 // 自動承認モード: 即時有効化しログイン情報を送付
 // 手動承認モード: 承認待ちで作成し受付メールのみ送付
 export async function POST(req: Request) {

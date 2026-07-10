@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 
 const READ_ROLES = ["ADMIN", "SUPER_ADMIN", "OPERATOR", "VIEWER"];
 
-// 紹介協力者一覧（クリック数・リード数・成約数・報酬累計付き）
+// ご紹介協力者一覧（クリック数・リード数・成約数・報酬累計付き）
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user || !READ_ROLES.includes((session.user as { role?: string }).role || "")) {

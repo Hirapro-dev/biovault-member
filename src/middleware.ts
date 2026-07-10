@@ -48,7 +48,7 @@ export default withAuth(
       return NextResponse.next();
     }
 
-    // ── 紹介協力者エリア ──
+    // ── ご紹介協力者エリア ──
     if (path.startsWith("/affiliate")) {
       if (token?.role !== "AFFILIATE") {
         return NextResponse.redirect(new URL("/login", req.url));
@@ -73,7 +73,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/staff", req.url));
     }
 
-    // 紹介協力者が会員ページにアクセスしようとした場合
+    // ご紹介協力者が会員ページにアクセスしようとした場合
     if (token?.role === "AFFILIATE") {
       return NextResponse.redirect(new URL("/affiliate", req.url));
     }

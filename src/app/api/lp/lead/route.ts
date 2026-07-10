@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "電話番号の形式が正しくありません" }, { status: 400 });
     }
 
-    // 紹介協力者の特定: URLパラメータ優先、なければCookie
+    // ご紹介協力者の特定: URLパラメータ優先、なければCookie
     const ref =
       (typeof body.ref === "string" && body.ref.trim()) ||
       req.cookies.get(AFFILIATE_COOKIE)?.value ||

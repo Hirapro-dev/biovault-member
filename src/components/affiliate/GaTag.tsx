@@ -1,6 +1,6 @@
 import Script from "next/script";
 
-// Google Analytics (gtag.js) — 紹介協力制度の公開ページ共通
+// Google Analytics (gtag.js) — ご紹介協力制度の公開ページ共通
 const GA_ID = "G-VVH225G59Q";
 
 export default function GaTag() {

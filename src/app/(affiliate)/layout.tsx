@@ -1,7 +1,7 @@
 import { requireAffiliate } from "@/lib/auth-helpers";
 import Header from "@/components/layout/Header";
 
-// 紹介協力者ポータルの共通レイアウト
+// ご紹介協力者ポータルの共通レイアウト
 export default async function AffiliateLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAffiliate();
 

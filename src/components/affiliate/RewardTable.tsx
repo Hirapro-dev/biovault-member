@@ -1,6 +1,6 @@
 "use client";
 
-// 紹介協力報酬の管理テーブル（admin用: 承認・支払・却下）
+// ご紹介協力報酬の管理テーブル（admin用: 承認・支払・却下）
 import { useCallback, useEffect, useState } from "react";
 import {
   AFFILIATE_CHANNEL_LABELS,

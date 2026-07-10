@@ -88,8 +88,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     console.error("Account created email failed:", e);
   }
 
-  // 紹介協力制度: 第二報酬（本登録）の起票
-  // 初回のID発行時のみ、紹介協力者経由の会員なら PENDING で自動起票する（確定は管理者承認）
+  // ご紹介協力制度: 第二報酬（本登録）の起票
+  // 初回のID発行時のみ、ご紹介協力者経由の会員なら PENDING で自動起票する（確定は管理者承認）
   if (!user.isIdIssued && user.role === "MEMBER" && user.referredByAffiliate) {
     try {
       const profile = await prisma.affiliateProfile.findUnique({

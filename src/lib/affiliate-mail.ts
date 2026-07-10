@@ -1,11 +1,11 @@
 /**
- * 紹介協力制度（アフィリエイト）関連メールテンプレート
+ * ご紹介協力制度（アフィリエイト）関連メールテンプレート
  * 送信は既存の sendEmail（src/lib/mail.ts / Amazon SES）を使用する。
  */
 
 import { getCompany, type SchemeKey } from "./scheme";
 
-const SCHEME: SchemeKey = "MRT"; // 紹介協力制度はMRTスキーム固定
+const SCHEME: SchemeKey = "MRT"; // ご紹介協力制度はMRTスキーム固定
 
 // 共通HTMLラッパー（既存メールのダークテーマに合わせる）
 function wrapHtml(name: string, paragraphs: string[], highlight?: string) {
@@ -64,10 +64,10 @@ MAIL: ${company.supportEmail}
 
 // ① 協力者登録の受付（手動承認モード時: 承認待ちの案内）
 export function affiliateRegistrationReceivedEmail(name: string) {
-  const subject = "【BioVault】紹介協力制度へのご登録を受け付けました";
+  const subject = "【BioVault】ご紹介協力制度へのご登録を受け付けました";
   const bodyText = `${name} 様
 
-BioVault 紹介協力制度へのご登録を
+BioVault ご紹介協力制度へのご登録を
 いただき、誠にありがとうございます。
 
 ただいま事務局にて登録内容を確認しております。
@@ -80,7 +80,7 @@ BioVault 紹介協力制度へのご登録を
 
 ${footerText()}`;
   const bodyHtml = wrapHtml(name, [
-    "BioVault 紹介協力制度へのご登録をいただき、誠にありがとうございます。",
+    "BioVault ご紹介協力制度へのご登録をいただき、誠にありがとうございます。",
     "ただいま事務局にて登録内容を確認しております。確認が完了しましたら、ログイン情報とご紹介用URLをメールにてお送りいたします。",
     "今しばらくお待ちくださいますようお願い申し上げます。",
   ]);
@@ -94,10 +94,10 @@ export function affiliateAccountCreatedEmail(
   password: string,
   lpUrl: string
 ) {
-  const subject = "【BioVault】紹介協力者アカウントを発行しました";
+  const subject = "【BioVault】ご紹介協力者アカウントを発行しました";
   const bodyText = `${name} 様
 
-BioVault 紹介協力制度へのご登録が完了しました。
+BioVault ご紹介協力制度へのご登録が完了しました。
 
 ■ ログイン情報
 ログインURL: https://member.biovault.jp/login
@@ -117,7 +117,7 @@ ${footerText()}`;
   const bodyHtml = wrapHtml(
     name,
     [
-      "BioVault 紹介協力制度へのご登録が完了しました。",
+      "BioVault ご紹介協力制度へのご登録が完了しました。",
       "以下のログイン情報で専用ページにログインし、ご紹介用URLをご利用ください。実績・報酬は専用ページからご確認いただけます。",
       "※ 初回ログイン時にパスワードの変更をお願いいたします。",
     ],
@@ -176,7 +176,7 @@ export function affiliateRewardConfirmedEmail(
   const subject = "【BioVault】紹介報酬が確定しました";
   const bodyText = `${name} 様
 
-いつもBioVault 紹介協力制度にご協力いただき、
+いつもBioVault ご紹介協力制度にご協力いただき、
 誠にありがとうございます。
 
 ご紹介いただいた案件について、
@@ -199,7 +199,7 @@ ${footerText()}`;
   const bodyHtml = wrapHtml(
     name,
     [
-      "いつもBioVault 紹介協力制度にご協力いただき、誠にありがとうございます。",
+      "いつもBioVault ご紹介協力制度にご協力いただき、誠にありがとうございます。",
       "ご紹介いただいた案件について、下記の報酬が確定いたしましたのでお知らせいたします。",
       "報酬の詳細・累計は専用ページよりご確認いただけます。",
     ],
