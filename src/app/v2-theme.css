@@ -1094,3 +1094,20 @@
   letter-spacing: 0.04em;
   line-height: 1.6;
 }
+
+/* ── /lp/ipsf/entry(リードフォーム)専用のバナー高さ・人物画像サイズ ── */
+.v2-scope .v2-header.v2-header-entry.has-hero .v2-header-inner {
+  min-height: 185px;
+}
+.v2-scope .v2-header.v2-header-entry .v2-header-image {
+  width: 135px;
+}
+
+@media (min-width: 768px) {
+  .v2-scope .v2-header.v2-header-entry.has-hero .v2-header-inner {
+    min-height: 270px;
+  }
+  .v2-scope .v2-header.v2-header-entry .v2-header-image {
+    width: 200px;
+  }
+}

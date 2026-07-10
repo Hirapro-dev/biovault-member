@@ -41,6 +41,8 @@ type V2WrapperProps = {
   headerWide?: boolean;
   /** バナー背景動画のパス。未指定は既存の /header-bg.mp4。 */
   headerVideoSrc?: string;
+  /** バナーに追加するクラス名(ページ固有のスタイル調整用)。未指定なら付与しない。 */
+  headerClassName?: string;
 };
 
 export default function V2Wrapper({
@@ -54,6 +56,7 @@ export default function V2Wrapper({
   compact = false,
   headerWide = false,
   headerVideoSrc = "/header-bg.mp4",
+  headerClassName = "",
 }: V2WrapperProps) {
   const companyShortName = scheme === "MRT" ? "MRT Inc." : "SCPP Inc.";
   const headerClass = [
@@ -62,6 +65,7 @@ export default function V2Wrapper({
     title ? "has-title" : "",
     compact ? "is-compact" : "",
     headerWide ? "is-wide" : "",
+    headerClassName,
   ]
     .filter(Boolean)
     .join(" ");
