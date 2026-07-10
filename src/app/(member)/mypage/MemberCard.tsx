@@ -83,13 +83,12 @@ export default function MemberCard({
             </div>
             <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
             <div className="relative z-10 flex items-center justify-between">
-              {/* 白ロゴをCSSフィルタで暗色化(sakura背景用) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-80" style={{ filter: "invert(0.75)" }} />
+              <img src="/logo.png" alt="BioVault" className="h-6 sm:h-8 w-auto" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-[#4A3230]/90">
+              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px]" style={{ color: "#B08D3C" }}>
                 {memberNumber}
               </div>
             </div>
@@ -124,9 +123,8 @@ export default function MemberCard({
             <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(191,160,75,0.35) 50%, transparent 90%)" }} />
 
             <div className="relative z-10 flex items-center justify-between">
-              {/* 白ロゴをCSSフィルタで暗色化(sakura背景用) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo_white.png" alt="BioVault" className="h-5 sm:h-6 w-auto opacity-60" style={{ filter: "invert(0.75)" }} />
+              <img src="/logo.png" alt="BioVault" className="h-5 sm:h-6 w-auto opacity-90" style={{ filter: "brightness(0.72) saturate(1.6) drop-shadow(0 0 0.5px rgba(74,50,48,0.35))" }} />
               <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/50">STATUS</div>
             </div>
 
