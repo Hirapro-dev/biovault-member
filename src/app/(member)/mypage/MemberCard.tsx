@@ -70,36 +70,37 @@ export default function MemberCard({
         {/* ── 表面 ── */}
         {!showBack && (
           <div
-            className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+            className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-black/10"
             style={{
-              background: "#0A1A33",
-              boxShadow: "0 12px 34px rgba(0,0,0,0.30), 0 3px 10px rgba(0,0,0,0.20)",
+              background: "#F7E3E0",
+              boxShadow: "0 12px 34px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.12)",
             }}
           >
-            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_blue.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 95%, transparent 95%)" }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_sakura.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(160deg, transparent 5%, rgba(255,255,255,0.10) 15%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.10) 95%, transparent 95%)" }} />
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, transparent 0%, transparent 40%, rgba(255,255,255,0.18) 46%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.18) 54%, transparent 60%, transparent 100%)", backgroundSize: "400% 100%", animation: "card-shine 16s linear infinite" }} />
             </div>
             <style>{`@keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }`}</style>
             <div className="relative z-10 flex items-center justify-between">
+              {/* 白ロゴをCSSフィルタで暗色化(sakura背景用) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-70" />
-              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/80">MEMBER</div>
+              <img src="/logo_white.png" alt="BioVault" className="h-6 sm:h-8 w-auto opacity-80" style={{ filter: "invert(0.75)" }} />
+              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/80">MEMBER</div>
             </div>
             <div className="relative z-10">
-              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-white/90">
+              <div className="u-card-number text-xl sm:text-2xl tracking-[6px] sm:tracking-[8px] text-[#4A3230]/90">
                 {memberNumber}
               </div>
             </div>
             <div className="relative z-10 flex items-end justify-between">
               <div>
-                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">CARD HOLDER</div>
-                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase text-white/90">{holderName}</div>
+                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#4A3230]/70">CARD HOLDER</div>
+                <div className="text-sm sm:text-base tracking-[2px] sm:tracking-[3px] uppercase text-[#4A3230]/90">{holderName}</div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-white/80">MEMBER SINCE</div>
-                <div className="font-mono text-[14px] sm:text-xs tracking-wider text-white/80">
+                <div className="text-[10px] sm:text-[12px] tracking-[2px] mb-1 text-[#4A3230]/70">MEMBER SINCE</div>
+                <div className="font-mono text-[14px] sm:text-xs tracking-wider text-[#4A3230]/80">
                   {memberSince}
                 </div>
               </div>
@@ -110,62 +111,63 @@ export default function MemberCard({
         {/* ── 裏面 ── */}
         {showBack && (
           <div
-            className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-white/15"
+            className="absolute inset-0 overflow-hidden rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-black/10"
             style={{
-              background: "#0A1A33",
-              boxShadow: "0 12px 34px rgba(0,0,0,0.30), 0 3px 10px rgba(0,0,0,0.20)",
+              background: "#F7E3E0",
+              boxShadow: "0 12px 34px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.12)",
             }}
           >
-            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_blue.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
-            {/* データ可読性のため、画像の上に薄い暗幕を重ねる */}
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(145deg, rgba(10,26,51,0.55) 0%, rgba(10,26,51,0.35) 100%)" }} />
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(200deg, rgba(191,160,75,0.03) 0%, transparent 30%, transparent 70%, rgba(191,160,75,0.02) 100%)" }} />
-            <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(191,160,75,0.15) 50%, transparent 90%)" }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "url('/card_bg_sakura.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
+            {/* データ可読性のため、画像の上に薄い白幕を重ねる */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(145deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.30) 100%)" }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(200deg, rgba(191,160,75,0.05) 0%, transparent 30%, transparent 70%, rgba(191,160,75,0.04) 100%)" }} />
+            <div className="absolute top-0 left-0 right-0 h-[1px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(191,160,75,0.35) 50%, transparent 90%)" }} />
 
             <div className="relative z-10 flex items-center justify-between">
+              {/* 白ロゴをCSSフィルタで暗色化(sakura背景用) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo_white.png" alt="BioVault" className="h-5 sm:h-6 w-auto opacity-40" />
-              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-white/40">STATUS</div>
+              <img src="/logo_white.png" alt="BioVault" className="h-5 sm:h-6 w-auto opacity-60" style={{ filter: "invert(0.75)" }} />
+              <div className="text-[9px] sm:text-[10px] tracking-[3px] font-light text-[#4A3230]/50">STATUS</div>
             </div>
 
             <div className="relative z-10 flex-1 flex flex-col justify-center gap-4 sm:gap-5 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-white/50 mb-1.5">iPS細胞保管期限</div>
-                  <div className="font-mono text-base sm:text-lg text-white/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">iPS細胞保管期限</div>
+                  <div className="font-mono text-base sm:text-lg text-[#4A3230]/90">
                     {storageExpiry || "---"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-white/50 mb-1.5">iPS培養上清液 管理期限</div>
-                  <div className="font-mono text-base sm:text-lg text-white/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">iPS培養上清液 管理期限</div>
+                  <div className="font-mono text-base sm:text-lg text-[#4A3230]/90">
                     {cultureFluidExpiry || "---"}
                   </div>
                 </div>
               </div>
 
-              <div className="h-[1px]" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent 100%)" }} />
+              <div className="h-[1px]" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(74,50,48,0.15) 20%, rgba(74,50,48,0.15) 80%, transparent 100%)" }} />
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-white/50 mb-1.5">残り点滴施術回数</div>
-                  <div className="font-mono text-xl sm:text-2xl text-white/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">残り点滴施術回数</div>
+                  <div className="font-mono text-xl sm:text-2xl text-[#4A3230]/90">
                     {remainingSessions !== null ? `${remainingSessions}` : "---"}
-                    {remainingSessions !== null && <span className="text-sm sm:text-base text-white/50 ml-1">回</span>}
+                    {remainingSessions !== null && <span className="text-sm sm:text-base text-[#4A3230]/60 ml-1">回</span>}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-white/50 mb-1.5">点滴施術累計完了回数</div>
-                  <div className="font-mono text-xl sm:text-2xl text-white/90">
+                  <div className="text-[11px] sm:text-xs tracking-[0.5px] text-[#4A3230]/60 mb-1.5">点滴施術累計完了回数</div>
+                  <div className="font-mono text-xl sm:text-2xl text-[#4A3230]/90">
                     {completedSessions}
-                    <span className="text-sm sm:text-base text-white/50 ml-1">回</span>
+                    <span className="text-sm sm:text-base text-[#4A3230]/60 ml-1">回</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="relative z-10">
-              <div className="font-mono text-[11px] sm:text-xs tracking-[4px] text-white/30 text-center">
+              <div className="font-mono text-[11px] sm:text-xs tracking-[4px] text-[#4A3230]/40 text-center">
                 {memberNumber}
               </div>
             </div>
