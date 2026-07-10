@@ -83,7 +83,8 @@ export default function MemberCard({
             </div>
             <style>{`
               @keyframes card-shine { 0% { background-position: 300% 0; } 100% { background-position: -100% 0; } }
-              @keyframes gold-glint { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+              /* 光の通過は序盤25%(約3秒)のみ。残り75%(約9秒)は静止して間を作る */
+              @keyframes gold-glint { 0% { background-position: 200% center; } 25% { background-position: -200% center; } 100% { background-position: -200% center; } }
             `}</style>
             <div className="relative z-10 flex items-center justify-between">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -102,7 +103,7 @@ export default function MemberCard({
                   backgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   color: "transparent",
-                  animation: "gold-glint 8s linear infinite",
+                  animation: "gold-glint 12s linear infinite",
                   filter: "drop-shadow(0 1px 1px rgba(88,49,27,0.25))",
                 }}
               >
