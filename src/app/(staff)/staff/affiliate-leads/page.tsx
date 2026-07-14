@@ -14,7 +14,7 @@ export default async function StaffAffiliateLeadsPage() {
         ご紹介協力者（アフィリエイター）経由で登録された見込み顧客の一覧です。
         架電結果を「繋がった」で保存すると、適合確認フォームの案内メールが自動送信されます。
       </p>
-      <LeadTable apiBase="/api/staff/affiliate-leads" />
+      <LeadTable apiBase="/api/staff/affiliate-leads" hrefPrefix="/staff/affiliate-leads" />
     </div>
   );
 }
