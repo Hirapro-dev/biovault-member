@@ -584,6 +584,81 @@ MAIL: ${company.supportEmail}
   return { subject, bodyText, bodyHtml };
 }
 
+/**
+ * LP経由の新規リード（ご紹介協力）の管理者向け通知メール
+ *  - 宛先: 管理者・担当者（サーバー側で決定）
+ *  - LPフォームから見込み顧客の登録があった際に送信
+ */
+export function affiliateLeadAdminEmail(lead: {
+  name: string;
+  nameKana: string;
+  email: string;
+  phone: string;
+  postalCode?: string | null;
+  address: string;
+  occupation?: string | null;
+  income?: string | null;
+  createdAt?: Date;
+}) {
+  const createdAt = lead.createdAt ?? new Date();
+  const createdAtStr = createdAt.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+  const title = "【ご紹介協力制度経由】iPS適合確認お申し込みLP";
+  const subject = title;
+
+  const bodyText = `${title}
+
+受信日時: ${createdAtStr}
+氏名: ${lead.name}
+フリガナ：${lead.nameKana}
+電話番号: ${lead.phone}
+郵便番号: ${lead.postalCode || ""}
+住所: ${lead.address}
+メールアドレス: ${lead.email}
+職業: ${lead.occupation || ""}
+年収: ${lead.income || ""}`;
+
+  // HTML版も本文と同じ項目・順序で表示する
+  const rows: [string, string][] = [
+    ["受信日時", createdAtStr],
+    ["氏名", lead.name],
+    ["フリガナ", lead.nameKana],
+    ["電話番号", lead.phone],
+    ["郵便番号", lead.postalCode || ""],
+    ["住所", lead.address],
+    ["メールアドレス", lead.email],
+    ["職業", lead.occupation || ""],
+    ["年収", lead.income || ""],
+  ];
+
+  const bodyHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
+    <h1 style="font-size:16px;color:#1A1A1A;margin:0 0 24px;border-bottom:2px solid #F08301;padding-bottom:8px;">
+      ${escapeHtml(title)}
+    </h1>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#1A1A1A;">
+      ${rows
+        .map(
+          ([k, v]) => `<tr>
+        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;width:140px;border-bottom:1px solid #E5E0D5;">${escapeHtml(k)}</th>
+        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(v)}</td>
+      </tr>`
+        )
+        .join("")}
+    </table>
+    <p style="font-size:11px;color:#888888;margin-top:24px;text-align:center;">
+      ※ このメールは自動送信されています。
+    </p>
+  </div>
+</body>
+</html>`;
+
+  return { subject, bodyText, bodyHtml };
+}
+
 /** HTMLメール本文に入力値を埋め込む際の最低限のエスケープ */
 function escapeHtml(s: string): string {
   return s

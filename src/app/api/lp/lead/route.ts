@@ -5,6 +5,17 @@ import {
   getAffiliateSettings,
   resolveRewardAmount,
 } from "@/lib/affiliate";
+import { sendEmail, affiliateLeadAdminEmail } from "@/lib/mail";
+
+// LP新規リードの通知先（カンマ区切りで複数指定可）
+// 既定: マスター通知アドレス + 指定の平山様アドレス
+const LP_LEAD_NOTIFY_EMAILS = (
+  process.env.LP_LEAD_NOTIFY_EMAILS ||
+  "app@biovault.jp,y3awtd-hirayama-p@hdbronze.htdb.jp"
+)
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
 
 // リード登録（LP経由の見込み顧客・公開API）
 // 重複でなければ第一報酬を PENDING で自動起票する
@@ -103,6 +114,26 @@ export async function POST(req: NextRequest) {
           status: "PENDING",
         },
       });
+    }
+
+    // 管理者・担当者へ新規リード通知（送信失敗はリード登録の成否に影響させない）
+    try {
+      const mail = affiliateLeadAdminEmail({
+        name,
+        nameKana,
+        email,
+        phone,
+        postalCode: lead.postalCode,
+        address,
+        occupation: lead.occupation,
+        income: lead.income,
+        createdAt: lead.createdAt,
+      });
+      await Promise.all(
+        LP_LEAD_NOTIFY_EMAILS.map((to) => sendEmail({ to, ...mail }))
+      );
+    } catch (mailErr) {
+      console.error("Lead notification email failed:", mailErr);
     }
 
     return NextResponse.json({ success: true });
