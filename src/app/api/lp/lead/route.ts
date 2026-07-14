@@ -5,7 +5,7 @@ import {
   getAffiliateSettings,
   resolveRewardAmount,
 } from "@/lib/affiliate";
-import { sendEmail, affiliateLeadAdminEmail } from "@/lib/mail";
+import { sendEmail, affiliateLeadAdminEmail, affiliateLeadCustomerEmail } from "@/lib/mail";
 
 // LP新規リードの通知先（カンマ区切りで複数指定可）
 // 既定: マスター通知アドレス + 指定の平山様アドレス
@@ -134,6 +134,14 @@ export async function POST(req: NextRequest) {
       );
     } catch (mailErr) {
       console.error("Lead notification email failed:", mailErr);
+    }
+
+    // 申込者本人へ自動返信メール（LPはMRTスキーム。送信失敗はリード登録に影響させない）
+    try {
+      const customerMail = affiliateLeadCustomerEmail(name, "MRT");
+      await sendEmail({ to: email, ...customerMail });
+    } catch (mailErr) {
+      console.error("Lead auto-reply email failed:", mailErr);
     }
 
     return NextResponse.json({ success: true });
