@@ -7,10 +7,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  AFFILIATE_CHANNEL_LABELS,
-  LEAD_CALL_STATUS_LABELS,
-} from "@/lib/affiliate-labels";
+import { LEAD_CALL_STATUS_LABELS } from "@/lib/affiliate-labels";
 
 type Lead = {
   id: string;
@@ -37,12 +34,26 @@ type Lead = {
   };
 };
 
-const STATUS_BADGE: Record<string, string> = {
-  UNCALLED: "bg-text-muted/10 text-text-muted border-text-muted/20",
-  CONNECTED: "bg-status-active/10 text-status-active border-status-active/20",
-  NO_ANSWER: "bg-status-warning/10 text-status-warning border-status-warning/20",
-  RECALL: "bg-status-warning/10 text-status-warning border-status-warning/20",
-  INVALID: "bg-text-muted/10 text-text-muted border-text-muted/20",
+// 適合確認フォームの状況（送信〜提出で会員登録が同時に完了するため、
+// applicationId の有無がそのまま「会員一覧に登録済み」を表す）
+type FormStatus = "UNSENT" | "SENT" | "REGISTERED";
+
+function getFormStatus(l: Pick<Lead, "formSentAt" | "applicationId">): FormStatus {
+  if (l.applicationId) return "REGISTERED";
+  if (l.formSentAt) return "SENT";
+  return "UNSENT";
+}
+
+const FORM_STATUS_LABEL: Record<FormStatus, string> = {
+  UNSENT: "未送信",
+  SENT: "送信",
+  REGISTERED: "登録済み",
+};
+
+const FORM_STATUS_BADGE: Record<FormStatus, string> = {
+  UNSENT: "bg-text-muted/10 text-text-muted border-text-muted/20",
+  SENT: "bg-status-warning/10 text-status-warning border-status-warning/20",
+  REGISTERED: "bg-status-active/10 text-status-active border-status-active/20",
 };
 
 export default function LeadTable({ apiBase }: { apiBase: string }) {
@@ -114,10 +125,10 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
           <div className="py-12 text-center text-text-muted text-sm">リードはありません</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[1180px]">
+            <table className="w-full border-collapse min-w-[1120px]">
               <thead>
                 <tr className="border-b border-border">
-                  {["登録日", "氏名", "フリガナ", "電話", "メール", "住所", "紹介者", "架電状況", "ステータス", "操作"].map(
+                  {["登録日", "ID", "氏名", "電話", "住所", "年収", "職業", "メール", "適合確認フォーム", "操作"].map(
                     (h) => (
                       <th
                         key={h}
@@ -130,55 +141,42 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((l) => (
-                  <tr key={l.id} className="border-b border-border hover:bg-bg-primary/40 transition-colors">
-                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap">
-                      {new Date(l.createdAt).toLocaleDateString("ja-JP")}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-text-primary whitespace-nowrap">{l.name}</td>
-                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap">{l.nameKana}</td>
-                    <td className="px-4 py-3 text-[12px] text-text-primary font-mono whitespace-nowrap">{l.phone}</td>
-                    <td className="px-4 py-3 text-[12px] text-text-primary whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
-                      {l.email}
-                    </td>
-                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
-                      {l.address}
-                    </td>
-                    <td className="px-4 py-3 text-[12px] whitespace-nowrap">
-                      <span className="font-mono text-gold mr-1.5">{l.affiliateProfile.affiliateCode}</span>
-                      <span className="text-text-primary">{l.affiliateProfile.user.name}</span>
-                      <span className="text-[11px] text-text-muted ml-1.5">
-                        {AFFILIATE_CHANNEL_LABELS[l.affiliateProfile.channel]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 py-0.5 rounded text-[11px] border ${STATUS_BADGE[l.callStatus] || ""}`}>
-                        {LEAD_CALL_STATUS_LABELS[l.callStatus] || l.callStatus}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap space-x-1">
-                      {l.applicationId && (
-                        <span className="px-2 py-0.5 rounded text-[11px] border bg-status-active/10 text-status-active border-status-active/20">
-                          適合確認 申請済み
+                {filtered.map((l) => {
+                  const formStatus = getFormStatus(l);
+                  return (
+                    <tr key={l.id} className="border-b border-border hover:bg-bg-primary/40 transition-colors">
+                      <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap">
+                        {new Date(l.createdAt).toLocaleDateString("ja-JP")}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] font-mono text-gold whitespace-nowrap">
+                        {l.affiliateProfile.affiliateCode}
+                      </td>
+                      <td className="px-4 py-3 text-[13px] text-text-primary whitespace-nowrap">{l.name}</td>
+                      <td className="px-4 py-3 text-[12px] text-text-primary font-mono whitespace-nowrap">{l.phone}</td>
+                      <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
+                        {l.address}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-text-primary whitespace-nowrap">{l.income || "---"}</td>
+                      <td className="px-4 py-3 text-[12px] text-text-primary whitespace-nowrap">{l.occupation || "---"}</td>
+                      <td className="px-4 py-3 text-[12px] text-text-primary whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
+                        {l.email}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 py-0.5 rounded text-[11px] border ${FORM_STATUS_BADGE[formStatus]}`}>
+                          {FORM_STATUS_LABEL[formStatus]}
                         </span>
-                      )}
-                      {l.isDuplicate && (
-                        <span className="px-2 py-0.5 rounded text-[11px] border bg-status-warning/10 text-status-warning border-status-warning/20">
-                          重複
-                        </span>
-                      )}
-                      {!l.applicationId && !l.isDuplicate && <span className="text-text-muted">---</span>}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <button
-                        onClick={() => setDetailLead(l)}
-                        className="px-3 py-1 rounded border border-border text-[12px] text-text-primary hover:border-gold transition-colors"
-                      >
-                        詳細
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <button
+                          onClick={() => setDetailLead(l)}
+                          className="px-3 py-1 rounded border border-border text-[12px] text-text-primary hover:border-gold transition-colors"
+                        >
+                          詳細
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -286,6 +284,22 @@ function LeadDetailModal({
             label="フォーム送信"
             value={lead.formSentAt ? new Date(lead.formSentAt).toLocaleString("ja-JP") : "未送信"}
           />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 mb-5">
+          {(() => {
+            const formStatus = getFormStatus(lead);
+            return (
+              <span className={`px-2 py-0.5 rounded text-[11px] border ${FORM_STATUS_BADGE[formStatus]}`}>
+                適合確認フォーム: {FORM_STATUS_LABEL[formStatus]}
+              </span>
+            );
+          })()}
+          {lead.isDuplicate && (
+            <span className="px-2 py-0.5 rounded text-[11px] border bg-status-warning/10 text-status-warning border-status-warning/20">
+              重複（報酬対象外）
+            </span>
+          )}
         </div>
 
         <div className="border-t border-border pt-4">
