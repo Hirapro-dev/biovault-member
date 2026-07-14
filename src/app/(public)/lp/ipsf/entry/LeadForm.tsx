@@ -79,11 +79,18 @@ export default function LeadForm({ refCode }: { refCode: string }) {
         <div className="v2-form-container" style={{ paddingTop: 40, paddingBottom: 56 }}>
           <section className="v2-section" style={{ textAlign: "center" }}>
             <p style={{ fontSize: 14, color: "var(--v2-text-secondary)", lineHeight: 1.9 }}>
-              ご登録ありがとうございます。
+              この度は、iPS細胞作製の無料適合確認に
               <br />
-              担当者より順次お電話にてご連絡いたしますので、
+              お申込みいただき、誠にありがとうございます。
+            </p>
+            <p style={{ fontSize: 14, color: "var(--v2-text-secondary)", lineHeight: 1.9, marginTop: 16 }}>
+              お申込みの内容を確認のうえ、担当者より
               <br />
-              今しばらくお待ちください。
+              順次お電話にてご連絡させていただきます。
+              <br />
+              恐れ入りますが、今しばらくお待ちくださいますよう
+              <br />
+              お願い申し上げます。
             </p>
           </section>
         </div>
