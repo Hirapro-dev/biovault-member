@@ -49,7 +49,7 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
@@ -81,6 +81,8 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
     }
     setMessage(data.mailSent ? `${successMsg}（案内メールを送信しました）` : successMsg);
     await load();
+    // モーダル表示中のレコードも最新化する
+    setDetailLead((prev) => (prev && prev.id === id ? { ...prev, ...payload } as Lead : prev));
   };
 
   const filtered = filter ? leads.filter((l) => l.callStatus === filter) : leads;
@@ -88,12 +90,15 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
   return (
     <div>
       {/* ステータスフィルタ */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <span className="text-[11px] text-text-muted mr-1">架電状況:</span>
-        <FilterBtn current={filter} value="" label="全て" onClick={setFilter} />
-        {Object.entries(LEAD_CALL_STATUS_LABELS).map(([k, v]) => (
-          <FilterBtn key={k} current={filter} value={k} label={v} onClick={setFilter} />
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] text-text-muted mr-1">架電状況:</span>
+          <FilterBtn current={filter} value="" label="全て" onClick={setFilter} />
+          {Object.entries(LEAD_CALL_STATUS_LABELS).map(([k, v]) => (
+            <FilterBtn key={k} current={filter} value={k} label={v} onClick={setFilter} />
+          ))}
+        </div>
+        <span className="text-[11px] text-text-muted">{filtered.length} 件</span>
       </div>
 
       {message && (
@@ -108,71 +113,81 @@ export default function LeadTable({ apiBase }: { apiBase: string }) {
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-text-muted text-sm">リードはありません</div>
         ) : (
-          <div className="divide-y divide-border">
-            {filtered.map((l) => (
-              <div key={l.id}>
-                {/* 行サマリー */}
-                <button
-                  onClick={() => setExpanded(expanded === l.id ? null : l.id)}
-                  className="w-full px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-left hover:bg-bg-primary/40 transition-colors"
-                >
-                  <span className="text-[13px] text-text-primary font-medium min-w-[110px]">{l.name}</span>
-                  <span className="font-mono text-[12px] text-gold">{l.affiliateProfile.affiliateCode}</span>
-                  <span className="text-[11px] text-text-muted">
-                    {AFFILIATE_CHANNEL_LABELS[l.affiliateProfile.channel]}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[11px] border ${STATUS_BADGE[l.callStatus] || ""}`}
-                  >
-                    {LEAD_CALL_STATUS_LABELS[l.callStatus] || l.callStatus}
-                  </span>
-                  {l.applicationId && (
-                    <span className="px-2 py-0.5 rounded text-[11px] border bg-status-active/10 text-status-active border-status-active/20">
-                      適合確認 申請済み
-                    </span>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[1180px]">
+              <thead>
+                <tr className="border-b border-border">
+                  {["登録日", "氏名", "フリガナ", "電話", "メール", "住所", "紹介者", "架電状況", "ステータス", "操作"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-[11px] text-text-muted tracking-wider font-normal whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    )
                   )}
-                  {l.isDuplicate && (
-                    <span className="px-2 py-0.5 rounded text-[11px] border bg-status-warning/10 text-status-warning border-status-warning/20">
-                      重複（報酬対象外）
-                    </span>
-                  )}
-                  <span className="ml-auto text-[11px] text-text-muted">
-                    {new Date(l.createdAt).toLocaleDateString("ja-JP")}
-                  </span>
-                </button>
-
-                {/* 詳細 + 操作 */}
-                {expanded === l.id && (
-                  <div className="px-4 pb-4 pt-1 bg-bg-primary/30">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-[13px] mb-4">
-                      <InfoRow label="フリガナ" value={l.nameKana} />
-                      <InfoRow label="電話番号" value={l.phone} mono />
-                      <InfoRow label="メール" value={l.email} />
-                      <InfoRow label="住所" value={l.address} />
-                      <InfoRow label="職業" value={l.occupation || "---"} />
-                      <InfoRow label="ご年収" value={l.income || "---"} />
-                      <InfoRow
-                        label="紹介者"
-                        value={`${l.affiliateProfile.user.name}${l.affiliateProfile.displayName ? `（${l.affiliateProfile.displayName}）` : ""}`}
-                      />
-                      <InfoRow
-                        label="最終架電"
-                        value={l.calledAt ? `${new Date(l.calledAt).toLocaleString("ja-JP")}${l.staffCode ? ` (${l.staffCode})` : ""}` : "---"}
-                      />
-                      <InfoRow
-                        label="フォーム送信"
-                        value={l.formSentAt ? new Date(l.formSentAt).toLocaleString("ja-JP") : "未送信"}
-                      />
-                    </div>
-
-                    <LeadActions lead={l} onPatch={patch} />
-                  </div>
-                )}
-              </div>
-            ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((l) => (
+                  <tr key={l.id} className="border-b border-border hover:bg-bg-primary/40 transition-colors">
+                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap">
+                      {new Date(l.createdAt).toLocaleDateString("ja-JP")}
+                    </td>
+                    <td className="px-4 py-3 text-[13px] text-text-primary whitespace-nowrap">{l.name}</td>
+                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap">{l.nameKana}</td>
+                    <td className="px-4 py-3 text-[12px] text-text-primary font-mono whitespace-nowrap">{l.phone}</td>
+                    <td className="px-4 py-3 text-[12px] text-text-primary whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
+                      {l.email}
+                    </td>
+                    <td className="px-4 py-3 text-[12px] text-text-muted whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
+                      {l.address}
+                    </td>
+                    <td className="px-4 py-3 text-[12px] whitespace-nowrap">
+                      <span className="font-mono text-gold mr-1.5">{l.affiliateProfile.affiliateCode}</span>
+                      <span className="text-text-primary">{l.affiliateProfile.user.name}</span>
+                      <span className="text-[11px] text-text-muted ml-1.5">
+                        {AFFILIATE_CHANNEL_LABELS[l.affiliateProfile.channel]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`px-2 py-0.5 rounded text-[11px] border ${STATUS_BADGE[l.callStatus] || ""}`}>
+                        {LEAD_CALL_STATUS_LABELS[l.callStatus] || l.callStatus}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap space-x-1">
+                      {l.applicationId && (
+                        <span className="px-2 py-0.5 rounded text-[11px] border bg-status-active/10 text-status-active border-status-active/20">
+                          適合確認 申請済み
+                        </span>
+                      )}
+                      {l.isDuplicate && (
+                        <span className="px-2 py-0.5 rounded text-[11px] border bg-status-warning/10 text-status-warning border-status-warning/20">
+                          重複
+                        </span>
+                      )}
+                      {!l.applicationId && !l.isDuplicate && <span className="text-text-muted">---</span>}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        onClick={() => setDetailLead(l)}
+                        className="px-3 py-1 rounded border border-border text-[12px] text-text-primary hover:border-gold transition-colors"
+                      >
+                        詳細
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
+      {detailLead && (
+        <LeadDetailModal lead={detailLead} onPatch={patch} onClose={() => setDetailLead(null)} />
+      )}
     </div>
   );
 }
@@ -212,13 +227,15 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
   );
 }
 
-// 架電記録の操作パネル
-function LeadActions({
+// リード詳細・架電記録の編集モーダル
+function LeadDetailModal({
   lead,
   onPatch,
+  onClose,
 }: {
   lead: Lead;
   onPatch: (id: string, payload: Record<string, unknown>, successMsg: string) => Promise<void>;
+  onClose: () => void;
 }) {
   const [status, setStatus] = useState(lead.callStatus);
   const [note, setNote] = useState(lead.callNote || "");
@@ -227,11 +244,7 @@ function LeadActions({
   const save = async () => {
     setSaving(true);
     try {
-      await onPatch(
-        lead.id,
-        { callStatus: status, callNote: note },
-        "架電記録を更新しました"
-      );
+      await onPatch(lead.id, { callStatus: status, callNote: note }, "架電記録を更新しました");
     } finally {
       setSaving(false);
     }
@@ -247,51 +260,91 @@ function LeadActions({
   };
 
   return (
-    <div className="border-t border-border pt-3">
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <div className="text-[11px] text-text-muted mb-1">架電結果</div>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="bg-bg-secondary border border-border rounded px-2.5 py-1.5 text-[13px] text-text-primary"
-          >
-            {Object.entries(LEAD_CALL_STATUS_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <div className="text-[11px] text-text-muted mb-1">架電メモ</div>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="対応内容・次回予定など"
-            className="w-full bg-bg-secondary border border-border rounded px-2.5 py-1.5 text-[13px] text-text-primary"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-lg rounded-md border border-border bg-bg-secondary p-6 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-[15px] text-text-primary mb-4">{lead.name} さんのリード詳細</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-[13px] mb-5">
+          <InfoRow label="フリガナ" value={lead.nameKana} />
+          <InfoRow label="電話番号" value={lead.phone} mono />
+          <InfoRow label="メール" value={lead.email} />
+          <InfoRow label="住所" value={lead.address} />
+          <InfoRow label="職業" value={lead.occupation || "---"} />
+          <InfoRow label="ご年収" value={lead.income || "---"} />
+          <InfoRow
+            label="紹介者"
+            value={`${lead.affiliateProfile.user.name}${lead.affiliateProfile.displayName ? `（${lead.affiliateProfile.displayName}）` : ""}`}
+          />
+          <InfoRow
+            label="最終架電"
+            value={lead.calledAt ? `${new Date(lead.calledAt).toLocaleString("ja-JP")}${lead.staffCode ? ` (${lead.staffCode})` : ""}` : "---"}
+          />
+          <InfoRow
+            label="フォーム送信"
+            value={lead.formSentAt ? new Date(lead.formSentAt).toLocaleString("ja-JP") : "未送信"}
           />
         </div>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="px-4 py-1.5 rounded bg-gold/90 text-bg-primary text-[13px] font-bold hover:bg-gold transition-colors disabled:opacity-50"
-        >
-          {saving ? "保存中…" : "保存"}
-        </button>
-        {!lead.applicationId && lead.formSentAt && (
+
+        <div className="border-t border-border pt-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <div className="text-[11px] text-text-muted mb-1">架電結果</div>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="bg-bg-primary border border-border rounded px-2.5 py-1.5 text-[13px] text-text-primary"
+              >
+                {Object.entries(LEAD_CALL_STATUS_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <div className="text-[11px] text-text-muted mb-1">架電メモ</div>
+              <input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="対応内容・次回予定など"
+                className="w-full bg-bg-primary border border-border rounded px-2.5 py-1.5 text-[13px] text-text-primary"
+              />
+            </div>
+          </div>
+          {status === "CONNECTED" && lead.callStatus !== "CONNECTED" && !lead.applicationId && (
+            <p className="mt-2 text-[11px] text-gold">
+              ※「繋がった」で保存すると、適合確認フォームの案内メールが自動送信されます
+            </p>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 mt-5">
           <button
-            onClick={resend}
+            onClick={onClose}
             disabled={saving}
-            className="px-4 py-1.5 rounded border border-border text-[13px] text-text-primary hover:border-gold transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded border border-border text-[13px] text-text-primary hover:border-gold disabled:opacity-50"
           >
-            案内メール再送
+            閉じる
           </button>
-        )}
+          {!lead.applicationId && lead.formSentAt && (
+            <button
+              onClick={resend}
+              disabled={saving}
+              className="px-4 py-2 rounded border border-border text-[13px] text-text-primary hover:border-gold transition-colors disabled:opacity-50"
+            >
+              案内メール再送
+            </button>
+          )}
+          <button
+            onClick={save}
+            disabled={saving}
+            className="px-4 py-2 rounded bg-gold/90 text-bg-primary text-[13px] font-bold hover:bg-gold transition-colors disabled:opacity-50"
+          >
+            {saving ? "保存中…" : "保存"}
+          </button>
+        </div>
       </div>
-      {status === "CONNECTED" && lead.callStatus !== "CONNECTED" && !lead.applicationId && (
-        <p className="mt-2 text-[11px] text-gold">
-          ※「繋がった」で保存すると、適合確認フォームの案内メールが自動送信されます
-        </p>
-      )}
     </div>
   );
 }
