@@ -748,46 +748,42 @@ export function affiliateLeadAdminEmail(lead: {
 職業: ${lead.occupation || ""}
 年収: ${lead.income || ""}`;
 
-  // HTML版も本文と同じ項目・順序で表示する
-  const rows: [string, string][] = [
-    ["受信日時", createdAtStr],
-    ["氏名", lead.name],
-    ["フリガナ", lead.nameKana],
-    ["電話番号", lead.phone],
-    ["郵便番号", lead.postalCode || ""],
-    ["住所", lead.address],
-    ["メールアドレス", lead.email],
-    ["職業", lead.occupation || ""],
-    ["年収", lead.income || ""],
-  ];
+  return { subject, bodyText };
+}
 
-  const bodyHtml = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#FFFFFF;color:#1A1A1A;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-    <h1 style="font-size:16px;color:#1A1A1A;margin:0 0 24px;border-bottom:2px solid #F08301;padding-bottom:8px;">
-      ${escapeHtml(title)}
-    </h1>
-    <table style="width:100%;border-collapse:collapse;font-size:14px;color:#1A1A1A;">
-      ${rows
-        .map(
-          ([k, v]) => `<tr>
-        <th style="text-align:left;padding:10px 12px;background:#F5F0E6;width:140px;border-bottom:1px solid #E5E0D5;">${escapeHtml(k)}</th>
-        <td style="padding:10px 12px;border-bottom:1px solid #E5E0D5;">${escapeHtml(v)}</td>
-      </tr>`
-        )
-        .join("")}
-    </table>
-    <p style="font-size:11px;color:#888888;margin-top:24px;text-align:center;">
-      ※ このメールは自動送信されています。
-    </p>
-  </div>
-</body>
-</html>`;
+/**
+ * LP経由の申込者(顧客)向け自動返信メール（テキストメール）
+ *  - 宛先: 入力されたメールアドレス
+ *  - 内容: LPサンクスページと同等（担当者より順次お電話でご連絡）
+ */
+export function affiliateLeadCustomerEmail(name: string, scheme?: SchemeKey) {
+  const company = getCompany(scheme);
+  const subject = "【BioVault】適合確認のお申込みを受け付けました";
 
-  return { subject, bodyText, bodyHtml };
+  const bodyText = `${name} 様
+
+この度はiPS細胞作製の無料適合確認へ
+お申込みいただき、誠にありがとうございます。
+
+お申込みを受け付けいたしました。
+担当者より順次お電話にてご連絡いたしますので、
+今しばらくお待ちください。
+
+ご不明な点がございましたら、
+下記までお気軽にお問い合わせください。
+
+
+──────────────────
+BioVault（${company.name}）
+TEL: ${company.phone}
+MAIL: ${company.supportEmail}
+〒${company.postalCode} ${company.address}
+──────────────────
+
+※ このメールは自動送信されています。
+※ このメールに心当たりがない場合は、お手数ですが上記連絡先までご連絡ください。`;
+
+  return { subject, bodyText };
 }
 
 /** HTMLメール本文に入力値を埋め込む際の最低限のエスケープ */
