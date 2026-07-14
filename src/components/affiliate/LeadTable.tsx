@@ -56,10 +56,19 @@ export const FORM_STATUS_BADGE: Record<FormStatus, string> = {
   REGISTERED: "bg-status-active/10 text-status-active border-status-active/20",
 };
 
-export default function LeadTable({ apiBase, hrefPrefix }: { apiBase: string; hrefPrefix: string }) {
+export default function LeadTable({
+  apiBase,
+  hrefPrefix,
+  canDelete = false,
+}: {
+  apiBase: string;
+  hrefPrefix: string;
+  canDelete?: boolean;
+}) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,6 +84,28 @@ export default function LeadTable({ apiBase, hrefPrefix }: { apiBase: string; hr
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleDelete = async (lead: Lead) => {
+    if (
+      !confirm(
+        `「${lead.name}」さんのリードを削除します。\nこの操作は取り消せません。よろしいですか？`
+      )
+    ) {
+      return;
+    }
+    setDeletingId(lead.id);
+    try {
+      const res = await fetch(`${apiBase}/${lead.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setLeads((prev) => prev.filter((l) => l.id !== lead.id));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "削除に失敗しました");
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const filtered = filter ? leads.filter((l) => l.callStatus === filter) : leads;
 
@@ -146,13 +177,22 @@ export default function LeadTable({ apiBase, hrefPrefix }: { apiBase: string; hr
                           {FORM_STATUS_LABEL[formStatus]}
                         </span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap space-x-1.5">
                         <Link
                           href={`${hrefPrefix}/${l.id}`}
                           className="px-3 py-1 rounded border border-border text-[12px] text-text-primary hover:border-gold transition-colors"
                         >
                           詳細
                         </Link>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(l)}
+                            disabled={deletingId === l.id}
+                            className="px-3 py-1 rounded border border-red-400/40 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+                          >
+                            {deletingId === l.id ? "削除中…" : "削除"}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

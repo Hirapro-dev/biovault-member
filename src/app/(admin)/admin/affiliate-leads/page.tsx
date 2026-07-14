@@ -16,7 +16,7 @@ export default async function AdminAffiliateLeadsPage() {
           ご紹介協力 リード一覧
         </h2>
       </div>
-      <LeadTable apiBase="/api/admin/affiliate-leads" hrefPrefix="/admin/affiliate-leads" />
+      <LeadTable apiBase="/api/admin/affiliate-leads" hrefPrefix="/admin/affiliate-leads" canDelete />
     </div>
   );
 }
