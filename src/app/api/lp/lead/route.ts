@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
   AFFILIATE_COOKIE,
+  LEAD_COOKIE,
+  LEAD_COOKIE_MAX_AGE,
   getAffiliateSettings,
   resolveRewardAmount,
 } from "@/lib/affiliate";
@@ -144,7 +146,15 @@ export async function POST(req: NextRequest) {
       console.error("Lead auto-reply email failed:", mailErr);
     }
 
-    return NextResponse.json({ success: true });
+    // 申込フォームでの自動入力用に、このブラウザとリードを紐づけるCookieを発行
+    const res = NextResponse.json({ success: true });
+    res.cookies.set(LEAD_COOKIE, lead.id, {
+      maxAge: LEAD_COOKIE_MAX_AGE,
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+    return res;
   } catch (e) {
     console.error("Lead registration error:", e);
     return NextResponse.json({ error: "登録に失敗しました。時間をおいて再度お試しください。" }, { status: 500 });

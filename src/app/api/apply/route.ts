@@ -54,6 +54,12 @@ export async function POST(req: Request) {
       referrerName = agencyProfile.companyName || agencyProfile.user.name || agencyCode;
     }
   }
+  // ご紹介協力者コード（AF-XXXX形式のみ許可）。Cookie経由でフォームから渡る。
+  const affiliateCodeValue =
+    typeof body.referredByAffiliate === "string" && /^AF-\d{4,}$/.test(body.referredByAffiliate)
+      ? body.referredByAffiliate
+      : null;
+
   // 従業員コードから従業員名を自動解決
   const staffCodeValue = body.staffCode || null;
   let salesRepName: string | null = body.salesRepName || null;
@@ -84,6 +90,7 @@ export async function POST(req: Request) {
       referrerName,
       salesRepName,
       staffCode: staffCodeValue,
+      referredByAffiliate: affiliateCodeValue,
       currentIllness: body.currentIllness || false,
       currentIllnessDetail: body.currentIllnessDetail || null,
       pastIllness: body.pastIllness || false,
@@ -165,6 +172,7 @@ export async function POST(req: Request) {
       mustChangePassword: !isTester,
       referredByAgency: agencyCode,
       referredByStaff: staffCodeValue,
+      referredByAffiliate: affiliateCodeValue,
       scheme,
       applicationId: application.id,
       paymentMethod: body.paymentMethod || "bank_transfer",
