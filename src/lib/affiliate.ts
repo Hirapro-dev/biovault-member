@@ -10,6 +10,10 @@ import type { AffiliateChannel, AffiliateProfile } from "@prisma/client";
 export const AFFILIATE_COOKIE = "bv_aff";
 export const AFFILIATE_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30日
 
+// リード識別Cookie（LP登録時に発行し、申込フォームでの自動入力に使用）
+export const LEAD_COOKIE = "bv_lead";
+export const LEAD_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30日
+
 // SiteSetting のキー定義
 export const AFFILIATE_SETTING_KEYS = {
   autoApprove: "affiliate_auto_approve",                      // "true" | "false"

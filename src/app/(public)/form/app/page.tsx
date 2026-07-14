@@ -49,6 +49,9 @@ function ApplyPage() {
   };
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  // ご紹介協力制度経由（Cookie保持）の紐付けコード。全項目は表示したまま、
+  // LP登録済み情報を自動入力する。Cookieは httpOnly のためサーバー側APIから取得する。
+  const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
   const [testerRedirect, setTesterRedirect] = useState<{ loginId: string; password: string } | null>(null);
   const [testerCountdown, setTesterCountdown] = useState(3);
   const [error, setError] = useState("");
@@ -97,6 +100,35 @@ function ApplyPage() {
 
   const update = (field: string, value: unknown) => setForm((p) => ({ ...p, [field]: value }));
 
+  // ご紹介協力制度経由の紐付けコードと、LP登録済み情報の自動入力を取得。
+  useEffect(() => {
+    let active = true;
+    fetch("/api/affiliate/current")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active || !d) return;
+        if (d.affiliateCode) setAffiliateCode(d.affiliateCode);
+        // LP登録済みのリード情報を自動入力（空値は上書きしない・生年月日はLP未取得）
+        if (d.lead) {
+          const l = d.lead;
+          setForm((p) => ({
+            ...p,
+            name: l.name || p.name,
+            nameKana: l.nameKana || p.nameKana,
+            email: l.email || p.email,
+            phone: l.phone || p.phone,
+            postalCode: l.postalCode || p.postalCode,
+            address: l.address || p.address,
+            occupation: l.occupation || p.occupation,
+          }));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setError("");
@@ -107,6 +139,7 @@ function ApplyPage() {
         body: JSON.stringify({
           ...form,
           referredByAgency: refCode,
+          referredByAffiliate: affiliateCode,
           staffCode,
           salesRepName: repName,
           scheme,
